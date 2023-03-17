@@ -1,0 +1,36 @@
+fragment Place on Place {
+  id
+  name
+  lat
+  lng
+  address1
+  address2
+  zipCode
+  city
+}
+
+query getGroupsOnMap(
+  $lat: Float
+  $lng: Float
+  $minLat: Float
+  $minLng: Float
+  $maxLat: Float
+  $maxLng: Float
+) {
+  getGroupsOnMap(
+    lat: $lat
+    lng: $lng
+    minLat: $minLat
+    maxLat: $maxLat
+    minLng: $minLng
+    maxLng: $maxLng
+  ) {
+    id
+    name
+    image
+    placeId
+    place {
+      ...Place
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "Failed to fetch": "Impossible de joindre le serveur",
+  "INTERNAL_SERVER_ERROR": "$t(500)",
+  "400": "Un problème est survenu",
+  "401": "Vous n'êtes pas autorisé",
+  "403": "Vous n'êtes pas authentifié",
+  "404": "Ressource introuvable",
+  "500": "Un problème est survenu",
+  "status": {
+    "400": "$t(400)",
+    "401": "$t(401)",
+    "403": "$t(403)",
+    "404": "$t(404)",
+    "500": "$t(500)"
+  },
+  "unexpectedUnauthorized": "Vous n'êtes pas autorisé. Si vous pensez que c'est une erreur vérifiez que votre navigateur accepte bien les cookies (voir ici : https://wiki.camap.net/errors#unauthorized). Essayez ensuite de vous reconnecter",
+  "wrongCredentials": "Nom d’utilisateur ou mot de passe incorrect",
+  "emailAlreadyRegistered": "Nous avons déjà un compte avec cette adresse courriel",
+  "bruteForce": "Vous avez essayé de vous connecter sans succès plus de 4 fois, votre adresse IP est bannie pendant 10 minutes.",
+  "Invalid time value": "La date n'est pas correcte"
+}

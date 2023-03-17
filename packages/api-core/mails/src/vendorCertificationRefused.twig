@@ -1,0 +1,27 @@
+{% extends "_layout-camap.twig" %}
+{% block content %}
+	<div style="max-width: 800px;">
+		<div style="padding: 8px; padding-bottom: 16px;">
+			<h2 style="text-align: center; margin-top: 0;">
+				Votre compte producteur n'a pas été validé
+			</h2>
+			<p>
+				Nous sommes désolés, votre demande d'ouverture de compte producteur a été refusée car elle ne correspond pas à notre
+				<a href="https://www.camap.net/charte-producteurs/" rel="notrack">Charte producteurs</a>.
+			</p>
+			{% if refusalReason!=null %}
+				<p>Motif du refus :
+					<pre style="white-space: pre-wrap;">"{{refusalReason}}"</pre>
+				</p>
+			{% endif %}
+
+			<p>
+				Bonne journée,
+			</p>
+			<p>
+				L'équipe
+				{{theme.name}}
+			</p>
+		</div>
+	</div>
+{% endblock %}

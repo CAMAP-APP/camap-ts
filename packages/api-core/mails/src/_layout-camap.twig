@@ -1,0 +1,19 @@
+{% extends "_base.twig" %}
+
+{% block baseStyles %}
+	<link rel="stylesheet" href="./styles/layout-camap.css">
+	{% block styles %}{% endblock %}
+{% endblock %}
+
+{% block baseContent %}
+	<div id="email-header">
+		<img src={{"#{host}/theme/#{theme.id}/logo2.png"}} alt={{"logo #{theme.name}"}}/>
+	</div>
+
+	{% block content %}{% endblock %}
+{% endblock %}
+
+{% block baseFooter %}
+	{% block footer %}{% endblock %}
+	{{theme.email.brandedEmailLayoutFooter | raw}}
+{% endblock %}

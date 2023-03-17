@@ -1,0 +1,18 @@
+{% extends "_layout-camap.twig" %}
+{% block content %}
+	<div style="max-width: 800px;">
+		<div style="padding: 8px; padding-bottom: 16px;">
+			<p>Bonjour,</p>
+
+			<p style="white-space: pre-wrap;">{{content}}</p>
+
+			<p>
+				Dans l'attente de votre réponse je vous souhaite une bonne journée,
+			</p>
+			<p>
+				L'équipe
+				{{theme.name}}
+			</p>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{
+  "mixed": {
+    "required": "Ce champ est requis",
+    "notType": "Type invalide",
+    "oneOf": "Option invalide"
+  },
+  "string": {
+    "min": "Ce champ doit contenir au moins {{min}} caractères",
+    "max": "Ce champ doit contenir au maximun {{max}} caractères",
+    "length": "Ce champ doit contenir uniquement {{length}} caractères",
+    "email": "Ce champ doit être une adresse mail valide",
+    "matches": "Le format de ce champ n'est pas valide"
+  },
+  "array": {
+    "min": "Au moins {{min}} champ doit être sélectionné",
+    "min_plural": "Au moins {{min}} champs doivent être sélectionnés",
+    "max": "Vous ne pouvez sélectionner que {{max}} champ maximum.",
+    "max_plural": "Vous ne pouvez sélectionner que {{max}} champs maximum."
+  },
+  "custom": {
+    "luhn": "Invalide",
+    "legalAge": "Doit être majeur",
+    "iban": "IBAN invalide",
+    "bic": "BIC invalide",
+    "oneOfTheFieldsIsRequired": "Un des deux champs est requis",
+    "fieldsInOrder": "Rentrez les champs dans l'ordre"
+  },
+  "passwordsMustMatch": "Les mots de passent ne correspondent pas"
+}

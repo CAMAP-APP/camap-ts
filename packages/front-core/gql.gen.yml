@@ -1,0 +1,47 @@
+overwrite: true
+schema: http://localhost:3010/graphql
+documents:
+  - 'src/gql/queries/**/*.ts'
+  - 'src/gql/mutations/**/*.ts'
+  - 'src/gql/fragments/**/*.ts'
+  - 'src/**/*.gql.ts'
+  - 'src/**/*.gql'
+# hooks:
+#   afterOneFileWrite:
+#     - prettier --write
+#     - eslint --fix
+generates:
+  src/gql/introspection.json:
+    plugins:
+      - introspection
+    config:
+      minify: true
+  src/gql/index.tsx:
+    plugins:
+      - add:
+          content: '/* eslint-disable */'
+      - 'typescript'
+      - 'typescript-operations'
+      - 'typescript-react-apollo'
+    config:
+      withComponent: false
+      withHOC: false
+      withHooks: true
+      apolloReactHooksImportFrom: '@apollo/client'
+      # apolloImportFrom: '@apollo/client'
+      # hooksImportFrom: '@apollo/client'
+      namingConvention:
+        # typeNames: pascal-case#pascalCase
+        typeNames: change-case#pascalCase
+        enumValues: keep
+        transformUnderscore: true
+  # src/gql/mocks.ts:
+  #   plugins:
+  #     - add: /* eslint-disable */
+  #     - typescript-mock-data:
+  #         addTypename: true
+  #         typesFile: './index.ts'
+  #         enumValues: upper-case#upperCase
+  #         typenames: keep
+  #         scalars:
+  #           AWSTimestamp: unix_time # gets translated to casual.unix_time

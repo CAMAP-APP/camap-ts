@@ -1,0 +1,10 @@
+{
+  "findAGroupCloseBy": "Trouvez un groupe {{theme.name}} près de chez vous",
+  "enterAddress": "Saisissez une ville, un code postal, une adresse, etc",
+  "noGroupFound": "Aucun groupe trouvé",
+  "searchZoneTooLarge": "Zone de recherche trop large",
+  "tryToUnzoomOrUseSearchBar": "Essayez de dézoomer ou utilisez la barre de recherche",
+  "tryToZoomOrUseSearchBar": "Zoomez plus ou utilisez la barre de recherche",
+  "zoomIn": "Zoomer",
+  "zoomOut": "Dézoomer"
+}

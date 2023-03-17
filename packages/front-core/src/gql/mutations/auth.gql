@@ -1,0 +1,25 @@
+mutation Login($input: LoginInput!) {
+  login(input: $input) {
+    id
+  }
+}
+
+mutation Logout {
+  logout
+}
+
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    id
+  }
+}
+
+mutation RecordBadLogin {
+  recordBadLogin
+}
+
+mutation LoginAs($userId: Int!, $groupId: Int) {
+  loginAs(userId: $userId, groupId: $groupId) {
+    id
+  }
+}

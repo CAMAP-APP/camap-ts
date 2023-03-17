@@ -1,0 +1,10 @@
+{
+  "dropYourImageHere": "Glissez votre image ici",
+  "addAnImage": "Ajouter une image",
+  "chooseAnotherFile": "Choisir un autre fichier",
+  "zoom": "Zoom",
+  "left": "Gauche",
+  "right": "Droite",
+  "send": "Envoyer",
+  "dropReject": "Impossible d'ajouter le fichier {{ fileName }}. Le fichier doit être une image et ne doit pas dépasser {{ maxFileSize }} Mo."
+}

@@ -1,0 +1,31 @@
+
+node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+
+# misc
+.DS_Store
+.env*
+!.env.sample
+!.env.test
+!.env.ci.test
+
+/tmp/*
+!/tmp/.gitkeep
+
+.next
+dist
+coverage
+not-gited
+.cache
+
+public/neostatic
+
+/db
+/nb
+/tmp
+.vscode/launch.json

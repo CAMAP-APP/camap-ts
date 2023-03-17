@@ -1,0 +1,15 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t)s$": "ts-jest"
+  },
+  "testTimeout": 18000,
+  "globals": {
+    "ts-jest": {
+      "isolatedModules": true
+    }
+  }
+}

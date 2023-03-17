@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "sourceMap": true,
+    "inlineSources": true,
+    "sourceRoot": "/",
+    "types": ["node"]
+  },
+  "exclude": ["node_modules", "test", "mails", "dist", "**/*spec.ts"]
+}

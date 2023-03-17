@@ -1,0 +1,9 @@
+{
+  "cash": "Espèces",
+  "check": "Chèque",
+  "transfer": "Virement",
+  "moneypot": "Cagnotte",
+  "onthespot": "Paiement sur place",
+  "cardTerminal": "Carte bancaire sur place",
+  "card-terminal": "$t(cardTerminal)"
+}

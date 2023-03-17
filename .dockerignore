@@ -1,0 +1,8 @@
+docs
+**/node_modules
+build
+.vscode
+README.md
+Dockerfile
+**/*~
+.git

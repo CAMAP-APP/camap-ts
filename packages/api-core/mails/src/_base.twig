@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta name="viewport" content="width=device-width"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+		<link rel="stylesheet" href="./styles/base.css">
+		{% block baseStyles %}{% endblock %}
+		<title>{{theme.name}}</title>
+	</head>
+
+	<body id="email-body">
+		{% block baseHeader %}{% endblock %}
+		<div id="email-root">
+			{% block baseContent %}{% endblock %}
+		</div>
+
+		<div id="email-footer">
+			{% block baseFooter %}{% endblock %}
+		</div>
+	</body>
+
+</html>

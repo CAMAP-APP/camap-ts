@@ -1,0 +1,20 @@
+{
+  "duties": "Permanences",
+  "volunteersCalendar": "Calendrier des permanences",
+  "roles": "Rôles",
+  "nRegisterdOutOfnRequired": "{{registered}} inscrit sur {{required}} requis",
+  "nRegisterdOutOfnRequired_plural": "{{registered}} inscrits sur {{required}} requis",
+  "dutyPeriodsOpenForVolunteersDaysBeforeTheDutyPeriod": "Permanences ouvertes aux inscriptions {{days}} jours avant la permanence",
+  "join": "Rejoindre",
+  "unsubscribe": "Se désinscrire",
+  "thisRoleDoesNotNeedVolunteerForThisDate": "Ce rôle ne necessite pas de volontaire à cette date.",
+  "participationToDuties": "Participation aux permanences",
+  "yourParticipationToDuties": "Votre participation aux permanences",
+  "isNotEnough": "est insuffisante",
+  "dutyDoneOrPlannedOn": "permanence faite ou prévue sur",
+  "dutyDoneOrPlannedOn_plural": "permanences faites ou prévues sur",
+  "dutyToDo": "permanence à faire.",
+  "dutyToDo_plural": "permanences à faire.",
+  "thereIsNoDistributionOnThisPeriod": "Il n'y a pas de distributions sur cette période",
+  "defineGroupRoles": "Définir les rôles du groupe"
+}

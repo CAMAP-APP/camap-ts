@@ -1,0 +1,8 @@
+query groupDisabled($id: Int!) {
+  groupPreview(id: $id) {
+    id
+    disabled
+    extUrl
+  }
+  canManageAllCatalogs(groupId: $id)
+}

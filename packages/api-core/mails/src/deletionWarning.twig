@@ -1,0 +1,58 @@
+{% extends "_layout-camap.twig" %}
+
+{% block styles %}
+	<link rel="stylesheet" href="./styles/material.css">
+{% endblock %}
+
+{% block content %}
+	<div>
+		<div>
+			<div class="alert" role="alert">
+				<div class="alert-icon">
+					<svg class="alert-svg" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+						<path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20, 12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10, 10 0 0,0 12,2M11,17H13V11H11V17Z"></path>
+					</svg>
+				</div>
+				<div class="alert-message">Attention : Votre compte Camap sera supprimé le
+					{{deletionDate}}</div>
+			</div>
+		</div>
+		<p>
+			Bonjour,
+		</p>
+		<p>
+			Votre compte n'a pas été utilisé pendant les deux dernières années et sera supprimé le
+			{{deletionDate}}
+		</p>
+		<p>
+			Si vous voulez garder votre compte, connectez-vous pour le réactiver.
+		</p>
+
+		<a class="button" href={{ "#{host}" }} target="_blank" rel="noreferrer noopener notrack">
+			<span class="button-label">
+				<span class="button-start-icon">
+					<svg class="button-icon-root" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+						<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+					</svg>
+				</span>
+				Aller sur
+				{{theme.name}}
+			</span>
+		</a>
+
+		<p>
+			A bientôt,
+		</p>
+		<p>
+			L'équipe
+			{{theme.name}}
+		</p>
+		<hr></hr>
+	<p>
+		<em>Si vous pensez que cet email est une erreur car vous utilisez toujours
+			{{theme.name}}
+			: vérifiez l'adresse destinataire de cet email, elle ne devrait pas être la même que celle du compte
+			{{theme.name}}
+			que vous utilisez.</em>
+	</p>
+</div>{% endblock %}

@@ -1,0 +1,65 @@
+{
+  "coordinator": "Coordinateur",
+  "vendor": "Producteur",
+  "instructions": "Instructions",
+  "volunteers": "Bénévoles",
+  "format": {
+    "contact": {
+      "label": "Format des contacts",
+      "aria-label": "format contacts",
+      "0": "Deux colonnes : \"Nom\" et \"Téléphone\"",
+      "1": "Une seule colonne"
+    },
+    "product": {
+      "label": "Format des produits",
+      "aria-label": "format produits",
+      "0": "Une seule colonne",
+      "1": "Une colonne par produit"
+    },
+    "date": {
+      "label": "Format des dates",
+      "aria-label": "format dates",
+      "0": "jj/mm",
+      "1": "jj/mm/aa",
+      "2": "jj/mm/aaaa"
+    },
+    "cellHeight": {
+      "label": "Hauteur des cellules",
+      "aria-label": "cell height",
+      "big": "Grande",
+      "small": "Petite"
+    },
+    "onePersonPerPage": {
+      "label": "Imprimer une personne par page"
+    }
+  },
+  "actions": {
+    "csv": "Export CSV",
+    "xlsx": "Export Excel",
+    "print": "Imprimer"
+  },
+  "header": {
+    "coordinator": "<bold>Coordinateur : </bold> {{ infos }}",
+    "vendor": "<bold>Producteur : </bold> {{ infos }}",
+    "instructions": "<bold>Instructions : </bold> {{ infos }}",
+    "volunteers": "<bold>Bénévoles : </bold> {{ infos }}"
+  },
+  "table": {
+    "name": "Nom",
+    "phone": "Téléphone",
+    "contact": "Contact",
+    "contract": "Contrat",
+    "balance": "Solde contrat",
+    "amount": "Montant livré",
+    "weight": "Poids/Qté livré",
+    "provision": "Nouvelle provision reçue",
+    "signature": "Signature"
+  },
+  "classic": {
+    "title": "Feuille d’émargement - {{group}} - {{catalog}}"
+  },
+  "variable": {
+    "title": "Feuille d’émargement - {{group}} - {{catalog}} - {{date}}",
+    "titleHeader": "{{group}} - {{catalog}} - Distribution du {{date}}"
+  }
+}

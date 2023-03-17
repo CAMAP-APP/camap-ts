@@ -1,0 +1,51 @@
+{% extends "_layout-camap.twig" %}
+
+{% block styles %}
+	<link rel="stylesheet" href="./styles/material.css">
+{% endblock %}
+
+{% block content %}
+	<div>
+		<p>
+			<b>Bonjour
+				{{recipientName}}
+				!</b>
+		</p>
+		<p>
+			{{senderName}}
+			vous invite à rejoindre le groupe
+			{{theme.name}}
+			<b>{{groupName}}</b>
+			pour commander des produits locaux en vente directe.
+		</p>
+		<p>
+			Cliquez ici pour accepter l'invitation et créer votre compte :
+			<a class="button" href={{link}} target="_blank" rel="noreferrer noopener notrack">
+				<span class="button-label">
+					<span class="button-start-icon">
+						<svg class="button-icon-root" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+							<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+						</svg>
+					</span>
+					Accepter l'invitation
+				</span>
+			</a>
+		</p>
+		<p>
+			Si vous avez des questions vous pouvez répondre à cet email et
+			{{senderName}}
+			les recevra directement !
+		</p>
+		<p>
+			Bienvenue à bord,
+		</p>
+		<p>
+			L'équipe
+			{{theme.name}}
+		</p>
+		<p>
+			PS : Besoin d'aide pour commencer ? Regardez notre
+			<a href="https://wiki.camap.net/user:index" rel="notrack">Wiki</a>.
+		</p>
+	</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends "_layout-camap.twig" %}
+{% block content %}
+	<div style="padding: 8px; padding-bottom: 16px;">
+		<p>
+			<b>Les producteurs suivant sont suspectés de triche :</b>
+		</p>
+
+		<ul>
+			{% for groupsByVendor in groupsByVendors %}
+				<li>
+					Producteur
+					<a href={{"#{host}/admin/vendor/view/#{groupsByVendor.vendorId}"}} target="_blank" rel="noreferrer noopener notrack">#{{groupsByVendor.vendorId}}</a>
+					<br/>
+					Nombre de commandes à 0 sur les deux derniers mois :
+					{{groupsByVendor.nb0QuantityOrders}}.
+					<br/>
+					Groupes avec des commandes à 0 (dans les distributions validées la semaine dernière) :
+					<ul>
+						{% for groupId in groupsByVendor.groupIds %}
+							<li>
+								<a href={{"#{host}/p/hosted/group/#{groupId}"}} target="_blank" rel="noreferrer noopener notrack">#{{groupId}}</a>
+							</li>
+						{% endfor %}
+					</ul>
+				</li>
+			{% endfor %}
+		</ul>
+		<p>Bonne journée !</p>
+	</div>
+{% endblock %}

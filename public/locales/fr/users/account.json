@@ -1,0 +1,23 @@
+{
+  "infos": "Informations",
+  "partner": "Partenaire",
+  "notifications": "Notifications",
+  "hasEmailNotif4h": "Recevoir des notifications par email 4h avant les distributions",
+  "hasEmailNotif24h": "Recevoir des notifications par email 24h avant les distributions",
+  "hasEmailNotifOuverture": "Recevoir des notifications par email pour l'ouverture des commandes",
+  "partnerInfo": "Renseigner les champs suivants si vous souhaitez qu'une autre personne puisse retirer vos commandes à votre place.",
+  "updateSuccess": "Votre compte a bien été mis à jour",
+  "updateNotificationsSuccess": "Vos préférences de notifications ont bien été mises à jour",
+  "updatePartnerSuccess": "Les informations sur votre partenaire ont bien été mises à jour",
+  "mailAlreadyInUseError": "Cette adresse e-mail est déjà utilisée sur un autre compte",
+  "myGroups": "Mes groupes",
+  "quitGroup": "Quitter le groupe",
+  "quitGroupDialogTitle": "Quitter le groupe '{{groupName}}'",
+  "yourAccount": "Votre compte",
+  "ifYouQuitThisGroup": "Si vous quittez ce groupe :",
+  "youWontGetMessages": "Vous ne recevrez plus les messages envoyés aux membres du groupe ",
+  "yourCommandsWillBeStored": "Vos anciennes commandes seront conservées",
+  "emptyList": "Vous n'êtes membre d'aucun groupe pour l'instant",
+  "editYourNotifications": "Gérer vos préférences de notification",
+  "youShouldBeLoggedToQuitGroup": "Vous devez vous logger pour pouvoir quitter ce groupe"
+}

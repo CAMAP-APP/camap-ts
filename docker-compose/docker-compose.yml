@@ -1,0 +1,39 @@
+version: "2"
+services:
+  mysql:
+    build: ./mysql
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=db-camap
+      - MYSQL_USER=docker
+      - MYSQL_PASSWORD=docker
+    ports:
+      - "3306:3306"
+    volumes:
+      - database:/var/lib/mysql
+      - ./mysql/dumps/:/root/dumps
+  nest-camap:
+    depends_on:
+      - mysql
+    image: node:16.14
+    container_name: nest-camap
+    ports:
+      - "3010:3010"
+      - "6007:6007"
+    volumes:
+      - ../:/home/node/app
+    working_dir: /home/node/app/packages/api-core
+    command: npm run dev
+  neko-camap:
+    build: ./neko
+    container_name: neko-camap
+    ports:
+      - "80:80"
+    volumes:
+      - ../../CAMAP-haxe:/var/www/
+    depends_on:
+      - mysql
+      - nest-camap
+volumes:
+  database:

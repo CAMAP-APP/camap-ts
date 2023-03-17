@@ -1,0 +1,30 @@
+{% extends "_layout-group.twig" %}
+
+{% block content %}
+    <div>
+        <p>
+            <b>Bonjour {{recipientName}} !</b>
+        </p>
+        <p>
+            {{senderName}} vous invite à rejoindre le groupe {{theme.name}} <b>{{groupName}}</b>.
+        </p>
+        <p>
+            Cliquez ici pour accepter l'invitation : 
+            <a class="button" href={{link}} target="_blank" rel="noreferrer noopener notrack">
+                <span class="button-label">
+                    <span class="button-start-icon">
+                        <svg class="button-icon-root" focusable="false" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path></svg>
+                    </span>
+                    Rejoindre {{groupName}} sur {{theme.name}}
+                </span>
+            </a>
+        </p>
+        
+        <p>
+            Bienvenue dans ce nouveau groupe,
+        </p>
+        <p>
+            L'équipe {{theme.name}}
+        </p>
+    </div>
+{% endblock %}

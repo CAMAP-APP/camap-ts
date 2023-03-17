@@ -1,0 +1,89 @@
+{% extends "_layout-camap.twig" %}
+{% block content %}
+	<img src={{ "#{host}/img/emails/header_tomatoes.jpg" }} alt="distributions de tomates" style="width: 100%;"/>
+
+	<div>
+		<p>
+			<b>{{invationSenderName}}</b>
+			coordonne le groupe
+			{{theme.name}}
+			<b>{{groupName}}</b>.
+		</p>
+		<p>
+			Il ou elle vous invite à
+			<span class="bold-green">référencer et vendre vos produits sur son groupe
+				{{theme.name}}.</span>
+		</p>
+		<div class='light-green-background' style="margin-top: 16px; display: flex; justify-content: space-between; border: solid 1px; padding: 4px;">
+			<div style="padding: 4px; width: 48%;">
+				<p>
+					Prenez contact avec lui ou elle si vous souhaitez plus d'informations :
+					<ul>
+						{% if invitationSenderPhone!=null %}
+							<li>Téléphone :
+								{{invitationSenderPhone}}</li>
+						{% endif %}
+						<li>Email :
+							{{invitationSenderEmail}}</li>
+					</ul>
+				</p>
+			</div>
+			<div style="padding: 4px; width: 48%;">
+				<p>
+					Informations sur ce point de distribution :
+					<a href={{ "#{host}/group/#{groupId}" }} rel="notrack">{{groupName}}</a>
+					<ul>
+						<li>Jours de distribution :
+							{{distributionDaysAndTimes}}</li>
+						<li>Adresse :
+							{{placeAddress}}</li>
+					</ul>
+				</p>
+			</div>
+		</div>
+		<div style="border: solid 1px; padding: 4px; margin-top: 16px;">
+			<p>Son message :
+				<i>"{{message}}"</i>
+			</p>
+		</div>
+
+		<h4 class="bold-green">
+			{{theme.name}}, c'est quoi ?
+		</h4>
+		<p>{{theme.name}}
+			est un réseau de vente directe entre producteurs et consommateurs, sans commission sur les ventes.</p>
+
+		<h4 class="bold-green">
+			Ouverture de votre compte producteur
+		</h4>
+		<p>En vous inscrivant, vous ouvrez votre Compte Producteur qui vous permet de prendre les commandes en ligne auprès d’un nombre illimité de groupes de consommateurs. Le réseau Camap réunit plus de 2000 groupes Camap pour développer votre vente directe !</p>
+		<p>
+			<i>Pour garantir la cohérence du projet, votre activité doit respecter la
+				<a href="https://www.camap.net/charte-producteurs/" target="_blank" rel="noreferrer noopener notrack">Charte producteurs</a>.</i>
+		</p>
+
+	</br>
+
+	<p>Vous pourrez ensuite
+		<b>vendre gratuitement et sans engagement</b>
+		grâce à la Formule Découverte (chiffre d’affaires limité à 1000€ par an, hors ventes en AMAP).</p>
+	<a href="https://www.camap.net/producteurs" target="_blank" rel="noreferrer noopener notrack">> En savoir plus sur le compte producteur et les formules
+	</a>
+
+	<h4 class="bold-green">
+		Comment rejoindre le groupe
+		{{theme.name}}
+		{{groupName}}
+		?
+	</h4>
+	<p>
+		<a href={{ "#{host}/p/pro/signup/discovery/#{groupId}/#{invitationSenderId}?mtm_campaign=new-vendor-invitation&mtm_medium=email" }} target="_blank" rel="noreferrer noopener notrack">> Créez votre compte producteur</a>! C’est gratuit. Après la validation de votre inscription, vous pourrez proposer votre catalogue de produits à ce groupe.</p>
+</br>
+
+<p>
+	À très vite,
+</p>
+<p>
+	L'équipe
+	{{theme.name}}
+</p></div>{% include 'utils/info-visio.twig' %}{% endblock %}{% block footer %}{% include 'utils/photo-credit.twig' %}{% endblock %}

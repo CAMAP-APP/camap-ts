@@ -1,0 +1,36 @@
+{% extends "_layout-group.twig" %}
+
+{% block content %}
+	<div>
+		<p>Votre distribution vient de se terminer, n'oubliez pas de la
+			<b>valider</b>.
+		</p>
+
+		<br></br>
+
+	<p>Cette étape est importante afin de :</p>
+	<ul>
+		<li>Mettre à jour les commandes si les quantités livrées sont différentes des quantités commandées</li>
+		<li>Confirmer la réception des paiements (chèques, espèces, virements) afin de classer les commandes comme 'payées'</li>
+	</ul>
+
+	<p>Si tous les paniers sont totalement payés, cette distribution sera validée automatiquement dans 2 semaines et tous les paiements seront considérés comme reçus.</p>
+
+	<br></br>
+
+<div style="text-align: center;">
+	<a class="button" href={{"#{host}/distribution/validate/#{multiDistribId}"}} target="_blank" rel="noreferrer noopener notrack">
+		<span class="button-label">
+			<span class="button-start-icon">
+				<svg class="button-icon-root" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+					<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+				</svg>
+			</span>
+			Valider la distribution
+		</span>
+	</a>
+	<p style="font-size: 80%">
+		<i>(vous devez être connecté·e à votre groupe
+			{{theme.name}})</i>
+	</p>
+</div></div>{% endblock %}

@@ -1,0 +1,708 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserNotifications {
+  hasEmailNotif4h: Boolean!
+  hasEmailNotif24h: Boolean!
+  hasEmailNotifOuverture: Boolean!
+}
+
+type User {
+  id: Int!
+  firstName: String!
+  lastName: String!
+  email: String!
+  address1: String
+  address2: String
+  zipCode: String
+  city: String
+  nationality: String
+  countryOfResidence: String
+  birthDate: DateTime
+  email2: String
+  firstName2: String
+  lastName2: String
+  phone: String
+  phone2: String
+  notifications: UserNotifications!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type GroupPreview {
+  id: Int!
+  name: String!
+  allowedPaymentsType: [PaymentTypeId!]
+  currencyCode: String!
+  flags: Int!
+  betaFlags: Int!
+  iban: String
+  extUrl: String
+  disabled: GroupDisabledReason
+  hasPhoneRequired: Boolean!
+  hasAddressRequired: Boolean!
+}
+
+enum PaymentTypeId {
+  cash
+  check
+  transfer
+  onthespot
+  moneypot
+  cardTerminal
+}
+
+enum GroupDisabledReason {
+  BLOCKED_BY_ADMIN
+  MOVED
+}
+
+type Group {
+  id: Int!
+  name: String!
+  allowedPaymentsType: [PaymentTypeId!]
+  currencyCode: String!
+  flags: Int!
+  betaFlags: Int!
+  iban: String
+  extUrl: String
+  disabled: GroupDisabledReason
+  hasPhoneRequired: Boolean!
+  hasAddressRequired: Boolean!
+  users: [User!]
+  user: User
+  hasMembership: Boolean!
+  membershipFee: Float
+  txtDistrib: String
+  image: String
+  userGroup: UserGroup
+  multiDistribs: [MultiDistrib!]!
+}
+
+type Place {
+  id: Int!
+  name: String!
+  city: String!
+  zipCode: String!
+  group: Group!
+  address1: String
+  address2: String
+  country: String
+  lat: Float
+  lng: Float
+}
+
+type CsaSubscriptionType {
+  id: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  userId: Int!
+  user: User!
+  catalogId: Int!
+  catalog: Catalog!
+  userId2: Int
+  user2: User
+  absentDistribIds: String
+  balance: Float!
+}
+
+type Product {
+  id: Int!
+  name: String!
+  qt: Float!
+  smallQt: Float
+  unitType: Int!
+  vat: Float!
+  desc: String
+  stock: Float
+  organic: Boolean!
+  bulk: Boolean!
+  wholesale: Boolean!
+  variablePrice: Boolean!
+  imageId: Int
+  catalogId: Int!
+  ref: String
+  multiWeight: Boolean!
+  active: Boolean!
+  image: String!
+  price: Float!
+  vendorId: Int!
+  vendorName: String!
+  catalogName: String!
+}
+
+type Catalog {
+  id: Int!
+  name: String!
+  type: CatalogType!
+  groupId: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  vendorId: Int!
+  user: User
+  products: [Product!]!
+  group: Group!
+  subscriptions: [CsaSubscriptionType!]!
+  vendor: Vendor!
+}
+
+enum CatalogType {
+  TYPE_CONSTORDERS
+  TYPE_VARORDER
+}
+
+type VendorImages {
+  portrait: String
+  logo: String
+  banner: String
+  farm1: String
+  farm2: String
+  farm3: String
+  farm4: String
+}
+
+type Vendor {
+  id: Int!
+  name: String!
+  peopleName: String
+  email: String
+  phone: String
+  zipCode: String
+  city: String!
+  cdate: DateTime!
+  address1: String
+  address2: String
+  imageId: Int
+  linkUrl: String
+  linkText: String
+  desc: String
+  longDesc: String
+  images: VendorImages!
+  companyNumber: String
+  offCamap: String
+  vatNumber: String
+  companyCapital: Int
+  legalStatus: Int
+  country: String
+  disabled: VendorDisabledReason
+  image: String
+  imageFile: File
+  portrait: String!
+  profession: String!
+  professionId: Int
+}
+
+enum VendorDisabledReason {
+  IncompleteLegalInfos
+  NotCompliantWithPolicy
+  Banned
+}
+
+type File {
+  id: Int!
+  name: String!
+  data: String!
+  cDate: DateTime
+}
+
+type MultiDistrib {
+  id: Int!
+  placeId: Int!
+  groupId: Int!
+  validatedStatus: MultiDistribValidatedStatus!
+  distribStartDate: DateTime!
+  distribEndDate: DateTime!
+  orderEndDate: DateTime!
+  validated: Boolean
+  distributionCycleId: Int
+  orderStartDate: DateTime!
+  volunteers: [Volunteer!]!
+  volunteerRoles: [VolunteerRole!]!
+}
+
+enum MultiDistribValidatedStatus {
+  NOT_VALIDATED
+  VALIDATED
+}
+
+type UserOrder {
+  id: Int!
+  quantity: Float!
+  productPrice: Float!
+  productId: Int!
+  userId: Int!
+  distributionId: Int!
+  subscriptionId: Int
+  product: Product!
+  smartQt: String!
+}
+
+type Distribution {
+  id: Int!
+  date: DateTime!
+  catalogId: Int!
+  catalog: Catalog!
+  orderEndDate: DateTime!
+  orderStartDate: DateTime!
+  place: Place!
+  userOrders: [UserOrder!]!
+  multiDistrib: MultiDistrib!
+  end: DateTime!
+}
+
+type InitVendorPage {
+  vendor: Vendor!
+  nextDistributions: [Distribution!]!
+}
+
+type AttendanceClassicContract {
+  catalog: Catalog!
+  subscriptions: [CsaSubscriptionType!]!
+  distributions: [Distribution!]!
+}
+
+type AttendanceVariableContract {
+  catalog: Catalog!
+  subscriptions: [CsaSubscriptionType!]!
+  distribution: Distribution!
+}
+
+type DistributionCycle {
+  id: Int!
+  groupId: Int!
+  placeId: Int!
+  cycleType: DistributionCycleType!
+  startDate: DateTime!
+  endDate: DateTime!
+  startHour: DateTime!
+  endHour: DateTime!
+  daysBeforeOrderStart: Int!
+  openingHour: DateTime!
+  daysBeforeOrderEnd: Int!
+  closingHour: DateTime!
+}
+
+enum DistributionCycleType {
+  Weekly
+  Monthly
+  BiWeekly
+  TriWeekly
+}
+
+type VolunteerRole {
+  id: Int!
+  name: String!
+  groupId: Int!
+  catalogId: Int
+}
+
+type Volunteer {
+  multiDistribId: Int!
+  userId: Int!
+  user: User!
+  volunteerRoleId: Int!
+  volunteerRole: VolunteerRole!
+}
+
+type Operation {
+  id: Int!
+  name: String!
+  date: DateTime!
+  amount: Float!
+  pending: Boolean!
+  relationId: Int
+  type: OperationType!
+  data: OperationDataUnion
+  relatedPayments: [Operation!]!
+}
+
+enum OperationType {
+  Order
+  SubscriptionTotal
+  Payment
+  Membership
+}
+
+union OperationDataUnion = PaymentOperationTypeData | OrderOperationTypeData | SubscriptionTotalOperationTypeData | MembershipOperationTypeData
+
+type PaymentOperationTypeData {
+  type: PaymentTypeId!
+  remoteOpId: String
+}
+
+type OrderOperationTypeData {
+  basketId: Int!
+}
+
+type SubscriptionTotalOperationTypeData {
+  subscriptionId: Int!
+}
+
+type MembershipOperationTypeData {
+  year: Int!
+}
+
+type InvitedUser {
+  firstName: String!
+  lastName: String!
+  email: String!
+  address1: String
+  address2: String
+  zipCode: String
+  city: String
+  email2: String
+  firstName2: String
+  lastName2: String
+  phone: String
+  phone2: String
+}
+
+type GroupPreviewCatalogs {
+  id: Int!
+  name: String!
+  flags: Int!
+  volunteerRoles: [VolunteerRole!]!
+  places: [Place!]!
+  mainPlace: Place!
+  users: [User!]!
+}
+
+type SendInvitesToNewMembersResponse {
+  withoutAccounts: [String!]!
+  withAccounts: [Int!]!
+}
+
+type GroupPreviewMembers {
+  id: Int!
+  name: String!
+  hasMembership: Boolean!
+  membershipFee: Float
+}
+
+type UserGroup {
+  groupId: Int!
+  userId: Int!
+  balance: Float!
+  group: Group!
+  hasValidMembership: Boolean!
+}
+
+type RemoveUsersFromGroupError {
+  userId: Int!
+  message: String!
+}
+
+type RemoveUsersFromGroupResponse {
+  success: [UserGroup!]!
+  errors: [RemoveUsersFromGroupError!]!
+}
+
+type GroupPreviewMap {
+  id: Int!
+  name: String!
+  image: String
+  placeId: Int!
+  place: Place!
+}
+
+type Membership {
+  id: String!
+  userId: Int!
+  groupId: Int!
+  user: User
+  group: Group
+  date: DateTime!
+  amount: Float!
+  distributionId: Int
+  operationId: Int
+  year: Int!
+  name: String!
+  operation: Operation
+}
+
+type CreateMembershipsResponseError {
+  userId: Int!
+  message: String!
+}
+
+type CreateMembershipsResponse {
+  success: [Membership!]!
+  errors: [CreateMembershipsResponseError!]!
+}
+
+type MembershipAvailableYears {
+  name: String!
+  id: Int!
+}
+
+type MembershipFormData {
+  availableYears: [MembershipAvailableYears!]!
+  membershipFee: Float
+  distributions: [MultiDistrib!]!
+}
+
+type UserList {
+  type: String!
+  count: Float
+  data: String
+}
+
+type MoveBackToWaitingListError {
+  userId: Int!
+  message: String!
+}
+
+type WaitingList {
+  amapId: Int!
+  userId: Int!
+  date: DateTime!
+  message: String!
+  user: User!
+}
+
+type MoveBackToWaitingListResponse {
+  success: [WaitingList!]!
+  errors: [MoveBackToWaitingListError!]!
+}
+
+type Message {
+  id: Int!
+  title: String!
+  body: String!
+  date: DateTime!
+  amapId: Int
+  senderId: Int!
+  recipients: [String!]!
+  recipientListId: String
+  attachments: [AttachmentUnion!]
+  slateContent: String!
+  sender: User!
+  group: Group
+}
+
+union AttachmentUnion = EmbeddedImageAttachment | OtherAttachment
+
+type EmbeddedImageAttachment {
+  cid: String!
+  content: String!
+}
+
+type OtherAttachment {
+  fileName: String!
+}
+
+type Query {
+  me: User!
+  user(id: Int!): User!
+  getUserFromControlKey(groupId: Int, controlKey: String!, id: Int!): User!
+  isGroupAdmin(groupId: Int!): Boolean!
+  canManageAllCatalogs(groupId: Int!): Boolean!
+  getUsersFromEmails(emails: [String!]!): [User!]!
+  getInvitedUserToRegister(email: String!): InvitedUser
+  group(id: Int!): Group!
+  groupPreview(id: Int!): GroupPreview!
+  groupPreviews: [GroupPreview!]!
+  groupPreviews2: [GroupPreview!]!
+  getGroupsOnMap(maxLng: Float, maxLat: Float, minLng: Float, minLat: Float, lng: Float, lat: Float): [GroupPreviewMap!]!
+  myGroups: [GroupPreview!]!
+  groupPreviewMembers(id: Int!): GroupPreviewMembers!
+  groupPreviewCatalogs(id: Int!): GroupPreviewCatalogs!
+  getUserMemberships(ignoreIfNotAllowed: Boolean = false, userId: Int!, groupId: Int!): [Membership!]!
+  getMembershipFormData(userId: Int!, groupId: Int!): MembershipFormData!
+  getWaitingListsOfGroup(groupId: Int!): [WaitingList!]!
+  getUserLists(groupId: Int!): [UserList!]!
+  getContractsUserLists(groupId: Int!): [UserList!]!
+  getDistributionsUserLists(groupId: Int!): [UserList!]!
+  getUserListInGroupByListType(data: String, groupId: Int!, listType: String!): [User!]!
+  userGroup(userId: Int!, groupId: Int!): UserGroup
+  place(id: Int!): Place!
+  vendor(id: Int!): Vendor!
+  getVendorWithEmailCheck(vendorId: Int!): Vendor!
+  getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
+  initVendorPage(vendorId: Int!): InitVendorPage!
+  getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
+  catalog(id: Int!): Catalog!
+  getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
+  getActiveCatalogs(groupId: Int!): [Catalog!]!
+  distribution(id: Int!): Distribution!
+  multiDistribution(id: Int!): MultiDistrib!
+  multiDistribs(nextMultiDistribIfEmpty: Boolean, toDate: DateTime!, fromDate: DateTime!, groupId: Int!): [MultiDistrib!]!
+  distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
+  attendanceClassicContract(endDate: DateTime, startDate: DateTime, catalogId: Int!): AttendanceClassicContract!
+  attendanceVariableContract(distributionId: Int!, catalogId: Int!): AttendanceVariableContract!
+  distributionCycles(groupId: Int!): [DistributionCycle!]!
+  isEmailRegistered(email: String!): Boolean!
+  getMessagesForGroup(groupId: Int!): [Message!]!
+  getUserMessagesForGroup(groupId: Int!): [Message!]!
+  message(id: Int!): Message!
+  getLatestMessages: [Message!]!
+}
+
+type Mutation {
+  updateUser(input: UpdateUserInput!): UpdateUserResult!
+  updateUserNotifications(input: UpdateUserNotificationsInput!): User!
+  deleteAccount(password: String!, userId: Int!): Int!
+  validateOperation(type: PaymentTypeId, id: Int!): Operation!
+  deleteOperation(id: Int!): Int
+  quitGroup(groupId: Int!): UserGroup!
+  setGroupImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, groupId: Int!): Group!
+  removeUsersFromGroup(groupId: Int!, userIds: [Int!]!): RemoveUsersFromGroupResponse!
+  importAndCreateMembers(withoutAccounts: [SendInvitesToNewMembersInput!]!, withAccounts: [Int!]!, groupId: Int!): SendInvitesToNewMembersResponse!
+  sendInvitesToNewMembers(withoutAccounts: [SendInvitesToNewMembersInput!]!, withAccounts: [Int!]!, groupId: Int!): SendInvitesToNewMembersResponse!
+  createMembership(input: CreateMembershipInput!): Membership!
+  createMemberships(input: CreateMembershipsInput!): CreateMembershipsResponse!
+  deleteMembership(year: Int!, userId: Int!, groupId: Int!): String!
+  moveBackToWaitingList(message: String!, groupId: Int!, userIds: [Int!]!): MoveBackToWaitingListResponse!
+  cancelRequest(groupId: Int!, userId: Int!): WaitingList!
+  approveRequest(groupId: Int!, userId: Int!): UserGroup!
+  setVendorImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, vendorId: Int!): Vendor!
+  setProductImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, productId: Int!): Product!
+  login(input: LoginInput!): User!
+  recordBadLogin: Int!
+  register(input: RegisterInput!): User!
+  logout: Int
+  loginAs(groupId: Int, userId: Int!): User!
+  createMessage(input: CreateMessageInput!): Message!
+}
+
+union UpdateUserResult = User | MailAlreadyInUseError
+
+type MailAlreadyInUseError {
+  type: UserErrorType!
+}
+
+enum UserErrorType {
+  MailAlreadyInUse
+  UserNotFound
+}
+
+input UpdateUserInput {
+  id: Int!
+  email: String
+  firstName: String
+  lastName: String
+  address1: String
+  address2: String
+  zipCode: String
+  city: String
+  nationality: String
+  countryOfResidence: String
+  birthDate: DateTime
+  email2: String
+  firstName2: String
+  lastName2: String
+  phone: String
+  phone2: String
+}
+
+input UpdateUserNotificationsInput {
+  userId: Int!
+  controlKey: String
+  hasEmailNotif4h: Boolean
+  hasEmailNotif24h: Boolean
+  hasEmailNotifOuverture: Boolean
+}
+
+input SendInvitesToNewMembersInput {
+  firstName: String!
+  lastName: String!
+  email: String!
+  address1: String
+  address2: String
+  zipCode: String
+  city: String
+  nationality: String
+  countryOfResidence: String
+  birthDate: DateTime
+  email2: String
+  firstName2: String
+  lastName2: String
+  phone: String
+  phone2: String
+}
+
+input CreateMembershipInput {
+  userId: Int!
+  groupId: Int!
+  year: Int
+  date: DateTime!
+  paymentType: PaymentTypeId
+  distributionId: Int
+  membershipFee: Float
+}
+
+input CreateMembershipsInput {
+  groupId: Int!
+  year: Int
+  date: DateTime!
+  paymentType: PaymentTypeId
+  distributionId: Int
+  membershipFee: Float
+  userIds: [Int!]!
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+  sid: String!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  sid: String!
+  firstName: String!
+  lastName: String!
+  phone: String
+  address1: String
+  zipCode: String
+  city: String
+  tos: Boolean!
+  confirmPassword: String!
+  invitedGroupId: Int
+  email2: String
+  firstName2: String
+  lastName2: String
+  phone2: String
+}
+
+input CreateMessageInput {
+  title: String!
+  htmlBody: String!
+  senderName: String!
+  senderEmail: String!
+  recipients: [MailUserInput!]!
+  group: MailGroupInput!
+  list: MailListInput!
+  attachments: [AttachmentFileInput!]
+  slateContent: String!
+}
+
+input MailUserInput {
+  email: String!
+  id: Int
+  firstName: String
+  lastName: String
+}
+
+input MailGroupInput {
+  id: Int!
+  name: String!
+}
+
+input MailListInput {
+  type: String!
+  name: String
+}
+
+input AttachmentFileInput {
+  contentType: String!
+  filename: String!
+  content: String!
+  encoding: String!
+  cid: String
+}

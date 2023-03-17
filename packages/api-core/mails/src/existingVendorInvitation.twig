@@ -1,0 +1,83 @@
+{% extends "_layout-group.twig" %}
+
+{% block content %}
+	<div>
+		<p>
+			<b>{{invationSenderName}}</b>
+			du groupe
+			<b>{{groupName}}</b>
+			vous invite à ouvrir votre compte producteur sur
+			{{theme.name}}.
+		</p>
+		<div style="border: solid 1px; padding: 4px;">
+			<p>Son message :
+				<i>"{{message}}"</i>
+			</p>
+		</div>
+		<div style="display: flex; justify-content: space-between; margin-top: 16px;">
+			<div style="border: solid 1px; padding: 4px; width: 47%;">
+				<p>
+					Prenez contact avec lui ou elle si vous souhaitez plus d'informations :
+					<ul>
+						{% if invitationSenderPhone!=null %}
+							<li>Téléphone :
+								{{invitationSenderPhone}}</li>
+						{% endif %}
+						<li>Email :
+							{{invitationSenderEmail}}</li>
+					</ul>
+				</p>
+			</div>
+			<div style="border: solid 1px; padding: 4px; width: 47%;">
+				<p>
+					Informations sur ce groupe
+					{{theme.name}}
+					:
+					<a href={{"#{host}/group/#{groupId}"}} rel="notrack">{{groupName}}</a>
+					<ul>
+						<li>Jours de distribution :
+							{{distributionDaysAndTimes}}</li>
+						{% if placeAddress!="" %}
+							<li>Adresse :
+								{{placeAddress}}</li>
+						{% endif %}
+					</ul>
+				</p>
+			</div>
+		</div>
+
+		<h4>
+			<b>{{theme.name}}, c'est quoi ?</b>
+		</h4>
+		<p>
+			{{theme.name}}
+			est un réseau de vente directe entre producteurs et consommateurs.
+		</p>
+		<p>
+			<a href="https://www.camap.net/producteurs" target="_blank" rel="noreferrer noopener notrack">
+				Cliquez ici pour en savoir plus sur l'offre
+				{{theme.name}}
+			</a>
+		</p>
+
+		<p>Pour rejoindre
+			{{groupName}}</p>
+		<a class="button" href={{"#{host}/p/pro/signup/discovery/#{groupId}/#{invitationSenderId}?mtm_campaign=existing-vendor-invitation&mtm_medium=email"}} target="_blank" rel="noreferrer noopener notrack">
+			<span class="button-label">
+				<span class="button-start-icon">
+					<svg class="button-icon-root" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+						<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+					</svg>
+				</span>
+				Faites une demande d'ouverture de compte producteur
+			</span>
+		</a>
+		<p>
+			À très vite,
+		</p>
+		<p>
+			L'équipe
+			{{theme.name}}
+		</p>
+	</div>
+{% endblock %}

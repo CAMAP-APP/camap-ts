@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": false,
+    "moduleResolution": "Node",
+    "jsx": "react-jsx",
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "strict": true,
+    "sourceMap": true,
+    "useDefineForClassFields": true,
+    "allowSyntheticDefaultImports": true,
+    "downlevelIteration": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@components/*": ["components/*"],
+      "@gql": ["gql"],
+      "@gql/*": ["gql/*"],
+      "@utils/*": ["utils/index", "utils/*"],
+      "@config/*": ["config/index", "config/*"],
+      "@lib/*": ["lib/index", "lib/*"],
+      "@mocks": ["mocks/index"],
+      "@mocks/*": ["mocks/*"],
+      "@theme/*": ["theme/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts", "src/**/*.tsx", "jest.config.js"]
+}

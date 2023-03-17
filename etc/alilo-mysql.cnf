@@ -1,0 +1,14 @@
+# Customization applied to mysql DB in github actions
+# - max_allowed_packet 16 -> 100
+# - character-set-server utf8 -> utf8mb4
+# - collation-server utf8_general_ci -> utf8mb4_unicode_ci
+#   cf https://stackoverflow.com/a/766996/3437801
+# - sql-mode: rm STRICT_TRANS_TABLES from default values (ONLY_FULL_GROUP_BY,
+#    STRICT_TRANS_TABLES, NO_ZERO_IN_DATE, NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,
+#    and NO_ENGINE_SUBSTITUTION.) See https://dev.mysql.com/doc/refman/8.0/en/sql-mode.html
+
+[mysqld]
+max_allowed_packet=100M
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+sql-mode="ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"

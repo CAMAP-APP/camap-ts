@@ -1,0 +1,15 @@
+{
+  "predefinedRange": "Créneaux prédéfinis",
+  "Start Date": "Date de début",
+  "End Date": "Date de fin",
+  "today": "Aujourd'hui",
+  "yesterday": "Hier",
+  "thisWeek": "Cette semaine",
+  "lastWeek": "La semaine dernière",
+  "last7Days": "Les 7 derniers jours",
+  "thisMonth": "Ce mois",
+  "lastMonth": "Le mois dernier",
+  "last31Days": "Les 31 derniers jours",
+  "thisYear": "Cette année",
+  "lastYear": "L'année dernière"
+}

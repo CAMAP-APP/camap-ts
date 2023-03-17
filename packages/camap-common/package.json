@@ -1,0 +1,49 @@
+{
+  "name": "camap-common",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup -c && rm -rf ./dist && mv ./tmp ./dist",
+    "dev": "tsc -w --preserveWatchOutput",
+    "lint": "eslint '{src,apps,libs,test}/**/*.ts' --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "tsc": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "yup": "^0.28.3"
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "@typescript-eslint/eslint-plugin": "^2.22.0",
+    "core-js": "^3.6.5",
+    "eslint": "^6.8.0",
+    "jest": "^25.5.2"
+  },
+  "dependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/plugin-transform-regenerator": "^7.8.7",
+    "@babel/plugin-transform-runtime": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-react": "^7.9.4",
+    "@babel/preset-typescript": "^7.9.0",
+    "@rollup/plugin-commonjs": "^11.0.2",
+    "@rollup/plugin-json": "^4.0.2",
+    "@rollup/plugin-node-resolve": "^7.1.1",
+    "@types/yup": "^0.26.32",
+    "date-fns": "^2.13.0",
+    "ibantools": "^3.0.0",
+    "lint-staged": "^10.0.8",
+    "rollup": "^2.3.0",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-delete": "^1.2.0",
+    "rollup-plugin-peer-deps-external": "^2.2.2",
+    "rollup-plugin-terser": "^5.3.0",
+    "rollup-plugin-typescript2": "^0.27.0",
+    "typescript": "^3.8.3",
+    "yup": "^0.28.3"
+  }
+}

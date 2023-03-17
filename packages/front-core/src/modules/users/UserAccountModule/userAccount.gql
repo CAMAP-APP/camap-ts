@@ -1,0 +1,84 @@
+fragment BaseUser on User {
+  id
+  firstName
+  lastName
+  email
+}
+
+fragment ContactUser on User {
+  phone
+  address1
+  address2
+  zipCode
+  city
+  countryOfResidence
+}
+
+fragment PartnerUser on User {
+  firstName2
+  lastName2
+  email2
+  phone2
+}
+
+fragment NotificationsUser on User {
+  notifications {
+    hasEmailNotif4h
+    hasEmailNotif24h
+    hasEmailNotifOuverture
+  }
+}
+
+query UserAccount {
+  me {
+    ...BaseUser
+    birthDate
+    nationality
+    ...ContactUser
+    ...PartnerUser
+    ...NotificationsUser
+  }
+  myGroups {
+    id
+    name
+    hasAddressRequired
+    hasPhoneRequired
+  }
+}
+
+mutation UpdateUser($input: UpdateUserInput!) {
+  updateUser(input: $input) {
+    ... on User {
+      ...BaseUser
+      birthDate
+      nationality
+      ...ContactUser
+      ...PartnerUser
+      ...NotificationsUser
+    }
+
+    ... on MailAlreadyInUseError {
+      __typename
+    }
+  }
+}
+
+mutation UpdateUserNotifications($input: UpdateUserNotificationsInput!) {
+  updateUserNotifications(input: $input) {
+    ... on User {
+      ...BaseUser
+      birthDate
+      nationality
+      ...ContactUser
+      ...PartnerUser
+      ...NotificationsUser
+    }
+  }
+}
+
+mutation quitGroup($groupId: Int!) {
+  quitGroup(groupId: $groupId) {
+    userId
+    groupId
+  }
+}

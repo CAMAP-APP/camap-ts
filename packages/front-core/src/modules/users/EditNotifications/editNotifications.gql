@@ -1,0 +1,9 @@
+query getUserFromControlKey($id: Int!, $controlKey: String!, $groupId: Int) {
+  getUserFromControlKey(id: $id, controlKey: $controlKey, groupId: $groupId) {
+    ... on User {
+      ...BaseUser
+      ...NotificationsUser
+      ...PartnerUser
+    }
+  }
+}

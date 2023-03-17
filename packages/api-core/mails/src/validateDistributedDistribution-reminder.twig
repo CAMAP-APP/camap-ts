@@ -1,0 +1,32 @@
+{% extends "_layout-group.twig" %}
+
+{% block content %}
+	<div>
+		<p>Votre distribution s'est terminée il y a plus de deux semaines mais elle ne peut pas être validée automatiquement car certains paniers ne sont pas totalement payés ou ont un crédit.</p>
+		<p>Vous devez donc
+			<b>valider votre distribution</b>
+			manuellement.
+		</p>
+
+		<br></br>
+
+	<p>À partir de quatre distributions non validées, votre groupe sera bloqué.</p>
+
+	<br></br>
+
+<div style="text-align: center;">
+	<a class="button" href={{"#{host}/distribution/validate/#{multiDistribId}"}} target="_blank" rel="noreferrer noopener notrack">
+		<span class="button-label">
+			<span class="button-start-icon">
+				<svg class="button-icon-root" focusable="false" viewbox="0 0 24 24" aria-hidden="true">
+					<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+				</svg>
+			</span>
+			Valider la distribution
+		</span>
+	</a>
+	<p style="font-size: 80%">
+		<i>(vous devez être connecté·e à votre groupe
+			{{theme.name}})</i>
+	</p>
+</div></div>{% endblock %}

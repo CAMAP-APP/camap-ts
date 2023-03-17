@@ -1,0 +1,21 @@
+{
+  "fieldRequired": "Veuillez saisir votre ",
+  "invalidEmail": "Veuillez saisir une adresse email correcte",
+  "password": "Mot de passe",
+  "login": "Se connecter",
+  "forgottenPassword": "Mot de passe oublié ?",
+  "firstVisit": "C'est votre première visite sur {{theme.name}} ?",
+  "register": "S'inscrire",
+  "registration": "Inscription",
+  "alreadyRegistered": "Déjà inscrit ?",
+  "iAcceptThe": "J'accepte les ",
+  "tos": "conditions générales d'utilisation",
+  "privacyPolicy": "politique de confidentialité",
+  "invalidZipCode": "Ce code postal n'est pas correct",
+  "invalidPhone": "Ce numéro de téléphone n'est pas correct",
+  "invalidPassword": "Votre mot de passe doit contenir au moins 8 caractères",
+  "min8Char": "Minimum 8 caractères",
+  "confirmPassword": "Confirmez votre mot de passe",
+  "loginAs": "Connexion en cours...",
+  "emailAlreadyRegistered": "Email déjà utiilisé, connectez-vous ci-dessous."
+}

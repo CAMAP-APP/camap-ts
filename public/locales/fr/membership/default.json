@@ -1,0 +1,17 @@
+{
+  "payment": "Paiement",
+  "duringDistribution": "Lors de la distribution",
+  "year": "Année",
+  "distributionOfDate": "Distribution du {{date}}",
+  "amount": "Montant",
+  "subscriptionPaymentDate": "Date de cotisation",
+  "pleaseInsertSubscriptionAmount": "Veuillez-saisir le montant de la cotisation",
+  "subscriptionAmount": "Montant de la cotisation",
+  "newSubscriptionRegistered": "Nouvelle adhésion enregistrée",
+  "add": "Ajouter",
+  "history": "Historique",
+  "userNamesSubsciptions": "Adhésions de {{userName}}",
+  "subscribDate": "Date de cotisation",
+  "deleteSubscription": "Supprimer cette adhésion ?",
+  "noMembership": "Cet utilisateur n'a aucune adhésion"
+}

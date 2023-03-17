@@ -1,0 +1,16 @@
+query getInvitedUserToRegister($email: String!) {
+  getInvitedUserToRegister(email: $email) {
+    firstName
+    lastName
+    email
+    phone
+    address1
+    address2
+    zipCode
+    city
+    firstName2
+    lastName2
+    email2
+    phone2
+  }
+}

@@ -1,0 +1,157 @@
+query AttendanceClassicContract(
+  $catalogId: Int!
+  $startDate: DateTime
+  $endDate: DateTime
+) {
+  attendanceClassicContract(
+    catalogId: $catalogId
+    startDate: $startDate
+    endDate: $endDate
+  ) {
+    catalog {
+      id
+      name
+      startDate
+      endDate
+      user {
+        id
+        firstName
+        lastName
+        phone
+        email
+      }
+      vendor {
+        id
+        name
+        phone
+        email
+      }
+      group {
+        id
+        name
+        txtDistrib
+      }
+      products {
+        id
+        name
+        unitType
+        qt
+        smallQt
+      }
+    }
+    distributions {
+      id
+      date
+      userOrders {
+        id
+        userId
+        smartQt
+        productId
+        quantity
+      }
+    }
+    subscriptions {
+      id
+      absentDistribIds
+      user {
+        id
+        lastName
+        firstName
+        lastName2
+        firstName2
+        phone
+      }
+      user2 {
+        id
+        lastName
+        firstName
+        lastName2
+        firstName2
+        phone
+      }
+    }
+  }
+}
+
+query AttendanceVariableContract($catalogId: Int!, $distributionId: Int!) {
+  attendanceVariableContract(
+    catalogId: $catalogId
+    distributionId: $distributionId
+  ) {
+    catalog {
+      id
+      name
+      startDate
+      endDate
+      user {
+        id
+        firstName
+        lastName
+        phone
+        email
+      }
+      vendor {
+        id
+        name
+        phone
+        email
+      }
+      group {
+        id
+        name
+        txtDistrib
+      }
+    }
+    subscriptions {
+      id
+      balance
+      absentDistribIds
+      user {
+        id
+        lastName
+        firstName
+        lastName2
+        firstName2
+        phone
+      }
+    }
+    distribution {
+      id
+      date
+      userOrders {
+        id
+        userId
+        quantity
+        smartQt
+        subscriptionId
+        productPrice
+        product {
+          id
+          name
+          qt
+          unitType
+          price
+        }
+      }
+      multiDistrib {
+        id
+        volunteers {
+          volunteerRole {
+            id
+            name
+            catalogId
+            groupId
+          }
+
+          user {
+            id
+            lastName
+            firstName
+            phone
+            email
+          }
+        }
+      }
+    }
+  }
+}

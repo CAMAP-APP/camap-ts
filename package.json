@@ -1,0 +1,44 @@
+{
+  "name": "camap-ts",
+  "engines": {
+    "node": "16.18.0",
+    "npm": "8.19.2"
+  },
+  "cacheDirectories": [
+    "node_modules"
+  ],
+  "private": true,
+  "scripts": {
+    "build": "npm run build:common && npm run build:api && npm run build:front ",
+    "build:common": "npm run build --prefix packages/camap-common",
+    "build:api": "npm run build --prefix packages/api-core",
+    "build:front": "npm run build --prefix packages/front-core",
+    "dataset": "npm run dataset --prefix ./packages/api-core --",
+    "dataset-server": "npm run dataset-server --prefix ./packages/api-core",
+    "dev:api": "cd ./packages/api-core && npm run dev",
+    "dev:common": "cd ./packages/camap-common && npm run dev",
+    "dev:story": "cd packages/front-core && npm run storybook",
+    "dev:restart:neko": "docker-compose restart neko-camap",
+    "dev:restart:nest": "docker-compose restart nest-camap",
+    "dev:typeorm:schema:log": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm schema:log",
+    "dev:typeorm:migration:show": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:show",
+    "dev:typeorm:migration:run": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:run",
+    "dev:typeorm:migration:revert": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:revert",
+    "dev:typeorm:migration:generate": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:generate -- -n",
+    "postinstall": "npm i --prefix packages/camap-common && npm i --prefix packages/api-core && npm i npm i --prefix packages/front-core",
+    "setup": "sh ./scripts/setup.sh",
+    "start": "npm run start --prefix ./packages/api-core",
+    "schema:sync": "npm run --prefix packages/api-core typeorm schema:sync"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "prettier": "^2.0.5",
+    "typescript": "^4.6.3"
+  },
+  "dependencies": {
+    "core-js": "^3.6.5",
+    "dotenv": "^8.2.0",
+    "typeorm": "^0.2.29",
+    "webpack": "^4.44.2"
+  }
+}
