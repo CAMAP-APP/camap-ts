@@ -1043,16 +1043,13 @@ export type UserOrder = {
 
 export type Vendor = {
   __typename?: 'Vendor';
-  activityCodeName?: Maybe<Scalars['String']>;
   address1?: Maybe<Scalars['String']>;
   address2?: Maybe<Scalars['String']>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
   companyCapital?: Maybe<Scalars['Int']>;
   companyNumber?: Maybe<Scalars['String']>;
-  completeLegalStatus: Scalars['String'];
   country?: Maybe<Scalars['String']>;
-  customizedTermsOfSaleFile?: Maybe<Scalars['String']>;
   desc?: Maybe<Scalars['String']>;
   disabled?: Maybe<VendorDisabledReason>;
   email?: Maybe<Scalars['String']>;
@@ -1073,7 +1070,6 @@ export type Vendor = {
   profession: Scalars['String'];
   professionId?: Maybe<Scalars['Int']>;
   vatNumber?: Maybe<Scalars['String']>;
-  vendorPage: Scalars['String'];
   zipCode?: Maybe<Scalars['String']>;
 };
 
@@ -1257,6 +1253,13 @@ export type GetInvitedUserToRegisterQueryVariables = Exact<{
 
 
 export type GetInvitedUserToRegisterQuery = { __typename?: 'Query', getInvitedUserToRegister?: { __typename?: 'InvitedUser', firstName: string, lastName: string, email: string, phone?: string | null, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, firstName2?: string | null, lastName2?: string | null, email2?: string | null, phone2?: string | null } | null };
+
+export type IsEmailRegisteredQueryVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type IsEmailRegisteredQuery = { __typename?: 'Query', isEmailRegistered: boolean };
 
 export type InitMembersQueryVariables = Exact<{
   groupId: Scalars['Int'];
@@ -2358,6 +2361,39 @@ export function useGetInvitedUserToRegisterLazyQuery(baseOptions?: ApolloReactHo
 export type GetInvitedUserToRegisterQueryHookResult = ReturnType<typeof useGetInvitedUserToRegisterQuery>;
 export type GetInvitedUserToRegisterLazyQueryHookResult = ReturnType<typeof useGetInvitedUserToRegisterLazyQuery>;
 export type GetInvitedUserToRegisterQueryResult = Apollo.QueryResult<GetInvitedUserToRegisterQuery, GetInvitedUserToRegisterQueryVariables>;
+export const IsEmailRegisteredDocument = gql`
+    query isEmailRegistered($email: String!) {
+  isEmailRegistered(email: $email)
+}
+    `;
+
+/**
+ * __useIsEmailRegisteredQuery__
+ *
+ * To run a query within a React component, call `useIsEmailRegisteredQuery` and pass it any options that fit your needs.
+ * When your component renders, `useIsEmailRegisteredQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useIsEmailRegisteredQuery({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useIsEmailRegisteredQuery(baseOptions: ApolloReactHooks.QueryHookOptions<IsEmailRegisteredQuery, IsEmailRegisteredQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<IsEmailRegisteredQuery, IsEmailRegisteredQueryVariables>(IsEmailRegisteredDocument, options);
+      }
+export function useIsEmailRegisteredLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<IsEmailRegisteredQuery, IsEmailRegisteredQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<IsEmailRegisteredQuery, IsEmailRegisteredQueryVariables>(IsEmailRegisteredDocument, options);
+        }
+export type IsEmailRegisteredQueryHookResult = ReturnType<typeof useIsEmailRegisteredQuery>;
+export type IsEmailRegisteredLazyQueryHookResult = ReturnType<typeof useIsEmailRegisteredLazyQuery>;
+export type IsEmailRegisteredQueryResult = Apollo.QueryResult<IsEmailRegisteredQuery, IsEmailRegisteredQueryVariables>;
 export const InitMembersDocument = gql`
     query initMembers($groupId: Int!) {
   me {

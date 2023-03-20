@@ -14,3 +14,7 @@ query getInvitedUserToRegister($email: String!) {
     phone2
   }
 }
+
+query isEmailRegistered($email: String!) {
+  isEmailRegistered(email: $email)
+}
