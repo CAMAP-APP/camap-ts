@@ -73,9 +73,7 @@ export class DistributionsResolver {
     if (parent.userOrders) {
       return parent.userOrders;
     }
-    return (
-      await this.ordersService.findUserOrdersByDistributionIds([parent.id])
-    )[0];
+    return this.ordersService.findUserOrdersByDistributionIds([parent.id]);
   }
 
   @ResolveField(() => MultiDistrib)
