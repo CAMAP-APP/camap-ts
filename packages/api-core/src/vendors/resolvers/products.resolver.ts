@@ -80,9 +80,11 @@ export class ProductsResolver {
       await this.filesService.delete(product.imageId);
     }
 
-    return await this.productsService.update(product.id, {
+    await this.productsService.update(product.id, {
       imageId: newImage.id,
     });
+      
+    return { ...product, imageId: newImage.id };
   }
 
   /**
