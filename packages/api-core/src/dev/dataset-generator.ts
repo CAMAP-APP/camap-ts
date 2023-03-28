@@ -296,11 +296,10 @@ interface GenUserProps {
   lastName?: string;
   phone?: string;
   rights?: RightSite[];
-  tosVersion?: number | undefined;
 }
 const genUser = async (
   app: INestApplication,
-  { rights, tosVersion = 1, ...props }: GenUserProps,
+  { rights, ...props }: GenUserProps,
 ) => {
   const repo = app.get<Repository<UserEntity>>(getRepositoryToken(UserEntity));
 
@@ -313,7 +312,6 @@ const genUser = async (
     pass2: await bcrypt.hash('admin', 10),
     firstName,
     lastName,
-    tosVersion,
   });
 
   for (const right of rights || []) {

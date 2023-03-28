@@ -98,8 +98,6 @@ export class AuthService {
       throw new UnauthorizedException('emailAlreadyRegistered');
     }
 
-    const tosVersion = await this.variableService.getInt(VariableNames.tosVersion);
-
     const user = new UserEntity();
     user.email = email;
     user.firstName = firstName;
@@ -112,7 +110,6 @@ export class AuthService {
     user.firstName2 = firstName2;
     user.lastName2 = lastName2;
     user.phone2 = phone2;
-    user.tosVersion = tosVersion;
     user.pass = this.hashPasswordWithMD5(password);
     user.pass2 = await this.hashPasswordWithBcrypt(password);
     user.flags = setFlag(UserFlags.HasEmailNotif24h, user.flags);

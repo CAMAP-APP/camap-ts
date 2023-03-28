@@ -84,9 +84,6 @@ export class UserEntity extends BaseEntity {
   @Column('varchar', { nullable: true, length: 2 })
   nationality: string | null;
 
-  @Column('int', { nullable: true })
-  tosVersion: number | null;
-
   @Column('varchar', { nullable: true, length: 2 })
   countryOfResidence: string | null;
 
