@@ -2,18 +2,21 @@ import { NotFoundException } from '@nestjs/common';
 import { Args, Int, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { zonedTimeToUtc } from 'date-fns-tz';
 import { TZ_PARIS } from '../../common/constants';
+import { OrdersService } from '../../payments/services/orders.service';
 import { DistributionEntity } from '../entities/distribution.entity';
 import { MultiDistribEntity } from '../entities/multi-distrib.entity';
 import { DistributionsService } from '../services/distributions.service';
 import { MultiDistribsService } from '../services/multi-distribs.service';
 import { Distribution } from '../types/distribution.type';
 import { MultiDistrib } from '../types/multi-distrib.type';
+import { UserOrder } from '../types/user-order.type';
 
 @Resolver(() => Distribution)
 export class DistributionsResolver {
   constructor(
     private readonly distributionsService: DistributionsService,
     private readonly multiDistribsService: MultiDistribsService,
+    private readonly ordersService: OrdersService,
   ) {}
 
   /**
@@ -61,6 +64,16 @@ export class DistributionsResolver {
     @Parent() parent: Distribution & Pick<DistributionEntity, 'raw_orderEndDate'>,
   ) {
     return zonedTimeToUtc(parent.raw_orderEndDate, TZ_PARIS);
+  }
+
+  @ResolveField(() => [UserOrder])
+  async userOrders(
+    @Parent() parent: Distribution & { userOrders?: Promise<UserOrder[]> },
+  ) {
+    if (parent.userOrders) {
+      return parent.userOrders;
+    }
+    return this.ordersService.findUserOrdersByDistributionIds([parent.id]);
   }
 
   @ResolveField(() => MultiDistrib)
