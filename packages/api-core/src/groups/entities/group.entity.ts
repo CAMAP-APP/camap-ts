@@ -83,9 +83,6 @@ export class GroupEntity extends BaseEntity {
   @Column('varchar', { nullable: true, length: 64 })
   checkOrder: string | null;
 
-  @Column('tinyint', { nullable: true, unsigned: true })
-  groupType: number | null;
-
   @Column('tinyint', {
     nullable: true,
     width: 1,
@@ -106,9 +103,6 @@ export class GroupEntity extends BaseEntity {
 
   @Column('mediumtext')
   alertMailContent: string;
-
-  @Column('int')
-  betaFlags: number;
 
   @Column('tinyint', { width: 1 })
   hasMembership: boolean;
@@ -216,7 +210,6 @@ export class GroupEntity extends BaseEntity {
     | 'allowedPaymentsType'
     | 'currencyCode'
     | 'flags'
-    | 'betaFlags'
     | 'iban'
     | 'disabled'
     | 'extUrl'
@@ -227,7 +220,6 @@ export class GroupEntity extends BaseEntity {
       allowedPaymentsType: this.allowedPaymentsType,
       currencyCode: this.currencyCode,
       flags: this.flags,
-      betaFlags: this.betaFlags,
       iban: this.iban,
       disabled: this.disabled,
       extUrl: this.extUrl,

@@ -22,7 +22,7 @@ import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entit
 import { GroupEntity } from '../groups/entities/group.entity';
 import { UserGroupEntity } from '../groups/entities/user-group.entity';
 import { VolunteerRoleEntity } from '../groups/entities/volunteer-role.entity';
-import { GroupBetaFlags, GroupFlags } from '../groups/types/interfaces';
+import { GroupFlags } from '../groups/types/interfaces';
 import {
   OperationData,
   OperationEntity,
@@ -95,7 +95,6 @@ interface GenGroupProps {
   id?: number;
   name?: string;
   flags?: GroupFlags[] | null;
-  betaFlags?: GroupBetaFlags[] | null;
   allowedPaymentsType?: PaymentTypeId[];
   hasMembership?: boolean;
   regOption?: number;
@@ -108,7 +107,6 @@ const genGroup = async (
     id,
     name,
     flags = [],
-    betaFlags = [],
     allowedPaymentsType,
     hasMembership,
     regOption,
@@ -153,11 +151,6 @@ const genGroup = async (
   if (flags) {
     for (const flag of flags) {
       entity.flags = setFlag(flag, entity.flags);
-    }
-  }
-  if (betaFlags) {
-    for (const betaFlag of betaFlags) {
-      entity.betaFlags = setFlag(betaFlag, entity.betaFlags);
     }
   }
 

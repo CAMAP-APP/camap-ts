@@ -10,7 +10,6 @@ export enum GroupFlags {
   Show3rdCategoryLevel = 10,
 }
 
-export enum GroupBetaFlags {}
 
 export enum RegOption {
   Closed = 0,

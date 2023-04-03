@@ -37,9 +37,6 @@ export class MultiDistribEntity {
   @Column('double')
   counterBeforeDistrib: number;
 
-  @Column('tinyint', { nullable: true, width: 1 })
-  validated: boolean | null;
-
   @Column({
     type: 'enum',
     enum: MultiDistribValidatedStatus,
