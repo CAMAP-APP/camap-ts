@@ -55,9 +55,6 @@ export class VendorEntity extends BaseEntity {
   @Column('varchar', { name: 'linkUrl', nullable: true, length: 256 })
   linkUrl: string | null;
 
-  @Column('varchar', { name: 'status', nullable: true, length: 32 })
-  status: string | null;
-
   @Column('varchar', { name: 'country', nullable: true, length: 64 })
   country: string | null;
 
