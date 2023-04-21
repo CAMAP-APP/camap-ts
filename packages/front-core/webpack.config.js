@@ -72,7 +72,7 @@ module.exports = {
         onEnd: {
           copy: [
             {
-              source: 'src/theme/camap/palette.ts',
+              source: 'src/theme/default/palette.ts',
               destination: 'src/palette.ts',
             },
           ],

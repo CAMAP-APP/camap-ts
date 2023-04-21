@@ -1,7 +1,7 @@
 import { Theme } from 'camap-common';
 
 const DEFAULT_THEME = (host: string): Theme => ({
-  id: 'camap',
+  id: 'default',
   name: 'CAMAP',
   supportEmail: 'support@cagette.net',
   email: {
