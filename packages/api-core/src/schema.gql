@@ -213,20 +213,13 @@ type MultiDistrib {
   id: Int!
   placeId: Int!
   groupId: Int!
-  validatedStatus: MultiDistribValidatedStatus!
   distribStartDate: DateTime!
   distribEndDate: DateTime!
   orderEndDate: DateTime!
-  validated: Boolean
   distributionCycleId: Int
   orderStartDate: DateTime!
   volunteers: [Volunteer!]!
   volunteerRoles: [VolunteerRole!]!
-}
-
-enum MultiDistribValidatedStatus {
-  NOT_VALIDATED
-  VALIDATED
 }
 
 type UserOrder {

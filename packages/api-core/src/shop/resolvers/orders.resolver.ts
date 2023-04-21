@@ -10,7 +10,6 @@ import { ProductEntity } from '../../vendors/entities/product.entity';
 import { ProductsLoader } from '../../vendors/loaders/products.loader';
 import { CatalogsService } from '../../vendors/services/catalogs.service';
 import { Product } from '../../vendors/types/product.type';
-import { MultiDistribValidatedStatus } from '../entities/multi-distrib.entity';
 import { MultiDistribsService } from '../services/multi-distribs.service';
 import { UserOrder } from '../types/user-order.type';
 import DataLoader = require('dataloader');
@@ -22,7 +21,7 @@ export class OrdersResolver {
     private readonly userGroupsService: UserGroupsService,
     private readonly catalogsService: CatalogsService,
     private readonly multiDistribsService: MultiDistribsService,
-  ) {}
+  ) { }
 
   /**
    * FIELDS
@@ -81,9 +80,6 @@ export class OrdersResolver {
       !this.userGroupsService.canManageAllCatalogs(currentUser, multiDistrib.groupId)
     ) {
       throw new ForbiddenException('Forbidden access');
-    }
-    if (multiDistrib.validatedStatus !== MultiDistribValidatedStatus.NOT_VALIDATED) {
-      throw new ForbiddenException('This delivery has already been validated');
     }
 
     return catalog;

@@ -33,8 +33,7 @@ import { PlaceEntity } from '../places/models/place.entity';
 import { BasketEntity, BasketStatus } from '../shop/entities/basket.entity';
 import { DistributionEntity } from '../shop/entities/distribution.entity';
 import {
-  MultiDistribEntity,
-  MultiDistribValidatedStatus,
+  MultiDistribEntity
 } from '../shop/entities/multi-distrib.entity';
 import { UserOrderEntity } from '../shop/entities/user-order.entity';
 import { VariableEntity } from '../tools/models/variable.entity';
@@ -176,9 +175,7 @@ interface GenMultiDistribProps {
   distribEndDate?: Date;
   groupIdOrEntity?: number | GroupEntity;
   placeIdOrEntity?: number | PlaceEntity;
-  validatedStatus?: MultiDistribValidatedStatus;
   volunteerRolesIds?: number[];
-  validatedDate?: Date;
 }
 const genMultiDistrib = async (
   app: INestApplication,
@@ -190,9 +187,7 @@ const genMultiDistrib = async (
     distribEndDate,
     groupIdOrEntity,
     placeIdOrEntity,
-    validatedStatus = MultiDistribValidatedStatus.NOT_VALIDATED,
     volunteerRolesIds,
-    validatedDate,
   }: GenMultiDistribProps,
 ) => {
   const repo = app.get<Repository<MultiDistribEntity>>(
@@ -230,9 +225,7 @@ const genMultiDistrib = async (
       raw_distribStartDate,
       raw_distribEndDate,
       placeId,
-      validatedStatus,
       volunteerRolesIds,
-      validatedDate,
     }),
   );
 };

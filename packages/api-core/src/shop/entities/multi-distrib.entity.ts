@@ -17,11 +17,6 @@ import { BasketEntity } from './basket.entity';
 import { DistributionCycleEntity } from './distribution-cycle.entity';
 import { DistributionEntity } from './distribution.entity';
 
-export enum MultiDistribValidatedStatus {
-  NOT_VALIDATED = 'NOT_VALIDATED',
-  VALIDATED = 'VALIDATED',
-}
-
 @Index('MultiDistrib_groupId', ['groupId'], {})
 @Index('MultiDistrib_placeId', ['placeId'], {})
 @Index('MultiDistrib_distributionCycleId', ['distributionCycleId'], {})
@@ -33,19 +28,6 @@ export class MultiDistribEntity {
 
   @Column('simple-array', { nullable: true })
   volunteerRolesIds: number[] | null;
-
-  @Column('double')
-  counterBeforeDistrib: number;
-
-  @Column({
-    type: 'enum',
-    enum: MultiDistribValidatedStatus,
-    default: MultiDistribValidatedStatus.NOT_VALIDATED,
-  })
-  validatedStatus: MultiDistribValidatedStatus;
-
-  @Column('datetime', { nullable: true })
-  validatedDate: Date | null;
 
   /**
    * =========

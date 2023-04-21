@@ -1,9 +1,5 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
-import { MultiDistribValidatedStatus } from '../entities/multi-distrib.entity';
 
-registerEnumType(MultiDistribValidatedStatus, {
-  name: 'MultiDistribValidatedStatus',
-});
 
 @ObjectType()
 export class MultiDistrib {
@@ -16,9 +12,6 @@ export class MultiDistrib {
   @Field(() => Int)
   groupId: number;
 
-  @Field(() => MultiDistribValidatedStatus)
-  validatedStatus: MultiDistribValidatedStatus;
-
   @Field(() => Date)
   distribStartDate: Date;
 
@@ -27,9 +20,6 @@ export class MultiDistrib {
 
   @Field(() => Date)
   orderEndDate: Date;
-
-  @Field(() => Boolean, { nullable: true })
-  validated?: boolean;
 
   @Field(() => Int, { nullable: true })
   distributionCycleId?: number;

@@ -14,17 +14,12 @@ import { MailsService } from '../../mails/mails.service';
 import { OrdersService } from '../../payments/services/orders.service';
 import { CatalogType } from '../../vendors/catalog.interface';
 import { DistributionEntity } from '../entities/distribution.entity';
-import {
-  MultiDistribEntity,
-  MultiDistribValidatedStatus,
-} from '../entities/multi-distrib.entity';
+import { MultiDistribEntity } from '../entities/multi-distrib.entity';
 import { DistributionsService } from './distributions.service';
 import {
   DistributionsServiceError,
   DistributionsServiceFailReason,
 } from './distributions.service.error';
-
-const NB_NOT_VALIDATED_MULTI_DISTRIBS_TO_BE_BLOCKED = 4;
 
 @Injectable()
 export class MultiDistribsService {
@@ -112,7 +107,6 @@ export class MultiDistribsService {
         {
           groupId: group.id,
           raw_distribStartDate: LessThan(new Date()),
-          validatedStatus: MultiDistribValidatedStatus.NOT_VALIDATED,
         },
       ],
       order: { raw_distribStartDate: 'DESC' },
