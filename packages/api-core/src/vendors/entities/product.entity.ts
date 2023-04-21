@@ -42,9 +42,6 @@ export class ProductEntity {
   @Column('double', { nullable: true })
   qt: number | null;
 
-  @Column('double', { nullable: true })
-  smallQt: number | null;
-
   @Column('tinyint', { nullable: true, unsigned: true })
   unitType: number | null;
 
@@ -59,12 +56,6 @@ export class ProductEntity {
 
   @Column('tinyint', { width: 1 })
   bulk: boolean;
-
-  @Column('tinyint', { width: 1 })
-  wholesale: boolean;
-
-  @Column('tinyint', { width: 1 })
-  retail: boolean;
 
   /**
    * =========

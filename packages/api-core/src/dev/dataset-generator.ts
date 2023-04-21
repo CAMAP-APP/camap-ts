@@ -474,7 +474,6 @@ const genProduct = async (
       active,
       stock: stock || null,
       multiWeight,
-      wholesale,
       variablePrice,
       bulk,
       ref,
