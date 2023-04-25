@@ -67,7 +67,6 @@ type Catalog = {
     name: string;
     unitType: number;
     qt: number;
-    smallQt?: number | null;
   }>;
 };
 

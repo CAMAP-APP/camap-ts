@@ -222,22 +222,6 @@ export const formatPricePerUnit = (
   return `${formatCurrency(ppu)}/${formatUnit(u, qt, t)}`;
 };
 
-export const convertSmallQtInBiggerUnit = (
-  qt: number,
-  unit: ProductUnit,
-): [number, ProductUnit] => {
-  if (qt >= 1) return [qt, unit];
-  switch (unit) {
-    case ProductUnit.Kilogram:
-      return [qt * 1000, ProductUnit.Gram];
-    case ProductUnit.Litre:
-      if (qt < 0.01) return [qt * 1000, ProductUnit.Millilitre];
-      return [qt * 100, ProductUnit.Centilitre];
-    default:
-      return [qt, unit];
-  }
-};
-
 export const round = (number: number): number => {
   return Math.round(number * 100) / 100;
 };

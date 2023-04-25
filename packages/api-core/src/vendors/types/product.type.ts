@@ -11,9 +11,6 @@ export class Product {
   @Field(() => Float)
   qt: number;
 
-  @Field(() => Float, { nullable: true })
-  smallQt: number;
-
   @Field(() => Int)
   unitType: number; // enum : Kg / L / g / units
 
