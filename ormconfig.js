@@ -33,8 +33,8 @@ const config = {
   entities: [resolve(__dirname, "packages/api-core", env.DB_ENTITIES)],
   // synchronize: env.SYNCHRONIZE,
   logging: JSON.parse(env.DB_LOGGING),
-  charset: "latin1_swedish_ci",
-  extra: { charset: "latin1_swedish_ci" },
+  charset: "utf8mb4",
+  extra: { charset: "utf8mb4_general_ci" },
   namingStrategy: new CamapNamingStrategy(),
 };
 
