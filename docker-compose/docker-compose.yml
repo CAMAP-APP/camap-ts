@@ -31,7 +31,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ../../CAMAP-haxe:/var/www/
+      - ../../camap-hx:/var/www/
     depends_on:
       - mysql
       - nest-camap
