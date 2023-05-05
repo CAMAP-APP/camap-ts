@@ -134,7 +134,7 @@ export const formatUserList = (
     if (distribution) {
       label = t(`${userList.type}`, {
         catalogName: distribution.catalogName,
-        date: new Date(distribution.date).toLocaleDateString(),
+        date: new Date(distribution.raw_date).toLocaleDateString(),
       });
     }
   }
