@@ -58,18 +58,6 @@ export class Vendor {
   companyNumber?: string;
 
   @Field({ nullable: true })
-  offCamap?: string;
-
-  @Field({ nullable: true })
-  vatNumber?: string;
-
-  @Field(() => Int, { nullable: true })
-  companyCapital?: number;
-
-  @Field(() => Int, { nullable: true })
-  legalStatus?: number;
-
-  @Field({ nullable: true })
   country?: string;
 
   @Field(() => VendorDisabledReason, { nullable: true })

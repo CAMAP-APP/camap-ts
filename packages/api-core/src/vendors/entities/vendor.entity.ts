@@ -61,9 +61,6 @@ export class VendorEntity extends BaseEntity {
   @Column('mediumtext', { name: 'longDesc', nullable: true })
   longDesc: string | null;
 
-  @Column('mediumtext', { name: 'offCamap', nullable: true })
-  offCamap: string | null;
-
   @Column('int', { name: 'profession', nullable: true })
   profession: number | null;
 

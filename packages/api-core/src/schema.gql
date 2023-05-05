@@ -182,10 +182,6 @@ type Vendor {
   longDesc: String
   images: VendorImages!
   companyNumber: String
-  offCamap: String
-  vatNumber: String
-  companyCapital: Int
-  legalStatus: Int
   country: String
   disabled: VendorDisabledReason
   image: String
@@ -319,11 +315,7 @@ enum OperationType {
   Membership
 }
 
-union OperationDataUnion =
-    PaymentOperationTypeData
-  | OrderOperationTypeData
-  | SubscriptionTotalOperationTypeData
-  | MembershipOperationTypeData
+union OperationDataUnion = PaymentOperationTypeData | OrderOperationTypeData | SubscriptionTotalOperationTypeData | MembershipOperationTypeData
 
 type PaymentOperationTypeData {
   type: PaymentTypeId!
@@ -503,32 +495,17 @@ type Query {
   groupPreview(id: Int!): GroupPreview!
   groupPreviews: [GroupPreview!]!
   groupPreviews2: [GroupPreview!]!
-  getGroupsOnMap(
-    maxLng: Float
-    maxLat: Float
-    minLng: Float
-    minLat: Float
-    lng: Float
-    lat: Float
-  ): [GroupPreviewMap!]!
+  getGroupsOnMap(maxLng: Float, maxLat: Float, minLng: Float, minLat: Float, lng: Float, lat: Float): [GroupPreviewMap!]!
   myGroups: [GroupPreview!]!
   groupPreviewMembers(id: Int!): GroupPreviewMembers!
   groupPreviewCatalogs(id: Int!): GroupPreviewCatalogs!
-  getUserMemberships(
-    ignoreIfNotAllowed: Boolean = false
-    userId: Int!
-    groupId: Int!
-  ): [Membership!]!
+  getUserMemberships(ignoreIfNotAllowed: Boolean = false, userId: Int!, groupId: Int!): [Membership!]!
   getMembershipFormData(userId: Int!, groupId: Int!): MembershipFormData!
   getWaitingListsOfGroup(groupId: Int!): [WaitingList!]!
   getUserLists(groupId: Int!): [UserList!]!
   getContractsUserLists(groupId: Int!): [UserList!]!
   getDistributionsUserLists(groupId: Int!): [UserList!]!
-  getUserListInGroupByListType(
-    data: String
-    groupId: Int!
-    listType: String!
-  ): [User!]!
+  getUserListInGroupByListType(data: String, groupId: Int!, listType: String!): [User!]!
   userGroup(userId: Int!, groupId: Int!): UserGroup
   place(id: Int!): Place!
   vendor(id: Int!): Vendor!
@@ -541,22 +518,10 @@ type Query {
   getActiveCatalogs(groupId: Int!): [Catalog!]!
   distribution(id: Int!): Distribution!
   multiDistribution(id: Int!): MultiDistrib!
-  multiDistribs(
-    nextMultiDistribIfEmpty: Boolean
-    toDate: DateTime!
-    fromDate: DateTime!
-    groupId: Int!
-  ): [MultiDistrib!]!
+  multiDistribs(nextMultiDistribIfEmpty: Boolean, toDate: DateTime!, fromDate: DateTime!, groupId: Int!): [MultiDistrib!]!
   distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
-  attendanceClassicContract(
-    endDate: DateTime
-    startDate: DateTime
-    catalogId: Int!
-  ): AttendanceClassicContract!
-  attendanceVariableContract(
-    distributionId: Int!
-    catalogId: Int!
-  ): AttendanceVariableContract!
+  attendanceClassicContract(endDate: DateTime, startDate: DateTime, catalogId: Int!): AttendanceClassicContract!
+  attendanceVariableContract(distributionId: Int!, catalogId: Int!): AttendanceVariableContract!
   distributionCycles(groupId: Int!): [DistributionCycle!]!
   isEmailRegistered(email: String!): Boolean!
   getMessagesForGroup(groupId: Int!): [Message!]!
@@ -572,51 +537,18 @@ type Mutation {
   validateOperation(type: PaymentTypeId, id: Int!): Operation!
   deleteOperation(id: Int!): Int
   quitGroup(groupId: Int!): UserGroup!
-  setGroupImage(
-    maxWidth: Int!
-    fileName: String!
-    mimeType: String!
-    base64EncodedImage: String!
-    groupId: Int!
-  ): Group!
-  removeUsersFromGroup(
-    groupId: Int!
-    userIds: [Int!]!
-  ): RemoveUsersFromGroupResponse!
-  importAndCreateMembers(
-    withoutAccounts: [SendInvitesToNewMembersInput!]!
-    withAccounts: [Int!]!
-    groupId: Int!
-  ): SendInvitesToNewMembersResponse!
-  sendInvitesToNewMembers(
-    withoutAccounts: [SendInvitesToNewMembersInput!]!
-    withAccounts: [Int!]!
-    groupId: Int!
-  ): SendInvitesToNewMembersResponse!
+  setGroupImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, groupId: Int!): Group!
+  removeUsersFromGroup(groupId: Int!, userIds: [Int!]!): RemoveUsersFromGroupResponse!
+  importAndCreateMembers(withoutAccounts: [SendInvitesToNewMembersInput!]!, withAccounts: [Int!]!, groupId: Int!): SendInvitesToNewMembersResponse!
+  sendInvitesToNewMembers(withoutAccounts: [SendInvitesToNewMembersInput!]!, withAccounts: [Int!]!, groupId: Int!): SendInvitesToNewMembersResponse!
   createMembership(input: CreateMembershipInput!): Membership!
   createMemberships(input: CreateMembershipsInput!): CreateMembershipsResponse!
   deleteMembership(year: Int!, userId: Int!, groupId: Int!): String!
-  moveBackToWaitingList(
-    message: String!
-    groupId: Int!
-    userIds: [Int!]!
-  ): MoveBackToWaitingListResponse!
+  moveBackToWaitingList(message: String!, groupId: Int!, userIds: [Int!]!): MoveBackToWaitingListResponse!
   cancelRequest(groupId: Int!, userId: Int!): WaitingList!
   approveRequest(groupId: Int!, userId: Int!): UserGroup!
-  setVendorImage(
-    maxWidth: Int!
-    fileName: String!
-    mimeType: String!
-    base64EncodedImage: String!
-    vendorId: Int!
-  ): Vendor!
-  setProductImage(
-    maxWidth: Int!
-    fileName: String!
-    mimeType: String!
-    base64EncodedImage: String!
-    productId: Int!
-  ): Product!
+  setVendorImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, vendorId: Int!): Vendor!
+  setProductImage(maxWidth: Int!, fileName: String!, mimeType: String!, base64EncodedImage: String!, productId: Int!): Product!
   login(input: LoginInput!): User!
   recordBadLogin: Int!
   register(input: RegisterInput!): User!

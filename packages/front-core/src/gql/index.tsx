@@ -995,7 +995,6 @@ export type Vendor = {
   address2?: Maybe<Scalars['String']>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
-  companyCapital?: Maybe<Scalars['Int']>;
   companyNumber?: Maybe<Scalars['String']>;
   country?: Maybe<Scalars['String']>;
   desc?: Maybe<Scalars['String']>;
@@ -1006,12 +1005,10 @@ export type Vendor = {
   imageFile?: Maybe<File>;
   imageId?: Maybe<Scalars['Int']>;
   images: VendorImages;
-  legalStatus?: Maybe<Scalars['Int']>;
   linkText?: Maybe<Scalars['String']>;
   linkUrl?: Maybe<Scalars['String']>;
   longDesc?: Maybe<Scalars['String']>;
   name: Scalars['String'];
-  offCamap?: Maybe<Scalars['String']>;
   peopleName?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   portrait: Scalars['String'];
@@ -1684,8 +1681,8 @@ export type SendInvitesToNewMembersMutationVariables = Exact<{
   groupId: Scalars['Int'];
   withAccounts: Array<Scalars['Int']> | Scalars['Int'];
   withoutAccounts:
-    | Array<SendInvitesToNewMembersInput>
-    | SendInvitesToNewMembersInput;
+  | Array<SendInvitesToNewMembersInput>
+  | SendInvitesToNewMembersInput;
 }>;
 
 export type SendInvitesToNewMembersMutation = {
@@ -1701,8 +1698,8 @@ export type ImportAndCreateMembersMutationVariables = Exact<{
   groupId: Scalars['Int'];
   withAccounts: Array<Scalars['Int']> | Scalars['Int'];
   withoutAccounts:
-    | Array<SendInvitesToNewMembersInput>
-    | SendInvitesToNewMembersInput;
+  | Array<SendInvitesToNewMembersInput>
+  | SendInvitesToNewMembersInput;
 }>;
 
 export type ImportAndCreateMembersMutation = {
@@ -2086,32 +2083,32 @@ export type UpdateUserMutationVariables = Exact<{
 export type UpdateUserMutation = {
   __typename?: 'Mutation';
   updateUser:
-    | { __typename: 'MailAlreadyInUseError' }
-    | {
-        __typename?: 'User';
-        birthDate?: any | null;
-        nationality?: string | null;
-        id: number;
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone?: string | null;
-        address1?: string | null;
-        address2?: string | null;
-        zipCode?: string | null;
-        city?: string | null;
-        countryOfResidence?: string | null;
-        firstName2?: string | null;
-        lastName2?: string | null;
-        email2?: string | null;
-        phone2?: string | null;
-        notifications: {
-          __typename?: 'UserNotifications';
-          hasEmailNotif4h: boolean;
-          hasEmailNotif24h: boolean;
-          hasEmailNotifOuverture: boolean;
-        };
-      };
+  | { __typename: 'MailAlreadyInUseError' }
+  | {
+    __typename?: 'User';
+    birthDate?: any | null;
+    nationality?: string | null;
+    id: number;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string | null;
+    address1?: string | null;
+    address2?: string | null;
+    zipCode?: string | null;
+    city?: string | null;
+    countryOfResidence?: string | null;
+    firstName2?: string | null;
+    lastName2?: string | null;
+    email2?: string | null;
+    phone2?: string | null;
+    notifications: {
+      __typename?: 'UserNotifications';
+      hasEmailNotif4h: boolean;
+      hasEmailNotif24h: boolean;
+      hasEmailNotifOuverture: boolean;
+    };
+  };
 };
 
 export type UpdateUserNotificationsMutationVariables = Exact<{
