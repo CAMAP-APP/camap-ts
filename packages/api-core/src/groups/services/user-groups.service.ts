@@ -35,7 +35,7 @@ export class UserGroupsService {
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
     private readonly ordersService: OrdersService,
-  ) {}
+  ) { }
 
   get(
     userOrId: UserEntity | number,
@@ -70,16 +70,16 @@ export class UserGroupsService {
     return !sort
       ? users
       : users.sort((a, b) => {
-          const nameA = a.lastName.toUpperCase();
-          const nameB = b.lastName.toUpperCase();
-          if (nameA < nameB) {
-            return -1;
-          }
-          if (nameA > nameB) {
-            return 1;
-          }
-          return 0;
-        });
+        const nameA = a.lastName.toUpperCase();
+        const nameB = b.lastName.toUpperCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
   }
 
   async findByIds(ids: number[]) {
@@ -178,7 +178,7 @@ export class UserGroupsService {
     const userIds = userGroups.map((ug) => ug.userId);
     const r = await this.usersService.count({
       where: {
-        pass: '',
+        ldate: IsNull(),
         id: In(userIds),
       },
       order: { lastName: 'ASC' },
@@ -192,7 +192,7 @@ export class UserGroupsService {
     const userIds = userGroups.map((ug) => ug.userId);
     return this.usersService.findByIds(userIds, {
       where: {
-        pass: '',
+        ldate: IsNull(),
       },
       order: { lastName: 'ASC' },
     });
