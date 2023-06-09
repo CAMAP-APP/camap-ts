@@ -69,6 +69,10 @@ const CsaCatalogDistribution = ({
         sx={{ my: 1, overflow: 'visible' }}
       />
       <Typography variant="caption">
+        @ <u>
+          {distribution.place.name}</u>
+      </Typography>
+      <Typography variant="caption">
         {distribution.state === RestDistributionState.Open &&
           t('orderBeforeThe', {
             date: formatAbsoluteDate(distribution.orderEndDate, true),
