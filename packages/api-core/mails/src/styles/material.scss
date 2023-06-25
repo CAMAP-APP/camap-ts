@@ -23,7 +23,7 @@
   box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
     0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
   color: #fff;
-  background-color: #10654e;
+  background-color: #6faf1d;
   margin: 8px;
 
   .button-label {
@@ -42,6 +42,7 @@
     align-items: inherit;
     justify-content: inherit;
   }
+
   .button-start-icon {
     cursor: pointer;
     user-select: none;
@@ -56,6 +57,7 @@
     display: inherit;
     margin-left: -4px;
     margin-right: 8px;
+
     .button-icon-root {
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
@@ -87,7 +89,7 @@
   letter-spacing: 0.01071em;
   color: #fff;
   font-weight: 500;
-  background-color: #cda87b;
+  background-color: #6faf1d;
   margin-top: 16px;
 
   .alert-icon {
@@ -101,6 +103,7 @@
     padding: 7px 0;
     font-size: 22px;
     margin-right: 12px;
+
     .alert-svg {
       line-height: 1.43;
       letter-spacing: 0.01071em;
@@ -116,6 +119,7 @@
       font-size: inherit;
     }
   }
+
   .alert-message {
     font-size: 0.875rem;
     line-height: 1.43;
