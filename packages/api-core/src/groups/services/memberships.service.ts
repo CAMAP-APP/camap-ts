@@ -34,7 +34,7 @@ export class MembershipsService {
     private readonly paymentsService: PaymentsService,
     @Inject(forwardRef(() => UserGroupsService))
     private readonly userGroupsService: UserGroupsService,
-  ) { }
+  ) {}
 
   /**
    * Get user Memberships for a group
@@ -95,7 +95,12 @@ export class MembershipsService {
 
   @Transactional()
   async createMembership(
-    { user, group, date, year, membershipFee, distribution }: { user: UserEntity; group: GroupEntity; date: Date; year: number; membershipFee?: number; distribution?: MultiDistribEntity; },
+    user: UserEntity,
+    group: GroupEntity,
+    date: Date,
+    year: number,
+    membershipFee?: number,
+    distribution?: MultiDistribEntity,
   ): Promise<MembershipEntity> {
     let fee = membershipFee;
     if (!fee) {
@@ -180,10 +185,10 @@ export class MembershipsService {
 
     return checkDeleted(deleteResult)
       ? {
-        userId: membership.userId,
-        groupId: membership.groupId,
-        year: membership.year,
-      }
+          userId: membership.userId,
+          groupId: membership.groupId,
+          year: membership.year,
+        }
       : null;
   }
 
@@ -255,7 +260,8 @@ export class MembershipsService {
       .select('m.userId as userId')
       .addFrom(UserGroupEntity, 'ug')
       .where(
-        `m.userId = ug.userId AND ug.groupId = m.groupId and m.groupId = ${group.id
+        `m.userId = ug.userId AND ug.groupId = m.groupId and m.groupId = ${
+          group.id
         } and m.year = ${this.getMembershipYear(group)}`,
       )
       .getRawMany<Pick<MembershipEntity, 'userId'>>();

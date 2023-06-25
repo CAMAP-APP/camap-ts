@@ -5,8 +5,9 @@
 	<link rel="stylesheet" href="./styles/material.css">
 	<style>
 		.button:hover {
-			background-color: #477072 !important;
-			box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12) !important;
+			background-color: #622162 !important;
+			box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.2),
+			0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12) !important;
 		}
 	</style>
 	{% block styles %}{% endblock %}
@@ -33,15 +34,7 @@
 {% block baseFooter %}
 	<img src={{ "#{host}/theme/#{theme.id}/logo3.png" }} alt={{"logo #{theme.name}"}} style="margin-bottom: 16px; max-width: 200px;"/>
 	{% block footer %}{% endblock %}
-	<p>Ce courriel a été envoyé depuis
-		<a href={{ "#{host}" }} target="_blank" rel="noreferrer noopener notrack">{{theme.name}}</a>.</p>
-	<p>Vous recevez ce message car vous faites partie de
-		<b>{{ groupName }}</b>
-		{% if list!=null %}
-			({{ list }})
-		{% endif %}
-	</p>
-	<p>
-		<a href={{ "#{quitGroupLink}" }} rel="notrack">Quittez ce groupe</a>
-		si vous ne souhaitez plus recevoir de messages</p>
+	<p>Ce courriel a été envoyé depuis <a href={{ "#{host}" }} target="_blank" rel="noreferrer noopener notrack">{{theme.name}}</a>.</p>
+	<p>Vous recevez ce message car vous faites partie de <b>{{ groupName }}</b> {% if list!=null %} ({{ list }}) {% endif %}</p>
+	<p><a href={{ "#{quitGroupLink}" }} rel="notrack">Quittez ce groupe</a> si vous ne souhaitez plus recevoir de messages</p>
 {% endblock %}
