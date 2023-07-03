@@ -136,7 +136,7 @@ const Messages = ({ groupId, whichUser }: MessagesProps) => {
                           >
                             <CamapIcon
                               id={CamapIconId.info}
-                              sx={{ color: Colors.kiwiDark }}
+                              sx={{ color: Colors.brandPrimary }}
                             />
                           </CamapLink>
                         </div>
