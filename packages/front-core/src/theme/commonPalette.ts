@@ -22,4 +22,3 @@ export const Colors = {
 
   background3: '#F2EBD9',
 };
-a
