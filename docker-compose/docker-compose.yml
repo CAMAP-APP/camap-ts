@@ -10,8 +10,8 @@ services:
       - MYSQL_PASSWORD=docker
     networks:
       camap-net:
-    expose:
-      - 3306
+    ports:
+      - "127.0.0.1:3306:3306"
     volumes:
       - database:/var/lib/mysql
       - ./mysql/dumps/:/root/dumps
@@ -29,7 +29,7 @@ services:
     volumes:
       - ../:/home/node/app
     working_dir: /home/node/app/packages/api-core
-    command: npm run dev
+    command: npm run start:prod
   neko-camap:
     build: ./neko
     container_name: neko-camap

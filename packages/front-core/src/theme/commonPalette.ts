@@ -15,9 +15,11 @@ export const Colors = {
   terreLight: '#F8F4E5',
   terreDark: '#A0734D',
   terreDarker: '#7E5A3C',
+  brandPrimary: '#eb702f',
 
   white: '#FFFFFF',
   black: '#000000',
 
   background3: '#F2EBD9',
 };
+a
