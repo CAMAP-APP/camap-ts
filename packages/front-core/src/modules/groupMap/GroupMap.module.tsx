@@ -88,7 +88,7 @@ const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
   backgroundImage: `url(/theme/${window._Camap.theme.id}/logo3.png)`,
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  height: '130px',
+  height: '315px',
   width: '100%',
 
   [theme.breakpoints.only('sm')]: {
