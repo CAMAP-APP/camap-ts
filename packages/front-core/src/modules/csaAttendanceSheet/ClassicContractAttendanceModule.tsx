@@ -187,9 +187,9 @@ const getTableData = (
       row.push({
         value: sub.user2
           ? [
-              formatUserSubNames(sub.user),
-              `↔️ ${formatUserSubNames(sub.user2)}`,
-            ]
+            formatUserSubNames(sub.user),
+            `↔️ ${formatUserSubNames(sub.user2)}`,
+          ]
           : formatUserSubNames(sub.user),
       });
       row.push({
@@ -201,16 +201,13 @@ const getTableData = (
       row.push({
         value: sub.user2
           ? [
-              `${formatUserSubNames(sub.user)}${
-                sub.user.phone ? ` (${formatPhone(sub.user.phone)})` : ''
-              }`,
-              `↔️ ${formatUserSubNames(sub.user2)}${
-                sub.user2.phone ? ` (${formatPhone(sub.user2.phone)})` : ''
-              }`,
-            ]
-          : `${formatUserSubNames(sub.user)}${
-              sub.user.phone ? ` (${formatPhone(sub.user.phone)})` : ''
+            `${formatUserSubNames(sub.user)}${sub.user.phone ? ` (${formatPhone(sub.user.phone)})` : ''
             }`,
+            `↔️ ${formatUserSubNames(sub.user2)}${sub.user2.phone ? ` (${formatPhone(sub.user2.phone)})` : ''
+            }`,
+          ]
+          : `${formatUserSubNames(sub.user)}${sub.user.phone ? ` (${formatPhone(sub.user.phone)})` : ''
+          }`,
       });
     }
 
@@ -220,12 +217,12 @@ const getTableData = (
       row.push({
         value: defaultOrder
           ? defaultOrder.reduce((acc, p) => {
-              let res = acc;
-              if (res !== '') {
-                res = `${res}, `;
-              }
-              return `${res} ${p.smartQt}`;
-            }, '')
+            let res = acc;
+            if (res !== '') {
+              res = `${res}, `;
+            }
+            return `${res} ${p.smartQt}`;
+          }, '')
           : '',
       });
     } else {
@@ -235,7 +232,7 @@ const getTableData = (
         products.forEach((product) => {
           const productOrder = defaultOrder.find((dO) => dO.id === product.id);
           row.push({
-            value: productOrder ? `${productOrder.orderQt}` : '0',
+            value: productOrder ? `${productOrder.orderQt}` : '-',
             align: 'center',
           });
         });
