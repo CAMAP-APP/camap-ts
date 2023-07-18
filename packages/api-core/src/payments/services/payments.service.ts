@@ -277,7 +277,7 @@ export class PaymentsService {
       .createQueryBuilder('operation, subscription')
       .select('SUM(amount) as balance')
       .where(
-        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = subscription.id AND YEAR(subscription.edate) > 2021',
+        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = subscription.id AND YEAR(subscription.endDate) > 2021',
         {
           userId,
           groupId,
