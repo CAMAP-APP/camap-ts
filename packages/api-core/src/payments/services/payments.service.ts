@@ -34,7 +34,7 @@ export class PaymentsService {
     private readonly userGroupsService: UserGroupsService,
     @Inject(forwardRef(() => GroupsService))
     private readonly groupsService: GroupsService,
-  ) {}
+  ) { }
 
   async findOneById(id: number, lock = false) {
     return this.operationRepo.findOne(id, {
@@ -277,7 +277,7 @@ export class PaymentsService {
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
       .where(
-        'operation.userId = :userId AND operation.groupId = :groupId AND !(type=2 and pending=1)',
+        'operation.userId = :userId AND operation.groupId = :groupId AND YEAR(date) > 2020',
         {
           userId,
           groupId,
