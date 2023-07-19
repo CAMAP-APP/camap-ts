@@ -17,6 +17,7 @@ import { OperationsService } from './services/operations.service';
 import { OrdersService } from './services/orders.service';
 import { PaymentsService } from './services/payments.service';
 import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entity';
+import { CsaSubscriptionsService } from '../groups/services/csa-subscriptions.service';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entit
     OperationResolver,
     RelatedPaymentsLoader,
     OrdersService,
+    CsaSubscriptionsService,
   ],
   exports: [PaymentsService, OperationsService, OrdersService],
 })
