@@ -279,7 +279,13 @@ export class PaymentsService {
    */
   @Transactional()
   async updateUserBalance(userId: number, groupId: number) {
-    const subs: CsaSubscriptionEntity = await this.csasubscriptionsService.findByUserId(userId);
+    const subs = this.subscriptionRepo
+      .createQueryBuilder('s')
+      .select('s.*')
+      .where(
+        's.userId = ${userId}'
+      )
+      .getRawMany();
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
