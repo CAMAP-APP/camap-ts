@@ -274,8 +274,9 @@ export class PaymentsService {
   @Transactional()
   async updateUserBalance(userId: number, groupId: number) {
     const result: { balance: number } = await this.operationRepo
-      .createQueryBuilder('Operation, Subscription')
+      .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
+      .from('Operation, Subscription')
       .where(
         'Operation.userId = :userId AND Operation.groupId = :groupId AND Operation.subscriptionId = Subscription.id AND YEAR(Subscription.startDate) > 2022',
         {
