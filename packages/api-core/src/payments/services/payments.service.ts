@@ -7,7 +7,7 @@ import { checkDeleted } from '../../common/utils';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
-import { CsaSubscriptionService } from '../../groups/services/csa-subscription.service';
+import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions.service';
 import {
   OperationData,
   OperationEntity,
@@ -25,6 +25,7 @@ import {
   transferPaymentType,
 } from '../interfaces';
 import { OperationType } from '../OperationType';
+import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -35,8 +36,8 @@ export class PaymentsService {
     private readonly userGroupsService: UserGroupsService,
     @Inject(forwardRef(() => GroupsService))
     private readonly groupsService: GroupsService,
-    @Inject(forwardRef(() => CsaSubscriptionService))
-    private readonly csasubscriptionService: CsaSubscriptionService,
+    @Inject(forwardRef(() => CsaSubscriptionsService))
+    private readonly csasubscriptionsService: CsaSubscriptionService,
   ) { }
 
   async findOneById(id: number, lock = false) {
@@ -276,7 +277,7 @@ export class PaymentsService {
    */
   @Transactional()
   async updateUserBalance(userId: number, groupId: number) {
-    const subs = await this.csasubscriptionService.findByUserId(userId);
+    const subs: CsaSubscriptionEntity = await this.csasubscriptionsService.findByUserId(userId);
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
