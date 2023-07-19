@@ -37,7 +37,7 @@ export class PaymentsService {
     @Inject(forwardRef(() => GroupsService))
     private readonly groupsService: GroupsService,
     @Inject(forwardRef(() => CsaSubscriptionsService))
-    private readonly csasubscriptionsService: CsaSubscriptionService,
+    private readonly csasubscriptionsService: CsaSubscriptionsService,
   ) { }
 
   async findOneById(id: number, lock = false) {
