@@ -7,6 +7,7 @@ import { checkDeleted } from '../../common/utils';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
+import { CsaSubscriptionEntity } from '../entities/csa-subscription.entity';
 import {
   OperationData,
   OperationEntity,
@@ -276,9 +277,9 @@ export class PaymentsService {
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
-      .from('Operation, Subscription')
+      .addFrom(SubscriptionEntity, 'sub')
       .where(
-        'Operation.userId = :userId AND Operation.groupId = :groupId AND Operation.subscriptionId = Subscription.id AND YEAR(Subscription.startDate) > 2022',
+        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = sub.id AND YEAR(sub.startDate) > 2022',
         {
           userId,
           groupId,
