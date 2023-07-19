@@ -276,7 +276,7 @@ export class PaymentsService {
    */
   @Transactional()
   async updateUserBalance(userId: number, groupId: number) {
-    const subs = await this.subscriptionRepo.findPartialByUserId(userId);
+    const subs = await this.subscriptionRepo.find(userId);
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
