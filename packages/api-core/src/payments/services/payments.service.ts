@@ -7,7 +7,7 @@ import { checkDeleted } from '../../common/utils';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
-import { CsaSubscriptionEntity } from '../entities/csa-subscription.entity';
+import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
 import {
   OperationData,
   OperationEntity,
@@ -35,6 +35,8 @@ export class PaymentsService {
     private readonly userGroupsService: UserGroupsService,
     @Inject(forwardRef(() => GroupsService))
     private readonly groupsService: GroupsService,
+    @InjectRepository(CsaSubscriptionEntity)
+    private readonly subscriptionRepo: Repository<CsaSubscriptionEntity>,
   ) { }
 
   async findOneById(id: number, lock = false) {
