@@ -282,7 +282,7 @@ export class PaymentsService {
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
-      .addFrom(CsaSubscriptionEntitys, 'sub')
+      .addFrom(CsaSubscriptionEntity, 'sub')
       .where(
         'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = sub.id AND YEAR(sub.startDate) > 2022',
         {
