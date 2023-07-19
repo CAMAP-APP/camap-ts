@@ -38,6 +38,6 @@ import { CsaSubscriptionsService } from '../groups/services/csa-subscriptions.se
     OrdersService,
     CsaSubscriptionsService,
   ],
-  exports: [PaymentsService, OperationsService, OrdersService],
+  exports: [PaymentsService, OperationsService, OrdersService, CsaSubscriptionsService],
 })
 export class PaymentsModule { }
