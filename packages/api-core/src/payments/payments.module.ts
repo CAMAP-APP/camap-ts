@@ -16,10 +16,11 @@ import { OperationResolver } from './resolvers/operation.resolver';
 import { OperationsService } from './services/operations.service';
 import { OrdersService } from './services/orders.service';
 import { PaymentsService } from './services/payments.service';
+import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([OperationEntity, UserOrderEntity, BasketEntity]),
+    TypeOrmModule.forFeature([OperationEntity, UserOrderEntity, BasketEntity, CsaSubscriptionEntity]),
     ConfigModule,
     HttpModule,
     MailsModule,
@@ -37,4 +38,4 @@ import { PaymentsService } from './services/payments.service';
   ],
   exports: [PaymentsService, OperationsService, OrdersService],
 })
-export class PaymentsModule {}
+export class PaymentsModule { }
