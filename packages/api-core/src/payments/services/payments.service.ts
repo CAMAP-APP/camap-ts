@@ -38,6 +38,8 @@ export class PaymentsService {
     private readonly groupsService: GroupsService,
     @Inject(forwardRef(() => CsaSubscriptionsService))
     private readonly csasubscriptionsService: CsaSubscriptionsService,
+    @InjectRepository(CsaSubscriptionEntity)
+    private readonly subscriptionRepo: Repository<CsaSubscriptionEntity>,
   ) { }
 
   async findOneById(id: number, lock = false) {
