@@ -36,7 +36,6 @@ import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entit
     OperationResolver,
     RelatedPaymentsLoader,
     OrdersService,
-    CsaSubscriptionsService,
   ],
   exports: [PaymentsService, OperationsService, OrdersService],
 })
