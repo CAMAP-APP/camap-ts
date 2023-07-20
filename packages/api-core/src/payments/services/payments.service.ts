@@ -81,7 +81,7 @@ export class PaymentsService {
           cashPaymentType,
           checkPaymentType,
           transferPaymentType,
-          moneyPotPaymentType,
+          // moneyPotPaymentType,
           onTheSpotPaymentType,
           onTheSpotCardTerminalPaymentType,
         ];
