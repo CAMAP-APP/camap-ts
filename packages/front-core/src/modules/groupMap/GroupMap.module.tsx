@@ -98,7 +98,7 @@ const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
 
 const DEFAULT_LAT = 46.52863469527167; // center of France
 const DEFAULT_LNG = 2.43896484375; // center of France
-const INIT_ZOOM = 6;
+const INIT_ZOOM = 7;
 const DEFAULT_ZOOM = 13;
 
 export interface GroupMapProps {
@@ -207,7 +207,7 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       wait.current = true;
     }
 
-    if (maxLat - minLat > 15 || maxLng - minLng > 20) {
+    if (maxLat - minLat > 18 || maxLng - minLng > 22) {
       setShowTooLargeWarning(true);
     } else {
       setShowTooLargeWarning(false);
