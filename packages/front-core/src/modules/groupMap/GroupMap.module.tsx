@@ -88,7 +88,7 @@ const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
   backgroundImage: `url(/theme/${window._Camap.theme.id}/logo4.png)`,
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  height: '150px',
+  height: '160px',
   width: '100%',
 
   [theme.breakpoints.only('sm')]: {
@@ -207,7 +207,7 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       wait.current = true;
     }
 
-    if (maxLat - minLat > 3.5 || maxLng - minLng > 5) {
+    if (maxLat - minLat > 5 || maxLng - minLng > 7) {
       setShowTooLargeWarning(true);
     } else {
       setShowTooLargeWarning(false);
