@@ -32,7 +32,7 @@ export class GroupPreviewsResolver {
     private readonly filesService: FilesService,
     private readonly paymentsService: PaymentsService,
     private readonly userGroupsService: UserGroupsService,
-  ) {}
+  ) { }
 
   /** */
   @Query(() => GroupPreview, { name: 'groupPreview' })
@@ -80,9 +80,9 @@ export class GroupPreviewsResolver {
       minLng !== undefined &&
       maxLng !== undefined
     ) {
-      if (maxLat - minLat > 1) {
+      if (maxLat - minLat > 12) {
         // Zone is too large
-      } else if (maxLng - minLng > 2) {
+      } else if (maxLng - minLng > 8) {
         // Zone is too large
       } else {
         // Request by zone
