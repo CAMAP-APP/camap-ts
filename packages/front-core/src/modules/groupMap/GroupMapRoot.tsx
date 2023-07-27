@@ -127,7 +127,7 @@ const GroupMapRoot = ({
       setIsFitting(true);
     } else if (isFitting) {
       setIsFitting(false);
-    } else if (map.getZoom() > 6) {
+    } else if (map.getZoom() > 5) {
       getGroups();
     }
   });
