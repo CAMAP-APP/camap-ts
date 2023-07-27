@@ -80,9 +80,9 @@ export class GroupPreviewsResolver {
       minLng !== undefined &&
       maxLng !== undefined
     ) {
-      if (maxLat - minLat > 18) {
+      if (maxLat - minLat > 20) {
         // Zone is too large
-      } else if (maxLng - minLng > 22) {
+      } else if (maxLng - minLng > 38) {
         // Zone is too large
       } else {
         // Request by zone

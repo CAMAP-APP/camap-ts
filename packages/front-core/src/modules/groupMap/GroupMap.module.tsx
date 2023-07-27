@@ -207,7 +207,7 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       wait.current = true;
     }
 
-    if (maxLat - minLat > 18 || maxLng - minLng > 22) {
+    if (maxLat - minLat > 20 || maxLng - minLng > 38) {
       setShowTooLargeWarning(true);
     } else {
       setShowTooLargeWarning(false);
