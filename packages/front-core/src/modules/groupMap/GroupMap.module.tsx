@@ -85,7 +85,7 @@ const GridContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
-  backgroundImage: `url(/theme/${window._Camap.theme.id}/logo3.png)`,
+  backgroundImage: `url(/theme/${window._Camap.theme.id}/logo4.png)`,
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
   height: '150px',
