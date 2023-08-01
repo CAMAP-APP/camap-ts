@@ -13,7 +13,7 @@
     "404": "$t(404)",
     "500": "$t(500)"
   },
-  "unexpectedUnauthorized": "Vous n'êtes pas autorisé. Si vous pensez que c'est une erreur vérifiez que votre navigateur accepte bien les cookies (voir ici : https://wiki.camap.net/errors#unauthorized). Essayez ensuite de vous reconnecter",
+  "unexpectedUnauthorized": "Vous n'êtes pas autorisé. Si vous pensez que c'est une erreur vérifiez que votre navigateur accepte bien les cookies. Essayez ensuite de vous reconnecter",
   "wrongCredentials": "Nom d’utilisateur ou mot de passe incorrect",
   "emailAlreadyRegistered": "Nous avons déjà un compte avec cette adresse courriel",
   "bruteForce": "Vous avez essayé de vous connecter sans succès plus de 4 fois, votre adresse IP est bannie pendant 10 minutes.",
