@@ -53,23 +53,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
   });
 
   React.useEffect(() => {
-    if (!userId) return;
-
-    getUserFromControlKeyQuery({
-      variables: {
-        id: userId,
-        groupId,
-        controlKey,
-      },
-    });
-  }, [controlKey, groupId, getUserFromControlKeyQuery, userId]);
-
-  const user = userData?.getUserFromControlKey;
-  const group = groupData?.groupPreview;
-
-  const onQuitGroup = async () => {
-
-    // AJOUT AC => Si commande < 2 mois return
+    if (!userId) return;// AJOUT AC => Si commande < 2 mois return
     let twoMonthsAgo = subMonths(new Date(), 2);
     (
       await this.usersRepo
@@ -124,6 +108,22 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
       {t('quitGroupDialogTitle', { groupName })}
     </Typography>
   );
+
+  getUserFromControlKeyQuery({
+    variables: {
+      id: userId,
+      groupId,
+      controlKey,
+    },
+  });
+}, [controlKey, groupId, getUserFromControlKeyQuery, userId]);
+
+const user = userData?.getUserFromControlKey;
+const group = groupData?.groupPreview;
+
+const onQuitGroup = async () => {
+
+
 
   /** */
   if (!!group && !userId) {
