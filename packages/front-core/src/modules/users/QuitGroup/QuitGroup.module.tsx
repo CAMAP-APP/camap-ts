@@ -17,11 +17,6 @@ import React from 'react';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { goTo } from '../../../utils/url';
 import QuitGroupContent from './components/QuitGroupContent';
-import {
-  isAfter,
-  parseISO,
-  subMonths,
-} from 'date-fns';
 
 export interface QuitGroupProps {
   userId?: number;
@@ -54,6 +49,20 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
 
   React.useEffect(() => {
     if (!userId) return;
+
+    getUserFromControlKeyQuery({
+      variables: {
+        id: userId,
+        groupId,
+        controlKey,
+      },
+    });
+  }, [controlKey, groupId, getUserFromControlKeyQuery, userId]);
+
+  const user = userData?.getUserFromControlKey;
+  const group = groupData?.groupPreview;
+
+  const onQuitGroup = async () => {
     const { data: quitGroup } = await quitGroupMutation();
     const deletedGroupId = quitGroup?.quitGroup.groupId;
 
@@ -71,20 +80,6 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
       {t('quitGroupDialogTitle', { groupName })}
     </Typography>
   );
-
-  getUserFromControlKeyQuery({
-    variables: {
-      id: userId,
-      groupId,
-      controlKey,
-    },
-  });
-}, [controlKey, groupId, getUserFromControlKeyQuery, userId]);
-
-const user = userData?.getUserFromControlKey;
-const group = groupData?.groupPreview;
-
-const onQuitGroup = async () => {
 
   /** */
   if (!!group && !userId) {
