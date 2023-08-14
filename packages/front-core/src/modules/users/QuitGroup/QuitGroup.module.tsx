@@ -53,44 +53,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
   });
 
   React.useEffect(() => {
-    if (!userId) return;// AJOUT AC => Si commande < 2 mois return
-    let twoMonthsAgo = subMonths(new Date(), 2);
-    (
-      await this.usersRepo
-        .createQueryBuilder('u')
-        .select('u.id, u.firstName, u.lastName, u.email, u.ldate')
-        .where(
-          `u.id = userId)`,
-        )
-        .stream()
-    ).on(
-      'data',
-      async (
-        chunk: Pick<UserEntity, 'id' | 'firstName' | 'lastName' | 'email' | 'ldate'>,
-      ) => {
-        // Don't delete those who still have orders in less than 2 months
-        let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
-          chunk.id,
-        );
-        orders1 = orders1.filter((o) => {
-          if (!o) return false;
-          let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-          return isAfter(date, twoMonthsAgo);
-        });
-        if (orders1.length > 0) return;
-
-        let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
-          chunk.id,
-        );
-        orders2 = orders2.filter((o) => {
-          if (!o) return false;
-          let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-          return isAfter(date, twoYearsAgo);
-        });
-        if (orders2.length > 0) return;
-      },
-    );
-    // FIN AJOUT AC
+    if (!userId) return;
     const { data: quitGroup } = await quitGroupMutation();
     const deletedGroupId = quitGroup?.quitGroup.groupId;
 
@@ -122,9 +85,42 @@ const user = userData?.getUserFromControlKey;
 const group = groupData?.groupPreview;
 
 const onQuitGroup = async () => {
+  // AJOUT AC
+  let twoMonthsAgo = subMonths(new Date(), 2);
+  (
+    await this.usersRepo
+      .createQueryBuilder('u')
+      .select('u.id, u.firstName, u.lastName, u.email, u.ldate')
+      .where('u.id = userId')
+      .stream()
+  ).on(
+    'data',
+    async (
+      chunk: Pick<UserEntity, 'id' | 'firstName' | 'lastName' | 'email' | 'ldate'>,
+    ) => {
+      // Don't delete those who still have orders in less than 2 months
+      let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
+        chunk.id,
+      );
+      orders1 = orders1.filter((o) => {
+        if (!o) return false;
+        let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+        return isAfter(date, twoMonthsAgo);
+      });
+      if (orders1.length > 0) return;
 
-
-
+      let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
+        chunk.id,
+      );
+      orders2 = orders2.filter((o) => {
+        if (!o) return false;
+        let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+        return isAfter(date, twoMonthsAgo);
+      });
+      if (orders2.length > 0) return;
+    },
+  );
+  // FIN AJOUT AC
   /** */
   if (!!group && !userId) {
     return (
