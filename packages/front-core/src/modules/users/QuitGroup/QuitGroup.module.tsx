@@ -17,6 +17,11 @@ import React from 'react';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { goTo } from '../../../utils/url';
 import QuitGroupContent from './components/QuitGroupContent';
+import {
+  isAfter,
+  parseISO,
+  subMonths,
+} from 'date-fns';
 
 export interface QuitGroupProps {
   userId?: number;
