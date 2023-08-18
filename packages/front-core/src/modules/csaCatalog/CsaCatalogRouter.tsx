@@ -107,6 +107,12 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setShowPresentation(false);
     setShowOrders(false);
     setShowDefaultOrder(false);
+    if (postSubscriptionError ||
+      updatedSubscriptionError ||
+      contextError ||
+      updateDefaultOrderError) {
+      onDefaultOrderNext();
+    }
     if (catalog && !catalog.absentDistribsMaxNb) {
       onAbsencesNext();
     } else {
