@@ -296,6 +296,27 @@ export class PaymentsService {
   }
 
   /**
+   * Get User Balance
+   */
+  async getUserBalance(userId: number, groupId: number) {
+    const result: { balance: number } = await this.operationRepo
+      .createQueryBuilder('operation')
+      .select('SUM(amount) as balance')
+      .addFrom(CsaSubscriptionEntity, 'sub')
+      .where(
+        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = sub.id AND YEAR(sub.startDate) > 2022',
+        {
+          userId,
+          groupId,
+        },
+      )
+      .getRawOne();
+    const balance = Math.round(result.balance * 100) / 100;
+    return balance;
+  }
+
+
+  /**
    * get payments linked to an order operation
    */
   async getRelatedPayments(
