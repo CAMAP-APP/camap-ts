@@ -116,21 +116,18 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   };
 
   const checkDefaultOrderAndContinue = async () => {
-    try {
-      const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
-        Object.keys(defaultOrder).map((productId) => {
-          const productIdNumber = parseInt(productId, 10);
-          const product = catalog!.products.find((p) => p.id === productIdNumber);
-          return {
-            productId: productIdNumber,
-            quantity: defaultOrder[productIdNumber],
-            productPrice: product!.price,
-          };
-        }),
-      );
-    } catch (e) {
-      onPresentationNext();
-    }
+    const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
+      Object.keys(defaultOrder).map((productId) => {
+        const productIdNumber = parseInt(productId, 10);
+        const product = catalog!.products.find((p) => p.id === productIdNumber);
+        return {
+          productId: productIdNumber,
+          quantity: defaultOrder[productIdNumber],
+          productPrice: product!.price,
+        };
+      }),
+    );
+
     if (!checkDefaultOrderData) return;
 
     onDefaultOrderNext();
