@@ -107,12 +107,6 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setShowPresentation(false);
     setShowOrders(false);
     setShowDefaultOrder(false);
-    if (postSubscriptionError ||
-      updatedSubscriptionError ||
-      contextError ||
-      updateDefaultOrderError) {
-      onDefaultOrderNext();
-    }
     if (catalog && !catalog.absentDistribsMaxNb) {
       onAbsencesNext();
     } else {
@@ -122,18 +116,21 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   };
 
   const checkDefaultOrderAndContinue = async () => {
-    const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
-      Object.keys(defaultOrder).map((productId) => {
-        const productIdNumber = parseInt(productId, 10);
-        const product = catalog!.products.find((p) => p.id === productIdNumber);
-        return {
-          productId: productIdNumber,
-          quantity: defaultOrder[productIdNumber],
-          productPrice: product!.price,
-        };
-      }),
-    );
-
+    try {
+      const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
+        Object.keys(defaultOrder).map((productId) => {
+          const productIdNumber = parseInt(productId, 10);
+          const product = catalog!.products.find((p) => p.id === productIdNumber);
+          return {
+            productId: productIdNumber,
+            quantity: defaultOrder[productIdNumber],
+            productPrice: product!.price,
+          };
+        }),
+      );
+    } catch (e) {
+      return;
+    }
     if (!checkDefaultOrderData) return;
 
     onDefaultOrderNext();
