@@ -93,9 +93,9 @@ export class GroupsResolver {
     const group = await this.groupsService.findOne(groupId);
     if (!group) throw new NotFoundException();
     // AJOUTER CONTROLE
-    const balance = await this.paymentsService.getUserBalance(currentUser, groupId);
+    const balance = await this.paymentsService.getUserBalance(currentUser.id, groupId);
     if (balance < 0) throw new UnauthorizedException("Vous ne pouvez pas quitter ce groupe car votre solde est négatif")
-
+    // FIN
     const userGroup = await this.userGroupsService.get(currentUser, groupId);
     if (!userGroup) throw new NotFoundException();
 
