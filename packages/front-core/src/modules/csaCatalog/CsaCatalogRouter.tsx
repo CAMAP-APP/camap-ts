@@ -129,7 +129,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         }),
       );
     } catch (e) {
-      return;
+      onPresentationNext();
     }
     if (!checkDefaultOrderData) return;
 
@@ -164,43 +164,33 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     if (!showOrders || !subscription || !catalog) return false;
     let success = false;
     if (isConstOrders) {
-      try {
-        success = await updateSubscriptionDefaultOrder(
-          Object.keys(defaultOrder).map((productId) => ({
-            productId: parseInt(productId, 10),
-            quantity: defaultOrder[parseInt(productId, 10)],
-          })),
-          `${subscription.id}`,
-        );
-      } catch (e) {
-        success = false;
-        return success;
-      }
+      success = await updateSubscriptionDefaultOrder(
+        Object.keys(defaultOrder).map((productId) => ({
+          productId: parseInt(productId, 10),
+          quantity: defaultOrder[parseInt(productId, 10)],
+        })),
+        `${subscription.id}`,
+      );
     } else {
-      try {
-        success = await updateSubscriptionOrders(
-          {
-            distributions: distributions
-              .filter((d) => {
-                if (absenceDistributionsIds) {
-                  return !absenceDistributionsIds.includes(d.id);
-                }
-                return !!updatedOrders[d.id];
-              })
-              .map((d) => ({
-                id: d.id,
-                orders: Object.keys(updatedOrders[d.id]).map((p) => ({
-                  productId: parseInt(p, 10),
-                  qty: updatedOrders[d.id][parseInt(p, 10)],
-                })),
+      success = await updateSubscriptionOrders(
+        {
+          distributions: distributions
+            .filter((d) => {
+              if (absenceDistributionsIds) {
+                return !absenceDistributionsIds.includes(d.id);
+              }
+              return !!updatedOrders[d.id];
+            })
+            .map((d) => ({
+              id: d.id,
+              orders: Object.keys(updatedOrders[d.id]).map((p) => ({
+                productId: parseInt(p, 10),
+                qty: updatedOrders[d.id][parseInt(p, 10)],
               })),
-          },
-          `${subscription.id}`,
-        );
-      } catch (e) {
-        success = false;
-        return success;
-      }
+            })),
+        },
+        `${subscription.id}`,
+      );
     }
 
     return success;
