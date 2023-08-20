@@ -43,7 +43,6 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
         },
       });
     } catch (e) {
-      this.logger.log(`An error occured ${e}`);
       throw (e);
     }
 
