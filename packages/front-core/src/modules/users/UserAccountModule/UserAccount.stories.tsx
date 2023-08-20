@@ -106,14 +106,18 @@ const mock: MockedRequests = {
     },
   },
   QuitGroup: {
-    query: QuitGroupDocument,
-    handler: () => {
-      return Promise.resolve({
-        data: {
-          quitGroup: { groupId: 1 },
-        },
-      });
-    },
+    try{
+      query: QuitGroupDocument,
+      handler: () => {
+        return Promise.resolve({
+          data: {
+            quitGroup: { groupId: 1 },
+          },
+        });
+      },
+    } catch(e) {
+      console.error(e)
+    }
   },
 };
 
