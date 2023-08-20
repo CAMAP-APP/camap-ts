@@ -43,7 +43,6 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
         },
       });
     } catch (e) {
-      this.error.message = (e.message);
       throw (e);
     }
 
