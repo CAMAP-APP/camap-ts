@@ -87,21 +87,24 @@ const UserGroups = ({ groups, user, currentGroupId }: UserGroupsProps) => {
               });
 
               const onClick = () =>
+              try {
                 quitGroupMutation({ variables: { groupId: group.id } });
-
-              return (
-                <TableRow key={group.id}>
-                  <TableCell component="th" scope="row">
-                    {group.name}
-                  </TableCell>
-                  <TableCell align="right">
-                    <QuitGroupButton variant="outlined" onClick={onClick}>
-                      {t('quitGroup')}
-                    </QuitGroupButton>
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+              } catch (e) {
+                setGqlError(quitGroupError);
+              }
+                return (
+                  <TableRow key={group.id}>
+                    <TableCell component="th" scope="row">
+                      {group.name}
+                    </TableCell>
+                    <TableCell align="right">
+                      <QuitGroupButton variant="outlined" onClick={onClick}>
+                        {t('quitGroup')}
+                      </QuitGroupButton>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </Box>
