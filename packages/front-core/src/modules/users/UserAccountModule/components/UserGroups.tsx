@@ -104,7 +104,7 @@ const UserGroups = ({ groups, user, currentGroupId }: UserGroupsProps) => {
                   </TableRow>
                 );
               } catch (e) {
-                setGqlError(quitGroupError);
+                throw (e);
               }
             })}
           </TableBody>

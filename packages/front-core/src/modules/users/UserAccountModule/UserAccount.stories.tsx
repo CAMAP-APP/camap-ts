@@ -115,8 +115,8 @@ const mock: MockedRequests = {
           },
         });
       },
-    } catch(e) {
-      console.error(e)
+    }catch(e) {
+      throw (e);
     }
   },
 };
