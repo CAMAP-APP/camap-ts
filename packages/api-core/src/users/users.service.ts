@@ -332,6 +332,32 @@ export class UsersService {
     // Never delete the DeletedUser
     if (userId === deletedUserId) return null;
 
+    //AJOUT CONTROLE
+    let twoMonthsAgo = subMonths(new Date(), 2);
+
+    // Don't delete those who still have orders in less than months
+    let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
+      user.id,
+    );
+    orders1 = orders1.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, twoMonthsAgo);
+    });
+    if (orders1.length > 0) throw new ValidationException("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
+
+
+    let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
+      user.id,
+    );
+    orders2 = orders2.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, twoMonthsAgo);
+    });
+    if (orders2.length > 0) throw new ValidationException("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
+    //FIN AJOUT
+
     // Replace contacts
     const catalogs = await this.catalogsService.findByContact(userId);
     if (catalogs && catalogs.length) {
