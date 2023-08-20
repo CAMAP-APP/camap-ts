@@ -86,12 +86,11 @@ const UserGroups = ({ groups, user, currentGroupId }: UserGroupsProps) => {
                 useBigTitle: true,
               });
 
-              const onClick = () =>
               try {
-                quitGroupMutation({ variables: { groupId: group.id } });
-              } catch (e) {
-                setGqlError(quitGroupError);
-              }
+                const onClick = () =>
+
+                  quitGroupMutation({ variables: { groupId: group.id } });
+
                 return (
                   <TableRow key={group.id}>
                     <TableCell component="th" scope="row">
@@ -104,7 +103,10 @@ const UserGroups = ({ groups, user, currentGroupId }: UserGroupsProps) => {
                     </TableCell>
                   </TableRow>
                 );
-              })}
+              } catch (e) {
+                setGqlError(quitGroupError);
+              }
+            })}
           </TableBody>
         </Table>
       </Box>
