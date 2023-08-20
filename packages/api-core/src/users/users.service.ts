@@ -334,9 +334,10 @@ export class UsersService {
     if (userId === deletedUserId) return null;
 
     //AJOUT CONTROLE
+    // Bloquer suppression compte si commandes < 2 mois
     let twoMonthsAgo = subMonths(new Date(), 2);
 
-    // Don't delete those who still have orders in less than months
+    // Don't delete those who still have orders in less than 2 months
     let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
       user.id,
     );
@@ -347,7 +348,7 @@ export class UsersService {
     });
     if (orders1.length > 0) {
       throw new UnauthorizedException(
-        'Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)',
+        `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
       );
     }
 
@@ -362,7 +363,7 @@ export class UsersService {
     });
     if (orders2.length > 0) {
       throw new UnauthorizedException(
-        'Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)',
+        `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
       );
     }
     //FIN AJOUT
