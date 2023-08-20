@@ -344,7 +344,7 @@ export class UsersService {
       let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
       return isAfter(date, twoMonthsAgo);
     });
-    if (orders1.length > 0) throw new ValidationException("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
+    if (orders1.length > 0) throw new Error("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
 
 
     let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
@@ -355,7 +355,7 @@ export class UsersService {
       let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
       return isAfter(date, twoMonthsAgo);
     });
-    if (orders2.length > 0) throw new ValidationException("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
+    if (orders2.length > 0) throw new Error("Impossible de supprimer votre compte vous avez des commandes trop récentes (< 2 mois) ");
     //FIN AJOUT
 
     // Replace contacts
