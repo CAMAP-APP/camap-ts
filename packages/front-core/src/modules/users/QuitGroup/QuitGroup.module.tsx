@@ -64,7 +64,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
 
   const onQuitGroup = async () => {
     try {
-      const { data: quitGroup } = await quitGroupMutation();
+      const { data: quitGroup, loading, quitGroupError } = await quitGroupMutation();
     } catch (e) {
       console.error(e);
       this.quitGroupError = e;
