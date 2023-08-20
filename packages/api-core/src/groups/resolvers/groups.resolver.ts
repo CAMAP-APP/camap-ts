@@ -94,65 +94,70 @@ export class GroupsResolver {
     if (!group) throw new NotFoundException();
     // AJOUTER CONTROLE
     const balance = await this.paymentsService.getUserBalance(currentUser.id, groupId);
-    if (balance < 0) throw new UnauthorizedException('votre solde est négatif: solde = ${balance}', 'Vous ne pouvez pas quitter ce groupe');
-    // FIN
-    const userGroup = await this.userGroupsService.get(currentUser, groupId);
-    if (!userGroup) throw new NotFoundException();
+    //if (balance < 0) throw new UnauthorizedException('votre solde est négatif: solde = ${balance}', 'Vous ne pouvez pas quitter ce groupe');
+    if (balance < 0) {
+      //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}');
+      throw new UnauthorizedException(
+        `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}`,
+      );
+      // FIN
+      const userGroup = await this.userGroupsService.get(currentUser, groupId);
+      if (!userGroup) throw new NotFoundException();
 
-    return this.userGroupsService.delete(userGroup);
-  }
-
-  @Transactional()
-  @Mutation(() => Group)
-  async setGroupImage(
-    @Args({ name: 'groupId', type: () => Int })
-    groupId: number,
-    @Args({ name: 'base64EncodedImage' })
-    base64EncodedImage: string,
-    @Args({ name: 'mimeType' })
-    mimeType: string,
-    @Args({ name: 'fileName' })
-    fileName: string,
-    @Args({ name: 'maxWidth', type: () => Int })
-    maxWidth: number,
-    @CurrentUser() currentUser: UserEntity,
-  ) {
-    let group = await this.groupsService.findOne(groupId);
-    if (!group) throw new NotFoundException();
-
-    await this.userIsAllowedToManageGroup(currentUser, groupId);
-
-    const imageData = base64EncodedImage.substr(`data:${mimeType};base64,`.length);
-    const compressedImage = await compressImage(
-      Buffer.from(imageData, 'base64'),
-      mimeType,
-      maxWidth,
-    );
-
-    const newImage = await this.filesService.createFromBytes(
-      compressedImage,
-      fileName,
-    );
-
-    if (group.imageId) {
-      await this.filesService.delete(group.imageId);
+      return this.userGroupsService.delete(userGroup);
     }
 
-    group = await this.groupsService.lock(groupId);
+    @Transactional()
+    @Mutation(() => Group)
+    async setGroupImage(
+      @Args({ name: 'groupId', type: () => Int })
+    groupId: number,
+      @Args({ name: 'base64EncodedImage' })
+    base64EncodedImage: string,
+      @Args({ name: 'mimeType' })
+    mimeType: string,
+      @Args({ name: 'fileName' })
+    fileName: string,
+      @Args({ name: 'maxWidth', type: () => Int })
+    maxWidth: number,
+      @CurrentUser() currentUser: UserEntity,
+    ) {
+      let group = await this.groupsService.findOne(groupId);
+      if (!group) throw new NotFoundException();
 
-    return this.groupsService.update({
-      id: group.id,
-      imageId: newImage.id,
-    });
-  }
+      await this.userIsAllowedToManageGroup(currentUser, groupId);
+
+      const imageData = base64EncodedImage.substr(`data:${mimeType};base64,`.length);
+      const compressedImage = await compressImage(
+        Buffer.from(imageData, 'base64'),
+        mimeType,
+        maxWidth,
+      );
+
+      const newImage = await this.filesService.createFromBytes(
+        compressedImage,
+        fileName,
+      );
+
+      if (group.imageId) {
+        await this.filesService.delete(group.imageId);
+      }
+
+      group = await this.groupsService.lock(groupId);
+
+      return this.groupsService.update({
+        id: group.id,
+        imageId: newImage.id,
+      });
+    }
 
   /**
    * HELPERS
    */
   private async userIsAllowedToManageGroup(
-    currentUser: UserEntity,
-    groupId: number,
-  ) {
+      currentUser: UserEntity,
+      groupId: number,
+    ) {
     const hasRight = await this.userGroupsService.isGroupAdmin(currentUser, groupId);
     if (!hasRight)
       throw new UnauthorizedException(
