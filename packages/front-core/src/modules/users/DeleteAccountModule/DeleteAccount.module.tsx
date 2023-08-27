@@ -88,7 +88,7 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
             }}
           >
             <b>
-              {t('deleteConditions')}
+              {t('deleteConditions')}<br />
               {t('whenDeletingYourAccount')}
               <ul>
                 <li>{t('yourDataWillBePermanentlyDeleted')}</li>
