@@ -366,6 +366,39 @@ export class UsersService {
         `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
       );
     }
+    // Bloquer suppression si solde < 0 sur un groupe
+    // Trouver les groupes auquel appartient l'utilisateur
+    const usersGroups = await this.userGroupsService.find({
+      where: { userId: user.id },
+    });
+    usersGroups.array.forEach((g) => {
+      const balance = await this.paymentsService.getUserBalance(userId, g.groupId);
+      if (balance < 0) {
+        //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+        throw new UnauthorizedException(
+          `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${g.groupId}, solde = ${balance}€`,
+        );
+      }
+    });
+    const groups = await Promise.all(
+      usersGroups.map((ug) => this.groupsService.findOne(ug.groupId)),
+    );
+
+    // Check du solde pour chaque groupe (paymentsServices.getUserBalance)
+
+    await Promise.all(
+      groups.map((index) => {
+        const group = groups[index];
+        const balance = await this.paymentsService.getUserBalance(userId, group.id);
+        if (balance < 0) {
+          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+          throw new UnauthorizedException(
+            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€`,
+          );
+        }
+      }),
+    );
+
     //FIN AJOUT
 
     // Replace contacts
