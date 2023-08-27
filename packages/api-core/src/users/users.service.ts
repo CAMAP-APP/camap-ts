@@ -351,8 +351,6 @@ export class UsersService {
         `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
       );
     }
-
-
     let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
       user.id,
     );
@@ -371,8 +369,9 @@ export class UsersService {
     const usersGroups = await this.userGroupsService.find({
       where: { userId: user.id },
     });
+    // Check du solde pour chaque groupe (paymentsServices.getUserBalance)
     usersGroups.forEach((g) => {
-      const balance: number = this.paymentsService.getUserBalance(userId, g.groupId);
+      const balance = this.paymentsService.getUserBalance(userId, g.groupId);
       if (balance < 0) {
         //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
         throw new UnauthorizedException(
@@ -380,24 +379,6 @@ export class UsersService {
         );
       }
     });
-    const groups = await Promise.all(
-      usersGroups.map((ug) => this.groupsService.findOne(ug.groupId)),
-    );
-
-    // Check du solde pour chaque groupe (paymentsServices.getUserBalance)
-
-    await Promise.all(
-      groups.map((index) => {
-        const group = groups[index];
-        const balance = await this.paymentsService.getUserBalance(userId, group.id);
-        if (balance < 0) {
-          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
-          throw new UnauthorizedException(
-            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€`,
-          );
-        }
-      }),
-    );
 
     //FIN AJOUT
 
