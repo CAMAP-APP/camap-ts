@@ -91,7 +91,6 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
               {t('whenDeletingYourAccount')}
               <ul>
                 <li>{t('yourDataWillBePermanentlyDeleted')}</li>
-                <li>{t('ifYouAreAVendor')}</li>
                 <li>{t('ifYouAreAGroupAdmin')}</li>
               </ul>
             </b>
