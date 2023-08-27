@@ -7,6 +7,7 @@
   "yourDataWillBePermanentlyDeleted": "les données vous concernant seront supprimées définitivement. Vous ne pourrez jamais récupérer ce compte.",
   "ifYouAreAVendor": "Si vous êtes producteur : vous perdrez l'accès à votre compte Producteur.",
   "ifYouAreAGroupAdmin": "Si vous êtes administrateur de groupe : vous perdrez l'accès à vos groupes.",
+  "deleteConditions": "Attention: vous ne pouvez pas supprimer votre compte si vous avec des commandes de moins de 2 mois ou un solde négatif dans un des groupes dont vous êtes membres",
   "enterYourPAsswordHere": "Entrez ici votre mot de passe pour confirmer la suppression de votre compte",
   "password": "Mot de passe",
   "keepMyAccount": "Garder mon compte"
