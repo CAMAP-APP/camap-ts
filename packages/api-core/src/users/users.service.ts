@@ -366,19 +366,20 @@ export class UsersService {
     }
     // Bloquer suppression si solde < 0 sur un groupe
     // Trouver les groupes auquel appartient l'utilisateur
-    const usersGroups = await this.userGroupsService.find({
+    const userGroups = await this.userGroupsService.find({
       where: { userId: user.id },
     });
-    // Check du solde pour chaque groupe (paymentsServices.getUserBalance)
-    usersGroups.forEach(async (g) => {
-      const balance = await this.paymentsService.getUserBalance(userId, g.groupId);
-      if (balance < 0) {
-        //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
-        throw new UnauthorizedException(
-          `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${g.groupId}, solde = ${balance}€`,
-        );
-      }
-    });
+    // Check du solde pour chaque groupe 
+    if (userGroups.length) {
+      userGroups.forEach((ug) => {
+        if (ug.balance < 0) {
+          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+          throw new UnauthorizedException(
+            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${g.groupId}, solde = ${balance}€`,
+          );
+        }
+      });
+    }
 
     //FIN AJOUT
 
