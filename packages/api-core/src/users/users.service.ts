@@ -373,9 +373,9 @@ export class UsersService {
     if (userGroups.length) {
       userGroups.forEach((ug) => {
         if (ug.balance < 0) {
-          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${ug.balance}€');
           throw new UnauthorizedException(
-            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${g.groupId}, solde = ${balance}€`,
+            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${ug.groupId}, solde = ${ug.balance}€`,
           );
         }
       });
