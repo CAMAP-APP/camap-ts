@@ -371,8 +371,8 @@ export class UsersService {
     const usersGroups = await this.userGroupsService.find({
       where: { userId: user.id },
     });
-    usersGroups.array.forEach((g) => {
-      const balance = await this.paymentsService.getUserBalance(userId, g.groupId);
+    usersGroups.forEach((g) => {
+      const balance: number = this.paymentsService.getUserBalance(userId, g.groupId);
       if (balance < 0) {
         //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
         throw new UnauthorizedException(
