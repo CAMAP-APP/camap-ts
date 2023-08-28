@@ -89,6 +89,7 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
           >
             <b>
               {t('deleteConditions')}<br />
+              Vous ne pouvez pas supprimer votre compte si vous avec des commandes de moins de 2 mois ou un solde négatif<br />
               {t('whenDeletingYourAccount')}
               <ul>
                 <li>{t('yourDataWillBePermanentlyDeleted')}</li>
