@@ -5,7 +5,7 @@
   "wrongPassword": "Mauvais mot de passe",
   "deleteConditions": "Vous ne pouvez pas supprimer votre compte si vous avec des commandes de moins de 2 mois ou un solde négatif",
   "whenDeletingYourAccount": "En supprimant votre compte {{theme.name}} :",
-  "yourDataWillBePermanentlyDeleted": "les données vous concernant seront supprimées définitivement. Vous ne pourrez jamais récupérer ce compte.",
+  "yourDataWillBePermanentlyDeleted": "les données vous concernant seront supprimées définitivement. Vous ne pourrez plus récupérer ce compte.",
   "ifYouAreAVendor": "Si vous êtes producteur : vous perdrez l'accès à votre compte Producteur.",
   "ifYouAreAGroupAdmin": "Si vous êtes administrateur de groupe : vous perdrez l'accès à vos groupes.",
   "enterYourPAsswordHere": "Entrez ici votre mot de passe pour confirmer la suppression de votre compte",
