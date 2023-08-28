@@ -115,7 +115,7 @@ export class GroupsResolver {
     // Bloquer si commandes < 1 mois
     let oneMonthsAgo = subMonths(new Date(), 1);
 
-    // Don't delete those who still have orders in less than 2 months
+    // Don't delete those who still have orders in less than 1 month
     let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
       currentUser.id,
     );
