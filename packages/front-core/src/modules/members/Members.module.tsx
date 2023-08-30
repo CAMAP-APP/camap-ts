@@ -43,14 +43,6 @@ const Members = ({ groupId, token }: MembersProps) => {
                       <Grid item>
                         <Paper>
                           <Box p={2}>
-                            <Typography variant="h6">{t('lists')}</Typography>
-                            <MemberLists />
-                          </Box>
-                        </Paper>
-                      </Grid>
-                      <Grid item>
-                        <Paper>
-                          <Box p={2}>
                             <Button
                               variant="outlined"
                               href="/member/balance"
@@ -61,6 +53,15 @@ const Members = ({ groupId, token }: MembersProps) => {
                           </Box>
                         </Paper>
                       </Grid>
+                      <Grid item>
+                        <Paper>
+                          <Box p={2}>
+                            <Typography variant="h6">{t('lists')}</Typography>
+                            <MemberLists />
+                          </Box>
+                        </Paper>
+                      </Grid>
+
                     </Grid>
                   </Grid>
                 </Grid>

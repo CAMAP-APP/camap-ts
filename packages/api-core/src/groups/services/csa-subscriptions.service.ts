@@ -22,7 +22,7 @@ export class CsaSubscriptionsService {
     @InjectRepository(UserOrderEntity)
     private readonly ordersRepo: Repository<UserOrderEntity>,
     private readonly paymentService: PaymentsService,
-  ) {}
+  ) { }
 
   async findOneById(id: number) {
     return this.subscriptionsRepo.findOne(id);

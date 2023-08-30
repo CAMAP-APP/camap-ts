@@ -35,12 +35,16 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
   const [logout] = useLogoutMutation();
 
   const onDeleteAccount = async () => {
-    const { data: deleteAccount } = await deleteAccountMutation({
-      variables: {
-        userId,
-        password,
-      },
-    });
+    try {
+      const { data: deleteAccount } = await deleteAccountMutation({
+        variables: {
+          userId,
+          password,
+        },
+      });
+    } catch (e) {
+      throw (e);
+    }
 
     if (!deleteAccount) return;
 
@@ -84,10 +88,10 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
             }}
           >
             <b>
+              {t('deleteConditions')}<br />
               {t('whenDeletingYourAccount')}
               <ul>
                 <li>{t('yourDataWillBePermanentlyDeleted')}</li>
-                <li>{t('ifYouAreAVendor')}</li>
                 <li>{t('ifYouAreAGroupAdmin')}</li>
               </ul>
             </b>

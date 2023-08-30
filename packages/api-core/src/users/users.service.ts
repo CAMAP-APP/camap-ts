@@ -1,3 +1,4 @@
+import { NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -331,6 +332,56 @@ export class UsersService {
     const userId = user.id;
     // Never delete the DeletedUser
     if (userId === deletedUserId) return null;
+
+    //AJOUT CONTROLE
+    // Bloquer suppression compte si commandes < 2 mois
+    let twoMonthsAgo = subMonths(new Date(), 2);
+
+    // Don't delete those who still have orders in less than 2 months
+    let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
+      user.id,
+    );
+    orders1 = orders1.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, twoMonthsAgo);
+    });
+    if (orders1.length > 0) {
+      throw new UnauthorizedException(
+        `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
+      );
+    }
+    let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
+      user.id,
+    );
+    orders2 = orders2.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, twoMonthsAgo);
+    });
+    if (orders2.length > 0) {
+      throw new UnauthorizedException(
+        `Impossible de supprimer votre compte ${userId} vous avez des commandes trop récentes (< 2 mois)`,
+      );
+    }
+    // Bloquer suppression si solde < 0 sur un groupe
+    // Trouver les groupes auquel appartient l'utilisateur
+    const userGroups = await this.userGroupsService.find({
+      where: { userId: user.id },
+    });
+    // Check du solde pour chaque groupe 
+    if (userGroups.length) {
+      userGroups.forEach((ug) => {
+        if (ug.balance < 0) {
+          //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${ug.balance}€');
+          throw new UnauthorizedException(
+            `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: groupe: ${ug.groupId}, solde = ${ug.balance}€`,
+          );
+        }
+      });
+    }
+
+    //FIN AJOUT
 
     // Replace contacts
     const catalogs = await this.catalogsService.findByContact(userId);

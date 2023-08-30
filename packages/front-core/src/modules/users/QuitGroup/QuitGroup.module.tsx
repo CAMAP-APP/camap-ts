@@ -63,7 +63,13 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
   const group = groupData?.groupPreview;
 
   const onQuitGroup = async () => {
-    const { data: quitGroup } = await quitGroupMutation();
+    try {
+      setGqlError(undefined);
+      const { data: quitGroup } = await quitGroupMutation();
+    } catch (e) {
+      setGqlError(e);
+    }
+    const quitGroupError = quitGroup.error;
     const deletedGroupId = quitGroup?.quitGroup.groupId;
 
     if (groupId !== deletedGroupId) return;

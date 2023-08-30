@@ -20,7 +20,7 @@ export const Default = ({ initLat, initLng, initAddress }: GroupMapProps) => {
 };
 
 Default.args = {
-  initAddress: 'Bordeaux',
+  initAddress: 'Nantes',
 };
 
 export default {

@@ -24,6 +24,24 @@ import { GroupsService } from '../services/groups.service';
 import { UserGroupsService } from '../services/user-groups.service';
 import { Group } from '../types/group.type';
 import { UserGroup } from '../types/user-group.type';
+import { OrdersService } from '../../payments/services/orders.service';
+import {
+  addDays,
+  addMonths,
+  addWeeks,
+  addYears,
+  format,
+  isAfter,
+  isSameDay,
+  parseISO,
+  setHours,
+  setMilliseconds,
+  setMinutes,
+  setSeconds,
+  subMilliseconds,
+  subMonths,
+  subYears,
+} from 'date-fns';
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => Group)
@@ -35,7 +53,8 @@ export class GroupsResolver {
     private readonly filesService: FilesService,
     private readonly paymentsService: PaymentsService,
     private readonly multiDistribsService: MultiDistribsService,
-  ) {}
+    private readonly ordersService: OrdersService,
+  ) { }
 
   /** QUERIES */
   @Query(() => Group, { name: 'group' })
@@ -92,7 +111,48 @@ export class GroupsResolver {
   ) {
     const group = await this.groupsService.findOne(groupId);
     if (!group) throw new NotFoundException();
+    // AJOUTER CONTROLE
+    // Bloquer si commandes < 1 mois
+    let oneMonthsAgo = subMonths(new Date(), 1);
 
+    // Don't delete those who still have orders in less than 1 month
+    let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
+      currentUser.id,
+    );
+    orders1 = orders1.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, oneMonthsAgo);
+    });
+    if (orders1.length > 0) {
+      throw new UnauthorizedException(
+        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
+      );
+    }
+    let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
+      currentUser.id,
+    );
+    orders2 = orders2.filter((o) => {
+      if (!o) return false;
+      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
+      return isAfter(date, oneMonthsAgo);
+    });
+    if (orders2.length > 0) {
+      throw new UnauthorizedException(
+        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
+      );
+    }
+
+    // Bloquer sortie du groupe si solde < 0
+    const balance = await this.paymentsService.getUserBalance(currentUser.id, groupId);
+    //if (balance < 0) throw new UnauthorizedException('votre solde est négatif: solde = ${balance}', 'Vous ne pouvez pas quitter ce groupe');
+    if (balance < 0) {
+      //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+      throw new UnauthorizedException(
+        `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€`,
+      );
+    }
+    // FIN
     const userGroup = await this.userGroupsService.get(currentUser, groupId);
     if (!userGroup) throw new NotFoundException();
 
