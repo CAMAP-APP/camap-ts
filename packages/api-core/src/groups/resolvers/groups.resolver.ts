@@ -113,6 +113,10 @@ export class GroupsResolver {
     if (!group) throw new NotFoundException();
     // AJOUTER CONTROLE
     // Bloquer si commandes < 1 mois
+
+    // BUG: il ne faut chercher les commandes que dans le groupe concerné
+    // BUG: désactivé le temps de corriger
+    /*
     let oneMonthsAgo = subMonths(new Date(), 1);
 
     // Don't delete those who still have orders in less than 1 month
@@ -142,6 +146,7 @@ export class GroupsResolver {
         `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
       );
     }
+    */
 
     // Bloquer sortie du groupe si solde < 0
     const balance = await this.paymentsService.getUserBalance(currentUser.id, groupId);

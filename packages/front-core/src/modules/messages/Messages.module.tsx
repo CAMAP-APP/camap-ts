@@ -11,7 +11,7 @@ import SentMessageList from './containers/SentMessageList';
 import Message from './Message';
 import MessagesContextProvider from './MessagesContext';
 
-const DOC_LINK = 'https://formation.alilo.fr/mod/hvp/view.php?id=824';
+const DOC_LINK = 'https://wiki.amap44.org/fr/app/la-messagerie';
 
 export interface MessagesProps {
   groupId: number;
