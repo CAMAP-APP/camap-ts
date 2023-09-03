@@ -147,14 +147,13 @@ export class GroupsResolver {
       );
     }
     */
-
+    // Bloquer sortie du groupe si groupe Hébergement Camap (id 16936)
     // Bloquer sortie du groupe si solde < 0
-    const balance = await this.paymentsService.getUserBalance(currentUser.id, groupId);
-    //if (balance < 0) throw new UnauthorizedException('votre solde est négatif: solde = ${balance}', 'Vous ne pouvez pas quitter ce groupe');
-    if (balance < 0) {
-      //throw new Error('Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€');
+
+    if (groupId == 16936) {
+      //throw new Error('Vous ne pouvez pas quitter ce groupe');
       throw new UnauthorizedException(
-        `Vous ne pouvez pas quitter ce groupe, votre solde est négatif: solde = ${balance}€`,
+        `Vous ne pouvez pas quitter ce groupe`,
       );
     }
     // FIN
