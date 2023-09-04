@@ -95,10 +95,10 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                 maxHeight:
                   catalog.description || catalog.documents.length > 0
                     ? {
-                        xs: 138,
-                        sm: 206,
-                        md: 275,
-                      }
+                      xs: 138,
+                      sm: 206,
+                      md: 275,
+                    }
                     : 450,
               }}
             >
@@ -121,11 +121,11 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                           secondary={d.place.name}
                           sx={{
                             '& .MuiListItemText-secondary, & .MuiListItemText-primary':
-                              {
-                                color: isPassed
-                                  ? theme.palette.action.disabled
-                                  : 'inherit',
-                              },
+                            {
+                              color: isPassed
+                                ? theme.palette.action.disabled
+                                : 'inherit',
+                            },
                           }}
                         />
                       </ListItem>

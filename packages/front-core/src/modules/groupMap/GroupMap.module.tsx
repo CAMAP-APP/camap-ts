@@ -85,10 +85,10 @@ const GridContainer = styled(Grid)(({ theme }) => ({
 }));
 
 const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
-  backgroundImage: `url(/theme/${window._Camap.theme.id}/logo3.png)`,
+  backgroundImage: `url(/theme/${window._Camap.theme.id}/logo4.png)`,
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
-  height: '130px',
+  height: '160px',
   width: '100%',
 
   [theme.breakpoints.only('sm')]: {
@@ -98,7 +98,7 @@ const ButtonBaseCamapLogo = styled(ButtonBase)(({ theme }) => ({
 
 const DEFAULT_LAT = 46.52863469527167; // center of France
 const DEFAULT_LNG = 2.43896484375; // center of France
-const INIT_ZOOM = 6;
+const INIT_ZOOM = 7;
 const DEFAULT_ZOOM = 13;
 
 export interface GroupMapProps {
@@ -207,7 +207,7 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       wait.current = true;
     }
 
-    if (maxLat - minLat > 1 || maxLng - minLng > 2) {
+    if (maxLat - minLat > 20 || maxLng - minLng > 38) {
       setShowTooLargeWarning(true);
     } else {
       setShowTooLargeWarning(false);

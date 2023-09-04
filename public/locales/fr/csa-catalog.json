@@ -6,7 +6,7 @@
   "distribution": "1 distribution",
   "distribution_plural": "{{count}} distributions",
   "conditions": "Conditions",
-  "engagementPeriod": "Période d'engagement",
+  "engagementPeriod": "Période de souscription",
   "engagement": "Engagement",
   "absences": "Absences",
   "absence": "Absence",
@@ -41,7 +41,7 @@
   "orders": "Commandes",
   "cancelSubscription": "Annuler la souscription",
   "orderEndDateIsPassedItsTooLateToChangeThisAbsence": "La date de fermeture des commandes de cette distribution étant passée, il est trop tard pour modifier cette absence.",
-  "enterYourDefaultOrder": "Saissisez votre commande par défaut",
+  "enterYourDefaultOrder": "Saisissez votre commande par défaut",
   "defaultOrderInfosVarOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat. Vous aurez ensuite la possibilité de personnaliser votre commande date par date.",
   "defaultOrderInfosConstOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat.",
   "defaultOrder": "Commande par défaut"

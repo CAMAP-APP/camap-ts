@@ -7,6 +7,7 @@ import { checkDeleted } from '../../common/utils';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
+import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions.service';
 import {
   OperationData,
   OperationEntity,
@@ -24,6 +25,7 @@ import {
   transferPaymentType,
 } from '../interfaces';
 import { OperationType } from '../OperationType';
+import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
 
 @Injectable()
 export class PaymentsService {
@@ -34,7 +36,11 @@ export class PaymentsService {
     private readonly userGroupsService: UserGroupsService,
     @Inject(forwardRef(() => GroupsService))
     private readonly groupsService: GroupsService,
-  ) {}
+    @Inject(forwardRef(() => CsaSubscriptionsService))
+    private readonly csasubscriptionsService: CsaSubscriptionsService,
+    @InjectRepository(CsaSubscriptionEntity)
+    private readonly subscriptionRepo: Repository<CsaSubscriptionEntity>,
+  ) { }
 
   async findOneById(id: number, lock = false) {
     return this.operationRepo.findOne(id, {
@@ -75,7 +81,7 @@ export class PaymentsService {
           cashPaymentType,
           checkPaymentType,
           transferPaymentType,
-          moneyPotPaymentType,
+          // moneyPotPaymentType,
           onTheSpotPaymentType,
           onTheSpotCardTerminalPaymentType,
         ];
@@ -276,8 +282,9 @@ export class PaymentsService {
     const result: { balance: number } = await this.operationRepo
       .createQueryBuilder('operation')
       .select('SUM(amount) as balance')
+      .addFrom(CsaSubscriptionEntity, 'sub')
       .where(
-        'operation.userId = :userId AND operation.groupId = :groupId AND !(type=2 and pending=1)',
+        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = sub.id AND YEAR(sub.startDate) > 2022',
         {
           userId,
           groupId,
@@ -287,6 +294,27 @@ export class PaymentsService {
     const balance = Math.round(result.balance * 100) / 100;
     return this.userGroupsService.update(userId, groupId, { balance });
   }
+
+  /**
+   * Get User Balance
+   */
+  async getUserBalance(userId: number, groupId: number) {
+    const result: { balance: number } = await this.operationRepo
+      .createQueryBuilder('operation')
+      .select('SUM(amount) as balance')
+      .addFrom(CsaSubscriptionEntity, 'sub')
+      .where(
+        'operation.userId = :userId AND operation.groupId = :groupId AND operation.subscriptionId = sub.id AND YEAR(sub.startDate) > 2022',
+        {
+          userId,
+          groupId,
+        },
+      )
+      .getRawOne();
+    const balance = Math.round(result.balance * 100) / 100;
+    return balance;
+  }
+
 
   /**
    * get payments linked to an order operation

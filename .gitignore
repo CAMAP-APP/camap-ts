@@ -29,3 +29,4 @@ public/neostatic
 /nb
 /tmp
 .vscode/launch.json
+docker-compose/docker-compose.yml
