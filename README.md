@@ -22,6 +22,7 @@ L'application est installable via Docker ou chez [Scalingo.com](https://www.scal
 -   Briques fonctionnelles
     -   [Utilisateurs](/docs/users.md)
     -   [Groupes](/docs/groups.md)
+    -   [Distributions](/docs/distributions.md)
 
 ## Historique
 
