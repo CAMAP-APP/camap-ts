@@ -6,7 +6,7 @@ describe("formatSmartQt", () => {
     expect(
       formatSmartQt(
         {
-          name: "fromage",
+          name: "formage",
           qt: 100,
           unitType: Unit.Gram,
           bulk: false,
@@ -15,7 +15,7 @@ describe("formatSmartQt", () => {
         },
         { quantity: 2 }
       )
-    ).toBe("200g. fromage");
+    ).toBe("200g. formage");
 
     expect(
       formatSmartQt(
