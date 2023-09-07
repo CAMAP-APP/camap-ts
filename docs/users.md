@@ -51,3 +51,9 @@ L'utilisateur courant est récupéré via `app.user` dans tous les controllers, 
 **Pour camap-TS** : la [méthode JWT](https://fr.wikipedia.org/wiki/JSON_Web_Token) est utilisée pour l'authentification. Lorsque l'utilisateur se connecte, camap-ts "hacke" le fonctionnement de camap-hx en mettant le userID dans `Session.user`.
 
 L'utilisateur courant est récupéré via un décorateur dédié en entête des fonctions de controllers ou de resolvers : `@CurrentUser() currentUser: UserEntity`
+
+## Accès à un groupe
+
+Pour savoir à quel groupe un utilisateur est connecté, il faut aller chercher `amapId` dans `Session.data`.
+
+[Exemple de code ici](https://github.com/CAMAP-APP/camap-hx/blob/master/src/controller/Main.hx#L77) dans le controller qui gère l'URL `/home`.

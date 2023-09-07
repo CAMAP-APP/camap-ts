@@ -20,7 +20,7 @@ Le champs `disabled` correspond à un enum qui précise pourquoi ce groupe est b
 
 L'appartenance d'un utilisateur à un groupe est stocké dans le table `UserGroup` qui a une relation vers `User.id` et une autre vers `Group.id`. Il ne peut exister qu'un seul `UserGroup` par groupe-utilisateur ( clé primaire unique sur les 2 relations ).
 
-Le champs `balance` représente le solde de l'utilisateur dans ce groupe ( somme du `Operation.amount` de toutes ses opérations )
+Le champs `balance` représente le solde de l'utilisateur dans ce groupe ( somme du `Operation.amount` de toutes ses opérations ). Pour plus d'informations, consultez [la doc des paiements](./payments.md)
 
 Le champs `rights` stocke les droits de ce membre dans ce groupe en JSON
 
@@ -42,3 +42,13 @@ Messages;	                //peut envoyer des messages
 ```
 
 Les droits sont cumulables. Si quelqu'un veut pouvoir tout faire dans un groupe, il doit cumuler tous les droits.
+
+```
+//exemple de droits stockés en JSON dans UserGroup.rights
+[
+  {"right":"ContractAdmin","params":["8"]},
+  {"right":"Messages","params":null},
+  {"right":"Membership","params":null}
+]
+
+```
