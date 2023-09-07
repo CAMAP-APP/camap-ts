@@ -42,7 +42,7 @@ interface ProductModalProps {
 }
 
 const ProductModal = ({ product, onClose }: ProductModalProps) => {
-  //const { t } = useTranslation(['shop/default']);
+  const { t } = useTranslation(['shop/default']);
   const { t: tUnit } = useTranslation(['unit']);
 
   // eslint-disable-next-line no-empty-pattern
