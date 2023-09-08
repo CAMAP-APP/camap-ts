@@ -44,7 +44,7 @@ export const themeOptions: ThemeOptions = {
     MuiTooltip: {
       styleOverrides: {
         tooltip: {
-          color: '#eb702f',
+          color: '#ffffff',
           fontSize: '0.85rem',
         },
       },
