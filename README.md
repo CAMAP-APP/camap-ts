@@ -25,6 +25,9 @@ L'application se compose de 3 modules :
     -   [Distributions](/docs/distributions.md)
     -   [Paiements](/docs/payments.md)
     -   [Produits](/docs/products.md)
+    -   [Contrats](/docs/contracts.md)
+    -   [Commandes](/docs/orders.md)
+    -   [Souscriptions](/docs/subscriptions.md)
 
 ## Historique
 

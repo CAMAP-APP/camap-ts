@@ -20,7 +20,7 @@ Les utilisateurs sont gérés par la table `User`.
 
 Le champs `rights` est de type "Enum flags", c'est à dire qu'il stocke dans un integer une série de booléens correspondant à toutes les valeurs d'un Enum. Concrètement ça permet, par exemple, de stocker des droits ou des options. Cette fonctionnalité vient à l'origine de record-macros ( ORM Haxe ) et [a été portée en TS](https://github.com/CAMAP-APP/camap-ts/blob/master/packages/api-core/src/common/haxeCompat.ts).
 
-Le champs `rights` permet de définir si le User est superadmin, c'est à dire administrateur de toute l'instance CAMAP.
+Le champs `rights` permet de définir si le User est superadmin, c'est à dire administrateur de toute l'instance CAMAP. ( `user.isAdmin()` en haxe)
 
 Le champs `flags` stocke les options de notification du User.
 
@@ -57,3 +57,9 @@ L'utilisateur courant est récupéré via un décorateur dédié en entête des 
 Pour savoir à quel groupe un utilisateur est connecté, il faut aller chercher `amapId` dans `Session.data`.
 
 [Exemple de code ici](https://github.com/CAMAP-APP/camap-hx/blob/master/src/controller/Main.hx#L77) dans le controller qui gère l'URL `/home`.
+
+## Suppression des comptes inactifs
+
+La méthode `UserService.cleanUsers()` ( en TS ) supprime les utilisateurs qui ne se sont pas connectés depuis 2 ans ( compatibilité avec la RGPD ), après plusieurs relances par email.
+
+Si le compte ne se reconnecte pas, il est supprimé et ses commandes passées sont attribuées à un utilisateur par défaut (`deleted@camap.tld`) afin que l'historique de commande des AMAP ne soit pas effacé.
