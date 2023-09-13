@@ -28,6 +28,25 @@ L'application se compose de 3 modules :
     -   [Contrats](/docs/contracts.md)
     -   [Commandes](/docs/orders.md)
     -   [Souscriptions](/docs/subscriptions.md)
+    -   [Permanences](/docs/volunteers.md)
+    -   [Gestion des membres et Messagerie](/docs/messages.md)
+    -   [Adhésions](/docs/membership.md)
+-   Briques techniques
+    -   [Emails](/docs/emails.md)
+    -   fichiers de configuration
+    -   système de theme/settings
+    -   [Crons](/docs/crons.md)
+    -   Gestion des Files
+    -   gestion de la traduction
+    -   tests unitaires et e2e en TS
+    -   génération de datasets pour le dev
+    -   templates MTT cache et traduction
+-   Maintenance et pérénnité du logiciel sur le long terme
+    -   Migration vers JS
+    -   Dates FR et UTC dans la BDD
+    -   ORM et migrations
+    -   encodage UTF8 vs ISO
+    -   dépendances JS et autres
 
 ## Historique
 

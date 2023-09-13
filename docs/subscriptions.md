@@ -49,4 +49,6 @@ Dans ce dernier cas, si la souscription a une durée inférieure au contrat, on 
 
 Il est possible de gérer une alternance de paniers dans les contrats classiques ( user et user2 de la souscription ).
 
-Dans ce cas, la creation de la souscription va créer un ensemble de `UserOrder` avec un flag `InvertSharedOrder`. Le user et user2 de la souscription sont répercutés dans le user et user2 du `UserOrder`. C'est ensuite la fonction `getWhosTurn()` qui dit quel user peut récupérer la commande.
+Dans ce cas, le user et user2 de la souscription sont répercutés dans le user et user2 du `UserOrder`. C'est ensuite la fonction `getWhosTurn()` qui dit quel user peut récupérer la commande en fonction de la distribution.
+
+Le flag `InvertSharedOrder` permet d'inverser l'alternance si besoin.
