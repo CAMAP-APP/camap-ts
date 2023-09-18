@@ -33,20 +33,16 @@ L'application se compose de 3 modules :
     -   [Adhésions](/docs/membership.md)
 -   Briques techniques
     -   [Emails](/docs/emails.md)
-    -   fichiers de configuration
-    -   système de theme/settings
+    -   [Fichiers de configuration](conf.md)
+    -   [Thème](/docs/theme.md)
     -   [Crons](/docs/crons.md)
-    -   Gestion des Files
-    -   gestion de la traduction
-    -   tests unitaires et e2e en TS
-    -   génération de datasets pour le dev
-    -   templates MTT cache et traduction
--   Maintenance et pérénnité du logiciel sur le long terme
-    -   Migration vers JS
-    -   Dates FR et UTC dans la BDD
-    -   ORM et migrations
-    -   encodage UTF8 vs ISO
-    -   dépendances JS et autres
+    -   [Files](docs/files.md)
+    -   [Traduction / i18n](docs/i18n.md)
+    -   [Tests en TS](docs/tests.md)
+    -   [Génération de datasets pour le dev](/docs/dataset.md)
+    -   [Gestion des erreurs en GraphQL](/docs/error-handling.md)
+    -   [Templates](/docs/templates.md)
+-   [Maintenance et pérénnité du logiciel sur le long terme](docs/future.md)
 
 ## Historique
 
