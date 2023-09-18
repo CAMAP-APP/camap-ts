@@ -48,6 +48,6 @@ Malheureusement, il n'est pas possible de passer à un _characterset_ et une _co
 
 ## Dépendances JS et autres
 
-Le monde Javascript / Node Js / Typescript évolue très vite, ce qui nécéssite de mettre à jour les dépendances régulièrement, au moins sur les briques principales ( Nest JS, TypeORM, React, Appolo...etc) sinon l'application risque de devenir obsolète et difficile à maintenir.
+Le monde Javascript / Node Js / Typescript évolue très vite, ce qui nécéssite de mettre à jour les dépendances régulièrement, au moins sur les briques principales ( _Nest JS, TypeORM, React, Appolo ...etc_) sinon l'application risque de devenir obsolète et difficile à maintenir.
 
 Côté BDD, la version 5.7 de MySQL commence à être ancienne, une évolution vers des versions plus récentes serait bénéfique. ( Si les vieux drivers MySQL de Neko continuent de fonctionner )
