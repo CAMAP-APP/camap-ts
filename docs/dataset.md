@@ -1,6 +1,14 @@
-# Dataset
+# Datasets
 
-## Génération de données
+## Fonctionnalité
+
+Afin de faciliter le développement de l'application, un système de génération de données de test a été créé.
+
+Cela permet de facilement peupler une instance de dev ou de test avec des données correspondant à un scénario particulier.
+
+## Code
+
+Ce module est codé en TS et utilier [Faker](https://fakerjs.dev/) pour générer des données.
 
 La fonction `datasetGenerators` prend en paramètre une application Nest et retourne les fonctions de génération de données.
 
@@ -10,135 +18,33 @@ La fonction `datasetGenerators` prend en paramètre une application Nest et reto
 datasetGenerators(app: INestApplication) => Promise<DatasetGenerators>
 ```
 
-Chaque fonction de génération de données correspond à une entité du modèle.
+Chaque fonction de génération de données correspond à une entité de l'app.
 
 Par exemple, pour générer un nouveau groupe :
 
 ```TS
 const { genGroup } = await datasetGenerators(app);
-const group: GroupEntity = await genGroup({
-  name: "Nouveau Groupe"
-});
+const group: GroupEntity = await genGroup({name: "AMAP St Martin"});
 ```
 
-### Relation entre les entités
+### îlot (islet)
 
-```TS
-@Entity('Group')
-class GroupEntity {
-  /**
-   * ManyToOne
-   */
-  @Column('int', { nullable: true })
-  userId: number | null;
+Un îlot de données est un ensemble de données correspondant à un scénario de test.
 
-  @ManyToOne(() => UserEntity, { onDelete: 'SET NULL', onUpdate: 'RESTRICT' })
-  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
-  user: Promise<UserEntity>;
-}
-
-const { genGroup, genUser } = await datasetGenerators(app);
-
-const user: UserEntity = await genUser({
-  id: 1
-});
-let group: GroupEntity;
-
-group = await genGroup({});
-console.log(group.userId); // null
-console.log(await group.user); // null
-
-group = await genGroup({
-  userIdOrEntity: user // <- UserEntity
-});
-console.log(group.userId); // 1
-console.log(await group.user); // UserEntity { id: 1, ...}
-console.log((await group.user).id); // 1
-
-group = await genGroup({
-  userIdOrEntity: user.id // <- number
-});
-console.log(group.userId); // 1
-console.log(await group.user); // UserEntity { id: 1, ...}
-console.log((await group.user).id); // 1
-
-```
-
-## îlot (islet)
-
-Un îlot de données est un ensemble de données liés entre elles.
-
-Par exemple, pour tester les fonctionnalités liées au tunnel d'achat, on peut définir une fonction qui va générer un groupe contenant une distribution proposant à la vente sur place ou par virement de deux produits d'un catalogue d'un producteur ...
+Par exemple, le script `default.islet.ts` génère une AMAP avec 50 adhérents.
 
 ```TS
 
-const genTransactionIslet = async (generators: DatasetGenerators) => {
-  const group = await generators.genGroup({
-    allowedPaymentsType: [
-      PaymentTypeId.cash,
-      PaymentTypeId.check,
-      PaymentTypeId.cardTerminal,
-      PaymentTypeId.transfer,
-    ],
-  });
-
-  const user = await generators.genUser({});
-
-  await generators.genUserGroup({
-    userIdOrEntity: user,
-    groupIdOrEntity: group,
-  });
-
-  const vendor = await generators.genVendor({});
-
-  const catalog = await generators.genCatalog({
-    groupIdOrdEntity: group,
-    flags: [CatalogFlags.StockManagement],
-    vendorIdOrdEntity: vendor,
-  });
-
-  const [product1, product2] = await Promise.all([
-    generators.genProduct({
-      catalogIdOrEntity: catalog,
-      stock: 4,
-      price: 1.12,
-    }),
-    generators.genProduct({
-      catalogIdOrEntity: catalog,
-      stock: 10,
-      price: 0.45,
-    }),
-  ]);
-
-  ...
-
-  return {
-    group,
-    user,
-    vendor,
-    catalog,
-    products: product1, product2],
-    ...
+export default async (generators: DatasetGenerators, app: INestApplication) => {
+  const group = await generators.genGroup({ name: 'AMAP de ' + faker.address.city() });
+  let i = 50;
+  while (i > 0) {
+    const u = await generators.genUser({});
+    await generators.genUserGroup({ userIdOrEntity: u, groupIdOrEntity: group });
+    i--;
   }
-}
-
-// test e2e
-
-describe("mon test"), () => {
-  let generators: DatasetGenerators;
-
-  it("test1", () => {
-    const { user, group } = await genTransactionIslet(generators);
-    // va générer un îlot
-    ...
-  })
-
-  it("test2", () => {
-    const { user, group } = await genTransactionIslet(generators);
-    // va générer un autre îlot
-    ...
-  })
-}
+  return { group };
+};
 ```
 
 ## Cli
@@ -149,12 +55,12 @@ On peut utiliser la commande `npm run dataset <isletName> [options]`, depuis la 
 
 **Paramètre**
 
-- `<isletName>` : nom de l'îlot. Doit correspondre au fichier `packages/api-core/src/dev/islets/<isletName>.islet.ts`
+-   `<isletName>` : nom de l'îlot. Doit correspondre au fichier `packages/api-core/src/dev/islets/<isletName>.islet.ts`
 
 **Options**
 
-- `-c, --clean` : permet de supprimer toutes les données de la bdd avant la génération de données.
-- `--noFail` : si l'îlot n'existe pas, permet de charger l'îlot par défaut (`packages/api-core/src/dev/islets/dafault.islet.ts`).
+-   `-c, --clean` : permet de supprimer toutes les données de la bdd avant la génération de données.
+-   `--noFail` : si l'îlot n'existe pas, permet de charger l'îlot par défaut (`packages/api-core/src/dev/islets/dafault.islet.ts`).
 
 ## Storybook
 
@@ -184,10 +90,7 @@ export default (generators: DatasetGenerators) => {
 
   const user = await generators.genUser({});
 
-  return {
-    group,
-    user
-  }
+  return { group, user }
 }
 
 
@@ -208,9 +111,7 @@ const Template = () => {
 export const Default = Template.bind({});
 Default.decorators = [
   (Story: any) => (
-    <DatasetProvider
-      islet="myIlset"
-    >
+    <DatasetProvider islet="myIlset">
       <Story />
     </DatasetProvider>
   ),
@@ -230,9 +131,7 @@ Auth.decorators = [
   (Story: any) => (
     <DatasetProvider
       islet="myIlset"
-      loginAs={(data) => {
-        return data.user.email;
-      }}
+      loginAs={(data) => { return data.user.email; }}
     >
       <Story />
     </DatasetProvider>
