@@ -33,7 +33,7 @@ L'application se compose de 3 modules :
     -   [Adhésions](/docs/membership.md)
 -   Briques techniques
     -   [Emails](/docs/emails.md)
-    -   [Fichiers de configuration](conf.md)
+    -   [Fichiers de configuration](/docs/conf.md)
     -   [Thème](/docs/theme.md)
     -   [Crons](/docs/crons.md)
     -   [Files](docs/files.md)
