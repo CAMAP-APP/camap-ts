@@ -17,6 +17,7 @@ L'application se compose de 3 modules :
 ## Documentation technique
 
 -   Installation
+    -   [docker-camap](https://github.com/CAMAP-APP/camap-docker/README.md) pour une installation simplifiée (avec reverse proxy Traefik)
     -   [Avec docker-compose](/docs/install.md)
     -   Avec un [buildpack](https://github.com/CAMAP-APP/neko-scalingo-buildpack-camap) chez [Scalingo](https://www.scalingo.com)
 -   Briques fonctionnelles
