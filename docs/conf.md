@@ -28,7 +28,7 @@ Cela affecte aussi le système de template, lorsque DEBUG=1 les templates sont c
 
 `maintain` : passe l'application en maintenance ( possible de le faire aussi en mettant une variable "`maintain`" à 1 dans la table `Variable` ). Les superadmin déjà logués peuvent continuer à utiliser l'app.
 
-`key` : clé permettant d'encoder des tokens ou des mots de passe.
+`key` : clé secrète permettant d'encoder des tokens ou des mots de passe.
 
 `camap_api` : URL de camap-ts, par exemple `https://api.camap.amap44.org` ou `http://localhost:3010`
 
@@ -42,11 +42,14 @@ D'autres paramètres secondaires peuvent être stockés dans la table `Variable`
 
 La configuration de camap-ts est stocké dans un fichier .env ( [ou via des variables d'environnement](https://docs.nestjs.com/techniques/configuration) )
 
-`CAMAP_KEY`: comme `key` en Haxe
+`CAMAP_KEY`: idem `key` dans la config Haxe
 
 `JWT_ACCESS_TOKEN_SECRET` : token secret pour l'authentification JWT
+
 `JWT_ACCESS_TOKEN_EXPIRATION_TIME` : délai d'expiration en secondes, valeur conseillée : 900 (15 mn)
+
 `JWT_REFRESH_TOKEN_SECRET` : token secret de rafraîchissement
+
 `JWT_REFRESH_TOKEN_EXPIRATION_TIME` : valeur conseillée 2629746 (1 mois)
 
 Connection à MySQL
