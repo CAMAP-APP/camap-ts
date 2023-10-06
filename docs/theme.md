@@ -6,13 +6,25 @@ Comme une installation Wordpress, CAMAP peut être personnalisé afin que chaque
 
 Le thème peut être modifié depuis l'interface d'administration de l'instance.
 
-Il permet de customiser le nom du site, l'email expéditeur par défaut, l'email de support, les blocs dans le footer du site et les blocs dans les footer d'email, le lien vers des CGU ...
+Il permet de customiser :
+
+-   le nom du site
+-   l'email expéditeur par défaut
+-   l'email de support
+-   les 4 blocs dans le footer du site
+-   les blocs dans les footer d'email
+-   le lien vers les CGU
+-   l'apparence du site via le champs `id` (CSS et logos)
 
 Le champs `id` correspond au dossier qui contient les fichiers images et CSS, par exemple le logo du site est chargé depuis l'URL `/theme/$themeId/logo`
 
+Vous pouvez donc créer autant de thèmes que vous le souhaitez, et changer le thème de l'instance depuis l'interface d'administration en changant le champs `id`.
+
+Les 2 thèmes disponibles actuellement sont `default` et `camap_old`
+
 ## Code
 
-Pour obtenir l'objet Theme :
+Pour obtenir l'objet Theme dans le code :
 
 -   en Haxe : `App.getTheme()`
 -   en TS : `const theme = await this.variableService.getTheme();`
