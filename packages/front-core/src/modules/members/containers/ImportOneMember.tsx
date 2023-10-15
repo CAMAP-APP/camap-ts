@@ -119,7 +119,7 @@ const ImportOneMember = () => {
       if (newUser.address2) newUser.address2 = newUser.address2.trim();
       if (newUser.city) newUser.city = newUser.city.trim();
       if (newUser.firstName2) newUser.firstName2 = newUser.firstName2.trim();
-      if (newUser.lastName2) newUser.firstName2 = newUser.lastName2.trim();
+      if (newUser.lastName2) newUser.lastName2 = newUser.lastName2.trim();
       if (newUser.firstName) newUser.firstName = newUser.firstName.trim();
       if (newUser.lastName) newUser.lastName = newUser.lastName.trim();
 
@@ -163,24 +163,24 @@ const ImportOneMember = () => {
       });
       const data = accountCreationModeChecked
         ? (result.data as ImportAndCreateMembersMutation)
-            ?.importAndCreateMembers
+          ?.importAndCreateMembers
         : (result.data as SendInvitesToNewMembersMutation)
-            ?.sendInvitesToNewMembers;
+          ?.sendInvitesToNewMembers;
       if (account && data?.withAccounts.length === 0) {
         // This user is already a member of this group
         let emails =
           valuesRef.current.email.toLowerCase() ===
             account.email.toLowerCase() ||
-          valuesRef.current.email2?.toLowerCase() ===
+            valuesRef.current.email2?.toLowerCase() ===
             account.email.toLowerCase()
             ? `${account.email} `
             : '';
         if (account.email2) {
           if (
             valuesRef.current.email.toLowerCase() ===
-              account.email2.toLowerCase() ||
+            account.email2.toLowerCase() ||
             valuesRef.current.email2?.toLowerCase() ===
-              account.email2.toLowerCase()
+            account.email2.toLowerCase()
           ) {
             emails += emails.length ? `${memoizedTAnd}/${memoizedTOr} ` : '';
             emails += `${account.email2}`;
@@ -509,7 +509,7 @@ const ImportOneMember = () => {
                           label: tCommon('countryOfResidence'),
                           error: Boolean(
                             touched.countryOfResidence &&
-                              errors.countryOfResidence,
+                            errors.countryOfResidence,
                           ),
                           onBlur: () => setFieldTouched('countryOfResidence'),
                         }}
