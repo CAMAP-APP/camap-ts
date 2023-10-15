@@ -137,8 +137,8 @@ const VolunteersCalendar = ({
 
   React.useEffect(() => {
     const now = new Date();
-    const aMonthBefore = subMonths(now, 2);
-    const aMonthLater = addMonths(now, 2);
+    const aMonthBefore = subMonths(now, 4);
+    const aMonthLater = addMonths(now, 4);
     doGetVolunteerMultiDistribs(aMonthBefore, aMonthLater);
   }, [doGetVolunteerMultiDistribs]);
 
@@ -174,7 +174,7 @@ const VolunteersCalendar = ({
     if (!multiDistribs?.length) return;
     const lastMultiDistrib = multiDistribs[multiDistribs.length - 1];
     const distribStartDate = new Date(lastMultiDistrib.distribStartDate);
-    const aMonthLater = addMonths(distribStartDate, 2);
+    const aMonthLater = addMonths(distribStartDate, 4);
     setLastClickedButton('next');
     doGetVolunteerMultiDistribs(distribStartDate, aMonthLater);
   }, [doGetVolunteerMultiDistribs, multiDistribs]);
@@ -183,7 +183,7 @@ const VolunteersCalendar = ({
     if (!multiDistribs?.length) return;
     const firstMultiDistrib = multiDistribs[0];
     const distribStartDate = new Date(firstMultiDistrib.distribStartDate);
-    const aMonthBefore = subMonths(distribStartDate, 2);
+    const aMonthBefore = subMonths(distribStartDate, 4);
     setLastClickedButton('previous');
     doGetVolunteerMultiDistribs(aMonthBefore, distribStartDate);
   }, [doGetVolunteerMultiDistribs, multiDistribs]);
@@ -403,7 +403,7 @@ const VolunteersCalendar = ({
                     disabled={
                       shouldDisableButton['next'] &&
                       firstDistributionIndex + maxNbDistribToShow ===
-                        multiDistribs.length
+                      multiDistribs.length
                     }
                   >
                     <ArrowForward />
@@ -457,11 +457,10 @@ const VolunteersCalendar = ({
                               daysBeforeDutyPeriodsOpen={
                                 daysBeforeDutyPeriodsOpen
                               }
-                              returnUrl={`/distribution/volunteersCalendar${
-                                focusedMultiDistribId
+                              returnUrl={`/distribution/volunteersCalendar${focusedMultiDistribId
                                   ? `/${focusedMultiDistribId}`
                                   : ''
-                              }`}
+                                }`}
                             />
                           </Box>
                         ))}

@@ -110,6 +110,7 @@ export class GroupsResolver {
     @CurrentUser() currentUser: UserEntity,
   ) {
     const group = await this.groupsService.findOne(groupId);
+
     if (!group) throw new NotFoundException();
     // AJOUTER CONTROLE
     // Bloquer si commandes < 1 mois
@@ -156,9 +157,14 @@ export class GroupsResolver {
         `Vous ne pouvez pas quitter ce groupe`,
       );
     }
-    // FIN
+
     const userGroup = await this.userGroupsService.get(currentUser, groupId);
     if (!userGroup) throw new NotFoundException();
+    if (userGroup.balance < 0) {
+      throw new UnauthorizedException(
+        `Impossible de quitter ce groupe ${group.name} car votre solde est négatif (${userGroup.balance})`,
+      );
+    }
 
     return this.userGroupsService.delete(userGroup);
   }
