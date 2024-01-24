@@ -1,16 +1,20 @@
 {% extends "_layout-group.twig" %}
-{% block content %} 
-    <div style="max-width: 800px;">
-        <div style="padding: 8px; padding-bottom: 16px;">
-            <p>Un membre de votre groupe, {{userName}}, vient de supprimer son compte {{theme.name}} définitivement.</p>
-            <p>Ces commandes passées seront marquées sous le nom de "Utilisateur effacé".</p>
-            
-            <p>
-                Bonne journée,
-            </p>
-            <p>
-                L'équipe {{theme.name}}
-            </p>
-        </div>
-    </div>
+{% block content %}
+	<div style="max-width: 800px;">
+		<div style="padding: 8px; padding-bottom: 16px;">
+			<p>Un membre de votre groupe,
+				{{userName}}, vient de supprimer son compte
+				{{theme.name}}
+				définitivement.</p>
+			<p>Ses commandes passées seront marquées sous le nom de "Utilisateur effacé".</p>
+
+			<p>
+				Bonne journée,
+			</p>
+			<p>
+				L'équipe
+				{{theme.name}}
+			</p>
+		</div>
+	</div>
 {% endblock %}
