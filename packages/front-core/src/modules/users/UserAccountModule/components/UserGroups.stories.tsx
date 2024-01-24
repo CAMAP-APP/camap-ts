@@ -17,7 +17,7 @@ export const UserGroups: React.VFC<{}> = () => (
         {
           firstName: 'Jean-Michel',
           lastName: 'LeDev',
-          email: 'admin@camap.net',
+          email: 'admin@camap.localdomain',
         } as User
       }
     />
