@@ -1,4 +1,8 @@
-# Installation avec docker-compose
+# ATTENTION: Obsolète, doc d'installation à refaire
+
+Privilégier docker-camap comme base d'installation
+
+## Installation avec docker-compose
 
 Ce mode d'installation est recommandé pour une installation locale sur un poste de développement.
 
