@@ -18,8 +18,8 @@ L'application se compose de 3 modules :
 
 -   Installation
     -   [docker-camap](https://github.com/CAMAP-APP/camap-docker) pour une installation simplifiée (avec reverse proxy Traefik)
-    -   [Avec docker-compose](/docs/install.md)
-    -   Avec un [buildpack](https://github.com/CAMAP-APP/neko-scalingo-buildpack-camap) chez [Scalingo](https://www.scalingo.com)
+    -   [Avec docker-compose](/docs/install.md) (ne fonctionne plus, utiliser docker-camap pour une installation locale)
+    -   Avec un [buildpack](https://github.com/CAMAP-APP/neko-scalingo-buildpack-camap) chez [Scalingo](https://www.scalingo.com) (probablement non fonctionnelle)
 -   Briques fonctionnelles
     -   [Utilisateurs](/docs/users.md)
     -   [Groupes](/docs/groups.md)
