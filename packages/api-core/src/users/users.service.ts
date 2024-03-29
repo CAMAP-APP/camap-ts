@@ -327,7 +327,8 @@ export class UsersService {
   async delete(user: Pick<UserEntity, 'id'>, deletedUser?: Pick<UserEntity, 'id'>) {
     let deletedUserId = deletedUser?.id;
     if (!deletedUserId) {
-      deletedUserId = (await this.findOneByEmail('deleted@camap.tld')).id;
+      deletedUserId = (await this.findOneByEmail('deleted@camap.tld'))?.id;
+      if (!deletedUserId) return;
     }
     const userId = user.id;
     // Never delete the DeletedUser
@@ -369,7 +370,7 @@ export class UsersService {
     const userGroups = await this.userGroupsService.find({
       where: { userId: user.id },
     });
-    // Check du solde pour chaque groupe 
+    // Check du solde pour chaque groupe
     if (userGroups.length) {
       userGroups.forEach((ug) => {
         if (ug.balance < 0) {
