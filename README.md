@@ -12,7 +12,7 @@ L'application se compose de 3 modules :
 
 -   CAMAP-haxe, codé en [Haxe](https://haxe.org)
 -   CAMAP-ts, codé en [Typescript](https://www.typescriptlang.org/)
--   une base de données MySQL 5.7
+-   une base de données MySQL 8
 
 ## Documentation technique
 

@@ -51,3 +51,25 @@ Malheureusement, il n'est pas possible de passer à un _characterset_ et une _co
 Le monde Javascript / Node Js / Typescript évolue très vite, ce qui nécéssite de mettre à jour les dépendances régulièrement, au moins sur les briques principales ( _Nest JS, TypeORM, React, Appolo ...etc_) sinon l'application risque de devenir obsolète et difficile à maintenir.
 
 Côté BDD, la version 5.7 de MySQL commence à être ancienne, une évolution vers des versions plus récentes serait bénéfique. ( Si les vieux drivers MySQL de Neko continuent de fonctionner )
+
+# Autre chantiers possibles
+
+## Amélioration du système de thème / boostrap
+
+Le système actuel est documenté dans [theme.md](../../camap-hx/www/theme/theme.md).
+
+Ce système pourrait être améliorer :
+- utilisation de variables CSS avec des valeurs précalculées
+  1. Précompiler une version de bootstrap 3.4 avec des variables css à la place des valeurs
+  2. Déclaration des variables css avec valeurs précalculées (plutôt que les fonction sass) dans un fichier styles.css
+  3. Ajout de styles spécifiques dans styles.css également
+
+Les avantages de ce système :
+- plus besoin de sass (utilisation des valeurs en dur directement dans un fichier styles.css)
+- plus besoin de less (utilisation de variables css pour déclarer les valeurs, dans le même styles.css)
+- plus besoin de script ou autre pour recompiler bootstrap lors d'évolutions (une fois compilé avec des variables css il ne bougera plus)
+
+Ainsi il ne resterait que les fichiers :
+- boostrap.min.css (qu'on compile une fois pour toute)
+- styles.css (dans lequel on définit les variables css que bootstrap pourra utilisée, et les styles additionnels)
+- Ajout de l'outil outil post-css un passe de l'outil post-css pour générer styles.min.css (minifié et optimisé pour la cible navigateurs souhaitée, mais en soit styles.css pourraient fonctionner aussi sans retouche)
