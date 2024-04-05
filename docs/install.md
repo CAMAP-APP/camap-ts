@@ -22,7 +22,9 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
 ### camap-hx (Le socle applicatif initial):
 
 #### backend (templates):
-- role: rendu de templates "templo" via apache2 mod neko.
+- role: 
+  - rendu de templates "templo" via apache2 mod neko.
+  - service d'API sur `/api/<controller>/<action>` où <controller> est défini dans `camap-hx\src\controller\api\<Controller>.hx` et <action> en tant que `doAction` dans le controlleur.
 - sources: camap-hx/common, camap-hx/src, camap-hx/lang/master/tpl, camap-hx/backend
 - output: camap-hx/www/index.n (fichier neko)
 - compilation: `haxe.exe backend/build.hxml --cwd backend`
@@ -71,11 +73,12 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
 
 ## Installer les outils et dépendances
 
-- Installer [VSCode](https://code.visualstudio.com/)
-    - Installer l'extension "Haxe extension pack" depuis l'onglet extensions de VSCode
-    - Installer l'extension "lix" depuis l'onglet extensions de VSCode
 - Installer [NodeJS en version 20.X](https://nodejs.org/)
 - Installer lix (équivalent de npm+nvm pour Haxe) : `npm i -g lix`
+- Installer [VSCode](https://code.visualstudio.com/)
+  - Installer l'extension "Haxe extension pack" depuis l'onglet extensions de VSCode
+  - Installer l'extension "Templo" depuis l'onglet extensions de VSCode
+  - Installer l'extension "lix" depuis l'onglet extensions de VSCode
 
 ## Projet haxe
 
