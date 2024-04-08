@@ -1,5 +1,5 @@
-import { clean, runSass, copyTwigs } from './utils';
+import { clean, copyCss, copyTwigs } from './utils';
 
 clean();
-runSass();
+copyCss();
 copyTwigs();

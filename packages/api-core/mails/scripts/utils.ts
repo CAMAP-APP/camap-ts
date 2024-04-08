@@ -3,47 +3,39 @@ import { watch } from 'chokidar';
 import { copyFileSync, existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
 import * as nodeSass from 'node-sass';
-import { dirname, join } from 'path';
+import { dirname, join, basename } from 'path';
 import * as rimraf from 'rimraf';
 
 export const conf = {
   SRC_DIR: join(__dirname, '../src'),
   DIST_DIR: join(__dirname, '../dist'),
+  STYLES_DIST_DIR: join(__dirname, '../dist', 'styles'),
 };
 
 export const clean = () => {
+  console.log("cleaning " + conf.DIST_DIR)
   rimraf.sync(conf.DIST_DIR);
 };
 
-export const runSass = (w = false) => {
-  const sassGlob = `${conf.SRC_DIR}/**/*.scss`;
+export const copyCss = (w = false) => {
+  const cssGlob = `${conf.SRC_DIR}/**/*.css`;
 
-  const compileSass = (src: string, dest: string) => {
-    mkdirSync(dirname(dest), { recursive: true });
-    const { css } = nodeSass.renderSync({
-      file: src,
-    });
-    writeFileSync(dest, css);
-  };
-
+  console.log("copy css " + cssGlob)
   if (w) {
-    watch(sassGlob).on('all', (event, path) => {
-      const desPath = path
-        .replace(conf.SRC_DIR, conf.DIST_DIR)
-        .replace('.scss', '.css');
+    watch(cssGlob).on('all', (event, file) => {
+      const dest = join(conf.STYLES_DIST_DIR, basename(file));
       if (event === 'add' || event === 'change') {
-        compileSass(path, desPath);
+        copyFileSync(file, dest);
       } else if (event === 'unlink') {
-        unlinkSync(desPath);
+        unlinkSync(dest);
       }
     });
   } else {
-    glob(sassGlob, {}, (err, files) => {
+    glob(cssGlob, {}, (err, files) => {
       files.forEach((file) => {
-        compileSass(
-          file,
-          file.replace(conf.SRC_DIR, conf.DIST_DIR).replace('.scss', '.css'),
-        );
+        const dest = join(conf.STYLES_DIST_DIR, basename(file));
+        console.log("copy " + file + " to " + dest)
+        copyFileSync(file, dest);
       });
     });
   }
@@ -51,10 +43,11 @@ export const runSass = (w = false) => {
 
 export const copyTwigs = (w = false) => {
   const twigGlob = `${conf.SRC_DIR}/**/*.twig`;
+  console.log("copy twig " + twigGlob)
 
-  const stylesDir = join(conf.DIST_DIR, 'styles');
-  if (!existsSync(stylesDir)) {
-    mkdirSync(stylesDir, { recursive: true });
+  const stylesDistDir = conf.STYLES_DIST_DIR;
+  if (!existsSync(stylesDistDir)) {
+    mkdirSync(stylesDistDir, { recursive: true });
   }
   const utilsDir = join(conf.DIST_DIR, 'utils');
   if (!existsSync(utilsDir)) {
@@ -62,10 +55,10 @@ export const copyTwigs = (w = false) => {
   }
 
   if (w) {
-    watch(twigGlob).on('all', (event, path) => {
-      const desPath = path.replace(conf.SRC_DIR, conf.DIST_DIR);
+    watch(twigGlob).on('all', (event, file) => {
+      const desPath = join(conf.DIST_DIR, basename(file));
       if (event === 'add' || event === 'change') {
-        copyFileSync(path, desPath);
+        copyFileSync(file, desPath);
       } else if (event === 'unlink') {
         unlinkSync(desPath);
       }

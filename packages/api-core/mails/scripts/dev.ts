@@ -4,14 +4,14 @@ import * as express from 'express';
 import { existsSync } from 'fs';
 import * as inlineCSS from 'inline-css';
 import { join } from 'path';
-import { clean, runSass, copyTwigs, conf } from './utils';
+import { clean, copyCss, copyTwigs, conf } from './utils';
 import { initTwig } from '../../src/common/mailer/adapters/twing.adapter';
 
 const PORT = 1234;
 const server = express();
 
 clean();
-runSass(true);
+copyCss(true);
 copyTwigs(true);
 
 server.get('/:template', async ({ params: { template }, query }, res) => {
