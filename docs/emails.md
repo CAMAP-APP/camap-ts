@@ -72,3 +72,5 @@ const mail = await this.mailsService.createBufferedJsonMail(
 ### Cron d'envoi des mails en TS
 
 Le cron qui envoie réellement les emails via SMTP est dans `MailsService.sendEmailsFromBuffer()`
+
+Les templates sont à contribuer directement dans `camap-ts\packages\api-core\mails`
