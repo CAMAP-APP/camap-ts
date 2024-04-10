@@ -1,7 +1,7 @@
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import { Box, Card, TextField } from '@mui/material';
 import { DateTimePicker } from '@mui/x-date-pickers';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import { subMonths } from 'date-fns';
 import React from 'react';
 import HaxeDatePicker from './HaxeDatePicker';

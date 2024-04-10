@@ -4,12 +4,13 @@ const { mergeConfig, loadEnv } = require('vite');
 const tsconfigPaths = require('vite-tsconfig-paths').default;
 
 module.exports = {
-  framework: '@storybook/react',
-  stories: [
-    '../src/**/*.stories.mdx',
-    '../src/**/*.stories.@(js|jsx|ts|tsx)',
-    '../stories/**/*.stories.@(js|jsx|ts|tsx)',
-  ],
+  framework: {
+    name: '@storybook/react-vite',
+    options: {}
+  },
+
+  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)', '../stories/**/*.stories.@(js|jsx|ts|tsx)'],
+
   addons: [
     '@storybook/addon-links',
     {
@@ -19,13 +20,11 @@ module.exports = {
       },
     },
   ],
-  features: {
-    storyStoreV7: true,
-  },
+
   core: {
     disableTelemetry: true,
-    builder: '@storybook/builder-vite',
   },
+
   typescript: {
     reactDocgen: 'none',
   },
@@ -58,7 +57,6 @@ module.exports = {
         'process.env.MAPBOX_KEY': JSON.stringify(env.MAPBOX_KEY),
         'process.env.FRONT_GRAPHQL_URL': JSON.stringify(env.FRONT_GRAPHQL_URL),
         'process.env.CAMAP_HOST': JSON.stringify(env.CAMAP_HOST),
-        'process.env.MAPBOX_KEY': JSON.stringify(env.MAPBOX_KEY),
       },
       optimizeDeps: {
         include: [
@@ -76,5 +74,10 @@ module.exports = {
       },
     });
   },
-  staticDirs: ['../../../../../www/'],
+
+  staticDirs: ['../../../../camap-hx/www/'],
+
+  docs: {
+    autodocs: true
+  }
 };

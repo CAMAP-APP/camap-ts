@@ -1,5 +1,5 @@
 import { ApolloProvider } from '@apollo/client';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import { CaveaRouter } from '@utils/cavea-router';
 import { Route, Routes } from 'react-router-dom';
 import initApolloClient from '../../../lib/initApollo';

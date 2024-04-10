@@ -1,5 +1,5 @@
 overwrite: true
-schema: http://localhost:3010/graphql
+schema: https://api.camap.localdomain/graphql
 documents:
   - 'src/gql/queries/**/*.ts'
   - 'src/gql/mutations/**/*.ts'

@@ -4,14 +4,14 @@ module.exports = function expressMiddleware(router) {
   router.use(
     '/graphql',
     createProxyMiddleware({
-      target: 'http://localhost:3010/graphql',
+      target: 'https://api.camap.localdomain/graphql',
       changeOrigin: true,
     }),
   );
   router.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://localhost',
+      target: 'https://camap.localdomain',
       changeOrigin: true,
     }),
   );
