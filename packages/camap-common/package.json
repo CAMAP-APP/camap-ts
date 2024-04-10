@@ -4,7 +4,7 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rollup -c && rm -rf ./dist && mv ./tmp ./dist",
+    "build": "rollup -c && rimraf ./dist && mv ./tmp ./dist",
     "dev": "tsc -w --preserveWatchOutput",
     "lint": "eslint '{src,apps,libs,test}/**/*.ts' --fix",
     "test": "jest",
@@ -21,7 +21,8 @@
     "@typescript-eslint/eslint-plugin": "^2.22.0",
     "core-js": "^3.6.5",
     "eslint": "^6.8.0",
-    "jest": "26.6.3"
+    "jest": "26.6.3",
+    "rimraf": "5.0.5"
   },
   "dependencies": {
     "@babel/core": "^7.9.0",
