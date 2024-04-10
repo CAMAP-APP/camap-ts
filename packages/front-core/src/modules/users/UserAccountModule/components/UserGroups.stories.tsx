@@ -1,5 +1,5 @@
 import { Paper } from '@mui/material';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import React from 'react';
 import { Group, User } from '../../../../gql';
 import Component from './UserGroups';

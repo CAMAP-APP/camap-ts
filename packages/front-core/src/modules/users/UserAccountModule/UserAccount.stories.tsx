@@ -7,7 +7,7 @@ import {
   UserAccountDocument,
 } from '@gql';
 import initApolloClient from '@lib/initApollo';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import * as faker from 'faker';
 import CamapApolloMockedProvider, {
   MockedRequests,
@@ -106,7 +106,6 @@ const mock: MockedRequests = {
     },
   },
   QuitGroup: {
-    try{
       query: QuitGroupDocument,
       handler: () => {
         return Promise.resolve({
@@ -115,9 +114,6 @@ const mock: MockedRequests = {
           },
         });
       },
-    }catch(e) {
-      throw (e);
-    }
   },
 };
 

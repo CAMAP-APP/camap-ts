@@ -6,7 +6,7 @@ import {
   User,
 } from '@gql';
 import initApolloClient from '@lib/initApollo';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import * as faker from 'faker';
 import CamapApolloMockedProvider, {
   MockedRequests,

@@ -1,6 +1,6 @@
 import { ApolloProvider } from '@apollo/client';
 import initApolloClient from '@lib/initApollo';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import { DeleteAccountDocument, LogoutDocument } from '../../../gql';
 import CamapApolloMockedProvider, {
   MockedRequests,
