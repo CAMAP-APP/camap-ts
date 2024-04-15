@@ -1,0 +1,32 @@
+#email-body {
+  color: #5d1e4e;
+  font-family: sans-serif; }
+
+#email-root {
+  margin: auto;
+  max-width: 600px;
+  background-color: white;
+  padding: 16px; }
+
+#email-header {
+  padding: 16px;
+  text-align: center; }
+
+#email-footer {
+  font-size: 0.75rem;
+  max-width: 600px;
+  text-align: center;
+  padding: 16px;
+  padding-top: 0px;
+  margin: auto;
+  margin-top: 24px; }
+
+.bold-green {
+  font-weight: bold;
+  color: #eb702f; }
+
+.light-green-background {
+  background-color: #fff; }
+
+p {
+  margin: 0; }

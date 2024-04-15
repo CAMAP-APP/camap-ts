@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import { DateRange } from 'camap-common';
 import React from 'react';
 import Component from './DateRangePicker';

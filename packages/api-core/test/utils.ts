@@ -2,7 +2,6 @@ import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ApolloError } from 'apollo-server-core';
-import { GraphQLResponse as GraphQLResponseType } from 'apollo-server-types';
 import * as cookieParser from 'cookie-parser';
 import { DocumentNode, print } from 'graphql';
 import * as request from 'supertest';
@@ -19,7 +18,7 @@ import { UserEntity } from '../src/users/models/user.entity';
 initializeTransactionalContext();
 patchTypeORMRepositoryWithBaseRepository();
 
-type ApolloTestResponse<TData> = Omit<GraphQLResponseType, 'data'> & {
+type ApolloTestResponse<TData> = {
   data?: TData;
 };
 
