@@ -28,6 +28,7 @@
     "watch:e2e": "jest --watch --config ./test/jest-e2e.json -i",
     "tsc": "tsc --noEmit -p tsconfig.check.json",
     "typeorm": "typeorm --config ormconfig.js",
+    "dbsync": "typeorm --config ormconfig.js schema:sync",
     "typeorm:l": "USE_LOCAL_DB=1 typeorm",
     "docker-logs": "docker-compose logs -f --tail=100 nest-camap"
   },
@@ -106,7 +107,7 @@
     "i18next-fs-backend": "^1.0.7",
     "inline-css": "4.0.2",
     "md5": "^2.3.0",
-    "mysql": "^2.18.1",
+    "mysql2": "2.3.3",
     "node-sass": "^9.0.0",
     "nodemailer": "^6.7.2",
     "passport": "^0.4.1",
