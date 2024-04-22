@@ -83,16 +83,28 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
 ## Projet haxe
 
 - Ouvrez [backend.code-workspace](../../camap-hx/backend/backend.code-workspace) avec VSCode pour avoir l'environnement backend
+  - Exécutez les commandes dans le dossier backend:
+    - `lix scope create`
+    - `lix install haxe 4.0.5`
+    - `lix use haxe 4.0.5`
+    - `lix download`
   - Exécutez les actions:
-    - "Lix: Download Missing Dependencies"
     - "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
+    - "Build"
 - Ouvrez [frontend.code-workspace](../../camap-hx/frontend/frontend.code-workspace) avec VSCode pour avoir l'environnement frontend
+  - Exécutez les commandes dans le dossier frontend:
+    - `lix scope create`
+    - `lix use haxe 4.0.5`
+    - `lix download`
+    - `npm install`
 - Exécutez les actions:
-  - "Lix: Download Missing Dependencies"
   - "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
+  - "Build"
 
 ## Utiliser le docker-compose.yml pour le dev
 
-Il convient à ce stade de modifier le fichier docker-compose qui a été récupéré depuis camap-docker pour lui permettre d'utiliser les fichiers locaux au lieu de ceux embarqués dans l'image :
+Copier/coller `camap-docker\docker-compose.dev.yml` comme `docker-compose.yml` dans votre dossier camap et exécuter ce docker-compose
+
+exécuter ```docker-compose up -d --build```
 
 
