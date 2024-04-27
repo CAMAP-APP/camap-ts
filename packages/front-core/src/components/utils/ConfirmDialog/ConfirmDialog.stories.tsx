@@ -1,5 +1,5 @@
 import React from 'react';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import { Box, Typography } from '@mui/material';
 import ConfirmDialog, { ConfirmDialogProps } from './ConfirmDialog';
 
@@ -26,5 +26,4 @@ Default.args = {
 export default {
   title: 'components/utils/Confirm dialog',
   component: ConfirmDialog,
-  parameters: { actions: { argTypesRegex: '^on.*' } },
 };

@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import React from 'react';
 import withApollo from '../../lib/withApollo';
 import VatBoxModule, { VatBoxModuleProps } from './VatBox.module';

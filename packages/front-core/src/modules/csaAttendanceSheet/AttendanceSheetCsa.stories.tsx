@@ -1,6 +1,6 @@
 import { ApolloProvider } from '@apollo/client';
 import { Box } from '@mui/material';
-import { Meta } from '@storybook/react/types-6-0';
+import { Meta } from '@storybook/react';
 import React from 'react';
 import initApolloClient from '../../lib/initApollo';
 import ClassicContractAttendanceModule from './ClassicContractAttendanceModule';

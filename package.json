@@ -1,8 +1,7 @@
 {
   "name": "camap-ts",
   "engines": {
-    "node": "16.18.0",
-    "npm": "8.19.2"
+    "node": "20.12.1"
   },
   "cacheDirectories": [
     "node_modules"
@@ -25,7 +24,7 @@
     "dev:typeorm:migration:run": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:run",
     "dev:typeorm:migration:revert": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:revert",
     "dev:typeorm:migration:generate": "docker-compose exec nest-camap npm run --prefix packages/api-core typeorm migration:generate -- -n",
-    "postinstall": "npm i --prefix packages/camap-common && npm i --prefix packages/api-core && npm i npm i --prefix packages/front-core",
+    "postinstall": "npm i --prefix packages/camap-common --ignore-scripts && npm i --prefix packages/api-core --ignore-scripts && npm i --prefix packages/front-core --ignore-scripts",
     "setup": "sh ./scripts/setup.sh",
     "start": "npm run start --prefix ./packages/api-core",
     "schema:sync": "npm run --prefix packages/api-core typeorm schema:sync"

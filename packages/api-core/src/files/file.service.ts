@@ -6,7 +6,6 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { checkDeleted } from '../common/utils';
 import { FileEntity } from '../tools/models/file.entity';
 import { File } from './models/file.type';
-import sharp = require('sharp');
 
 /**
  * File Service
@@ -102,64 +101,4 @@ export class FilesService {
     const result = await this.fileRepo.delete({ id });
     return checkDeleted(result) ? id : null;
   }
-
-  // @Transactional()
-  // @Cron('45 */3 * * * *') // Every 3 minutes at 45 seconds
-  // async compressImages() {
-  //   const todayAtMidnight = new Date();
-  //   todayAtMidnight.setHours(9, 45, 0, 0);
-
-  //   // We take files that have been created before the deployment date of this branch
-  //   const files = await this.fileRepo.find({
-  //     take: 300,
-  //     skip:
-  //       300 * Math.floor(differenceInMinutes(new Date(), todayAtMidnight) / 3) +
-  //       86372,
-  //   });
-  //   this.logger.log(`Will compress ${files.length} files`);
-
-  //   const compressFilesData = await Promise.allSettled(
-  //     files.map((f) => {
-  //       try {
-  //         const extension = this.getExtension(f);
-  //         let sharpped = sharp(f.data);
-  //         if (extension === 'jpeg' || extension === 'jpg') {
-  //           sharpped = sharpped.jpeg({ mozjpeg: true });
-  //         } else {
-  //           sharpped = sharpped.png({ quality: 80 });
-  //         }
-  //         return sharpped.resize(null, 500, { withoutEnlargement: true }).toBuffer();
-  //       } catch (e) {
-  //         // This is probably not an image file
-  //         return;
-  //       }
-  //     }),
-  //   );
-
-  //   this.logger.log(
-  //     `Did compress files. Will update them now. ${compressFilesData.length}`,
-  //   );
-
-  //   let index = files.length - 1;
-  //   while (compressFilesData.length > 0) {
-  //     let compressedFileData = compressFilesData.pop();
-  //     if (compressedFileData.status === 'fulfilled') {
-  //       const file = files[index];
-  //       try {
-  //         await this.fileRepo.update(file.id, { data: compressedFileData.value });
-  //         if (index === 0) {
-  //           this.logger.log(
-  //             `Did update files from ${files[0].id} to ${
-  //               files[files.length - 1].id
-  //             }`,
-  //           );
-  //         }
-  //       } catch (e) {
-  //         this.logger.log(`An error occured ${file?.id} ${e}`);
-  //       }
-  //     }
-
-  //     index -= 1;
-  //   }
-  // }
 }
