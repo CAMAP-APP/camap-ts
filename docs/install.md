@@ -61,13 +61,15 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
 
 ### camap-ts
 
-
+-   Installer les dépendances : `npm i`
+-   Tout compiler : `npm run build`
+-   Relancez éventuellement le container nest-loc-camap
 
 ## Installer l'environnement projet
 
 Tout d'abord, suivez les étapes d'installation de [**camap-docker**](https://github.com/CAMAP-APP/camap-docker).
 
-Utiliser dans un premier temps le docker-compose.yml de base (pas celui de dev).
+Utiliser dans un premier temps le docker-compose.yml de base.
 
 Une fois les étapes terminées, assurez vous de jouer une première fois la commande `docker compose up -d --build` et de vérifier que l'environnement fonctionne en mode production.
 
@@ -97,13 +99,13 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
     - `lix use haxe 4.0.5`
     - `lix download`
     - `npm install`
-- Exécutez les actions:
-  - "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
-  - "Build"
+	- Exécutez les actions:
+		- "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
+		- "Build"
 
 ## Utiliser le docker-compose.yml pour le dev
 
-Copier/coller `camap-docker\docker-compose.dev.yml` comme `docker-compose.yml` dans votre dossier camap et exécuter ce docker-compose
+Cela permettra, grâce aux volumes, de lancer les conteneurs docker avec les fichiers sources locaux de la machine hote.
 
 exécuter ```docker-compose up -d --build```
 
