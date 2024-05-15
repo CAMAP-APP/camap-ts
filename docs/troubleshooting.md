@@ -28,12 +28,11 @@ La route `https://camap.localdomain/user/login` fonctionne, mais n'affiche pas l
 - `[Warning] World-writable config file '/etc/mysql/conf.d/my.cnf' is ignored.`
 	- Changer les permissions vers 0444: `chmod 0444 my.cnf`
 	- Et monter le dossier :
-
-```yaml
-volumes:
-    # Set mysql extra config:
-    - my.cnf:/etc/mysql/conf.d/my.cnf
-```
+		```yaml
+		volumes:
+				# Set mysql extra config:
+				- my.cnf:/etc/mysql/conf.d/my.cnf
+		```
 
 Si la config BD est bien prise en compte, le warning suivant doit apparaitre dans les logs de la BD : "Plugin mysql_native_password reported: ''mysql_native_password' is deprecated and will be removed in a future release. Please use caching_sha2_password instead'"
 
@@ -51,7 +50,7 @@ Si la config BD est bien prise en compte, le warning suivant doit apparaitre dan
 
  ### camap-hx - neko-loc-camap
 - ` Failed to connect to mysql server : Client does not support authentication protocol requested by server; consider upgrading MySQL client`
-	- Pour brancher Neko sur MySQL8, il faut utiliser l'ancienne authentification "mysql_native_password". Pour cela, une ligne a été ajoutée dans `camap-ts/docker-compose/mysql/my.cnf`. Cependant, il faut vérifier que ce fichier est bien pris en compte par la BD. Vérifier les logs de loc-mysql si le warning "World-writable config file" est présent
+	- Pour brancher Neko sur MySQL8, il faut utiliser l'ancienne authentification "mysql_native_password". Pour cela, une ligne a été ajoutée dans `camap-ts/mysql/my.cnf`. Cependant, il faut vérifier que ce fichier est bien pris en compte par la BD. Vérifier les logs de loc-mysql si le warning "World-writable config file" est présent
 
 - `Segmentation fault`
 	- Pas sur, mais tentez d'augmenter la RAM affectée à Docker (j'ai dû monter à 12GB personnellement)

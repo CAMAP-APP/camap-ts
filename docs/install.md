@@ -15,6 +15,8 @@ L'installation consistera a
 2. installer les outils et dépendances nécessaire pour le développement.
 3. personnaliser le docker-file pour utiliser les fichiers sources locaux de la machine hote dans les conteneurs docker,
 
+En cas d'erreur, un troubleshooting est à disposition [ici](./troubleshooting.md)
+
 ## Architecture des projets et interactions
 
 Pour développer une évolution dans l'application CAMAP, il est nécessaire de comprendre comment les projets s'articulent.
