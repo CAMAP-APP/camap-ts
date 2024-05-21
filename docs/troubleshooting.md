@@ -9,6 +9,10 @@ Consultez cette section en cas d'erreur
 - Sinon :
 	- Relancer build
 	- Checker permission
+	Si cela ne fonctionne pas : 
+	- Lisez ['.templates.md'](./templates.md) pour bien comprendre le fonctionnement des templates
+	- `cd backend && haxe build.hxml -D i18n_generation && cd tpl && neko ../../../backend/temploc2.n -macros macros.mtt -output ../tmp/ *.mtt */*.mtt */*/*.mtt`
+
 
 `"Unsupported charset : #255"`
 - Attention à ne pas créer la DB vous même, laissez le serveur camap-hx le faire pour imposer le bon charset

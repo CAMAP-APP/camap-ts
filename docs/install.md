@@ -38,7 +38,7 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
   - Les modifications haxe nécessitent une recompilation (build backend/build.hxml depuis vscode)
 
 #### backend (cron):
-- voir: voir [crons.md](crons.md)
+- voir [crons.md](crons.md)
 
 #### backend (css, html, images, fonts et autres fichiers statics)
 - role: fournir les fichiers css pour les thèmes et les styles de pages
