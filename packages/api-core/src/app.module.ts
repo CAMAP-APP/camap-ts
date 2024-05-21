@@ -42,6 +42,7 @@ const envFilePath = join(
     TypeOrmModule.forRoot(),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
+      cache: 'bounded',
       debug: process.env.NODE_ENV !== 'production',
       playground: process.env.NODE_ENV !== 'production',
       autoSchemaFile: join(process.cwd(), './src/schema.gql'),
