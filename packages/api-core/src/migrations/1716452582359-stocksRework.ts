@@ -10,6 +10,7 @@ export class stocksRework1716452582359 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE \`ProductDistibutionStock\` ADD CONSTRAINT \`ProductDistibutionStock_product\` FOREIGN KEY (\`productId\`) REFERENCES \`Product\`(\`id\`) ON DELETE CASCADE ON UPDATE RESTRICT`);
         await queryRunner.query(`ALTER TABLE \`ProductDistibutionStock\` ADD CONSTRAINT \`ProductDistibutionStock_startDistribution\` FOREIGN KEY (\`startDistributionId\`) REFERENCES \`Distribution\`(\`id\`) ON DELETE CASCADE ON UPDATE RESTRICT`);
         await queryRunner.query(`ALTER TABLE \`ProductDistibutionStock\` ADD CONSTRAINT \`ProductDistibutionStock_endDistribution\` FOREIGN KEY (\`endDistributionId\`) REFERENCES \`Distribution\`(\`id\`) ON DELETE CASCADE ON UPDATE RESTRICT`);
+        await queryRunner.query(`UPDATE \`Product\` SET stockTracking = 1 WHERE stock IS NOT null`);
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
