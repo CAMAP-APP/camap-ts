@@ -1,11 +1,11 @@
 import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
+	Column,
+	Entity,
+	Index,
+	JoinColumn,
+	ManyToOne,
+	OneToMany,
+	PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CatalogEntity } from '../../vendors/entities/catalog.entity';
 import { GroupEntity } from './group.entity';
@@ -20,6 +20,10 @@ export class VolunteerRoleEntity {
 
   @Column('varchar', { name: 'name', length: 64 })
   name: string;
+
+	// field enabledByDefault is added (bool), true by default
+	@Column('tinyint', { name: 'enabledByDefault', width:1, default: 1 })
+	enabledByDefault: boolean;
 
   @Column('int', { name: 'groupId' })
   groupId: number;
