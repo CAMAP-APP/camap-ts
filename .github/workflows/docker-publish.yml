@@ -113,7 +113,7 @@ jobs:
 
     steps:
       - name: Get mysql.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/!./!g' > Dockerfile
+        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/mysql/!!g' > Dockerfile
 
       - name: Get my.cnf from CAMAP-APP/camap-ts
         run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-ts/main/mysql/my.cnf > my.cnf
