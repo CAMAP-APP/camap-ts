@@ -13,9 +13,17 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build-camap-ts:
-    name: Build camap-ts container
+  build-and-push-images:
+    name: Build camap-ts & mysql container
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false      
+      matrix:
+        include:
+          - dockerfile: ./camap-ts.Dockerfile
+            image: ghcr.io/CAMAP-APP/camap-ts
+          - dockerfile: ./mysql.Dockerfile
+            image: ghcr.io/CAMAP-APP/mysql    
     permissions:
       contents: read
       packages: write
@@ -27,97 +35,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # Copy the camap-ts.Dockerfile from CAMAP-APP/camap-docker
+     
       - name: Get camap-ts.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/camap-ts.Dockerfile |  sed 's!camap-ts/!./!g' > Dockerfile
-
-      # Get .env from CAMAP-APP/camap-docker
+        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/camap-ts.Dockerfile |  sed 's!camap-ts/!./!g' > camap-ts.Dockerfile
+     
       - name: Get .env from camap-docker
         run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/.env > .env
 
-      # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
-        with:
-          cosign-release: 'v2.2.4'
-
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          labels: |
-            org.opencontainers.image.title=nest-loc-camap
-            org.opencontainers.image.description="Container 2/3 de l'application Camap (camap-ts)"
-            org.opencontainers.image.vendor="InterAMAP 44"
-            org.opencontainers.image.licenses="GPL-3.0-or-later"
-
-      # Build and push Docker image with Buildx (don't push on PR)
-      # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
-        with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-      
-      
-      # Sign the resulting Docker image digest except on PRs.
-      # This will only write to the public Rekor transparency log when the Docker
-      # repository is public to avoid leaking data.  If you would like to publish
-      # transparency data even for private images, pass --force to cosign below.
-      # https://github.com/sigstore/cosign
-      - name: Sign the published Docker image
-        env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        # This step uses the identity token to provision an ephemeral certificate
-        # against the sigstore community Fulcio instance.
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
-
-      - name: générer des usages d'attestation d'artefact
-        uses: actions/attest-build-provenance@v1 
-        with: 
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}} 
-          subject-digest: ${{ steps.build-and-push.outputs.digest }} 
-          push-to-registry: true
-
-  build-mysql:
-    name: Build mysql for camap container
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
-      
-
-    steps:
       - name: Get mysql.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/mysql/!!g' > Dockerfile
-
-      - name: Get my.cnf from CAMAP-APP/camap-ts
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-ts/main/mysql/my.cnf > my.cnf
-
+        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/!!g' > Dockerfile
+     
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
@@ -140,13 +67,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
         with:
-          images: ${{ env.REGISTRY }}/camap-mysql
-          labels: |
-            org.opencontainers.image.title=nest-loc-camap
-            org.opencontainers.image.description="Container 2/3 de l'application Camap (camap-ts)"
-            org.opencontainers.image.vendor="InterAMAP 44"
-            org.opencontainers.image.licenses="GPL-3.0-or-later"
-
+          images: ${{ matrix.image }}
+      
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -154,12 +76,12 @@ jobs:
         uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
         with:
           context: .
+          file: ${{ matrix.dockerfile }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      
-      
+ 
+    
       # Sign the resulting Docker image digest except on PRs.
       # This will only write to the public Rekor transparency log when the Docker
       # repository is public to avoid leaking data.  If you would like to publish
@@ -177,7 +99,8 @@ jobs:
       - name: générer des usages d'attestation d'artefact
         uses: actions/attest-build-provenance@v1 
         with: 
-          subject-name: ${{ env.REGISTRY }}/camap-mysql
+          subject-name: ${{ matrix.image }} 
           subject-digest: ${{ steps.build-and-push.outputs.digest }} 
           push-to-registry: true
 
+  
