@@ -15,13 +15,15 @@ L'installation consistera a
 2. installer les outils et dépendances nécessaire pour le développement.
 3. personnaliser le docker-file pour utiliser les fichiers sources locaux de la machine hote dans les conteneurs docker,
 
+En cas d'erreur, un troubleshooting est à disposition [ici](./troubleshooting.md)
+
 ## Architecture des projets et interactions
 
 Pour développer une évolution dans l'application CAMAP, il est nécessaire de comprendre comment les projets s'articulent.
 
 ### camap-hx (Le socle applicatif initial):
 
-#### backend (templates):
+#### backend (templates et api):
 - role: 
   - rendu de templates "templo" via apache2 mod neko.
   - service d'API sur `/api/<controller>/<action>` où <controller> est défini dans `camap-hx\src\controller\api\<Controller>.hx` et <action> en tant que `doAction` dans le controlleur.
@@ -34,6 +36,9 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
   - installer l'environnement vscode + docker-compose de développement.
   - Les modifications des templates (.mtt) sont prises en compte au rechargement de la page.
   - Les modifications haxe nécessitent une recompilation (build backend/build.hxml depuis vscode)
+
+#### backend (cron):
+- voir [crons.md](crons.md)
 
 #### backend (css, html, images, fonts et autres fichiers statics)
 - role: fournir les fichiers css pour les thèmes et les styles de pages
@@ -61,13 +66,58 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
 
 ### camap-ts
 
+Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un package.json et quelques outils pour les pilotes globalement.
 
+- role: build et démarrer les sous-projets
+- exécution: voir [package.json](..%2Fpackage.json)
+  - installer toutes les dépendances des packages: camap-ts> `npm install`
+  - build tous les packages: camap-ts> `npm run build`
+  - Démarrer le serveur nest et le cron: camap-ts> `npm start`
+
+#### camap-ts/packages/camap-common
+
+- role: Bibliothèque de code partagé pour les autres application.
+- sources: camap-ts/packages/camap-common/src
+- compilation (via rollup):  camap-ts> `npm run build:common`
+- output:
+  - camap-ts/packages/camap-common/dist/index.js
+    - point d'entrée au format commonJS de la lib
+
+#### camap-ts/packages/api-core
+
+- role: Serveur d'API NestJS, fournit un service d'API complémentaire à camap-hx/backend.
+- sources: camap-ts/packages/api-core/src, camap-common
+- compilation: camap-ts> `npm run build:front`
+- output: camap-ts/packages/front-core/dist/*
+- exécution:
+  - camap-ts> `npm start`
+  - cron: voir [crons.md](crons.md)
+
+#### camap-ts/packages/api-core/mails
+
+- role: Compiler les templates de mails pour l'envoi de mails de la partie typescript de l'app.
+- sources: camap-ts/packages/api-core/mails
+- compilation: camap-ts> `npm run build:mail`
+- output: camap-ts/packages/api-core/mails/dist
+- exécution: via le service nest [emails.md](emails.md)
+
+#### camap-ts/packages/front-core
+
+- role: Compile les neomodules pour les fournir au frontend à la demande.
+- sources: camap-ts/packages/front-core/src, camap-common
+- output: 
+  - camap-ts/public/neostatic/*.bundle.js
+  - camap-ts/public/neostatic/manifest.json
+- compilation: camap-ts> `npm run build:front`
+- utilisation: 
+  - Le template haxe [base.mtt](..%2F..%2Fcamap-hx%2Flang%2Fmaster%2Ftpl%2Fbase.mtt) importe les scripts via [BridgeService.hx](..%2F..%2Fcamap-hx%2Fsrc%2Fservice%2FBridgeService.hx)
+  - voir [neo-modules.md](neo-modules.md)
 
 ## Installer l'environnement projet
 
 Tout d'abord, suivez les étapes d'installation de [**camap-docker**](https://github.com/CAMAP-APP/camap-docker).
 
-Utiliser dans un premier temps le docker-compose.yml de base (pas celui de dev).
+Utiliser dans un premier temps le docker-compose.yml de base.
 
 Une fois les étapes terminées, assurez vous de jouer une première fois la commande `docker compose up -d --build` et de vérifier que l'environnement fonctionne en mode production.
 
@@ -97,14 +147,12 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
     - `lix use haxe 4.0.5`
     - `lix download`
     - `npm install`
-- Exécutez les actions:
-  - "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
-  - "Build"
+	- Exécutez les actions:
+		- "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
+		- "Build"
 
-## Utiliser le docker-compose.yml pour le dev
+## Utiliser le docker-compose.dev.yml pour le dev
 
-Copier/coller `camap-docker\docker-compose.dev.yml` comme `docker-compose.yml` dans votre dossier camap et exécuter ce docker-compose
+Cela permettra, grâce aux volumes, de lancer les conteneurs docker avec les fichiers compilés locaux de la machine hote.
 
-exécuter ```docker-compose up -d --build```
-
-
+exécuter ```docker-compose up -d```
