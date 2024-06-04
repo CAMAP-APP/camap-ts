@@ -37,7 +37,7 @@ jobs:
 
       # Copy the camap-ts.Dockerfile from CAMAP-APP/camap-docker
       - name: Get camap-ts.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/camap-ts.Dockerfile | sed 's!camap-ts!.!' > Dockerfile
+        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/camap-ts.Dockerfile |  sed 's!camap-ts/!./!g' > Dockerfile
 
       # Get .env from CAMAP-APP/camap-docker
       - name: Get .env from camap-docker
