@@ -43,7 +43,7 @@ jobs:
         run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/.env > .env
 
       - name: Get mysql.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/!!g' > Dockerfile
+        run: curl https://raw.githubusercontent.com/CAMAP-APP/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/!!g' > mysql.Dockerfile
      
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
