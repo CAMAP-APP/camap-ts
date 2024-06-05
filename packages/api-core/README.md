@@ -40,13 +40,22 @@ $ npm install
 # development
 $ npm run start
 
-# watch mode
+# watch mode 
 $ npm run start:dev
 
-# production mode
+# production mode 
 $ npm run start:prod
 ```
 
+Migrations are automatically run on start. If you want to run them manually, you can use the following command:
+
+```bash
+$ npm run typeorm migration:run
+```
+
+Typeorm will execute all pending migrations, which are not yet recorded in the database table "migrations"
+
+```bash
 ## Test
 
 ```bash
