@@ -63,13 +63,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
   const group = groupData?.groupPreview;
 
   const onQuitGroup = async () => {
-    try {
-      setGqlError(undefined);
-      const { data: quitGroup } = await quitGroupMutation();
-    } catch (e) {
-      setGqlError(e);
-    }
-    const quitGroupError = quitGroup.error;
+    const { data: quitGroup } = await quitGroupMutation()
     const deletedGroupId = quitGroup?.quitGroup.groupId;
 
     if (groupId !== deletedGroupId) return;
@@ -124,6 +118,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
       <Box p={2}>
         <Title groupName={group.name} />
         <QuitGroupContent user={user} />
+        {quitGroupError && <ApolloErrorAlert error={quitGroupError} />}
         <Box textAlign="center">
           <Button variant="contained" onClick={onQuitGroup}>
             {t('quitGroup')}

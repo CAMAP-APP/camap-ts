@@ -96,44 +96,6 @@ export class GroupsResolver {
     const group = await this.groupsService.findOne(groupId);
 
     if (!group) throw new NotFoundException();
-    // AJOUTER CONTROLE
-    // Bloquer si commandes < 1 mois
-
-    // BUG: il ne faut chercher les commandes que dans le groupe concerné
-    // BUG: désactivé le temps de corriger
-    /*
-    let oneMonthsAgo = subMonths(new Date(), 1);
-
-    // Don't delete those who still have orders in less than 1 month
-    let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
-      currentUser.id,
-    );
-    orders1 = orders1.filter((o) => {
-      if (!o) return false;
-      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-      return isAfter(date, oneMonthsAgo);
-    });
-    if (orders1.length > 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
-      );
-    }
-    let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
-      currentUser.id,
-    );
-    orders2 = orders2.filter((o) => {
-      if (!o) return false;
-      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-      return isAfter(date, oneMonthsAgo);
-    });
-    if (orders2.length > 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
-      );
-    }
-    */
-    // Bloquer sortie du groupe si groupe Hébergement Camap (id 16936)
-    // Bloquer sortie du groupe si solde < 0
 
     if (groupId == 16936) {
       //throw new Error('Vous ne pouvez pas quitter ce groupe');
@@ -153,6 +115,8 @@ export class GroupsResolver {
 
     return this.userGroupsService.delete(userGroup);
   }
+
+  // TODO: ajouter "quitGroupByControlKey"
 
   @Transactional()
   @Mutation(() => Group)
