@@ -1,4 +1,4 @@
-import { NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {ForbiddenException, NotFoundException, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {
   Args,
   Int,
@@ -25,23 +25,7 @@ import { UserGroupsService } from '../services/user-groups.service';
 import { Group } from '../types/group.type';
 import { UserGroup } from '../types/user-group.type';
 import { OrdersService } from '../../payments/services/orders.service';
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
-  format,
-  isAfter,
-  isSameDay,
-  parseISO,
-  setHours,
-  setMilliseconds,
-  setMinutes,
-  setSeconds,
-  subMilliseconds,
-  subMonths,
-  subYears,
-} from 'date-fns';
+import {GraphQLError} from "graphql";
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => Group)
@@ -153,7 +137,7 @@ export class GroupsResolver {
 
     if (groupId == 16936) {
       //throw new Error('Vous ne pouvez pas quitter ce groupe');
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         `Vous ne pouvez pas quitter ce groupe`,
       );
     }
@@ -161,9 +145,10 @@ export class GroupsResolver {
     const userGroup = await this.userGroupsService.get(currentUser, groupId);
     if (!userGroup) throw new NotFoundException();
     if (userGroup.balance < 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${group.name} car votre solde est négatif (${userGroup.balance})`,
-      );
+      throw new ForbiddenException({message: 'unableToQuitGroupNegativeBalance', options: {
+        groupName: group.name,
+        balance: userGroup.balance
+      }})
     }
 
     return this.userGroupsService.delete(userGroup);

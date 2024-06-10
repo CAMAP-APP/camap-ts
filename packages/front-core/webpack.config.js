@@ -13,6 +13,7 @@ const DIST_PATH = path.resolve(__dirname, '../../public/neostatic');
 module.exports = {
   mode: MODE,
   entry: { neo: './src/neo.tsx' },
+  // devtool: 'eval', // in dev mode, uncomment this line to get sourcemaps
   resolve: {
     plugins: [new TsconfigPathsPlugin()],
     extensions: ['.ts', '.tsx', '.js', '.json'],
