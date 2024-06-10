@@ -1,6 +1,5 @@
 import { isANestException } from '@utils/apolloError';
 import { GraphQLError } from 'graphql';
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import AlertError from '../AlertError';
 
@@ -8,21 +7,23 @@ export interface ApolloGqlErrorAlertProps {
   graphqlError: GraphQLError;
 }
 
-const extractResponseFromNestException = (gqlError: GraphQLError) => {
+type StandardError = {statusCode:number, message:string}
+
+const extractResponseFromNestException = (gqlError: GraphQLError) : StandardError => {
   if (!isANestException(gqlError))
     throw new Error(
       '[extractResponseFromNestException] invalid next exception',
     );
   const { code, response } = gqlError.extensions;
-
+	
   if (typeof response === 'string') {
     return {
-      statusCode: code,
+      statusCode: code as number,
       message: gqlError.message,
     };
   }
 
-  return response;
+  return response as StandardError;
 };
 
 const ApolloGqlErrorAlert = ({ graphqlError }: ApolloGqlErrorAlertProps) => {
@@ -37,7 +38,7 @@ const ApolloGqlErrorAlert = ({ graphqlError }: ApolloGqlErrorAlertProps) => {
     message = exists(`${response.message}`)
       ? t(`${response.message}`)
       : t(`${response.statusCode}`);
-  }
+		}
   return <AlertError message={message} />;
 };
 

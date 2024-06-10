@@ -17,5 +17,6 @@
   "wrongCredentials": "Nom d’utilisateur ou mot de passe incorrect",
   "emailAlreadyRegistered": "Nous avons déjà un compte avec cette adresse courriel",
   "bruteForce": "Vous avez essayé de vous connecter sans succès plus de 4 fois, votre adresse IP est bannie pendant 10 minutes.",
-  "Invalid time value": "La date n'est pas correcte"
+  "Invalid time value": "La date n'est pas correcte",
+	"unableToQuitGroupNegativeBalance": "Impossible de quitter ce groupe car votre solde est négatif"
 }
