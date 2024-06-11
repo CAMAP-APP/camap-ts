@@ -81,18 +81,6 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
     </Typography>
   );
 
-  /** */
-  if (!!group && !userId) {
-    return (
-      <Card>
-        <Box p={2}>
-          <Title groupName={group.name} />
-          <Alert severity={'info'}>{t('youShouldBeLoggedToQuitGroup')}</Alert>
-        </Box>
-      </Card>
-    );
-  }
-
   let error = userError || groupError || quitGroupError;
   if (error) {
     return (
