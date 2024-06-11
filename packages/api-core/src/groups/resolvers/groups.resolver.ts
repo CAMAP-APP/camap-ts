@@ -13,7 +13,6 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
 import { compressImage } from '../../common/image';
 import { FilesService } from '../../files/file.service';
-import { PaymentsService } from '../../payments/services/payments.service';
 import { MultiDistribEntity } from '../../shop/entities/multi-distrib.entity';
 import { MultiDistribsService } from '../../shop/services/multi-distribs.service';
 import { MultiDistrib } from '../../shop/types/multi-distrib.type';
@@ -24,10 +23,9 @@ import { GroupsService } from '../services/groups.service';
 import { UserGroupsService } from '../services/user-groups.service';
 import { Group } from '../types/group.type';
 import { UserGroup } from '../types/user-group.type';
-import { OrdersService } from '../../payments/services/orders.service';
-import {GraphQLError} from "graphql";
+import { isControlKeyValid } from '../../common/utils';
+import { CryptoService } from '../../tools/crypto.service';
 
-@UseGuards(GqlAuthGuard)
 @Resolver(() => Group)
 export class GroupsResolver {
   constructor(
@@ -35,12 +33,12 @@ export class GroupsResolver {
     private readonly usersService: UsersService,
     private readonly userGroupsService: UserGroupsService,
     private readonly filesService: FilesService,
-    private readonly paymentsService: PaymentsService,
     private readonly multiDistribsService: MultiDistribsService,
-    private readonly ordersService: OrdersService,
+    private readonly cryptoService: CryptoService,
   ) { }
 
   /** QUERIES */
+  @UseGuards(GqlAuthGuard)
   @Query(() => Group, { name: 'group' })
   async get(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -57,17 +55,20 @@ export class GroupsResolver {
   /**
    * RESOLVE FIELDS
    */
+  @UseGuards(GqlAuthGuard)
   @ResolveField()
   async user(@Parent() group: GroupEntity) {
     return this.usersService.findOne(group.userId);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => String, { nullable: true })
   async image(@Parent() parent: GroupEntity): Promise<string | null> {
     if (!parent.imageId) return null;
     return this.filesService.getUrl(parent.imageId);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => UserGroup, { nullable: true })
   async userGroup(
     @Parent() group: GroupEntity,
@@ -76,6 +77,7 @@ export class GroupsResolver {
     return this.userGroupsService.get(currentUser, group.id);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => [MultiDistrib])
   multiDistribs(
     @Parent() group: Group & { multiDistribs?: Promise<MultiDistribEntity[]> },
@@ -87,37 +89,57 @@ export class GroupsResolver {
   }
 
   /** MUTATIONS */
+  @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => UserGroup)
   async quitGroup(
     @Args('groupId', { type: () => Int }) groupId: number,
     @CurrentUser() currentUser: UserEntity,
   ) {
+    return await this.doQuitGroup(groupId, currentUser);
+  }
+
+  @Transactional()
+  @Mutation(() => UserGroup)
+  async quitGroupByControlKey(
+    @Args('groupId', { type: () => Int }) groupId: number,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('controlKey', { type: () => String }) controlKey: string,
+  ) {
+    if (!isControlKeyValid(this.cryptoService, userId, controlKey, groupId)) {
+      throw new UnauthorizedException();
+    }
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new NotFoundException();
+    return this.doQuitGroup(groupId, user);
+  }
+
+  private async doQuitGroup(groupId: number, user: UserEntity) {
     const group = await this.groupsService.findOne(groupId);
 
     if (!group) throw new NotFoundException();
 
     if (groupId == 16936) {
-      //throw new Error('Vous ne pouvez pas quitter ce groupe');
       throw new ForbiddenException(
         `Vous ne pouvez pas quitter ce groupe`,
       );
     }
 
-    const userGroup = await this.userGroupsService.get(currentUser, groupId);
+    const userGroup = await this.userGroupsService.get(user, groupId);
     if (!userGroup) throw new NotFoundException();
     if (userGroup.balance < 0) {
-      throw new ForbiddenException({message: 'unableToQuitGroupNegativeBalance', options: {
-        groupName: group.name,
-        balance: userGroup.balance
-      }})
+      throw new ForbiddenException({
+        message: 'unableToQuitGroupNegativeBalance', options: {
+          groupName: group.name,
+          balance: userGroup.balance,
+        },
+      });
     }
 
     return this.userGroupsService.delete(userGroup);
   }
 
-  // TODO: ajouter "quitGroupByControlKey"
-
+  @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => Group)
   async setGroupImage(

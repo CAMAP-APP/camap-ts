@@ -537,6 +537,7 @@ type Mutation {
   validateOperation(id: Int!, type: PaymentTypeId): Operation!
   deleteOperation(id: Int!): Int
   quitGroup(groupId: Int!): UserGroup!
+  quitGroupByControlKey(groupId: Int!, userId: Int!, controlKey: String!): UserGroup!
   setGroupImage(groupId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Group!
   removeUsersFromGroup(userIds: [Int!]!, groupId: Int!): RemoveUsersFromGroupResponse!
   importAndCreateMembers(groupId: Int!, withAccounts: [Int!]!, withoutAccounts: [SendInvitesToNewMembersInput!]!): SendInvitesToNewMembersResponse!

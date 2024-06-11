@@ -82,3 +82,11 @@ mutation quitGroup($groupId: Int!) {
     groupId
   }
 }
+
+
+mutation quitGroupByControlKey($userId: Int!, $groupId: Int!, $controlKey: String!) {
+  quitGroupByControlKey(groupId: $groupId, userId: $userId, controlKey: $controlKey) {
+    userId
+    groupId
+  }
+}

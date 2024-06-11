@@ -3,10 +3,9 @@ import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import {
   useGetUserFromControlKeyLazyQuery,
   useGroupPreviewQuery,
-  useQuitGroupMutation,
+  useQuitGroupByControlKeyMutation,
 } from '@gql';
 import {
-  Alert,
   Box,
   Button,
   Card,
@@ -43,8 +42,8 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
     },
   });
 
-  const [quitGroupMutation, { error: quitGroupError }] = useQuitGroupMutation({
-    variables: { groupId },
+  const [quitGroupMutation, { error: quitGroupError }] = useQuitGroupByControlKeyMutation({
+    variables: { groupId, userId: userId || -1, controlKey },
   });
 
   React.useEffect(() => {
@@ -64,7 +63,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
 
   const onQuitGroup = async () => {
     const { data: quitGroup } = await quitGroupMutation()
-    const deletedGroupId = quitGroup?.quitGroup.groupId;
+    const deletedGroupId = quitGroup?.quitGroupByControlKey.groupId;
 
     if (groupId !== deletedGroupId) return;
 
@@ -82,20 +81,13 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
   );
 
   let error = userError || groupError || quitGroupError;
-  if (error) {
-    return (
-      <Card>
-        <CardContent>
-          <ApolloErrorAlert error={error} />
-        </CardContent>
-      </Card>
-    );
-  }
+
   let loading = userLoading || groupLoading;
   if (loading || !user || !group) {
     return (
       <Card>
         <CardContent>
+          {error && <ApolloErrorAlert error={error} />}
           <CircularProgressBox />
         </CardContent>
       </Card>
@@ -106,7 +98,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
       <Box p={2}>
         <Title groupName={group.name} />
         <QuitGroupContent user={user} />
-        {quitGroupError && <ApolloErrorAlert error={quitGroupError} />}
+        {error && <Box my={2}><ApolloErrorAlert error={error} /</Box>>}
         <Box textAlign="center">
           <Button variant="contained" onClick={onQuitGroup}>
             {t('quitGroup')}

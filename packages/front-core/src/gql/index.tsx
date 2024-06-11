@@ -386,6 +386,7 @@ export type Mutation = {
   logout?: Maybe<Scalars['Int']>;
   moveBackToWaitingList: MoveBackToWaitingListResponse;
   quitGroup: UserGroup;
+  quitGroupByControlKey: UserGroup;
   recordBadLogin: Scalars['Int'];
   register: User;
   removeUsersFromGroup: RemoveUsersFromGroupResponse;
@@ -471,6 +472,13 @@ export type MutationMoveBackToWaitingListArgs = {
 
 export type MutationQuitGroupArgs = {
   groupId: Scalars['Int'];
+};
+
+
+export type MutationQuitGroupByControlKeyArgs = {
+  controlKey: Scalars['String'];
+  groupId: Scalars['Int'];
+  userId: Scalars['Int'];
 };
 
 
@@ -1496,6 +1504,15 @@ export type QuitGroupMutationVariables = Exact<{
 
 
 export type QuitGroupMutation = { __typename?: 'Mutation', quitGroup: { __typename?: 'UserGroup', userId: number, groupId: number } };
+
+export type QuitGroupByControlKeyMutationVariables = Exact<{
+  userId: Scalars['Int'];
+  groupId: Scalars['Int'];
+  controlKey: Scalars['String'];
+}>;
+
+
+export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroupByControlKey: { __typename?: 'UserGroup', userId: number, groupId: number } };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -3679,3 +3696,43 @@ export function useQuitGroupMutation(baseOptions?: ApolloReactHooks.MutationHook
 export type QuitGroupMutationHookResult = ReturnType<typeof useQuitGroupMutation>;
 export type QuitGroupMutationResult = Apollo.MutationResult<QuitGroupMutation>;
 export type QuitGroupMutationOptions = Apollo.BaseMutationOptions<QuitGroupMutation, QuitGroupMutationVariables>;
+export const QuitGroupByControlKeyDocument = gql`
+    mutation quitGroupByControlKey($userId: Int!, $groupId: Int!, $controlKey: String!) {
+  quitGroupByControlKey(
+    groupId: $groupId
+    userId: $userId
+    controlKey: $controlKey
+  ) {
+    userId
+    groupId
+  }
+}
+    `;
+export type QuitGroupByControlKeyMutationFn = Apollo.MutationFunction<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;
+
+/**
+ * __useQuitGroupByControlKeyMutation__
+ *
+ * To run a mutation, you first call `useQuitGroupByControlKeyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useQuitGroupByControlKeyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [quitGroupByControlKeyMutation, { data, loading, error }] = useQuitGroupByControlKeyMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      groupId: // value for 'groupId'
+ *      controlKey: // value for 'controlKey'
+ *   },
+ * });
+ */
+export function useQuitGroupByControlKeyMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>(QuitGroupByControlKeyDocument, options);
+      }
+export type QuitGroupByControlKeyMutationHookResult = ReturnType<typeof useQuitGroupByControlKeyMutation>;
+export type QuitGroupByControlKeyMutationResult = Apollo.MutationResult<QuitGroupByControlKeyMutation>;
+export type QuitGroupByControlKeyMutationOptions = Apollo.BaseMutationOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;

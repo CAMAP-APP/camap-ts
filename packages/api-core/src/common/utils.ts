@@ -2,6 +2,7 @@ import { getNamespace } from 'cls-hooked';
 import { DeleteResult } from 'typeorm';
 import { NAMESPACE_NAME } from 'typeorm-transactional-cls-hooked';
 import { getEntityManagerForConnection } from 'typeorm-transactional-cls-hooked/dist/common';
+import { CryptoService } from '../tools/crypto.service';
 
 export const checkDeleted = (
   result: DeleteResult,
@@ -55,3 +56,20 @@ export const convertAllEmptyStringsToNull = <T>(entity: T): T => {
   });
   return adaptedInput;
 };
+
+/**
+ * HELPERS
+ */
+export function isControlKeyValid(
+  cryptoService: CryptoService,
+  userId: number,
+  controlKey: string,
+  groupId?: number
+): boolean {
+  let stringToHash = '';
+  if (groupId) {
+    stringToHash += groupId;
+  }
+  stringToHash += userId;
+  return controlKey === cryptoService.sha1(stringToHash);
+}
