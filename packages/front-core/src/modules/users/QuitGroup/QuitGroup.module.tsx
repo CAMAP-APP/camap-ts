@@ -98,7 +98,7 @@ const QuitGroupModule = ({ userId, groupId, controlKey }: QuitGroupProps) => {
       <Box p={2}>
         <Title groupName={group.name} />
         <QuitGroupContent user={user} />
-        {error && <Box my={2}><ApolloErrorAlert error={error} /</Box>>}
+        {error && <Box my={2}><ApolloErrorAlert error={error} /></Box>}
         <Box textAlign="center">
           <Button variant="contained" onClick={onQuitGroup}>
             {t('quitGroup')}

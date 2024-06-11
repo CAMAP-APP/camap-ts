@@ -37,13 +37,13 @@ const ApolloGqlErrorAlert = ({graphqlError}: ApolloGqlErrorAlertProps) => {
   const {t: _t, i18n} = useTranslation('errors');
   const t = (key: string, extensions?: GraphQLErrorExtensions) => _t(`errors:${key}`, extensions);
   const exists = (key: string) => i18n.exists(`errors:${key}`);
-  let message = t(`${graphqlError.extensions?.code || graphqlError.message}`);
+  let message = graphqlError.message || t(`${graphqlError.extensions?.code}`);
   /** */
   if (isANestException(graphqlError)) {
     const response = extractResponseFromNestException(graphqlError);
     message = exists(`${response.message}`)
       ? t(`${response.message}`, response.options)
-      : t(`${response.statusCode}`);
+      : (!!response.message ? response.message : t(`${response.statusCode}`));
   }
   return <AlertError message={message}/>;
 };
