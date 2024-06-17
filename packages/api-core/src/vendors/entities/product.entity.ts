@@ -10,7 +10,7 @@ import {
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';
 import { FileEntity } from '../../tools/models/file.entity';
 import { CatalogEntity } from './catalog.entity';
-import { ProductDistibutionStockEntity } from './productDistributionStock.entity';
+import { ProductDistributionStockEntity } from './productDistributionStock.entity';
 
 @Index('Product_catalogId', ['catalogId'], {})
 @Index('Product_imageId', ['imageId'], {})
@@ -98,8 +98,8 @@ export class ProductEntity {
   userOrders: Promise<UserOrderEntity[]>;
 
   /** */
-  @OneToMany(() => ProductDistibutionStockEntity, (productDistributionStock) => productDistributionStock.product)
-  distributionStocks: Promise<ProductDistibutionStockEntity[]>;
+  @OneToMany(() => ProductDistributionStockEntity, (productDistributionStock) => productDistributionStock.product)
+  distributionStocks: Promise<ProductDistributionStockEntity[]>;
 
   /**
    * get price including margins
