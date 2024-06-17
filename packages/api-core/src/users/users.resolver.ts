@@ -37,6 +37,7 @@ import {
   userHasEmailNotifOuverture,
 } from './user.utils';
 import { UsersService } from './users.service';
+import { isControlKeyValid } from '../common/utils';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -68,7 +69,7 @@ export class UsersResolver {
     @Args({ name: 'controlKey' }) controlKey: string,
     @Args({ name: 'groupId', type: () => Int, nullable: true }) groupId?: number,
   ) {
-    if (!this.isControlKeyValid(id, controlKey, groupId)) {
+    if (!isControlKeyValid(this.cryptoService, id, controlKey, groupId)) {
       throw new UnauthorizedException();
     }
 
@@ -158,7 +159,7 @@ export class UsersResolver {
   ) {
     // Either we have a connected user or a controlKey.
     if (controlKey) {
-      if (!this.isControlKeyValid(userId, controlKey)) {
+      if (!isControlKeyValid(this.cryptoService, userId, controlKey)) {
         throw new UnauthorizedException();
       }
     } else if (currentUser && userId !== currentUser.id) {
@@ -219,21 +220,5 @@ export class UsersResolver {
     );
 
     return deletedUserId;
-  }
-
-  /**
-   * HELPERS
-   */
-  private isControlKeyValid(
-    userId: number,
-    controlKey: string,
-    groupId?: number,
-  ): boolean {
-    let stringToHash = '';
-    if (groupId) {
-      stringToHash += groupId;
-    }
-    stringToHash += userId;
-    return controlKey === this.cryptoService.sha1(stringToHash);
   }
 }

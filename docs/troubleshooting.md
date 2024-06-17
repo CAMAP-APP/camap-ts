@@ -28,6 +28,11 @@ Consultez cette section en cas d'erreur
 
 La route `https://camap.localdomain/user/login` fonctionne, mais n'affiche pas le formulaire + erreurs en console (`Uncaught TypeError: can't access property "createNeoModule", neo is undefined`)
 
+`"Failed to fetch" avec message console de type: "Mixed Content: The page at 'https://camap.localdomain/subscriptions/contract/80556' was loaded over HTTPS, but requested an insecure resource 'http://neko-loc-camap/api/catalog/80556'. This request has been blocked; the content must be served over HTTPS."`
+- **explication**: La configuration de la variable CAMAP_HOST dans l'environnement camap-ts *au moment de la compilation du frontend* est une URL et celle-ci n'est pas accessible par le navigateur (erreur de domaine ou de protocole ici).
+- Vérifier le configuration de CAMAP_HOST dans `camap-ts/.env`, cette URL est utilisée à la fois par le cron camap-ts et à la fois pour générer des URL à destination du frontend dans front-core.
+- Il convient de refaire un build de `camap-ts/packages/front-core` après modification pour que la nouvelle valeur soit prise en compte.
+
 ## Base de données - loc-mysql
 - `[Warning] World-writable config file '/etc/mysql/conf.d/my.cnf' is ignored.`
 	- Changer les permissions vers 0444: `chmod 0444 my.cnf`

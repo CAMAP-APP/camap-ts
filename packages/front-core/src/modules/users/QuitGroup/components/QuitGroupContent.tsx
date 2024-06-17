@@ -4,7 +4,7 @@ import { formatUserAndPartnerNames } from '../../../../utils/fomat';
 import { useCamapTranslation } from '../../../../utils/hooks/use-camap-translation';
 
 interface QuitGroupContentProps {
-  user: Pick<User, 'email' | 'email2'>;
+  user: User;
 }
 
 const QuitGroupContent = ({ user }: QuitGroupContentProps) => {
