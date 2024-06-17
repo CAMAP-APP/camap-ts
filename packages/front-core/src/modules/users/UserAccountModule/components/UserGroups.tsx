@@ -87,9 +87,7 @@ const UserGroups = ({ groups, user, currentGroupId }: UserGroupsProps) => {
               });
 
               try {
-                const onClick = () =>
-
-                  quitGroupMutation({ variables: { groupId: group.id } });
+                const onClick = () => quitGroupMutation({ variables: { groupId: group.id } });
 
                 return (
                   <TableRow key={group.id}>

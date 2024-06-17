@@ -2,11 +2,11 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { ProductEntity } from './product.entity';
 import { DistributionEntity } from '../../shop/entities/distribution.entity';
 
-@Index('ProductDistibutionStock_productId', ['productId'], {})
-@Index('ProductDistibutionStock_startDistributionId', ['startDistributionId'], {})
-@Index('ProductDistibutionStock_endDistributionId', ['endDistributionId'], {})
-@Entity('ProductDistibutionStock')
-export class ProductDistibutionStockEntity {
+@Index('ProductDistributionStock_productId', ['productId'], {})
+@Index('ProductDistributionStock_startDistributionId', ['startDistributionId'], {})
+@Index('ProductDistributionStock_endDistributionId', ['endDistributionId'], {})
+@Entity('ProductDistributionStock')
+export class ProductDistributionStockEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 

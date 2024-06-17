@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack",
     "lint": "eslint src/**/*.{ts,tsx} --fix",
-    "gen:gql": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 DOTENV_CONFIG_PATH=../../.env graphql-codegen --dotenvconfig --config ./gql.gen.yml -r dotenv/config && code ./src/gql/index.tsx",
+    "gen:gql": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 graphql-codegen --config ./gql.gen.yml",
     "precommit": "lint-staged",
     "storybook": "storybook dev -p 6006 --no-open",
     "test": "jest",
