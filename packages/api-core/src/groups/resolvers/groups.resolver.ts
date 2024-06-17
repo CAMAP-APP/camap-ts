@@ -25,12 +25,14 @@ import { Group } from '../types/group.type';
 import { UserGroup } from '../types/user-group.type';
 import { isControlKeyValid } from '../../common/utils';
 import { CryptoService } from '../../tools/crypto.service';
+import { OrdersService } from '../../payments/services/orders.service';
 
 @Resolver(() => Group)
 export class GroupsResolver {
   constructor(
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
+    private readonly ordersService: OrdersService,
     private readonly userGroupsService: UserGroupsService,
     private readonly filesService: FilesService,
     private readonly multiDistribsService: MultiDistribsService,
@@ -134,6 +136,14 @@ export class GroupsResolver {
           balance: userGroup.balance,
         },
       });
+    }
+
+    // Don't delete users who still have recent orders of less than 1 month
+    let orders = await this.ordersService.findRecentUserOrders(user.id, groupId);
+    if (orders.length > 0) {
+      throw new ForbiddenException(
+        `Impossible de quitter ce groupe ${group.name} vous avez des commandes trop récentes (< 1 mois). test: ${JSON.stringify(orders)}`,
+      );
     }
 
     return this.userGroupsService.delete(userGroup);

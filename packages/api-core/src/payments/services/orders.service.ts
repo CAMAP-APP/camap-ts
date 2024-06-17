@@ -70,4 +70,25 @@ export class OrdersService {
       },
     );
   }
+
+  /**
+   * Find orders that are not older than one month, belong to the userId, and related to the groupId
+   * @param userId
+   * @param groupId
+   */
+  async findRecentUserOrders(
+    userId: number,
+    groupId: number,
+  ): Promise<Pick<UserOrderEntity, 'id'>[]> {
+    return this.ordersRepo
+      .createQueryBuilder('o')
+      .select('o.id')
+      .where(`o.userId2 = :userId OR o.userId = :userId`, { userId })
+      .andWhere('o.date >= NOW() - INTERVAL 1 MONTH')
+      // need to find the groupId via UserOrderEntity.product.catalog.group
+      .innerJoin('o.product', 'p')
+      .innerJoin('p.catalog', 'c')
+      .innerJoin('c.group', 'g', 'g.id = :groupId', { groupId })
+      .getRawMany();
+  }
 }
