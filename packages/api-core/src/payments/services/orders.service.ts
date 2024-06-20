@@ -85,7 +85,7 @@ export class OrdersService {
       .select('o.id')
       .where('o.date >= NOW() - INTERVAL 1 MONTH')
       .andWhere(new Brackets(qb => {
-          qb.where(`o.userId2 = :userId`, { userId })
+          qb.where(`o.userId = :userId`, { userId })
             .orWhere(`o.userId2 = :userId`, { userId });
         }))
       // need to find the groupId via UserOrderEntity.product.catalog.group
