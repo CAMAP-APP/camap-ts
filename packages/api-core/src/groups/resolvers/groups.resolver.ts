@@ -142,7 +142,7 @@ export class GroupsResolver {
     let orders = await this.ordersService.findRecentUserOrders(user.id, groupId);
     if (orders.length > 0) {
       throw new ForbiddenException(
-        `Impossible de quitter ce groupe ${group.name} vous avez des commandes trop récentes (< 1 mois). test: ${JSON.stringify(orders)}`,
+        `Impossible de quitter ce groupe ${group.name} vous avez des commandes trop récentes (< 1 mois).`,
       );
     }
 
