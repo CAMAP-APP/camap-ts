@@ -163,7 +163,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                   inputMode: 'numeric',
                   pattern: '[0-9]*',
                 }}
-                value={defaultOrder[p.id]}
+                value={defaultOrder[p.id] ?? ""}
                 onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                   onOrderChange(p.id, parseInt(event.target.value, 10))
                 }
