@@ -5,7 +5,7 @@ import {
   ButtonBase,
   Divider,
   Modal,
-  TextField,
+  TextField, Tooltip,
   Typography,
   useMediaQuery,
 } from '@mui/material';
@@ -275,6 +275,8 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     return <CircularProgressBox />;
   }
 
+  const hasStockManagement = catalog.hasStockManagement;
+
   return (
     <Box>
       <Block
@@ -393,6 +395,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
                   >
                     {slicedDistributions.map((d) => (
                       <Box
+                        position="relative"
                         key={`order_${d.id}_${p.id}`}
                         sx={getSlideItemSx(
                           maxNbDistribToShow,
@@ -401,7 +404,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
                           distributions.length,
                         )}
                       >
-                        {d.state !== RestDistributionState.Absent ? (
+                        {d.state !== RestDistributionState.Absent ? (<>
                           <TextField
                             disabled={
                               d.state !== RestDistributionState.Open || loading
@@ -424,7 +427,14 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
                             onFocus={onFocus}
                             hiddenLabel
                           />
-                        ) : (
+                          {catalog.hasStockManagement && catalog.stocksPerProductDistribution[p.id] != null && catalog.stocksPerProductDistribution[p.id][d.id] != null && (
+                            <Typography align="center" color="grey" fontSize="0.8em" position="absolute" bottom={2} right={5} whiteSpace="nowrap">
+                              <Tooltip title={`${t('Available')}: ${catalog.stocksPerProductDistribution[p.id][d.id]}`}>
+                                <span><i className="icon icon-wholesale" style={{fontSize: '0.9em'}}/> {catalog.stocksPerProductDistribution[p.id][d.id]}</span>
+                              </Tooltip>
+                            </Typography>
+                          )}
+                        </>) : (
                           <Box width={150} minHeight={56} />
                         )}
                       </Box>

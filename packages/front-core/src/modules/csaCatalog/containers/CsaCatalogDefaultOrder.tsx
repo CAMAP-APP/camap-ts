@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab';
-import { Box, ButtonBase, TextField, Typography } from '@mui/material';
+import { Box, ButtonBase, TextField, Tooltip, Typography } from '@mui/material';
 import React from 'react';
 import Block from '../../../components/utils/Block/Block';
 import { CamapIconId } from '../../../components/utils/CamapIcon';
@@ -9,7 +9,7 @@ import ProductModal, {
   ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
-import { CatalogType } from '../../../gql';
+import { CatalogType, StockTracking } from '../../../gql';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import { restCsaCatalogTypeToType } from '../interfaces';
@@ -131,49 +131,67 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
       </Typography>
 
       <Box width="100%" my={2}>
-        {catalog.products.map((p) => (
-          <Box
-            key={`product_${p.id}`}
-            width="100%"
-            display="flex"
-            flexDirection={'row'}
-            alignItems="center"
-            justifyContent={'space-between'}
-            mb={1}
-          >
-            <ButtonBase
-              onClick={() => setModalProduct(p)}
-              sx={{
-                display: 'flex',
-                flexDirection: 'row',
-                alignItems: 'center',
-                textAlign: 'left',
-                justifyContent: 'start',
-                flex: 1,
-                mr: 1,
-                borderRadius: 1,
-              }}
+        {catalog.products.map((p) => {
+          let lowestStock:number | null = null;
+          if (p.stockTracking != null && p.stockTracking !== StockTracking.Disabled && catalog.stocksPerProductDistribution.hasOwnProperty(p.id)) {
+            const stocksPerDistrib = catalog.stocksPerProductDistribution[p.id];
+            if (stocksPerDistrib != null) {
+              const allStocks = Object.values(stocksPerDistrib);
+              lowestStock = allStocks.length <= 0 ? 0 : Math.round(allStocks.reduce((acc, v) => Math.min(acc, v), Number.MAX_VALUE));
+            }
+          }
+
+          return (
+            <Box
+              key={`product_${p.id}`}
+              width="100%"
+              display="flex"
+              flexDirection={'row'}
+              alignItems="center"
+              justifyContent={'space-between'}
+              mb={1}
             >
-              <Product product={p} />
-            </ButtonBase>
-            <Box width={150}>
-              <TextField
-                fullWidth
-                inputProps={{
-                  inputMode: 'numeric',
-                  pattern: '[0-9]*',
+              <ButtonBase
+                onClick={() => setModalProduct(p)}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  textAlign: 'left',
+                  justifyContent: 'start',
+                  flex: 1,
+                  mr: 1,
+                  borderRadius: 1,
                 }}
-                value={defaultOrder[p.id] ?? ""}
-                onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                  onOrderChange(p.id, parseInt(event.target.value, 10))
-                }
-                onFocus={onFocus}
-                hiddenLabel
-                disabled={loading}
-              />
+              >
+                <Product product={p} />
+              </ButtonBase>
+              <Box width={150} position="relative">
+                <TextField
+                  fullWidth
+                  inputProps={{
+                    inputMode: 'numeric',
+                    pattern: '[0-9]*',
+                  }}
+                  value={defaultOrder[p.id] ?? ''}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onOrderChange(p.id, parseInt(event.target.value, 10))
+                  }
+                  onFocus={onFocus}
+                  hiddenLabel
+                  disabled={loading}
+                />
+                {catalog.hasStockManagement && lowestStock != null && (
+                  <Typography align="center" color="grey" fontSize="0.8em" position="absolute" bottom={2} right={5} whiteSpace="nowrap">
+                    <Tooltip title={`${t('Available')}: ${lowestStock}`}>
+                      <span><i className="icon icon-wholesale" style={{fontSize: '0.9em'}}/> {lowestStock}</span>
+                    </Tooltip>
+                  </Typography>
+                )}
+              </Box>
             </Box>
-          </Box>
-        ))}
+          );
+        })}
         <ProductModal product={modalProduct} onClose={onProductModalClose} />
       </Box>
 

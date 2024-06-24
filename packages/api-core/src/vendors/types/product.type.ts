@@ -1,4 +1,8 @@
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { StockTracking, StockTrackingPerDistribution } from '../product.interface';
+
+registerEnumType(StockTracking, { name: 'StockTracking' });
+registerEnumType(StockTrackingPerDistribution, { name: 'StockTrackingPerDistribution' });
 
 @ObjectType()
 export class Product {
@@ -22,6 +26,12 @@ export class Product {
 
   @Field(() => Float, { nullable: true })
   stock: number; // if qantity can be float, stock should be float
+
+  @Field(() => StockTracking)
+  stockTracking: StockTracking;
+
+  @Field(() => StockTrackingPerDistribution)
+  stockTrackingPerDistrib: StockTrackingPerDistribution;
 
   @Field()
   organic: boolean;
