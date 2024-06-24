@@ -118,6 +118,8 @@ type Product {
   vat: Float!
   desc: String
   stock: Float
+  stockTracking: StockTracking!
+  stockTrackingPerDistrib: StockTrackingPerDistribution!
   organic: Boolean!
   bulk: Boolean!
   wholesale: Boolean!
@@ -132,6 +134,18 @@ type Product {
   vendorId: Int!
   vendorName: String!
   catalogName: String!
+}
+
+enum StockTracking {
+  Disabled
+  Global
+  PerDistribution
+}
+
+enum StockTrackingPerDistribution {
+  AlwaysTheSame
+  FrequencyBased
+  PerPeriod
 }
 
 type Catalog {

@@ -11,6 +11,7 @@ import { UserOrderEntity } from '../../shop/entities/user-order.entity';
 import { FileEntity } from '../../tools/models/file.entity';
 import { CatalogEntity } from './catalog.entity';
 import { ProductDistributionStockEntity } from './productDistributionStock.entity';
+import { StockTracking, StockTrackingPerDistribution } from 'camap-common';
 
 @Index('Product_catalogId', ['catalogId'], {})
 @Index('Product_imageId', ['imageId'], {})
@@ -38,10 +39,10 @@ export class ProductEntity {
   stock: number | null;
 
   @Column('tinyint', { nullable: true, unsigned: true })
-  stockTracking: number | null; // StockTracking
+  stockTracking: StockTracking | null; // StockTracking
 
   @Column('tinyint', { nullable: true, unsigned: true })
-  stockTrackingPerDistrib: number | null; // StockTrackingPerDistribution
+  stockTrackingPerDistrib: StockTrackingPerDistribution | null; // StockTrackingPerDistribution
 
   @Column('tinyint', { width: 1 })
   active: boolean;
