@@ -92,6 +92,9 @@ export class GroupEntity extends BaseEntity {
   @Column('tinyint')
   volunteersMailDaysBeforeDutyPeriod: number;
 
+  @Column('tinyint', { unsigned: true, default: 30 })
+  daysAfterClosingBeforeHidingDutyPeriods: number;
+
   @Column('int')
   daysBeforeDutyPeriodsOpen: number;
 
