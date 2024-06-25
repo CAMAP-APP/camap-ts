@@ -29,6 +29,8 @@ export type RestCsaCatalog = Pick<
   contact?: User;
   absentDistribsMaxNb?: number;
   distribMinOrdersTotal: number;
+  hasStockManagement: boolean;
+  stocksPerProductDistribution: { [productId: number]: { [distribId: number]: number } };
 };
 
 export type RestCsaCatalogAbsences = {

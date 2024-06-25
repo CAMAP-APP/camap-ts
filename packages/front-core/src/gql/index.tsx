@@ -620,6 +620,8 @@ export type Product = {
   qt: Scalars['Float'];
   ref?: Maybe<Scalars['String']>;
   stock?: Maybe<Scalars['Float']>;
+  stockTracking: StockTracking;
+  stockTrackingPerDistrib: StockTrackingPerDistribution;
   unitType: Scalars['Int'];
   variablePrice: Scalars['Boolean'];
   vat: Scalars['Float'];
@@ -944,6 +946,18 @@ export type SendInvitesToNewMembersResponse = {
   withAccounts: Array<Scalars['Int']>;
   withoutAccounts: Array<Scalars['String']>;
 };
+
+export enum StockTracking {
+  Disabled = 'Disabled',
+  Global = 'Global',
+  PerDistribution = 'PerDistribution'
+}
+
+export enum StockTrackingPerDistribution {
+  AlwaysTheSame = 'AlwaysTheSame',
+  FrequencyBased = 'FrequencyBased',
+  PerPeriod = 'PerPeriod'
+}
 
 export type SubscriptionTotalOperationTypeData = {
   __typename?: 'SubscriptionTotalOperationTypeData';
