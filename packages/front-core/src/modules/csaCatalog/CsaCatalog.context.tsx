@@ -5,10 +5,12 @@ import {
   RestCsaSubscription,
   RestCsaSubscriptionAbsences,
   RestDistributionEnriched,
-  RestDistributionState, RestStocksPerProductDistribution,
+  RestDistributionState,
+  RestStocksPerProductDistribution,
 } from './interfaces';
 import {
-  useRestCatalogGet, useRestStocksGet,
+  useRestCatalogGet,
+  useRestStocksGet,
   useRestSubscriptionAbsencesLazyGet,
   useRestSubscriptionGet,
 } from './requests';
@@ -37,6 +39,7 @@ interface CsaCatalogContextProps {
   setAddedOrders: (value: Record<number, number>) => void;
   stocksPerProductDistribution: RestStocksPerProductDistribution | undefined;
   setStocksPerProductDistribution: (value: RestStocksPerProductDistribution | undefined) => void;
+	adminMode?: boolean | undefined;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
@@ -61,17 +64,18 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   setAddedOrders: () => {},
   stocksPerProductDistribution: {},
   setStocksPerProductDistribution: () => {},
+	adminMode: false,
 });
 
 const CsaCatalogContextProvider = ({
   children,
   catalogId,
   initialSubscriptionId,
+	adminMode,
 }: {
   children: React.ReactNode;
-} & Pick<CsaCatalogContextProps, 'catalogId'> & {
-    initialSubscriptionId?: number;
-  }) => {
+  initialSubscriptionId?: number;
+} & Pick<CsaCatalogContextProps, 'catalogId'> & Pick<CsaCatalogContextProps, 'adminMode'>) => {
   const [updatedOrders, setUpdatedOrders] = React.useState<
     Record<number, Record<number, number>>
   >({}); // Matrices with distributionId as a key, and a value which is a record which maps productId to a quantity
@@ -181,6 +185,7 @@ const CsaCatalogContextProvider = ({
         setAddedOrders,
         stocksPerProductDistribution,
         setStocksPerProductDistribution,
+				adminMode
       }}
     >
       {children}

@@ -78,6 +78,10 @@ const GroupDisabled = React.lazy(
   () => import('./modules/groupDisabled/GroupDisabled.module'),
 );
 
+const BatchOrder = React.lazy(
+  () => import('./modules/batchOrder/BatchOrder.module'),
+);
+
 const Wrapper = ({
   children,
   showFallback = true,
@@ -290,6 +294,14 @@ export const createNeoModule = (
         </ApolloWrapper>
       );
     }
+
+		if (moduleName === 'batchOrder') {
+			return (
+				<ApolloWrapper>
+					<BatchOrder {...props} />
+				</ApolloWrapper>
+			);
+		}
 
     throw new Error(`Unknown module: ${moduleName}`);
   };
