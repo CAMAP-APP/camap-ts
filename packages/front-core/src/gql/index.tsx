@@ -1203,6 +1203,13 @@ export type AttendanceVariableContractQueryVariables = Exact<{
 
 export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
 
+export type GetCatalogSubscriptionsQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type GetCatalogSubscriptionsQuery = { __typename?: 'Query', catalog: { __typename?: 'Catalog', id: number, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, user: { __typename?: 'User', id: number, firstName: string, lastName: string } }> } };
+
 export type GroupDisabledQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
@@ -2113,6 +2120,49 @@ export function useAttendanceVariableContractLazyQuery(baseOptions?: ApolloReact
 export type AttendanceVariableContractQueryHookResult = ReturnType<typeof useAttendanceVariableContractQuery>;
 export type AttendanceVariableContractLazyQueryHookResult = ReturnType<typeof useAttendanceVariableContractLazyQuery>;
 export type AttendanceVariableContractQueryResult = Apollo.QueryResult<AttendanceVariableContractQuery, AttendanceVariableContractQueryVariables>;
+export const GetCatalogSubscriptionsDocument = gql`
+    query getCatalogSubscriptions($id: Int!) {
+  catalog(id: $id) {
+    id
+    subscriptions {
+      id
+      user {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCatalogSubscriptionsQuery__
+ *
+ * To run a query within a React component, call `useGetCatalogSubscriptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCatalogSubscriptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCatalogSubscriptionsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetCatalogSubscriptionsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>(GetCatalogSubscriptionsDocument, options);
+      }
+export function useGetCatalogSubscriptionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>(GetCatalogSubscriptionsDocument, options);
+        }
+export type GetCatalogSubscriptionsQueryHookResult = ReturnType<typeof useGetCatalogSubscriptionsQuery>;
+export type GetCatalogSubscriptionsLazyQueryHookResult = ReturnType<typeof useGetCatalogSubscriptionsLazyQuery>;
+export type GetCatalogSubscriptionsQueryResult = Apollo.QueryResult<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>;
 export const GroupDisabledDocument = gql`
     query groupDisabled($id: Int!) {
   groupPreview(id: $id) {

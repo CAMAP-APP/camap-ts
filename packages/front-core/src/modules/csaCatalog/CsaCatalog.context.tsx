@@ -1,16 +1,17 @@
 import React from 'react';
 import {
-  getEnrichedDistribution,
-  RestCsaCatalog,
-  RestCsaSubscription,
-  RestCsaSubscriptionAbsences,
-  RestDistributionEnriched,
-  RestDistributionState, RestStocksPerProductDistribution,
+	getEnrichedDistribution,
+	RestCsaCatalog,
+	RestCsaSubscription,
+	RestCsaSubscriptionAbsences,
+	RestDistributionEnriched,
+	RestDistributionState, RestStocksPerProductDistribution,
 } from './interfaces';
 import {
-  useRestCatalogGet, useRestStocksGet,
-  useRestSubscriptionAbsencesLazyGet,
-  useRestSubscriptionGet,
+	useRestCatalogGet,
+	useRestStocksGet,
+	useRestSubscriptionAbsencesLazyGet,
+	useRestSubscriptionGet,
 } from './requests';
 
 type Orders = Record<number, Record<number, number>>;
@@ -37,6 +38,7 @@ interface CsaCatalogContextProps {
   setAddedOrders: (value: Record<number, number>) => void;
   stocksPerProductDistribution: RestStocksPerProductDistribution | undefined;
   setStocksPerProductDistribution: (value: RestStocksPerProductDistribution | undefined) => void;
+	adminMode?: boolean | undefined;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
@@ -61,15 +63,17 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   setAddedOrders: () => {},
   stocksPerProductDistribution: {},
   setStocksPerProductDistribution: () => {},
+	adminMode: false,
 });
 
 const CsaCatalogContextProvider = ({
   children,
   catalogId,
   initialSubscriptionId,
+	adminMode,
 }: {
   children: React.ReactNode;
-} & Pick<CsaCatalogContextProps, 'catalogId'> & {
+} & Pick<CsaCatalogContextProps, 'catalogId'> & Pick<CsaCatalogContextProps, 'adminMode'>& {
     initialSubscriptionId?: number;
   }) => {
   const [updatedOrders, setUpdatedOrders] = React.useState<
@@ -181,6 +185,7 @@ const CsaCatalogContextProvider = ({
         setAddedOrders,
         stocksPerProductDistribution,
         setStocksPerProductDistribution,
+				adminMode
       }}
     >
       {children}
