@@ -26,8 +26,6 @@ Consultez cette section en cas d'erreur
 	- Recréez un container neko-loc-camap, charger la page `https://camap.localdomain/` puis vérifiez les logs si besoin
 - ⚠ N'oubliez pas, il faut ouvrir la page dans la navigateur pour lancer la génération !
 
-La route `https://camap.localdomain/user/login` fonctionne, mais n'affiche pas le formulaire + erreurs en console (`Uncaught TypeError: can't access property "createNeoModule", neo is undefined`)
-
 ## Base de données - loc-mysql
 - `[Warning] World-writable config file '/etc/mysql/conf.d/my.cnf' is ignored.`
 	- Changer les permissions vers 0444: `chmod 0444 my.cnf`
@@ -65,7 +63,7 @@ Si la config BD est bien prise en compte, le warning suivant doit apparaitre dan
 
 - `TypeError: can't access property "createNeoModule", neo is undefined`
 	- Essayer `npm run build:front` dans camap-ts
-		- Si il y a une erreur de `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
+		- S'il y a une erreur `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
 
 - `unable to load resources from camap-ts`
 	- **explication**: SSL n'est pas configuré en local et l'application ne parvient pas à accéder à camap-ts par manque de permission
