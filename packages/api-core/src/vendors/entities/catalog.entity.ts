@@ -15,6 +15,7 @@ import { UserEntity } from '../../users/models/user.entity';
 import { CatalogType } from '../catalog.interface';
 import { ProductEntity } from './product.entity';
 import { VendorEntity } from './vendor.entity';
+import { MultiDistribEntity } from '../../shop/entities/multi-distrib.entity';
 
 export enum CatalogFlags {
   UsersCanOrder, // adhérents peuvent saisir eux meme la commande en ligne
@@ -111,6 +112,18 @@ export class CatalogEntity {
   })
   @JoinColumn([{ name: 'groupId', referencedColumnName: 'id' }])
   group: Promise<GroupEntity>;
+
+
+  /** */
+  @Column('int', { name: 'firstDistribId', nullable: true })
+  firstDistribId: number | null;
+
+  @ManyToOne(() => MultiDistribEntity, {
+    onDelete: 'SET NULL',
+    onUpdate: 'RESTRICT',
+  })
+  @JoinColumn([{ name: 'firstDistribId', referencedColumnName: 'id' }])
+  firstDistrib: Promise<MultiDistribEntity>;
 
   /** */
   @Column('int', { name: 'vendorId' })
