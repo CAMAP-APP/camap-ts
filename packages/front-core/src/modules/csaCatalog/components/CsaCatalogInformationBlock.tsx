@@ -13,6 +13,7 @@ import { CamapIconId } from '../../../components/utils/CamapIcon';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import MediumActionIcon from '../containers/MediumActionIcon';
 import { RestCsaCatalog } from '../interfaces';
+import DOMPurify from 'dompurify';
 
 const host = process.env.CAMAP_HOST;
 
@@ -49,7 +50,7 @@ const CsaCatalogInformationBlock = ({
             },
           }}
         >
-          {catalog.description}
+          <span dangerouslySetInnerHTML={{__html:DOMPurify.sanitize(catalog.description ?? "")}}/>
         </Typography>
         {catalog.documents.length > 0 && (
           <List sx={{ pb: 0, mb: -1.5, flexShrink: 0 }}>
