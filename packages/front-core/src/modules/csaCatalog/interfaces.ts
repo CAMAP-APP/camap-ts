@@ -30,8 +30,9 @@ export type RestCsaCatalog = Pick<
   absentDistribsMaxNb?: number;
   distribMinOrdersTotal: number;
   hasStockManagement: boolean;
-  stocksPerProductDistribution: { [productId: number]: { [distribId: number]: number } };
 };
+
+export type RestStocksPerProductDistribution = { [productId: number]: { [distribId: number]: number } };
 
 export type RestCsaCatalogAbsences = {
   startDate: string;

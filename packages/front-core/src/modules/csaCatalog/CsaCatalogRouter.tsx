@@ -134,7 +134,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   };
 
   const onAbsencesNext = async () => {
-    const subscriptionData = await createSubscription({
+    const subscriptionSucceeded = await createSubscription({
       userId,
       catalogId,
       defaultOrder: Object.keys(defaultOrder).map((productId) => ({
@@ -144,7 +144,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       absentDistribIds: absenceDistributionsIds as number[] | null,
     });
 
-    if (!subscriptionData) return;
+    if (!subscriptionSucceeded) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setShowPresentation(false);
