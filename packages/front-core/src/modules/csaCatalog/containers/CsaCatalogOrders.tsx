@@ -140,6 +140,8 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
+    newOrders[distributionId][productId] = adaptedNewValue;
+    setUpdatedOrders(newOrders);
 
     // Count "added orders" for global stock estimations
     // initialOrders is what we received from server
@@ -312,7 +314,7 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
   return (
     <Box>
       <Block
-        title={t('changeMyOrders')}
+        title={displayDefaultOrder ? t('changeOrders') : t('changeMyOrders')}
         icon={<MediumActionIcon id={CamapIconId.basket} />}
         sx={{
           height: '100%',
@@ -364,7 +366,8 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
                   )}
                 >
                   <span>{t('defaultOrder')}</span>
-                </Box>)}
+                </Box>
+              )}
               {slicedDistributions.map((d) => (
                 <Box
                   key={`distribution_${d.id}`}
@@ -581,8 +584,7 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
                   sx={{
                     width: 150,
                     textAlign: 'center',
-                    color: (theme) =>
-                      'initial',
+                    color: (theme) => 'initial',
                     ...getSlideItemSx(
                       maxNbDistribToShow,
                       150,
@@ -632,7 +634,8 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
         >
           {(restCsaCatalogTypeToType(catalog.type) ===
             CatalogType.TYPE_CONSTORDERS ||
-            catalog?.distribMinOrdersTotal > 0 || displayDefaultOrder) && (
+            catalog?.distribMinOrdersTotal > 0 ||
+            displayDefaultOrder) && (
             <Button
               variant="outlined"
               onClick={onDefaultOrdersChangeClick}
