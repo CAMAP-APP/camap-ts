@@ -6,11 +6,10 @@ import {
 	Divider,
 	Modal,
 	TextField,
-	Tooltip,
 	Typography,
 	useMediaQuery,
 } from '@mui/material';
-import { StockTracking, formatCurrency } from 'camap-common';
+import { formatCurrency } from 'camap-common';
 import React from 'react';
 import Block from '../../../components/utils/Block/Block';
 import { CamapIconId } from '../../../components/utils/CamapIcon';
@@ -129,6 +128,7 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
     productId: number,
     newValue: number,
   ) => {
+		console.log('onOrderChange', distributionId, productId, newValue);
     let adaptedNewValue = newValue;
     if (isNaN(newValue)) adaptedNewValue = 0;
     if (
@@ -142,6 +142,8 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
+    newOrders[distributionId][productId] = adaptedNewValue;
+    setUpdatedOrders(newOrders);
 
     // Count "added orders" for global stock estimations
     // initialOrders is what we received from server
@@ -326,40 +328,10 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
   ) {
     return <CircularProgressBox />;
   }
-
-  function getStockValue(
-    isGlobalStock: boolean,
-    p: { id: number },
-    d: { id: number },
-  ) {
-    const isDistributionStock =
-      catalog != null &&
-      catalog.hasStockManagement &&
-      !isGlobalStock &&
-      stocksPerProductDistribution != null &&
-      stocksPerProductDistribution[p.id] != null &&
-      stocksPerProductDistribution[p.id][d.id] != null;
-    let distributionStock = null;
-    if (isDistributionStock) {
-      distributionStock = stocksPerProductDistribution[p.id][d.id];
-      var initialOrder: number =
-        initialOrders[d.id] != null && initialOrders[d.id][p.id] != null
-          ? initialOrders[d.id][p.id]
-          : 0;
-      var updatedOrder: number =
-        updatedOrders[d.id] != null && updatedOrders[d.id][p.id] != null
-          ? updatedOrders[d.id][p.id]
-          : initialOrder;
-      var added = updatedOrder - initialOrder;
-      distributionStock -= added;
-    }
-    return distributionStock;
-  }
-
   return (
     <Box>
       <Block
-        title={t('changeMyOrders')}
+        title={displayDefaultOrder ? t('changeOrders') : t('changeMyOrders')}
         icon={<MediumActionIcon id={CamapIconId.basket} />}
         sx={{
           height: '100%',
@@ -463,77 +435,39 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
 
         <Box my={2}>
           {/* Product line */}
+          {catalog.products.map((p) => (
+            <Box key={`product_${p.id}`}>
+              <Divider sx={{ my: 1 }} />
+              <Box display="flex" flexDirection={'row'} mb={1}>
+                <ButtonBase
+                  sx={{
+                    width: {
+                      xs: 'calc(100% - 150px)',
+                      sm: 200,
+                    },
+                    display: 'flex',
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    textAlign: 'left',
+                  }}
+                  onClick={() => setModalProduct(p)}
+                >
+                  <Product product={p} />
+                </ButtonBase>
 
-          {catalog.products.map((p) => {
-            const isGlobalStock =
-              catalog.hasStockManagement &&
-              (p.stockTracking as StockTracking) == StockTracking.Global &&
-              stocksPerProductDistribution != null;
-            var globalStock = 0;
-            if (isGlobalStock && stocksPerProductDistribution[p.id] != null) {
-              globalStock = Object.values(
-                stocksPerProductDistribution[p.id],
-              ).reduce((acc, v) => Math.min(acc, v), Number.MAX_VALUE);
-              globalStock -= addedOrders.hasOwnProperty(p.id)
-                ? addedOrders[p.id]
-                : 0;
-            }
-            return (
-              <Box key={`product_${p.id}`}>
-                <Divider sx={{ my: 1 }} />
-                <Box display="flex" flexDirection={'row'} mb={1}>
-                  <ButtonBase
-                    sx={{
-                      width: {
-                        xs: 'calc(100% - 150px)',
-                        sm: 200,
-                      },
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      textAlign: 'left',
-                    }}
-                    onClick={() => setModalProduct(p)}
-                  >
-                    <Product product={p} />
-                    {isGlobalStock && (
-                      <Typography
-                        align="center"
-                        color="grey"
-                        fontSize="0.8em"
-                        position="absolute"
-                        top={28}
-                        right={-54}
-                        whiteSpace="nowrap"
-                      >
-                        <Tooltip
-                          title={`${t('Available')} (global): ${globalStock}`}
-                        >
-                          <span>
-                            <i
-                              className="icon icon-wholesale"
-                              style={{ fontSize: '0.9em' }}
-                            />{' '}
-                            {globalStock}
-                          </span>
-                        </Tooltip>
-                      </Typography>
+                <Box display="flex" flex={1} overflow="hidden">
+                  <Box
+                    display="flex"
+                    justifyContent="space-evenly"
+                    flex={1}
+                    alignItems="center"
+                    sx={getSlideContainerSx(
+                      maxNbDistribToShow,
+                      150,
+                      isAnimating,
                     )}
-                  </ButtonBase>
-
-                  <Box display="flex" flex={1} overflow="hidden">
-                    <Box
-                      display="flex"
-                      justifyContent="space-evenly"
-                      flex={1}
-                      alignItems="center"
-                      sx={getSlideContainerSx(
-                        maxNbDistribToShow,
-                        150,
-                        isAnimating,
-                      )}
-                    >
-											  {displayDefaultOrder && (
+                  >
+                    {displayDefaultOrder && (
                       <Box
                         key={`order_default`}
                         sx={getSlideItemSx(
@@ -555,88 +489,50 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
                         />
                       </Box>
                     )}
-										
-                      {slicedDistributions.map((d) => {
-                        const distributionStock = getStockValue(
-                          isGlobalStock,
-                          p,
-                          d,
-                        );
 
-                        return (
-                          <Box
-                            position="relative"
-                            key={`order_${d.id}_${p.id}`}
-                            sx={getSlideItemSx(
-                              maxNbDistribToShow,
-                              150,
-                              firstDistributionIndex,
-                              distributions.length,
-                            )}
-                          >
-                            {d.state !== RestDistributionState.Absent ? (
-                              <>
-                                <TextField
-                                  disabled={
-                                    d.state !== RestDistributionState.Open ||
-                                    loading
-                                  }
-                                  sx={{ width: 150 }}
-                                  inputProps={{
-                                    inputMode: 'numeric',
-                                    pattern: '[0-9]*',
-                                  }}
-                                  value={orders[d.id][p.id]}
-                                  onChange={(
-                                    event: React.ChangeEvent<HTMLInputElement>,
-                                  ) =>
-                                    onOrderChange(
-                                      d.id,
-                                      p.id,
-                                      parseInt(event.target.value, 10),
-                                    )
-                                  }
-                                  onFocus={onFocus}
-                                  hiddenLabel
-                                />
-                                {distributionStock != null && (
-                                  <Typography
-                                    align="center"
-                                    color="grey"
-                                    fontSize="0.8em"
-                                    position="absolute"
-                                    bottom={2}
-                                    right={5}
-                                    whiteSpace="nowrap"
-                                  >
-                                    <Tooltip
-                                      title={`${t(
-                                        'Available',
-                                      )}: ${distributionStock}`}
-                                    >
-                                      <span>
-                                        <i
-                                          className="icon icon-wholesale"
-                                          style={{ fontSize: '0.9em' }}
-                                        />
-                                        &nbsp;{distributionStock}
-                                      </span>
-                                    </Tooltip>
-                                  </Typography>
-                                )}
-                              </>
-                            ) : (
-                              <Box width={150} minHeight={56} />
-                            )}
-                          </Box>
-                        );
-                      })}
-                    </Box>
+                    {slicedDistributions.map((d) => (
+                      <Box
+                        key={`order_${d.id}_${p.id}`}
+                        sx={getSlideItemSx(
+                          maxNbDistribToShow,
+                          150,
+                          firstDistributionIndex,
+                          distributions.length,
+                        )}
+                      >
+                        {d.state !== RestDistributionState.Absent ? (
+                          <TextField
+                            disabled={
+                              d.state !== RestDistributionState.Open || loading
+                            }
+                            sx={{ width: 150 }}
+                            inputProps={{
+                              inputMode: 'numeric',
+                              pattern: '[0-9]*',
+                            }}
+                            value={orders[d.id][p.id]}
+                            onChange={(
+                              event: React.ChangeEvent<HTMLInputElement>,
+                            ) =>
+                              onOrderChange(
+                                d.id,
+                                p.id,
+                                parseInt(event.target.value, 10),
+                              )
+                            }
+                            onFocus={onFocus}
+                            hiddenLabel
+                          />
+                        ) : (
+                          <Box width={150} minHeight={56} />
+                        )}
+                      </Box>
+                    ))}
                   </Box>
                 </Box>
               </Box>
-            );
-          })}
+            </Box>
+          ))}
           <ProductModal product={modalProduct} onClose={onProductModalClose} />
         </Box>
 
