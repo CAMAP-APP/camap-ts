@@ -1,14 +1,14 @@
 import { LoadingButton } from '@mui/lab';
 import {
-  Alert,
-  Box,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  SelectChangeEvent,
-  Tooltip,
-  Typography,
+	Alert,
+	Box,
+	FormControl,
+	InputLabel,
+	MenuItem,
+	Select,
+	SelectChangeEvent,
+	Tooltip,
+	Typography,
 } from '@mui/material';
 import { isBefore } from 'date-fns';
 import React from 'react';
@@ -23,10 +23,11 @@ import { useRestCatalogAbsencesLazyGet } from '../requests';
 import MediumActionIcon from './MediumActionIcon';
 
 interface CsaCatalogAbsencesProps {
+	adminMode?: boolean;
   onNext: () => Promise<void>;
 }
 
-const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
+const CsaCatalogAbsences = ({ adminMode,onNext }: CsaCatalogAbsencesProps) => {
   const { t, tCommon } = useCamapTranslation(
     {
       t: 'csa-catalog',
@@ -185,7 +186,7 @@ const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
         sx={{ height: '100%' }}
       >
         <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'center' }}>
-          {t('absencesInfos', {
+          {t(adminMode ? 'absencesInfosAdmin' : 'absencesInfos', {
             count: absentDistribsMaxNb,
             startDate: formatAbsoluteDate(
               new Date(startDate),

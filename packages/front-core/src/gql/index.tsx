@@ -1186,7 +1186,7 @@ export type GetCatalogSubscriptionsQueryVariables = Exact<{
 }>;
 
 
-export type GetCatalogSubscriptionsQuery = { __typename?: 'Query', catalog: { __typename?: 'Catalog', id: number, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, user: { __typename?: 'User', id: number, firstName: string, lastName: string } }> } };
+export type GetCatalogSubscriptionsQuery = { __typename?: 'Query', catalog: { __typename?: 'Catalog', id: number, type: CatalogType, name: string, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, user: { __typename?: 'User', id: number, firstName: string, lastName: string } }> } };
 
 export type GroupDisabledQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -2093,6 +2093,8 @@ export const GetCatalogSubscriptionsDocument = gql`
     query getCatalogSubscriptions($id: Int!) {
   catalog(id: $id) {
     id
+    type
+    name
     subscriptions {
       id
       user {
