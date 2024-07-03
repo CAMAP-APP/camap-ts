@@ -95,7 +95,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
   };
 
   const onOrderChange = (productId: number, newValue: number) => {
-    if (!addedOrders.hasOwnProperty(productId)) {
+    if (addedOrders != null &&!addedOrders.hasOwnProperty(productId)) {
       addedOrders[productId] = defaultOrder[productId];
       setAddedOrders(addedOrders);
     }
