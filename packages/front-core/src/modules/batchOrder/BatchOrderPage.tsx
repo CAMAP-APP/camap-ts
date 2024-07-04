@@ -4,22 +4,28 @@ import { CsaCatalogContext } from 'modules/csaCatalog/CsaCatalog.context';
 import CsaCatalogRouter from 'modules/csaCatalog/CsaCatalogRouter';
 import CsaCatalogAbsences from 'modules/csaCatalog/containers/CsaCatalogAbsences';
 import { useRestUpdateSubscriptionAbsencesPost } from 'modules/csaCatalog/requests';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 interface BatchOrderPageProps {
   selectedSubscription: number;
   showAbsencesModal: boolean;
   setShowAbsencesModal: (show: boolean) => void;
+	setAbsencesAutorized: (b: boolean) => void;
 }
 
 const BatchOrderPage = ({
   selectedSubscription,
   showAbsencesModal,
   setShowAbsencesModal,
+	setAbsencesAutorized
 }: BatchOrderPageProps) => {
-  const { absenceDistributionsIds, setSubscriptionAbsences } =
+  const { absenceDistributionsIds, setSubscriptionAbsences,subscriptionAbsences } =
     React.useContext(CsaCatalogContext);
 
+		useEffect(() => {
+		setAbsencesAutorized(subscriptionAbsences != null)
+		}, [setAbsencesAutorized, subscriptionAbsences])
+		
   /**
    * Absences
    */

@@ -20,6 +20,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
   });
 
   const [showAbsencesModal, setShowAbsencesModal] = React.useState(false);
+	const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
 
   const [
     getCatalogSubscriptions,
@@ -40,7 +41,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
 
   return (
     <>
-      {/* User selection */}
+      {/*Header */}
       <Box
         sx={{
           display: 'flex',
@@ -85,6 +86,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
           <Button
             variant="contained"
             onClick={() => setShowAbsencesModal(true)}
+						disabled={!absencesAutorized}
           >
             {t('allowedAbsences')}
           </Button>
@@ -104,6 +106,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
             selectedSubscription={selectedSubscription}
             showAbsencesModal={showAbsencesModal}
             setShowAbsencesModal={setShowAbsencesModal}
+						setAbsencesAutorized={setAbsencesAutorized}
           />
         </CsaCatalogContextProvider>
       )}

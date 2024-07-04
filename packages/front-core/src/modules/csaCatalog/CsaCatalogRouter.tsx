@@ -35,7 +35,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     defaultOrder,
     initialSubscriptionId,
     error: contextError,
-		adminMode
+    adminMode,
   } = React.useContext(CsaCatalogContext);
 
   const [showPresentation, setShowPresentation] = React.useState(
@@ -238,7 +238,10 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           {isConstOrders ? (
             <CsaCatalogDefaultOrder onNext={onOrderNext} />
           ) : (
-            <CsaCatalogOrders onNext={onOrderNext} displayDefaultOrder={true}/>
+            <CsaCatalogOrders
+              onNext={onOrderNext}
+              displayDefaultOrder={adminMode}
+            />
           )}
         </>
       )}
