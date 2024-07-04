@@ -130,7 +130,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     // updatedOrders is the current user input
     // addedOrders keep track of the difference between initialOrders and current use input
     // Estimating the next stock according to current user input is then done by subtracting addedOrders from initialStock
-    if (catalog != null && catalog.hasStockManagement) {
+    if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
       let prevValue = updatedOrders[distributionId] != null && updatedOrders[distributionId][productId] != null ? updatedOrders[distributionId][productId] : null;
       if (prevValue == null) prevValue = initialOrders[distributionId] != null && initialOrders[distributionId][productId] != null ? initialOrders[distributionId][productId] : 0;
       var addedOrder = adaptedNewValue - prevValue;
@@ -388,7 +388,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
               && p.stockTracking as StockTracking == StockTracking.Global
               && stocksPerProductDistribution != null;
             var globalStock = 0;
-            if (isGlobalStock && stocksPerProductDistribution[p.id] != null) {
+            if (isGlobalStock && stocksPerProductDistribution[p.id] != null && addedOrders != null) {
               globalStock = Object.values(stocksPerProductDistribution[p.id]).reduce((acc, v) => Math.min(acc, v), Number.MAX_VALUE);
               globalStock -= addedOrders.hasOwnProperty(p.id) ? addedOrders[p.id] : 0;
             }
