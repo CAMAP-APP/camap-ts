@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Product } from '../../../gql';
 import { formatUnit } from '../../../utils/fomat';
 import ProductLabels from './ProductLabels';
+import DOMPurify from 'dompurify';
 
 const ImgCover = styled('img')(() => ({
   maxWidth: '100%',
@@ -129,7 +130,8 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
                   <Typography
                     sx={{ whiteSpace: 'break-spaces' }}
                     component="p"
-                    dangerouslySetInnerHTML={{ __html: product.desc }}
+                    lineHeight={1}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.desc) }}
                   />
                 </Grid>
               )}

@@ -8,7 +8,7 @@ import {
   RestCsaDefaultOrder,
   RestCsaDefaultOrderWithPrice,
   RestCsaSubscription,
-  RestCsaSubscriptionAbsences,
+  RestCsaSubscriptionAbsences, RestStocksPerProductDistribution,
 } from './interfaces';
 
 /*
@@ -22,6 +22,19 @@ export const useRestCatalogGet = (catalogId: number) => {
     [catalogId],
   );
   return useRestGetApi<RestCsaCatalog>(url);
+};
+
+/*
+ * Get catalog infos
+ */
+
+export const useRestStocksGet = (catalogId: number) => {
+  const url = React.useMemo(
+    () => `/catalog/stocksPerProductDistribution/${catalogId}`,
+
+    [catalogId],
+  );
+  return useRestLazyGet<RestStocksPerProductDistribution>(url);
 };
 
 /*

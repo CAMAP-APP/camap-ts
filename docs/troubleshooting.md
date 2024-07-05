@@ -70,7 +70,7 @@ Si la config BD est bien prise en compte, le warning suivant doit apparaitre dan
 
 - `TypeError: can't access property "createNeoModule", neo is undefined`
 	- Essayer `npm run build:front` dans camap-ts
-		- Si il y a une erreur de `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
+		- S'il y a une erreur `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
 
 - `unable to load resources from camap-ts`
 	- **explication**: SSL n'est pas configuré en local et l'application ne parvient pas à accéder à camap-ts par manque de permission

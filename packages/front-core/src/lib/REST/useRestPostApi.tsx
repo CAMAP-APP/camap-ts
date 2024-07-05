@@ -19,6 +19,9 @@ const useRestPostApi = <TResult extends {}, TBody extends {}>(
         method: 'POST',
         body: JSON.stringify(body),
         credentials: 'include',
+        headers:{
+          'Accept': 'application/json'
+        }
       })
         .then(async (response) => {
           if (response.ok) {
