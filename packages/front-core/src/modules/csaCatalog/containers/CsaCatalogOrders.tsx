@@ -12,19 +12,20 @@ import { getSlideContainerSx, getSlideItemSx, SlideDirection } from '../../../co
 import { CatalogType } from '../../../gql';
 import theme from '../../../theme';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
-import CsaCatalogDistribution from '../components/CsaCatalogDistribution';
 import { CsaCatalogContext } from '../CsaCatalog.context';
-import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
+import CsaCatalogDistribution from '../components/CsaCatalogDistribution';
+import { RestDistributionState, restCsaCatalogTypeToType } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import CsaCatalogDefaultOrder from './CsaCatalogDefaultOrder';
 import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
 import MediumActionIcon from './MediumActionIcon';
 
 interface CsacatalogProps {
+  displayDefaultOrder?: boolean;
   onNext: () => Promise<boolean>;
 }
 
-const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
+const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
   const { t, tCommon } = useCamapTranslation(
     {
       t: 'csa-catalog',
@@ -44,11 +45,38 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     setError,
     addedOrders,
     setAddedOrders,
-    stocksPerProductDistribution
+    stocksPerProductDistribution,
   } = React.useContext(CsaCatalogContext);
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+
+
+  const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
+  const isUpMd = useMediaQuery(theme.breakpoints.up('md'));
+  const isUpSm = useMediaQuery(theme.breakpoints.up('sm'));
+
+  let maxNbDistribToShow = 1;
+  if (isUpSm && !isUpMd) {
+    maxNbDistribToShow = 2;
+  } else if (isUpMd && !isUpLg) {
+    maxNbDistribToShow = 3;
+  } else if (isUpLg) {
+    maxNbDistribToShow = 4;
+  } else {
+    maxNbDistribToShow = 1;
+  }
+  maxNbDistribToShow -= (displayDefaultOrder ? 1 : 0);
+
+  let firstDistributionIndexInitial = 0;
+  if (nextDistributionIndex + maxNbDistribToShow > distributions.length) {
+    const adaptedIndex = distributions.length - maxNbDistribToShow;
+    firstDistributionIndexInitial = adaptedIndex >= 0 ? adaptedIndex : 0;
+  } else {
+    firstDistributionIndexInitial = nextDistributionIndex;
+  }
+
+  const [firstDistributionIndex, setFirstDistributionIndex] = React.useState(firstDistributionIndexInitial);
 
   const [
     updateSubscriptionDefaultOrder,
@@ -63,19 +91,6 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     if (!updatedSubscriptionData) return;
     setSubscription(updatedSubscriptionData);
   }, [setSubscription, updatedSubscriptionData]);
-
-  const [maxNbDistribToShow, setMaxNbDistribToShow] = React.useState(1);
-
-  const [firstDistributionIndex, setFirstDistributionIndex] = React.useState(0);
-
-  React.useEffect(() => {
-    if (nextDistributionIndex + maxNbDistribToShow > distributions.length) {
-      const adaptedIndex = distributions.length - maxNbDistribToShow;
-
-      setFirstDistributionIndex(adaptedIndex >= 0 ? adaptedIndex : 0);
-    }
-    setFirstDistributionIndex(nextDistributionIndex);
-  }, [distributions.length, maxNbDistribToShow, nextDistributionIndex]);
 
   const [isAnimating, setIsAnimating] = React.useState<SlideDirection>();
 
@@ -106,6 +121,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     return initialOrders;
   }, [catalog, subscription]);
 
+  // user modified order
   const onOrderChange = (
     distributionId: number,
     productId: number,
@@ -124,6 +140,8 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
+    newOrders[distributionId][productId] = adaptedNewValue;
+    setUpdatedOrders(newOrders);
 
     // Count "added orders" for global stock estimations
     // initialOrders is what we received from server
@@ -145,6 +163,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     }
   };
 
+  // get orders from updatedOrders
   const orders = React.useMemo(() => {
     if (!catalog) return {};
 
@@ -185,21 +204,14 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
     [catalog?.products, orders],
   );
 
-  const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
-  const isUpMd = useMediaQuery(theme.breakpoints.up('md'));
-  const isUpSm = useMediaQuery(theme.breakpoints.up('sm'));
-
-  React.useEffect(() => {
-    if (isUpSm && !isUpMd) {
-      setMaxNbDistribToShow(2);
-    } else if (isUpMd && !isUpLg) {
-      setMaxNbDistribToShow(3);
-    } else if (isUpLg) {
-      setMaxNbDistribToShow(4);
-    } else {
-      setMaxNbDistribToShow(1);
-    }
-  }, [isUpSm, isUpMd, isUpLg]);
+  function getTotalFromDefaultOrder() {
+    if (!subscription) return 0;
+    return subscription.defaultOrder.reduce((acc, d) => {
+      const product: { price: number } | undefined = catalog?.products.find((p) => p.id === d.productId);
+      if (!product) return acc;
+      return acc + d.quantity * product.price;
+    }, 0);
+  }
 
   const onPreviousDistribution = () => {
     if (isAnimating) return;
@@ -302,7 +314,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
   return (
     <Box>
       <Block
-        title={t('changeMyOrders')}
+        title={displayDefaultOrder ? t('changeOrders') : t('changeMyOrders')}
         icon={<MediumActionIcon id={CamapIconId.basket} />}
         sx={{
           height: '100%',
@@ -314,6 +326,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
           },
         }}
       >
+        {/* Sold and distributions row */}
         <Box display="flex" flexDirection={'row'}>
           <Box
             width={{
@@ -340,6 +353,21 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
               position="relative"
               sx={getSlideContainerSx(maxNbDistribToShow, 150, isAnimating)}
             >
+              {displayDefaultOrder && (
+                <Box
+                  key="default"
+                  display="flex"
+                  alignSelf="center"
+                  sx={getSlideItemSx(
+                    maxNbDistribToShow,
+                    150,
+                    firstDistributionIndex,
+                    distributions.length,
+                  )}
+                >
+                  <span>{t('defaultOrder')}</span>
+                </Box>
+              )}
               {slicedDistributions.map((d) => (
                 <Box
                   key={`distribution_${d.id}`}
@@ -354,6 +382,8 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
                 </Box>
               ))}
             </Box>
+
+            {/* Arrow buttons */}
             <Box display={'flex'} justifyContent="space-evenly" mt={1}>
               <Button
                 variant="outlined"
@@ -364,8 +394,8 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
               >
                 <ArrowBack />
               </Button>
-              {maxNbDistribToShow >= 3 && <Box width={150} />}
-              {maxNbDistribToShow >= 4 && <Box width={150} />}
+              {maxNbDistribToShow >= 3 - (displayDefaultOrder ? 1 : 0) && <Box width={150} />}
+              {maxNbDistribToShow >= 4 - (displayDefaultOrder ? 1 : 0) && <Box width={150} />}
               <Button
                 variant="outlined"
                 size="small"
@@ -383,6 +413,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
         </Box>
 
         <Box my={2}>
+          {/* Product line */}
           {catalog.products.map((p) => {
             const isGlobalStock = catalog.hasStockManagement
               && p.stockTracking as StockTracking == StockTracking.Global
@@ -435,6 +466,25 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
                         isAnimating,
                       )}
                     >
+                      {displayDefaultOrder && (
+                        <Box
+                          key="order_default"
+                          sx={getSlideItemSx(
+                            maxNbDistribToShow,
+                            150,
+                            firstDistributionIndex,
+                            distributions.length,
+                          )}
+                        >
+                          <TextField
+                            sx={{ width: 150 }}
+                            value={subscription?.defaultOrder.find(d => d.productId === p.id)?.quantity || 0}
+                            disabled
+                            hiddenLabel
+                          />
+
+                        </Box>
+                      )}
                       {slicedDistributions.map((d) => {
                         const distributionStock = getStockValue(isGlobalStock, p, d);
 
@@ -497,6 +547,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
           <ProductModal product={modalProduct} onClose={onProductModalClose} />
         </Box>
 
+        {/* Total row */}
         <Box
           sx={{
             backgroundColor: (theme) => theme.palette.action.selected,
@@ -527,6 +578,25 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
               flex={1}
               sx={getSlideContainerSx(maxNbDistribToShow, 150, isAnimating)}
             >
+              {displayDefaultOrder && (
+                <Typography
+                  key="total_default"
+                  sx={{
+                    width: 150,
+                    textAlign: 'center',
+                    color: (theme) => 'initial',
+                    ...getSlideItemSx(
+                      maxNbDistribToShow,
+                      150,
+                      firstDistributionIndex,
+                      distributions.length,
+                    ),
+                  }}
+                >
+                  <b>{getTotalFromDefaultOrder()}</b>
+                </Typography>
+              )}
+
               {slicedDistributions.map((d) => (
                 <Typography
                   key={`total_${d.id}`}
@@ -554,6 +624,7 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
           </Box>
         </Box>
 
+        {/* Buttons */}
         <Box
           width="100%"
           textAlign="end"
@@ -563,7 +634,8 @@ const CsaCatalogOrders = ({ onNext }: CsacatalogProps) => {
         >
           {(restCsaCatalogTypeToType(catalog.type) ===
             CatalogType.TYPE_CONSTORDERS ||
-            catalog?.distribMinOrdersTotal > 0) && (
+            catalog?.distribMinOrdersTotal > 0 ||
+            displayDefaultOrder) && (
             <Button
               variant="outlined"
               onClick={onDefaultOrdersChangeClick}

@@ -2,12 +2,12 @@ import { Alert, Box } from '@mui/material';
 import React from 'react';
 import { CatalogType } from '../../gql';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
+import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
 import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
 import CsaCatalogOrders from './containers/CsaCatalogOrders';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
-import { CsaCatalogContext } from './CsaCatalog.context';
 import { restCsaCatalogTypeToType } from './interfaces';
 import {
   useRestCheckSubscriptionDefaultOrderPost,
@@ -35,6 +35,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     defaultOrder,
     initialSubscriptionId,
     error: contextError,
+    adminMode,
   } = React.useContext(CsaCatalogContext);
 
   const [showPresentation, setShowPresentation] = React.useState(
@@ -237,11 +238,14 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           {isConstOrders ? (
             <CsaCatalogDefaultOrder onNext={onOrderNext} />
           ) : (
-            <CsaCatalogOrders onNext={onOrderNext} />
+            <CsaCatalogOrders
+              onNext={onOrderNext}
+              displayDefaultOrder={adminMode}
+            />
           )}
         </>
       )}
-      {showOrders && !!subscription && (
+      {showOrders && !!subscription && !adminMode && (
         <Box mt={3}>
           <CsaCatalogSubscription />
         </Box>
