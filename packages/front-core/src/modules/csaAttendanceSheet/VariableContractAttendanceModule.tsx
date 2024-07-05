@@ -148,7 +148,7 @@ export const VariableContractAttendanceModule = ({
     exportAttendanceCSV(
       tableData,
       t,
-      catalog.name,
+      catalog.name + ' - ' + formatDateFr(distribution.date, 'EEEE dd MMMM yyyy'),
       catalog,
       distribution.multiDistrib.volunteers.filter(
         (v) =>
@@ -163,7 +163,7 @@ export const VariableContractAttendanceModule = ({
     exportAttendanceXlsx(
       tableData,
       t,
-      catalog.name,
+      catalog.name + ' - ' + formatDateFr(distribution.date, 'EEEE dd MMMM yyyy'),
       catalog,
       distribution.multiDistrib.volunteers.filter(
         (v) =>
