@@ -27,6 +27,10 @@ export class DistributionEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
 
+  // How many times the orders should be added in this distribution.
+  @Column('int', {nullable: false, default: 1})
+  quantities: number;
+
   /**
    * =========
    * RELATIONS
