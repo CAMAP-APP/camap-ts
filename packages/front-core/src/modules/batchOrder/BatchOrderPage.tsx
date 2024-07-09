@@ -39,9 +39,11 @@ const BatchOrderPage = ({
   }, [postAbsencesData, setSubscriptionAbsences]);
 
   const handleAbsences = async () => {
-    await updateSubscriptionAbsences({
-      absentDistribIds: absenceDistributionsIds as number[],
-    });
+		if (absenceDistributionsIds && absenceDistributionsIds.length > 0) {
+			await updateSubscriptionAbsences({
+				absentDistribIds: absenceDistributionsIds as number[],
+			});
+		}
     setShowAbsencesModal(false);
   };
 

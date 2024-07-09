@@ -1,5 +1,5 @@
 import { useGetCatalogSubscriptionsLazyQuery } from '@gql';
-import { Box, Button, MenuItem, Select } from '@mui/material';
+import { Alert, Box, Button, MenuItem, Select } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import CsaCatalogContextProvider from 'modules/csaCatalog/CsaCatalog.context';
 import React, { useEffect } from 'react';
@@ -20,7 +20,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
   });
 
   const [showAbsencesModal, setShowAbsencesModal] = React.useState(false);
-	const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
+  const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
 
   const [
     getCatalogSubscriptions,
@@ -33,11 +33,17 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
 
   // if no subscriptions, set first subscription
   useEffect(() => {
-    if (!subscriptions) return;
+    if (!subscriptions || subscriptions?.catalog.subscriptions.length === 0)
+      return;
     setSelectedSubcription(subscriptions.catalog.subscriptions[0].id);
   }, [subscriptions]);
 
-  if (!subscriptions) return ``;
+	if (!subscriptions) return null;
+	
+  if (subscriptions && subscriptions?.catalog.subscriptions.length === 0)
+    return (
+        <Alert severity="warning" sx= {{margin: "16px 0px"}}>{t('noSubscriptions')}</Alert>
+    );
 
   return (
     <>
@@ -65,7 +71,9 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
           <Select
             labelId="user-select-label"
             value={
-              selectedSubscription || subscriptions.catalog.subscriptions[0].id
+              selectedSubscription ||
+              subscriptions.catalog.subscriptions[0]?.id ||
+              undefined
             }
             style={{
               width: '250px',
@@ -86,7 +94,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
           <Button
             variant="contained"
             onClick={() => setShowAbsencesModal(true)}
-						disabled={!absencesAutorized}
+            disabled={!absencesAutorized}
           >
             {t('allowedAbsences')}
           </Button>
@@ -106,7 +114,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
             selectedSubscription={selectedSubscription}
             showAbsencesModal={showAbsencesModal}
             setShowAbsencesModal={setShowAbsencesModal}
-						setAbsencesAutorized={setAbsencesAutorized}
+            setAbsencesAutorized={setAbsencesAutorized}
           />
         </CsaCatalogContextProvider>
       )}
