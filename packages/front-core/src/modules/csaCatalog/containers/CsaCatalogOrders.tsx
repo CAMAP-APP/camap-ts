@@ -37,11 +37,11 @@ import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
 import MediumActionIcon from './MediumActionIcon';
 
 interface CsacatalogProps {
-  displayDefaultOrder?: boolean;
+  adminMode?: boolean;
   onNext: () => Promise<boolean>;
 }
 
-const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
+const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
   const { t, tCommon } = useCamapTranslation(
     {
       t: 'csa-catalog',
@@ -70,6 +70,10 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
   const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
   const isUpMd = useMediaQuery(theme.breakpoints.up('md'));
   const isUpSm = useMediaQuery(theme.breakpoints.up('sm'));
+
+  // override this, because we don't want to display default order if thre is no minimum order
+  const displayDefaultOrder =
+    adminMode && (catalog?.distribMinOrdersTotal || 0) > 0;
 
   let maxNbDistribToShow = 1;
   if (isUpSm && !isUpMd) {
@@ -354,7 +358,7 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
   return (
     <Box>
       <Block
-        title={displayDefaultOrder ? t('changeOrders') : t('changeMyOrders')}
+        title={adminMode ? t('changeOrders') : t('changeMyOrders')}
         icon={<MediumActionIcon id={CamapIconId.basket} />}
         sx={{
           height: '100%',
@@ -388,7 +392,7 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
             </Box>
           )}
 
-          {/* Distributions obx & arrow buttons */}
+          {/* Distributions box & arrow buttons */}
           <Box
             display="flex"
             flexDirection={'column'}
@@ -464,7 +468,6 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
             </Box>
           </Box>
         </Box>
-
         <Box my={2}>
           {/* Product line */}
           {catalog.products.map((p) => {
@@ -578,8 +581,10 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
                               <>
                                 <TextField
                                   disabled={
-                                    d.state !== RestDistributionState.Open ||
-                                    loading
+                                    (d.state !== RestDistributionState.Open &&
+                                      !adminMode) ||
+                                    loading ||
+                                    d.distributionStartDate < new Date()
                                   }
                                   sx={{ width: 150 }}
                                   inputProps={{
@@ -639,7 +644,6 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
           })}
           <ProductModal product={modalProduct} onClose={onProductModalClose} />
         </Box>
-
         {/* Total row */}
         <Box
           sx={{
@@ -690,7 +694,8 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
                     width: 150,
                     textAlign: 'center',
                     color: (theme) =>
-                      d.state === RestDistributionState.Open
+                      d.state === RestDistributionState.Open ||
+                      (adminMode && d.distributionStartDate > new Date())
                         ? 'initial'
                         : theme.palette.action.disabled,
                     ...getSlideItemSx(
@@ -709,7 +714,6 @@ const CsaCatalogOrders = ({ displayDefaultOrder, onNext }: CsacatalogProps) => {
             </Box>
           </Box>
         </Box>
-
         {/* Buttons */}
         <Box
           width="100%"

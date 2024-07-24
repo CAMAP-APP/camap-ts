@@ -10,22 +10,26 @@ interface BatchOrderPageProps {
   selectedSubscription: number;
   showAbsencesModal: boolean;
   setShowAbsencesModal: (show: boolean) => void;
-	setAbsencesAutorized: (b: boolean) => void;
+  setAbsencesAutorized: (b: boolean) => void;
 }
 
 const BatchOrderPage = ({
   selectedSubscription,
   showAbsencesModal,
   setShowAbsencesModal,
-	setAbsencesAutorized
+  setAbsencesAutorized,
 }: BatchOrderPageProps) => {
-  const { absenceDistributionsIds, setSubscriptionAbsences,subscriptionAbsences } =
-    React.useContext(CsaCatalogContext);
+  const {
+    absenceDistributionsIds,
+    setSubscriptionAbsences,
+    subscriptionAbsences,
+    getSubscription,
+  } = React.useContext(CsaCatalogContext);
 
-		useEffect(() => {
-		setAbsencesAutorized(subscriptionAbsences != null)
-		}, [setAbsencesAutorized, subscriptionAbsences])
-		
+  useEffect(() => {
+    setAbsencesAutorized(subscriptionAbsences != null);
+  }, [setAbsencesAutorized, subscriptionAbsences]);
+
   /**
    * Absences
    */
@@ -39,12 +43,16 @@ const BatchOrderPage = ({
   }, [postAbsencesData, setSubscriptionAbsences]);
 
   const handleAbsences = async () => {
-		if (absenceDistributionsIds && absenceDistributionsIds.length > 0) {
-			await updateSubscriptionAbsences({
-				absentDistribIds: absenceDistributionsIds as number[],
-			});
-		}
+    const ids = (absenceDistributionsIds?.filter((d) => d !== 0) ||
+      []) as number[];
+
+    await updateSubscriptionAbsences({
+      absentDistribIds: ids,
+    });
     setShowAbsencesModal(false);
+
+    // we have to recall /api/subscription to refresh orders displaying
+    getSubscription();
   };
 
   return (
@@ -69,9 +77,7 @@ const BatchOrderPage = ({
       </Modal>
       <br />
       {selectedSubscription ? (
-        <CsaCatalogRouter
-          userId={selectedSubscription}
-        />
+        <CsaCatalogRouter userId={selectedSubscription} />
       ) : (
         <CircularProgressBox />
       )}
