@@ -1,5 +1,8 @@
 {
 	"batchOrder": "Saisie de commandes en lot",
 	"allowedAbsences": "Absences autorisées",
-	"noSubscriptions": "Aucune souscription pour ce catalogue"
+	"noSubscriptions": "Aucune souscription pour ce catalogue",
+	"noUsers": "Aucun utilisateur pour ce catalogue",
+	"userHasNoSubscription": "Cet utilisateur n'a pas de souscription pour ce catalogue",
+	"createSubscription": "Créer une souscription"
 }

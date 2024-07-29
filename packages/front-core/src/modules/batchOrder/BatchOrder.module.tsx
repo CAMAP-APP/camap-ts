@@ -6,7 +6,7 @@ import { Alert, Box, Button, MenuItem, Select } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import CsaCatalogContextProvider from 'modules/csaCatalog/CsaCatalog.context';
 import React, { useEffect } from 'react';
-import { useRestSubscriptionPost } from '../csaCatalog/requests';
+import BatchOrderCreateSub from './BatchOrderCreateSub';
 import BatchOrderPage from './BatchOrderPage';
 
 interface BatchOrderProps {
@@ -52,11 +52,6 @@ const BatchOrder = ({
     },
   ] = useGetCatalogSubscriptionsLazyQuery({ variables: { id: catalogId } });
 
-  const [
-    createSubscription,
-    { data: createSubscriptionData, error: createError },
-  ] = useRestSubscriptionPost();
-
   /**
    * Side effects
    */
@@ -66,12 +61,7 @@ const BatchOrder = ({
 
   useEffect(() => {
     refetchSubscriptions();
-  }, [
-    catalogId,
-    getCatalogSubscriptions,
-    createSubscriptionData,
-    refetchSubscriptions,
-  ]);
+  }, [catalogId, getCatalogSubscriptions, refetchSubscriptions]);
 
   // select subscription of selected member
   useEffect(() => {
@@ -86,15 +76,6 @@ const BatchOrder = ({
     if (!groupMembers) return;
     setSelectedMember(groupMembers.getUserListInGroupByListType[0].id);
   }, [groupMembers]);
-
-  const createSub = async () => {
-    await createSubscription({
-      userId: selectedMember!,
-      catalogId,
-      defaultOrder: [],
-      absentDistribIds: [],
-    });
-  };
 
   if (!groupMembers) return null;
 
@@ -160,28 +141,23 @@ const BatchOrder = ({
         </Box>
       </Box>
 
-      {memberError}
-      {createError}
-      {subscriptionsError}
+      {(memberError || subscriptionsError) && (
+        <Alert severity="error">
+          {memberError?.message} {subscriptionsError?.message}
+        </Alert>
+      )}
 
-      {!selectedSubscription && (
-        <>
-          <Alert severity="warning" sx={{ margin: '16px 0px' }}>
-            {t('userHasNoSubscription')}
-          </Alert>
-
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              marginBottom: '16px',
-            }}
-          >
-            <Button variant="contained" onClick={() => createSub()}>
-              {t('createSubscription')}
-            </Button>
-          </div>
-        </>
+      {!selectedSubscription && selectedMember && (
+        <CsaCatalogContextProvider
+          catalogId={catalogId}
+          initialSubscriptionId={selectedSubscription}
+          adminMode={true}
+        >
+          <BatchOrderCreateSub
+            selectedMember={selectedMember}
+            refetchSubscriptions={refetchSubscriptions}
+          />
+        </CsaCatalogContextProvider>
       )}
 
       {/* Orders */}
@@ -202,5 +178,4 @@ const BatchOrder = ({
     </>
   );
 };
-
 export default BatchOrder;

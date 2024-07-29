@@ -26,10 +26,6 @@ const BatchOrderPage = ({
     getSubscription,
   } = React.useContext(CsaCatalogContext);
 
-  useEffect(() => {
-    setAbsencesAutorized(subscriptionAbsences != null);
-  }, [setAbsencesAutorized, subscriptionAbsences]);
-
   /**
    * Absences
    */
@@ -38,9 +34,13 @@ const BatchOrderPage = ({
     { data: postAbsencesData, error: postAbsencesError },
   ] = useRestUpdateSubscriptionAbsencesPost(selectedSubscription || 0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSubscriptionAbsences(postAbsencesData);
   }, [postAbsencesData, setSubscriptionAbsences]);
+
+  useEffect(() => {
+    setAbsencesAutorized(subscriptionAbsences != null);
+  }, [setAbsencesAutorized, subscriptionAbsences]);
 
   const handleAbsences = async () => {
     const ids = (absenceDistributionsIds?.filter((d) => d !== 0) ||
@@ -58,6 +58,7 @@ const BatchOrderPage = ({
   return (
     <>
       {postAbsencesError && <Alert severity="error">{postAbsencesError}</Alert>}
+      {/* Absence modal */}
       <Modal
         open={showAbsencesModal}
         onClose={() => setShowAbsencesModal(false)}
