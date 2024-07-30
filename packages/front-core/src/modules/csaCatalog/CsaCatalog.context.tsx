@@ -31,6 +31,7 @@ interface CsaCatalogContextProps {
   absenceDistributionsIds: (number | '')[] | null;
   setAbsenceDistributionsIds: (value: (number | '')[]) => void;
   subscription?: RestCsaSubscription;
+  getSubscription: () => void;
   setSubscription: (value?: RestCsaSubscription) => void;
   setSubscriptionAbsences: (value?: RestCsaSubscriptionAbsences) => void;
   defaultOrder: Record<number, number>;
@@ -38,8 +39,10 @@ interface CsaCatalogContextProps {
   addedOrders: Record<number, number>;
   setAddedOrders: (value: Record<number, number>) => void;
   stocksPerProductDistribution: RestStocksPerProductDistribution | undefined;
-  setStocksPerProductDistribution: (value: RestStocksPerProductDistribution | undefined) => void;
-	adminMode?: boolean | undefined;
+  setStocksPerProductDistribution: (
+    value: RestStocksPerProductDistribution | undefined,
+  ) => void;
+  adminMode?: boolean | undefined;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
@@ -56,6 +59,7 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   absenceDistributionsIds: null,
   setAbsenceDistributionsIds: () => {},
   subscription: undefined,
+  getSubscription: () => {},
   setSubscription: () => {},
   setSubscriptionAbsences: () => {},
   defaultOrder: {},
@@ -64,18 +68,19 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   setAddedOrders: () => {},
   stocksPerProductDistribution: {},
   setStocksPerProductDistribution: () => {},
-	adminMode: false,
+  adminMode: false,
 });
 
 const CsaCatalogContextProvider = ({
   children,
   catalogId,
   initialSubscriptionId,
-	adminMode,
+  adminMode,
 }: {
   children: React.ReactNode;
   initialSubscriptionId?: number;
-} & Pick<CsaCatalogContextProps, 'catalogId'> & Pick<CsaCatalogContextProps, 'adminMode'>) => {
+} & Pick<CsaCatalogContextProps, 'catalogId'> &
+  Pick<CsaCatalogContextProps, 'adminMode'>) => {
   const [updatedOrders, setUpdatedOrders] = React.useState<
     Record<number, Record<number, number>>
   >({}); // Matrices with distributionId as a key, and a value which is a record which maps productId to a quantity
@@ -92,11 +97,17 @@ const CsaCatalogContextProvider = ({
     Record<number, number>
   >({});
   const [otherError, setOtherError] = React.useState<string | undefined>();
-  const [addedOrders, setAddedOrders] = React.useState<Record<number, number>>({});
-  const [stocksPerProductDistribution, setStocksPerProductDistribution] = React.useState<RestStocksPerProductDistribution | undefined>({});
+  const [addedOrders, setAddedOrders] = React.useState<Record<number, number>>(
+    {},
+  );
+  const [stocksPerProductDistribution, setStocksPerProductDistribution] =
+    React.useState<RestStocksPerProductDistribution | undefined>({});
 
   const { data: catalog, error: catalogError } = useRestCatalogGet(catalogId);
-  const [getStocksPerProductDistribution,  { data: stocksPerProductDistributionData, error: stocksError }] = useRestStocksGet(catalogId);
+  const [
+    getStocksPerProductDistribution,
+    { data: stocksPerProductDistributionData, error: stocksError },
+  ] = useRestStocksGet(catalogId);
 
   const [
     getSubscriptionAbsences,
@@ -116,7 +127,6 @@ const CsaCatalogContextProvider = ({
 
   React.useEffect(() => {
     if (!initialSubscriptionId) return;
-
     getSubscription();
   }, [getSubscription, initialSubscriptionId]);
 
@@ -134,8 +144,8 @@ const CsaCatalogContextProvider = ({
 
   // reset stocks data whenever new stock information arrives with a subscription
   React.useEffect(() => {
-    getStocksPerProductDistribution()
-    setAddedOrders({})
+    getStocksPerProductDistribution();
+    setAddedOrders({});
   }, [getStocksPerProductDistribution, subscription]);
 
   const distributions = React.useMemo(() => {
@@ -170,13 +180,19 @@ const CsaCatalogContextProvider = ({
         setUpdatedOrders,
         catalog,
         subscriptionAbsences,
-        error: catalogError || absencesError || subscriptionError || otherError || stocksError,
+        error:
+          catalogError ||
+          absencesError ||
+          subscriptionError ||
+          otherError ||
+          stocksError,
         setError: setOtherError,
         distributions,
         nextDistributionIndex,
         absenceDistributionsIds,
         setAbsenceDistributionsIds,
         subscription,
+        getSubscription,
         setSubscription,
         setSubscriptionAbsences,
         defaultOrder,
@@ -185,7 +201,7 @@ const CsaCatalogContextProvider = ({
         setAddedOrders,
         stocksPerProductDistribution,
         setStocksPerProductDistribution,
-				adminMode
+        adminMode,
       }}
     >
       {children}

@@ -1,43 +1,90 @@
-import { useGetCatalogSubscriptionsLazyQuery } from '@gql';
-import { Box, Button, MenuItem, Select } from '@mui/material';
+import {
+  useGetCatalogSubscriptionsLazyQuery,
+  useGetMembersOfGroupByListTypeLazyQuery,
+} from '@gql';
+import { Alert, Box, Button, MenuItem, Select } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import CsaCatalogContextProvider from 'modules/csaCatalog/CsaCatalog.context';
 import React, { useEffect } from 'react';
+import BatchOrderCreateSub from './BatchOrderCreateSub';
 import BatchOrderPage from './BatchOrderPage';
 
 interface BatchOrderProps {
   catalogId: number;
+  catalogName: string;
   subscriptionId?: number;
 }
 
-const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
+const BatchOrder = ({
+  catalogId,
+  catalogName,
+  subscriptionId,
+}: BatchOrderProps) => {
   const [selectedSubscription, setSelectedSubcription] = React.useState<
     number | undefined
   >(subscriptionId);
+
+  const [selectedMember, setSelectedMember] = React.useState<
+    number | undefined
+  >(undefined);
 
   const { t } = useCamapTranslation({
     t: 'batch-order',
   });
 
   const [showAbsencesModal, setShowAbsencesModal] = React.useState(false);
-	const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
+  const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
+
+  /**
+   * Requests
+   */
+  const [getGroupMembers, { data: groupMembers, error: memberError }] =
+    useGetMembersOfGroupByListTypeLazyQuery({
+      variables: { listType: 'all', groupId: 16965 },
+    });
 
   const [
     getCatalogSubscriptions,
-    { data: subscriptions, error: subscriptionsError },
+    {
+      data: subscriptions,
+      error: subscriptionsError,
+      refetch: refetchSubscriptions,
+    },
   ] = useGetCatalogSubscriptionsLazyQuery({ variables: { id: catalogId } });
 
+  /**
+   * Side effects
+   */
   useEffect(() => {
-    getCatalogSubscriptions();
-  }, [catalogId, getCatalogSubscriptions]);
+    getGroupMembers();
+  }, [getGroupMembers]);
 
-  // if no subscriptions, set first subscription
   useEffect(() => {
-    if (!subscriptions) return;
-    setSelectedSubcription(subscriptions.catalog.subscriptions[0].id);
-  }, [subscriptions]);
+    refetchSubscriptions();
+  }, [catalogId, getCatalogSubscriptions, refetchSubscriptions]);
 
-  if (!subscriptions) return ``;
+  // select subscription of selected member
+  useEffect(() => {
+    const selectedSubscription = subscriptions?.catalog.subscriptions.filter(
+      (s) => s.user.id === selectedMember,
+    )[0];
+    setSelectedSubcription(selectedSubscription?.id);
+  }, [selectedMember, subscriptions?.catalog.subscriptions]);
+
+  // set first member at start
+  useEffect(() => {
+    if (!groupMembers) return;
+    setSelectedMember(groupMembers.getUserListInGroupByListType[0].id);
+  }, [groupMembers]);
+
+  if (!groupMembers) return null;
+
+  if (groupMembers && groupMembers?.getUserListInGroupByListType.length === 0)
+    return (
+      <Alert severity="warning" sx={{ margin: '16px 0px' }}>
+        {t('noUsers')}
+      </Alert>
+    );
 
   return (
     <>
@@ -52,7 +99,7 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
       >
         <div>
           <h2>{t('batchOrder')}</h2>
-          <h3>{subscriptions.catalog.name}</h3>
+          <h3>{catalogName}</h3>
         </div>
         <Box
           sx={{
@@ -65,20 +112,21 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
           <Select
             labelId="user-select-label"
             value={
-              selectedSubscription || subscriptions.catalog.subscriptions[0].id
+              selectedMember ||
+              groupMembers.getUserListInGroupByListType[0]?.id ||
+              undefined
             }
             style={{
               width: '250px',
               height: '42px',
               margin: '0px 16px 16px 0px',
             }}
-            onChange={(e) => setSelectedSubcription(e.target.value as number)}
+            onChange={(e) => setSelectedMember(e.target.value as number)}
           >
-            {subscriptions &&
-              subscriptions.catalog &&
-              subscriptions.catalog.subscriptions.map((s) => (
+            {groupMembers &&
+              groupMembers.getUserListInGroupByListType.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
-                  {s.user.firstName} {s.user.lastName}
+                  {s.firstName} {s.lastName}
                 </MenuItem>
               ))}
           </Select>
@@ -86,17 +134,34 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
           <Button
             variant="contained"
             onClick={() => setShowAbsencesModal(true)}
-						disabled={!absencesAutorized}
+            disabled={!absencesAutorized || !selectedSubscription}
           >
             {t('allowedAbsences')}
           </Button>
         </Box>
       </Box>
 
-      {subscriptionsError}
+      {(memberError || subscriptionsError) && (
+        <Alert severity="error">
+          {memberError?.message} {subscriptionsError?.message}
+        </Alert>
+      )}
+
+      {!selectedSubscription && selectedMember && (
+        <CsaCatalogContextProvider
+          catalogId={catalogId}
+          initialSubscriptionId={selectedSubscription}
+          adminMode={true}
+        >
+          <BatchOrderCreateSub
+            selectedMember={selectedMember}
+            refetchSubscriptions={refetchSubscriptions}
+          />
+        </CsaCatalogContextProvider>
+      )}
 
       {/* Orders */}
-      {selectedSubscription && (
+      {selectedMember && selectedSubscription && (
         <CsaCatalogContextProvider
           catalogId={catalogId}
           initialSubscriptionId={selectedSubscription}
@@ -106,12 +171,11 @@ const BatchOrder = ({ catalogId, subscriptionId }: BatchOrderProps) => {
             selectedSubscription={selectedSubscription}
             showAbsencesModal={showAbsencesModal}
             setShowAbsencesModal={setShowAbsencesModal}
-						setAbsencesAutorized={setAbsencesAutorized}
+            setAbsencesAutorized={setAbsencesAutorized}
           />
         </CsaCatalogContextProvider>
       )}
     </>
   );
 };
-
 export default BatchOrder;
