@@ -171,30 +171,29 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       );
     } else {
       if (Object.keys(updatedOrders).length === 0) {
-        console.log('No orders to update');
         return true;
       }
-      let distributionsToUpdate: any = distributions.filter((d) => {
-        // in admin mode, this variable is set after the admin has set / unset absences
-        // but we still want to update orders, so we ignore this
-        if (absenceDistributionsIds && !adminMode) {
-          return !absenceDistributionsIds.includes(d.id);
-        }
-        // return only updated orders on all distributions
-        return !!updatedOrders[d.id];
-      });
-      // transform in expected API format
-      distributionsToUpdate = distributionsToUpdate.map((d) => ({
-        id: d.id,
-        orders: Object.keys(updatedOrders[d.id]).map((p) => ({
-          productId: parseInt(p, 10),
-          qty: updatedOrders[d.id][parseInt(p, 10)],
-        })),
-      }));
 
       success = await updateSubscriptionOrders(
         {
-          distributions: distributionsToUpdate,
+          distributions: distributions
+            .filter((d) => {
+              // in admin mode, this variable is set after the admin has set / unset absences
+              // but we still want to update orders, so we ignore this
+              if (absenceDistributionsIds && !adminMode) {
+                return !absenceDistributionsIds.includes(d.id);
+              }
+              // return only updated orders on all distributions
+              return !!updatedOrders[d.id];
+            })
+            .map((d) => ({
+              // transform in expected API format
+              id: d.id,
+              orders: Object.keys(updatedOrders[d.id]).map((p) => ({
+                productId: parseInt(p, 10),
+                qty: updatedOrders[d.id][parseInt(p, 10)],
+              })),
+            })),
         },
         `${subscription.id}`,
       );

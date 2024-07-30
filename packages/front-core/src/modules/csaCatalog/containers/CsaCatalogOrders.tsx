@@ -72,7 +72,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
   const isUpSm = useMediaQuery(theme.breakpoints.up('sm'));
 
   // override this, because we don't want to display default order if thre is no minimum order
-  const displayDefaultOrder =
+  let displayDefaultOrder =
     adminMode && (catalog?.distribMinOrdersTotal || 0) > 0;
 
   let maxNbDistribToShow = 1;
@@ -85,7 +85,14 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
   }
   // hide 1 column distribution if displaying default order
   if (displayDefaultOrder) {
-    maxNbDistribToShow -= 1;
+    // if we have only one distribution, we hide the default order
+    if (maxNbDistribToShow === 1) {
+      displayDefaultOrder = false;
+    }
+    // else we reduce the number of distribution to display to diplay the default order
+    else {
+      maxNbDistribToShow -= 1;
+    }
   }
 
   const [firstDistributionIndex, setFirstDistributionIndex] = React.useState(0);
