@@ -170,16 +170,24 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         `${subscription.id}`,
       );
     } else {
+      if (Object.keys(updatedOrders).length === 0) {
+        return true;
+      }
+
       success = await updateSubscriptionOrders(
         {
           distributions: distributions
             .filter((d) => {
-              if (absenceDistributionsIds) {
+              // in admin mode, this variable is set after the admin has set / unset absences
+              // but we still want to update orders, so we ignore this
+              if (absenceDistributionsIds && !adminMode) {
                 return !absenceDistributionsIds.includes(d.id);
               }
+              // return only updated orders on all distributions
               return !!updatedOrders[d.id];
             })
             .map((d) => ({
+              // transform in expected API format
               id: d.id,
               orders: Object.keys(updatedOrders[d.id]).map((p) => ({
                 productId: parseInt(p, 10),
@@ -238,10 +246,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           {isConstOrders ? (
             <CsaCatalogDefaultOrder onNext={onOrderNext} />
           ) : (
-            <CsaCatalogOrders
-              onNext={onOrderNext}
-              displayDefaultOrder={adminMode}
-            />
+            <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
           )}
         </>
       )}

@@ -10,22 +10,22 @@ interface BatchOrderPageProps {
   selectedSubscription: number;
   showAbsencesModal: boolean;
   setShowAbsencesModal: (show: boolean) => void;
-	setAbsencesAutorized: (b: boolean) => void;
+  setAbsencesAutorized: (b: boolean) => void;
 }
 
 const BatchOrderPage = ({
   selectedSubscription,
   showAbsencesModal,
   setShowAbsencesModal,
-	setAbsencesAutorized
+  setAbsencesAutorized,
 }: BatchOrderPageProps) => {
-  const { absenceDistributionsIds, setSubscriptionAbsences,subscriptionAbsences } =
-    React.useContext(CsaCatalogContext);
+  const {
+    absenceDistributionsIds,
+    setSubscriptionAbsences,
+    subscriptionAbsences,
+    getSubscription,
+  } = React.useContext(CsaCatalogContext);
 
-		useEffect(() => {
-		setAbsencesAutorized(subscriptionAbsences != null)
-		}, [setAbsencesAutorized, subscriptionAbsences])
-		
   /**
    * Absences
    */
@@ -34,20 +34,31 @@ const BatchOrderPage = ({
     { data: postAbsencesData, error: postAbsencesError },
   ] = useRestUpdateSubscriptionAbsencesPost(selectedSubscription || 0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setSubscriptionAbsences(postAbsencesData);
   }, [postAbsencesData, setSubscriptionAbsences]);
 
+  useEffect(() => {
+    setAbsencesAutorized(subscriptionAbsences != null);
+  }, [setAbsencesAutorized, subscriptionAbsences]);
+
   const handleAbsences = async () => {
+    const ids = (absenceDistributionsIds?.filter((d) => d !== 0) ||
+      []) as number[];
+
     await updateSubscriptionAbsences({
-      absentDistribIds: absenceDistributionsIds as number[],
+      absentDistribIds: ids,
     });
     setShowAbsencesModal(false);
+
+    // we have to recall /api/subscription to refresh orders displaying
+    getSubscription();
   };
 
   return (
     <>
       {postAbsencesError && <Alert severity="error">{postAbsencesError}</Alert>}
+      {/* Absence modal */}
       <Modal
         open={showAbsencesModal}
         onClose={() => setShowAbsencesModal(false)}
@@ -67,9 +78,7 @@ const BatchOrderPage = ({
       </Modal>
       <br />
       {selectedSubscription ? (
-        <CsaCatalogRouter
-          userId={selectedSubscription}
-        />
+        <CsaCatalogRouter userId={selectedSubscription} />
       ) : (
         <CircularProgressBox />
       )}
