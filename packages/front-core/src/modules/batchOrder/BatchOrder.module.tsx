@@ -12,12 +12,14 @@ import BatchOrderPage from './BatchOrderPage';
 interface BatchOrderProps {
   catalogId: number;
   catalogName: string;
+  groupId: number;
   subscriptionId?: number;
 }
 
 const BatchOrder = ({
   catalogId,
   catalogName,
+  groupId,
   subscriptionId,
 }: BatchOrderProps) => {
   const [selectedSubscription, setSelectedSubcription] = React.useState<
@@ -40,7 +42,7 @@ const BatchOrder = ({
    */
   const [getGroupMembers, { data: groupMembers, error: memberError }] =
     useGetMembersOfGroupByListTypeLazyQuery({
-      variables: { listType: 'all', groupId: 16965 },
+      variables: { listType: 'all', groupId },
     });
 
   const [
