@@ -1,14 +1,14 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import {
-	Box,
-	Button,
-	ButtonBase,
-	Divider,
-	Modal,
-	TextField,
-	Tooltip,
-	Typography,
-	useMediaQuery,
+  Box,
+  Button,
+  ButtonBase,
+  Divider,
+  Modal,
+  TextField,
+  Tooltip,
+  Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { formatCurrency, StockTracking } from 'camap-common';
 import React from 'react';
@@ -17,13 +17,13 @@ import { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import Product from '../../../components/utils/Product/Product';
 import ProductModal, {
-	ProductInfos,
+  ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
 import {
-	getSlideContainerSx,
-	getSlideItemSx,
-	SlideDirection,
+  getSlideContainerSx,
+  getSlideItemSx,
+  SlideDirection,
 } from '../../../components/utils/Transitions/slide';
 import { CatalogType } from '../../../gql';
 import theme from '../../../theme';
@@ -514,11 +514,10 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                     onClick={() => setModalProduct(p)}
                   >
                     <Product product={p} />
-                   
                   </ButtonBase>
 
                   {displayDefaultOrder && (
-                    <Box key="order_default">
+                    <Box key="order_default" alignContent={'center'}>
                       <TextField
                         sx={{ width: 150 }}
                         value={
@@ -532,23 +531,22 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                     </Box>
                   )}
 
-										
-
                   <Box display="flex" flex={1} overflow="hidden">
-									{isGlobalStock && (
+                    {isGlobalStock && (
                       <Typography
                         align="center"
                         color="grey"
                         fontSize="0.8em"
                         position="relative"
                         whiteSpace="nowrap"
-												maxWidth={0}
-												margin={"auto"}
+                        maxWidth={0}
+                        margin={'auto'}
                       >
                         <Tooltip
                           title={`${t('Available')} (global): ${globalStock}`}
                         >
-                          <span>&nbsp;&nbsp;
+                          <span>
+                            &nbsp;&nbsp;
                             <i
                               className="icon icon-wholesale"
                               style={{ fontSize: '0.9em' }}
