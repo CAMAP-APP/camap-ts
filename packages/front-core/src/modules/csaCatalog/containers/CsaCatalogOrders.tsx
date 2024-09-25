@@ -1,14 +1,14 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import {
-	Box,
-	Button,
-	ButtonBase,
-	Divider,
-	Modal,
-	TextField,
-	Tooltip,
-	Typography,
-	useMediaQuery,
+  Box,
+  Button,
+  ButtonBase,
+  Divider,
+  Modal,
+  TextField,
+  Tooltip,
+  Typography,
+  useMediaQuery,
 } from '@mui/material';
 import { formatCurrency, StockTracking } from 'camap-common';
 import React from 'react';
@@ -17,13 +17,13 @@ import { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import Product from '../../../components/utils/Product/Product';
 import ProductModal, {
-	ProductInfos,
+  ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
 import {
-	getSlideContainerSx,
-	getSlideItemSx,
-	SlideDirection,
+  getSlideContainerSx,
+  getSlideItemSx,
+  SlideDirection,
 } from '../../../components/utils/Transitions/slide';
 import { CatalogType } from '../../../gql';
 import theme from '../../../theme';
@@ -164,12 +164,15 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     ) {
       return;
     }
+    let prevValue = updatedOrders[distributionId]
+      ? updatedOrders[distributionId][productId]
+      : null;
+
     const newOrders = { ...updatedOrders };
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
     newOrders[distributionId][productId] = adaptedNewValue;
-    setUpdatedOrders(newOrders);
 
     // Count "added orders" for global stock estimations
     // initialOrders is what we received from server
@@ -177,17 +180,15 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     // addedOrders keep track of the difference between initialOrders and current use input
     // Estimating the next stock according to current user input is then done by subtracting addedOrders from initialStock
     if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
-      let prevValue =
-        updatedOrders[distributionId] != null &&
-        updatedOrders[distributionId][productId] != null
-          ? updatedOrders[distributionId][productId]
-          : null;
-      if (prevValue == null)
-        prevValue =
-          initialOrders[distributionId] != null &&
-          initialOrders[distributionId][productId] != null
-            ? initialOrders[distributionId][productId]
-            : 0;
+      let initialValue =
+        initialOrders[distributionId] != null &&
+        initialOrders[distributionId][productId] != null
+          ? initialOrders[distributionId][productId]
+          : 0;
+      if (prevValue == null) {
+        prevValue = initialValue;
+      }
+
       var addedOrder = adaptedNewValue - prevValue;
       if (!addedOrders.hasOwnProperty(productId)) {
         addedOrders[productId] = 0;
@@ -196,8 +197,8 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
       setAddedOrders(addedOrders);
 
       newOrders[distributionId][productId] = adaptedNewValue;
-      setUpdatedOrders(newOrders);
     }
+    setUpdatedOrders(newOrders);
   };
 
   // get orders from updatedOrders
@@ -514,11 +515,10 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                     onClick={() => setModalProduct(p)}
                   >
                     <Product product={p} />
-                   
                   </ButtonBase>
 
                   {displayDefaultOrder && (
-                    <Box key="order_default">
+                    <Box key="order_default" alignContent={'center'}>
                       <TextField
                         sx={{ width: 150 }}
                         value={
@@ -532,23 +532,22 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                     </Box>
                   )}
 
-										
-
                   <Box display="flex" flex={1} overflow="hidden">
-									{isGlobalStock && (
+                    {isGlobalStock && (
                       <Typography
                         align="center"
                         color="grey"
                         fontSize="0.8em"
                         position="relative"
                         whiteSpace="nowrap"
-												maxWidth={0}
-												margin={"auto"}
+                        maxWidth={0}
+                        margin={'auto'}
                       >
                         <Tooltip
                           title={`${t('Available')} (global): ${globalStock}`}
                         >
-                          <span>&nbsp;&nbsp;
+                          <span>
+                            &nbsp;&nbsp;
                             <i
                               className="icon icon-wholesale"
                               style={{ fontSize: '0.9em' }}
