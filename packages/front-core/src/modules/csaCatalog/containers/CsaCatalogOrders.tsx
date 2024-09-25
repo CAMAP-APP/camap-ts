@@ -164,12 +164,15 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     ) {
       return;
     }
+    let prevValue = updatedOrders[distributionId]
+      ? updatedOrders[distributionId][productId]
+      : null;
+
     const newOrders = { ...updatedOrders };
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
     newOrders[distributionId][productId] = adaptedNewValue;
-    setUpdatedOrders(newOrders);
 
     // Count "added orders" for global stock estimations
     // initialOrders is what we received from server
@@ -177,17 +180,15 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     // addedOrders keep track of the difference between initialOrders and current use input
     // Estimating the next stock according to current user input is then done by subtracting addedOrders from initialStock
     if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
-      let prevValue =
-        updatedOrders[distributionId] != null &&
-        updatedOrders[distributionId][productId] != null
-          ? updatedOrders[distributionId][productId]
-          : null;
-      if (prevValue == null)
-        prevValue =
-          initialOrders[distributionId] != null &&
-          initialOrders[distributionId][productId] != null
-            ? initialOrders[distributionId][productId]
-            : 0;
+      let initialValue =
+        initialOrders[distributionId] != null &&
+        initialOrders[distributionId][productId] != null
+          ? initialOrders[distributionId][productId]
+          : 0;
+      if (prevValue == null) {
+        prevValue = initialValue;
+      }
+
       var addedOrder = adaptedNewValue - prevValue;
       if (!addedOrders.hasOwnProperty(productId)) {
         addedOrders[productId] = 0;
@@ -196,8 +197,8 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
       setAddedOrders(addedOrders);
 
       newOrders[distributionId][productId] = adaptedNewValue;
-      setUpdatedOrders(newOrders);
     }
+    setUpdatedOrders(newOrders);
   };
 
   // get orders from updatedOrders
