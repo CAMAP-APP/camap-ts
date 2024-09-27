@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { BasketEntity } from '../../shop/entities/basket.entity';
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';
@@ -69,5 +69,29 @@ export class OrdersService {
         userId: deleteUserId,
       },
     );
+  }
+
+  /**
+   * Find orders that are not older than one month, belong to the userId, and related to the groupId
+   * @param userId
+   * @param groupId
+   */
+  async findRecentUserOrders(
+    userId: number,
+    groupId: number,
+  ): Promise<Pick<UserOrderEntity, 'id'>[]> {
+    const query = this.ordersRepo
+      .createQueryBuilder('o')
+      .select('o.id')
+      .where('o.date >= NOW() - INTERVAL 1 MONTH')
+      .andWhere(new Brackets(qb => {
+          qb.where(`o.userId = :userId`, { userId })
+            .orWhere(`o.userId2 = :userId`, { userId });
+        }))
+      // need to find the groupId via UserOrderEntity.product.catalog.group
+      .innerJoin('o.product', 'p')
+      .innerJoin('p.catalog', 'c')
+      .innerJoin('c.group', 'g', 'g.id = :groupId', { groupId });
+    return query.getRawMany();
   }
 }

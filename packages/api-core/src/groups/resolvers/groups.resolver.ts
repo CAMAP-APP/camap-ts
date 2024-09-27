@@ -1,4 +1,4 @@
-import { NotFoundException, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {ForbiddenException, NotFoundException, UnauthorizedException, UseGuards} from '@nestjs/common';
 import {
   Args,
   Int,
@@ -13,7 +13,6 @@ import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
 import { compressImage } from '../../common/image';
 import { FilesService } from '../../files/file.service';
-import { PaymentsService } from '../../payments/services/payments.service';
 import { MultiDistribEntity } from '../../shop/entities/multi-distrib.entity';
 import { MultiDistribsService } from '../../shop/services/multi-distribs.service';
 import { MultiDistrib } from '../../shop/types/multi-distrib.type';
@@ -24,39 +23,24 @@ import { GroupsService } from '../services/groups.service';
 import { UserGroupsService } from '../services/user-groups.service';
 import { Group } from '../types/group.type';
 import { UserGroup } from '../types/user-group.type';
+import { isControlKeyValid } from '../../common/utils';
+import { CryptoService } from '../../tools/crypto.service';
 import { OrdersService } from '../../payments/services/orders.service';
-import {
-  addDays,
-  addMonths,
-  addWeeks,
-  addYears,
-  format,
-  isAfter,
-  isSameDay,
-  parseISO,
-  setHours,
-  setMilliseconds,
-  setMinutes,
-  setSeconds,
-  subMilliseconds,
-  subMonths,
-  subYears,
-} from 'date-fns';
 
-@UseGuards(GqlAuthGuard)
 @Resolver(() => Group)
 export class GroupsResolver {
   constructor(
     private readonly groupsService: GroupsService,
     private readonly usersService: UsersService,
+    private readonly ordersService: OrdersService,
     private readonly userGroupsService: UserGroupsService,
     private readonly filesService: FilesService,
-    private readonly paymentsService: PaymentsService,
     private readonly multiDistribsService: MultiDistribsService,
-    private readonly ordersService: OrdersService,
+    private readonly cryptoService: CryptoService,
   ) { }
 
   /** QUERIES */
+  @UseGuards(GqlAuthGuard)
   @Query(() => Group, { name: 'group' })
   async get(
     @Args({ name: 'id', type: () => Int }) id: number,
@@ -73,17 +57,20 @@ export class GroupsResolver {
   /**
    * RESOLVE FIELDS
    */
+  @UseGuards(GqlAuthGuard)
   @ResolveField()
   async user(@Parent() group: GroupEntity) {
     return this.usersService.findOne(group.userId);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => String, { nullable: true })
   async image(@Parent() parent: GroupEntity): Promise<string | null> {
     if (!parent.imageId) return null;
     return this.filesService.getUrl(parent.imageId);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => UserGroup, { nullable: true })
   async userGroup(
     @Parent() group: GroupEntity,
@@ -92,6 +79,7 @@ export class GroupsResolver {
     return this.userGroupsService.get(currentUser, group.id);
   }
 
+  @UseGuards(GqlAuthGuard)
   @ResolveField(() => [MultiDistrib])
   multiDistribs(
     @Parent() group: Group & { multiDistribs?: Promise<MultiDistribEntity[]> },
@@ -103,72 +91,65 @@ export class GroupsResolver {
   }
 
   /** MUTATIONS */
+  @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => UserGroup)
   async quitGroup(
     @Args('groupId', { type: () => Int }) groupId: number,
     @CurrentUser() currentUser: UserEntity,
   ) {
+    return await this.doQuitGroup(groupId, currentUser);
+  }
+
+  @Transactional()
+  @Mutation(() => UserGroup)
+  async quitGroupByControlKey(
+    @Args('groupId', { type: () => Int }) groupId: number,
+    @Args('userId', { type: () => Int }) userId: number,
+    @Args('controlKey', { type: () => String }) controlKey: string,
+  ) {
+    if (!isControlKeyValid(this.cryptoService, userId, controlKey, groupId)) {
+      throw new UnauthorizedException();
+    }
+    const user = await this.usersService.findOne(userId);
+    if (!user) throw new NotFoundException();
+    return this.doQuitGroup(groupId, user);
+  }
+
+  private async doQuitGroup(groupId: number, user: UserEntity) {
     const group = await this.groupsService.findOne(groupId);
 
     if (!group) throw new NotFoundException();
-    // AJOUTER CONTROLE
-    // Bloquer si commandes < 1 mois
-
-    // BUG: il ne faut chercher les commandes que dans le groupe concerné
-    // BUG: désactivé le temps de corriger
-    /*
-    let oneMonthsAgo = subMonths(new Date(), 1);
-
-    // Don't delete those who still have orders in less than 1 month
-    let orders1 = await this.ordersService.findPartialUserOrdersByUserId(
-      currentUser.id,
-    );
-    orders1 = orders1.filter((o) => {
-      if (!o) return false;
-      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-      return isAfter(date, oneMonthsAgo);
-    });
-    if (orders1.length > 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
-      );
-    }
-    let orders2 = await this.ordersService.findPartialUserOrdersByUserId2(
-      currentUser.id,
-    );
-    orders2 = orders2.filter((o) => {
-      if (!o) return false;
-      let date = typeof o.date === 'string' ? parseISO(o.date) : o.date;
-      return isAfter(date, oneMonthsAgo);
-    });
-    if (orders2.length > 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${groupId} vous avez des commandes trop récentes (< 1 mois)`,
-      );
-    }
-    */
-    // Bloquer sortie du groupe si groupe Hébergement Camap (id 16936)
-    // Bloquer sortie du groupe si solde < 0
 
     if (groupId == 16936) {
-      //throw new Error('Vous ne pouvez pas quitter ce groupe');
-      throw new UnauthorizedException(
+      throw new ForbiddenException(
         `Vous ne pouvez pas quitter ce groupe`,
       );
     }
 
-    const userGroup = await this.userGroupsService.get(currentUser, groupId);
+    const userGroup = await this.userGroupsService.get(user, groupId);
     if (!userGroup) throw new NotFoundException();
     if (userGroup.balance < 0) {
-      throw new UnauthorizedException(
-        `Impossible de quitter ce groupe ${group.name} car votre solde est négatif (${userGroup.balance})`,
+      throw new ForbiddenException({
+        message: 'unableToQuitGroupNegativeBalance', options: {
+          groupName: group.name,
+          balance: userGroup.balance,
+        },
+      });
+    }
+
+    // Don't delete users who still have recent orders of less than 1 month
+    let orders = await this.ordersService.findRecentUserOrders(user.id, groupId);
+    if (orders.length > 0) {
+      throw new ForbiddenException(
+        `Impossible de quitter ce groupe ${group.name} vous avez des commandes trop récentes (< 1 mois).`,
       );
     }
 
     return this.userGroupsService.delete(userGroup);
   }
 
+  @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => Group)
   async setGroupImage(

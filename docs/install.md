@@ -109,6 +109,10 @@ Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un pack
   - camap-ts/public/neostatic/*.bundle.js
   - camap-ts/public/neostatic/manifest.json
 - compilation: camap-ts> `npm run build:front`
+	- Astuce : il est possible d'utiliser `npm run watch` dans `packages/front-core` pour recompiler automatiquement les fichiers front modifiés. 
+		- Vous pouvez compléter avec le module filewatcher de firefox pour recharger automatiquement la page à la modification d'un fichier dans `/neostatic/` - NdR: Il est probablement possible de mettre en place un serveur de dév ou du hot reload. Cf les 3 solutions possibles de webpack ici : https://webpack.js.org/guides/development/#choosing-a-development-tool. 
+		- Attention : A des fin d'optimisation en dév, le fichier de config webpack en dev ne génère pas le fichier palette.ts (cf `webpack.dev.config.js`). Décommenter l.74 pour le faire revenir 
+
 - utilisation: 
   - Le template haxe [base.mtt](..%2F..%2Fcamap-hx%2Flang%2Fmaster%2Ftpl%2Fbase.mtt) importe les scripts via [BridgeService.hx](..%2F..%2Fcamap-hx%2Fsrc%2Fservice%2FBridgeService.hx)
   - voir [neo-modules.md](neo-modules.md)

@@ -29,7 +29,10 @@ export type RestCsaCatalog = Pick<
   contact?: User;
   absentDistribsMaxNb?: number;
   distribMinOrdersTotal: number;
+  hasStockManagement: boolean;
 };
+
+export type RestStocksPerProductDistribution = { [productId: number]: { [distribId: number]: number } };
 
 export type RestCsaCatalogAbsences = {
   startDate: string;

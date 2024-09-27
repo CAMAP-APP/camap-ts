@@ -21,6 +21,9 @@ const useRestGetApi = <T extends {}>(
       ...options,
       method: 'GET',
       credentials: 'include',
+      headers:{
+        'Accept': 'application/json'
+      }
     })
       .then(async (response) => {
         if (response.ok) {

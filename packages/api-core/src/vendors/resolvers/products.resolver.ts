@@ -1,13 +1,5 @@
 import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common';
-import {
-  Args,
-  Float,
-  Int,
-  Mutation,
-  Parent,
-  ResolveField,
-  Resolver,
-} from '@nestjs/graphql';
+import { Args, Float, Int, Mutation, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
@@ -24,6 +16,7 @@ import { VendorsLoader } from '../loaders/vendors.loader';
 import { CatalogsService } from '../services/catalogs.service';
 import { ProductsService } from '../services/products.service';
 import { Product } from '../types/product.type';
+import { StockTracking } from '../product.interface';
 import DataLoader = require('dataloader');
 
 @UseGuards(GqlAuthGuard)
@@ -64,7 +57,7 @@ export class ProductsResolver {
       productId,
     );
 
-    const imageData = base64EncodedImage.substr(`data:${mimeType};base64,`.length);
+    const imageData = base64EncodedImage.substring(`data:${mimeType};base64,`.length);
     const compressedImage = await compressImage(
       Buffer.from(imageData, 'base64'),
       mimeType,
@@ -139,14 +132,15 @@ export class ProductsResolver {
     return vendor.name;
   }
 
-  @ResolveField(() => String)
-  async stock(
+  @ResolveField(() => StockTracking)
+  async stockTracking(
     @Parent() parent: Product,
     @Loader(CatalogsLoader)
     catalogsLoader: DataLoader<CatalogEntity['id'], CatalogEntity>,
-  ): Promise<number | null> {
+  ): Promise<StockTracking> {
     const catalog = await catalogsLoader.load(parent.catalogId);
-    return this.catalogsService.hasStockManagement(catalog) ? parent.stock : null;
+    if (!this.catalogsService.hasStockManagement(catalog)) return StockTracking.Disabled;
+    return parent.stockTracking;
   }
 
   @ResolveField(() => String)

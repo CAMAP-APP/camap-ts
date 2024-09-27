@@ -386,6 +386,7 @@ export type Mutation = {
   logout?: Maybe<Scalars['Int']>;
   moveBackToWaitingList: MoveBackToWaitingListResponse;
   quitGroup: UserGroup;
+  quitGroupByControlKey: UserGroup;
   recordBadLogin: Scalars['Int'];
   register: User;
   removeUsersFromGroup: RemoveUsersFromGroupResponse;
@@ -471,6 +472,13 @@ export type MutationMoveBackToWaitingListArgs = {
 
 export type MutationQuitGroupArgs = {
   groupId: Scalars['Int'];
+};
+
+
+export type MutationQuitGroupByControlKeyArgs = {
+  controlKey: Scalars['String'];
+  groupId: Scalars['Int'];
+  userId: Scalars['Int'];
 };
 
 
@@ -612,6 +620,8 @@ export type Product = {
   qt: Scalars['Float'];
   ref?: Maybe<Scalars['String']>;
   stock?: Maybe<Scalars['Float']>;
+  stockTracking: StockTracking;
+  stockTrackingPerDistrib: StockTrackingPerDistribution;
   unitType: Scalars['Int'];
   variablePrice: Scalars['Boolean'];
   vat: Scalars['Float'];
@@ -937,6 +947,18 @@ export type SendInvitesToNewMembersResponse = {
   withoutAccounts: Array<Scalars['String']>;
 };
 
+export enum StockTracking {
+  Disabled = 'Disabled',
+  Global = 'Global',
+  PerDistribution = 'PerDistribution'
+}
+
+export enum StockTrackingPerDistribution {
+  AlwaysTheSame = 'AlwaysTheSame',
+  FrequencyBased = 'FrequencyBased',
+  PerPeriod = 'PerPeriod'
+}
+
 export type SubscriptionTotalOperationTypeData = {
   __typename?: 'SubscriptionTotalOperationTypeData';
   subscriptionId: Scalars['Int'];
@@ -1180,6 +1202,13 @@ export type AttendanceVariableContractQueryVariables = Exact<{
 
 
 export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
+
+export type GetCatalogSubscriptionsQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type GetCatalogSubscriptionsQuery = { __typename?: 'Query', catalog: { __typename?: 'Catalog', id: number, type: CatalogType, name: string, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, user: { __typename?: 'User', id: number, firstName: string, lastName: string } }> } };
 
 export type GroupDisabledQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -1496,6 +1525,15 @@ export type QuitGroupMutationVariables = Exact<{
 
 
 export type QuitGroupMutation = { __typename?: 'Mutation', quitGroup: { __typename?: 'UserGroup', userId: number, groupId: number } };
+
+export type QuitGroupByControlKeyMutationVariables = Exact<{
+  userId: Scalars['Int'];
+  groupId: Scalars['Int'];
+  controlKey: Scalars['String'];
+}>;
+
+
+export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroupByControlKey: { __typename?: 'UserGroup', userId: number, groupId: number } };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -2082,6 +2120,51 @@ export function useAttendanceVariableContractLazyQuery(baseOptions?: ApolloReact
 export type AttendanceVariableContractQueryHookResult = ReturnType<typeof useAttendanceVariableContractQuery>;
 export type AttendanceVariableContractLazyQueryHookResult = ReturnType<typeof useAttendanceVariableContractLazyQuery>;
 export type AttendanceVariableContractQueryResult = Apollo.QueryResult<AttendanceVariableContractQuery, AttendanceVariableContractQueryVariables>;
+export const GetCatalogSubscriptionsDocument = gql`
+    query getCatalogSubscriptions($id: Int!) {
+  catalog(id: $id) {
+    id
+    type
+    name
+    subscriptions {
+      id
+      user {
+        id
+        firstName
+        lastName
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetCatalogSubscriptionsQuery__
+ *
+ * To run a query within a React component, call `useGetCatalogSubscriptionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetCatalogSubscriptionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetCatalogSubscriptionsQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useGetCatalogSubscriptionsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>(GetCatalogSubscriptionsDocument, options);
+      }
+export function useGetCatalogSubscriptionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>(GetCatalogSubscriptionsDocument, options);
+        }
+export type GetCatalogSubscriptionsQueryHookResult = ReturnType<typeof useGetCatalogSubscriptionsQuery>;
+export type GetCatalogSubscriptionsLazyQueryHookResult = ReturnType<typeof useGetCatalogSubscriptionsLazyQuery>;
+export type GetCatalogSubscriptionsQueryResult = Apollo.QueryResult<GetCatalogSubscriptionsQuery, GetCatalogSubscriptionsQueryVariables>;
 export const GroupDisabledDocument = gql`
     query groupDisabled($id: Int!) {
   groupPreview(id: $id) {
@@ -3679,3 +3762,43 @@ export function useQuitGroupMutation(baseOptions?: ApolloReactHooks.MutationHook
 export type QuitGroupMutationHookResult = ReturnType<typeof useQuitGroupMutation>;
 export type QuitGroupMutationResult = Apollo.MutationResult<QuitGroupMutation>;
 export type QuitGroupMutationOptions = Apollo.BaseMutationOptions<QuitGroupMutation, QuitGroupMutationVariables>;
+export const QuitGroupByControlKeyDocument = gql`
+    mutation quitGroupByControlKey($userId: Int!, $groupId: Int!, $controlKey: String!) {
+  quitGroupByControlKey(
+    groupId: $groupId
+    userId: $userId
+    controlKey: $controlKey
+  ) {
+    userId
+    groupId
+  }
+}
+    `;
+export type QuitGroupByControlKeyMutationFn = Apollo.MutationFunction<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;
+
+/**
+ * __useQuitGroupByControlKeyMutation__
+ *
+ * To run a mutation, you first call `useQuitGroupByControlKeyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useQuitGroupByControlKeyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [quitGroupByControlKeyMutation, { data, loading, error }] = useQuitGroupByControlKeyMutation({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *      groupId: // value for 'groupId'
+ *      controlKey: // value for 'controlKey'
+ *   },
+ * });
+ */
+export function useQuitGroupByControlKeyMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>(QuitGroupByControlKeyDocument, options);
+      }
+export type QuitGroupByControlKeyMutationHookResult = ReturnType<typeof useQuitGroupByControlKeyMutation>;
+export type QuitGroupByControlKeyMutationResult = Apollo.MutationResult<QuitGroupByControlKeyMutation>;
+export type QuitGroupByControlKeyMutationOptions = Apollo.BaseMutationOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;

@@ -23,10 +23,11 @@ import { useRestCatalogAbsencesLazyGet } from '../requests';
 import MediumActionIcon from './MediumActionIcon';
 
 interface CsaCatalogAbsencesProps {
+  adminMode?: boolean;
   onNext: () => Promise<void>;
 }
 
-const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
+const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
   const { t, tCommon } = useCamapTranslation(
     {
       t: 'csa-catalog',
@@ -36,6 +37,7 @@ const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
 
   const {
     catalogId,
+    catalog,
     absenceDistributionsIds,
     setAbsenceDistributionsIds,
     nextDistributionIndex,
@@ -53,13 +55,17 @@ const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
     getCatalogAbsences();
   }, [getCatalogAbsences, subscription]);
 
-  const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(0);
+  const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(4);
 
   React.useEffect(() => {
     if (!subscriptionAbsences) return;
 
     // If the user already has a subscription with absences
-    setNbOfAbsenceDays(subscriptionAbsences.absentDistribIds.length);
+    // in admin mode, we can add new absences
+    const nbOfAbsenceDays = adminMode
+      ? catalog?.absentDistribsMaxNb || 0
+      : subscriptionAbsences.absentDistribIds.length;
+    setNbOfAbsenceDays(nbOfAbsenceDays);
     setAbsenceDistributionsIds(subscriptionAbsences.absentDistribIds);
   }, [setAbsenceDistributionsIds, subscriptionAbsences]);
 
@@ -185,7 +191,7 @@ const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
         sx={{ height: '100%' }}
       >
         <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'center' }}>
-          {t('absencesInfos', {
+          {t(adminMode ? 'absencesInfosAdmin' : 'absencesInfos', {
             count: absentDistribsMaxNb,
             startDate: formatAbsoluteDate(
               new Date(startDate),
@@ -255,6 +261,13 @@ const CsaCatalogAbsences = ({ onNext }: CsaCatalogAbsencesProps) => {
                       }}
                       disabled={isDisabledDistribution(i)}
                     >
+                      {/* In admin mode, we can add or remove absences */}
+                      {adminMode && (
+                        <MenuItem key={`absence_distrib_${''}`} value={0}>
+                          {'-'}
+                        </MenuItem>
+                      )}
+
                       {possibleAbsentDistribs
                         .filter((d) => {
                           if (!absenceDistributionsIds) return false;

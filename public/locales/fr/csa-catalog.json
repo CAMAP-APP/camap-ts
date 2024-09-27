@@ -15,8 +15,11 @@
   "TYPE_VARORDER": "Contrat AMAP Variable",
   "absencesInfos": "Vous avez droit de vous absenter lors de {{count}} distribution maximum.\nL'absence est autorisée du {{startDate}} au {{endDate}}.",
   "absencesInfos_plural": "Vous avez droit de vous absenter lors de {{count}} distributions maximum.\nLes absences sont autorisées du {{startDate}} au {{endDate}}.",
+	"absencesInfosAdmin": "L'utilisateur a le droit de s'absenter lors de {{count}} distribution maximum.\nL'absence est autorisée du {{startDate}} au {{endDate}}.",
+  "absencesInfosAdmin_plural": "L'utilisateur a le droit de s'absenter lors de {{count}} distributions maximum.\nLes absences sont autorisées du {{startDate}} au {{endDate}}.",
   "nbOfAbsenceDays": "Nombre de jours d'absence",
   "changeMyOrders": "Modifier mes commandes",
+  "changeOrders": "Modifier les commandes",
   "orderBeforeThe": "Commandez avant le {{date}}",
   "orderOpenThe": "Commande ouvre le {{date}}",
   "orderClosed": "Commande fermée",
@@ -44,5 +47,6 @@
   "enterYourDefaultOrder": "Saisissez votre commande par défaut",
   "defaultOrderInfosVarOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat. Vous aurez ensuite la possibilité de personnaliser votre commande date par date.",
   "defaultOrderInfosConstOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat.",
-  "defaultOrder": "Commande par défaut"
+  "defaultOrder": "Commande par défaut",
+  "Available": "Disponible"
 }

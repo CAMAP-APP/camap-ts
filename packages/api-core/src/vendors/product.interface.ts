@@ -1,12 +1,3 @@
-export enum Unit {
-  Piece,
-  Kilogram,
-  Gram,
-  Litre,
-  Centilitre,
-  Millilitre,
-}
-
 /**
  * Stock tracking rule to use.
  */
@@ -25,7 +16,7 @@ export enum StockTracking {
    * A per distribution stock.
    * @see StockTrackingPerDistribution
    */
-  PerDistribution
+  PerDistribution,
 }
 
 /**
@@ -40,11 +31,11 @@ export enum StockTrackingPerDistribution {
   /**
    * initial stock exists at regular intervals. oe: 1 times out of 3 there is stock. Else, 0.
    */
-  Intervals,
+  FrequencyBased,
 
   /**
    * initial stock configured per period (continuous group of distribs) for multiple periods.
-   * @see ProductDistributionStock
+   * @see db.ProductDistributionStock
    */
-  PerPeriod
+  PerPeriod,
 }

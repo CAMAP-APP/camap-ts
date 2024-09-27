@@ -28,6 +28,11 @@ Consultez cette section en cas d'erreur
 
 La route `https://camap.localdomain/user/login` fonctionne, mais n'affiche pas le formulaire + erreurs en console (`Uncaught TypeError: can't access property "createNeoModule", neo is undefined`)
 
+`"Failed to fetch" avec message console de type: "Mixed Content: The page at 'https://camap.localdomain/subscriptions/contract/80556' was loaded over HTTPS, but requested an insecure resource 'http://neko-loc-camap/api/catalog/80556'. This request has been blocked; the content must be served over HTTPS."`
+- **explication**: La configuration de la variable CAMAP_HOST dans l'environnement camap-ts *au moment de la compilation du frontend* est une URL et celle-ci n'est pas accessible par le navigateur (erreur de domaine ou de protocole ici).
+- Vérifier le configuration de CAMAP_HOST dans `camap-ts/.env`, cette URL est utilisée à la fois par le cron camap-ts et à la fois pour générer des URL à destination du frontend dans front-core.
+- Il convient de refaire un build de `camap-ts/packages/front-core` après modification pour que la nouvelle valeur soit prise en compte.
+
 ## Base de données - loc-mysql
 - `[Warning] World-writable config file '/etc/mysql/conf.d/my.cnf' is ignored.`
 	- Changer les permissions vers 0444: `chmod 0444 my.cnf`
@@ -63,9 +68,11 @@ Si la config BD est bien prise en compte, le warning suivant doit apparaitre dan
 - `Error : Temploc compilation of error.mtt failed : Called from templo/Main.nml line 183`
 	- Le dossier lang/master/tmp ne doit pas exister. Essayer de le créer à la main
 
-- `TypeError: can't access property "createNeoModule", neo is undefined`
+- `TypeError: can't access property "createNeoModule", neo is undefined` ou `neo is not defined`
 	- Essayer `npm run build:front` dans camap-ts
-		- Si il y a une erreur de `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
+		- S'il y a une erreur `camap-common not found`, rebuilder le tout => Dans le dossier packages : `npm run build`
+	- Vérifier dans votre console réseau si l'appel HTTP aux bundles est OK
+		-> Sous firefox, il peut y avoir un problème lié au SSL. Dans ce cas, supprimez les cookies / données liés au site et réactivez l'exception de sécurité dans le navigateur.
 
 - `unable to load resources from camap-ts`
 	- **explication**: SSL n'est pas configuré en local et l'application ne parvient pas à accéder à camap-ts par manque de permission

@@ -323,12 +323,17 @@ export class UsersService {
     });
   }
 
+  /**
+   * Remove the given user.
+   * @param user  The user to remove. All it's dependencies will be reattached to "deletedUser" instead.
+   * @param deletedUser The user data will be reaffected to this "deletedUser" account.
+   */
   @Transactional()
-  async delete(user: Pick<UserEntity, 'id'>, deletedUser?: Pick<UserEntity, 'id'>) {
+  async delete(user: Pick<UserEntity, 'id'>, deletedUser?: Pick<UserEntity, 'id'>):Promise<number|null> {
     let deletedUserId = deletedUser?.id;
     if (!deletedUserId) {
       deletedUserId = (await this.findOneByEmail('deleted@camap.tld'))?.id;
-      if (!deletedUserId) return;
+      if (!deletedUserId) return null;
     }
     const userId = user.id;
     // Never delete the DeletedUser
@@ -590,7 +595,11 @@ export class UsersService {
         if (orders2.length > 0) return;
 
         this.cronLogger.log(`Delete old user #${chunk.id}.`);
-        this.delete(chunk, deletedUser);
+        try {
+          await this.delete(chunk, deletedUser);
+        } catch (e) {
+          this.cronLogger.error(e)
+        }
       },
     );
   }

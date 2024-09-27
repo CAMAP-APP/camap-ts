@@ -2,12 +2,12 @@ import { Alert, Box } from '@mui/material';
 import React from 'react';
 import { CatalogType } from '../../gql';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
+import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
 import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
 import CsaCatalogOrders from './containers/CsaCatalogOrders';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
-import { CsaCatalogContext } from './CsaCatalog.context';
 import { restCsaCatalogTypeToType } from './interfaces';
 import {
   useRestCheckSubscriptionDefaultOrderPost,
@@ -35,6 +35,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     defaultOrder,
     initialSubscriptionId,
     error: contextError,
+    adminMode,
   } = React.useContext(CsaCatalogContext);
 
   const [showPresentation, setShowPresentation] = React.useState(
@@ -134,7 +135,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   };
 
   const onAbsencesNext = async () => {
-    const subscriptionData = await createSubscription({
+    const subscriptionSucceeded = await createSubscription({
       userId,
       catalogId,
       defaultOrder: Object.keys(defaultOrder).map((productId) => ({
@@ -144,7 +145,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       absentDistribIds: absenceDistributionsIds as number[] | null,
     });
 
-    if (!subscriptionData) return;
+    if (!subscriptionSucceeded) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setShowPresentation(false);
@@ -169,16 +170,24 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         `${subscription.id}`,
       );
     } else {
+      if (Object.keys(updatedOrders).length === 0) {
+        return true;
+      }
+
       success = await updateSubscriptionOrders(
         {
           distributions: distributions
             .filter((d) => {
-              if (absenceDistributionsIds) {
+              // in admin mode, this variable is set after the admin has set / unset absences
+              // but we still want to update orders, so we ignore this
+              if (absenceDistributionsIds && !adminMode) {
                 return !absenceDistributionsIds.includes(d.id);
               }
+              // return only updated orders on all distributions
               return !!updatedOrders[d.id];
             })
             .map((d) => ({
+              // transform in expected API format
               id: d.id,
               orders: Object.keys(updatedOrders[d.id]).map((p) => ({
                 productId: parseInt(p, 10),
@@ -237,11 +246,11 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           {isConstOrders ? (
             <CsaCatalogDefaultOrder onNext={onOrderNext} />
           ) : (
-            <CsaCatalogOrders onNext={onOrderNext} />
+            <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
           )}
         </>
       )}
-      {showOrders && !!subscription && (
+      {showOrders && !!subscription && !adminMode && (
         <Box mt={3}>
           <CsaCatalogSubscription />
         </Box>

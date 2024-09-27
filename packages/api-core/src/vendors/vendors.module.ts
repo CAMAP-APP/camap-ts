@@ -20,6 +20,7 @@ import { VendorsResolver } from './resolvers/vendors.resolver';
 import { CatalogsService } from './services/catalogs.service';
 import { ProductsService } from './services/products.service';
 import { VendorService } from './services/vendor.service';
+import { ProductDistributionStockEntity } from './entities/productDistributionStock.entity';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { VendorService } from './services/vendor.service';
       CatalogEntity,
       ProductEntity,
       DistributionEntity,
+      ProductDistributionStockEntity,
     ]),
     ToolsModule,
     forwardRef(() => FilesModule),

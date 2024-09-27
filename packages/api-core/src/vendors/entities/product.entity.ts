@@ -10,6 +10,8 @@ import {
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';
 import { FileEntity } from '../../tools/models/file.entity';
 import { CatalogEntity } from './catalog.entity';
+import { ProductDistributionStockEntity } from './productDistributionStock.entity';
+import { StockTracking, StockTrackingPerDistribution } from 'camap-common';
 
 @Index('Product_catalogId', ['catalogId'], {})
 @Index('Product_imageId', ['imageId'], {})
@@ -35,6 +37,12 @@ export class ProductEntity {
 
   @Column('double', { nullable: true })
   stock: number | null;
+
+  @Column('tinyint', { nullable: true, unsigned: true })
+  stockTracking: StockTracking | null; // StockTracking
+
+  @Column('tinyint', { nullable: true, unsigned: true })
+  stockTrackingPerDistrib: StockTrackingPerDistribution | null; // StockTrackingPerDistribution
 
   @Column('tinyint', { width: 1 })
   active: boolean;
@@ -89,6 +97,10 @@ export class ProductEntity {
   /** */
   @OneToMany(() => UserOrderEntity, (userOrder) => userOrder.product)
   userOrders: Promise<UserOrderEntity[]>;
+
+  /** */
+  @OneToMany(() => ProductDistributionStockEntity, (productDistributionStock) => productDistributionStock.product)
+  distributionStocks: Promise<ProductDistributionStockEntity[]>;
 
   /**
    * get price including margins
