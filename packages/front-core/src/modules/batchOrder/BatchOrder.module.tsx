@@ -128,7 +128,7 @@ const BatchOrder = ({
             {groupMembers &&
               groupMembers.getUserListInGroupByListType.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
-                  {s.firstName} {s.lastName}
+                  {s.lastName} {s.firstName}
                 </MenuItem>
               ))}
           </Select>
