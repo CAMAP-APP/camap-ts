@@ -19,7 +19,7 @@ const GroupDisabled = ({ groupId }: { groupId: number }) => {
   if (!group.disabled) return null;
 
   return (
-    <Paper elevation={0} sx={{ mb: 2 }}>
+    <Paper elevation={2} sx={{ mb: 2 }}>
       <Box p={2} width={'100%'} textAlign="center">
         <Typography variant="h2" gutterBottom>
           {t(group.disabled)}
