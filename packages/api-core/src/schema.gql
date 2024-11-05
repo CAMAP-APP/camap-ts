@@ -59,7 +59,6 @@ enum PaymentTypeId {
 enum GroupDisabledReason {
   BLOCKED_BY_ADMIN
   MOVED
-  SUSPENDED
 }
 
 type Group {
