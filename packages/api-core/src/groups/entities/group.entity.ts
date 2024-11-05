@@ -27,7 +27,7 @@ import { VolunteerRoleEntity } from './volunteer-role.entity';
 export enum GroupDisabledReason {
   BLOCKED_BY_ADMIN = 'BLOCKED_BY_ADMIN',
   MOVED = 'MOVED',
-  SUSPENDED = 'SUSPENDED'
+  SUSPENDED = 'SUSPENDED',
 }
 
 @Index('Group_userId', ['userId'], {})
