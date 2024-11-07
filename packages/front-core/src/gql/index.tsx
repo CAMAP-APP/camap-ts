@@ -198,7 +198,8 @@ export type Group = {
 
 export enum GroupDisabledReason {
   BLOCKED_BY_ADMIN = 'BLOCKED_BY_ADMIN',
-  MOVED = 'MOVED'
+  MOVED = 'MOVED',
+  SUSPENDED = 'SUSPENDED',
 }
 
 export type GroupPreview = {
