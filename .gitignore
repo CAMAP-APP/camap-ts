@@ -30,3 +30,4 @@ public/neostatic
 /tmp
 .vscode/launch.json
 docker-compose/docker-compose.yml
+.github/workflows/docker-publish.yml
