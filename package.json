@@ -37,7 +37,7 @@
   "dependencies": {
     "core-js": "^3.6.5",
     "dotenv": "^8.2.0",
-    "typeorm": "^0.2.29",
-    "webpack": "^4.44.2"
+    "typeorm": "^0.3.21",
+    "webpack": "^5.98.0"
   }
 }
