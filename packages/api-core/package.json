@@ -17,7 +17,7 @@
     "dataset-server": "nodemon dist/cli/dataset-server",
     "dev": "npm run start:dev",
     "dev:mail": "ts-node mails/scripts/dev",
-    "start:dev": "npm run typeorm migration:run && nest start --watch --preserveWatchOutput",
+    "start:dev": "nest start --watch --preserveWatchOutput",
     "start:debug": "nest start --debug --watch",
     "start:prod": "npm run typeorm migration:run && node dist/main",
     "lint": "eslint '{src,test}/**/*.ts' --fix",

@@ -18,7 +18,7 @@ La relation `UserOrder.userId2` représente éventuellement un deuxième user po
 
 Naturellement, un UserOrder a une relation vers une `Subscription` , une `Distribution` et un `Basket`.
 
-Le `productPrice` est stocké au moment de la saisie de la commande, afin de conservé le prix si il était changé à posteriori dans `Product.price`
+Le `productPrice` est stocké au moment de la saisie de la commande, afin de conserver le prix si il était changé à posteriori dans `Product.price`
 
 Les champs `paid` et `feesRate` ne servent plus.
 
