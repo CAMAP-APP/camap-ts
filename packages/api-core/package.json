@@ -93,7 +93,7 @@
     "camap-common": "file:../camap-common",
     "camap-ts": "file:../..",
     "chalk": "^3.0.0",
-    "class-transformer": "^0.3.1",
+    "class-transformer": "^0.5.0",
     "class-validator": "^0.14.1",
     "cli-progress": "^3.9.1",
     "commander": "^4.1.1",
@@ -102,7 +102,7 @@
     "date-fns": "^2.16.1",
     "date-fns-tz": "^1.0.12",
     "faker": "^5.1.0",
-    "graphql": "^15.5.0",
+    "graphql": "^16.6.0",
     "graphql-upload": "^17.0.0",
     "helmet": "^4.2.0",
     "i18next": "^19.8.3",
@@ -124,7 +124,7 @@
     "sharp": "^0.33.3",
     "ts-node": "^10.9.1",
     "twing": "^5.0.2",
-    "typeorm": "0.2.45",
+    "typeorm": "^0.3.0",
     "typeorm-transactional-cls-hooked": "^0.1.20",
     "yup": "^0.32.9"
   }
