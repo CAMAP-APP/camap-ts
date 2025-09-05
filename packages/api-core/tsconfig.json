@@ -21,7 +21,8 @@
   },
   "include": [
     "src",
-    "test"
+    "test",
+    ".eslintrc.js"
   ],
   "exclude": [
     "node_modules",
