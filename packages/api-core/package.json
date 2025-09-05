@@ -65,7 +65,7 @@
     "jest": "^27.4.7",
     "lint-staged": "^10.5.1",
     "nodemailer-mock": "^1.5.11",
-    "nodemon": "^2.0.6",
+    "nodemon": "^3.1.10",
     "prettier": "^2.2.1",
     "supertest": "^6.0.1",
     "ts-jest": "^27.1.2",
@@ -74,8 +74,8 @@
   "dependencies": {
     "@nestjs/apollo": "13.0.3",
     "@nestjs/axios": "^4.0.0",
-    "@nestjs/cli": "8.2.8",
-    "@nestjs/common": "11.0.11",
+    "@nestjs/cli": "^11.0.10",
+    "@nestjs/common": "^11.1.6",
     "@nestjs/config": "4.0.1",
     "@nestjs/core": "11.0.11",
     "@nestjs/graphql": "13.0.3",
@@ -123,7 +123,7 @@
     "rxjs": "^7.5.1",
     "sharp": "^0.33.3",
     "ts-node": "^10.9.1",
-    "twing": "^5.0.2",
+    "twing": "^7.2.1",
     "typeorm": "^0.3.0",
     "typeorm-transactional-cls-hooked": "^0.1.20",
     "yup": "^0.32.9"
