@@ -28,8 +28,8 @@ interface CsaCatalogContextProps {
   setError: (value: string | undefined) => void;
   distributions: RestDistributionEnriched[];
   nextDistributionIndex: number;
-  absenceDistributionsIds: (number | '')[] | null;
-  setAbsenceDistributionsIds: (value: (number | '')[]) => void;
+  absenceDistributionsIds: number[] | null;
+  setAbsenceDistributionsIds: (value: number[]) => void;
   subscription?: RestCsaSubscription;
   getSubscription: () => void;
   setSubscription: (value?: RestCsaSubscription) => void;
@@ -85,7 +85,7 @@ const CsaCatalogContextProvider = ({
     Record<number, Record<number, number>>
   >({}); // Matrices with distributionId as a key, and a value which is a record which maps productId to a quantity
   const [absenceDistributionsIds, setAbsenceDistributionsIds] = React.useState<
-    (number | '')[] | null
+    number[] | null
   >(null);
   const [subscription, setSubscription] = React.useState<
     RestCsaSubscription | undefined
