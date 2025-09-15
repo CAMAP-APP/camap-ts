@@ -37,10 +37,8 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
 
   const {
     catalogId,
-    catalog,
     absenceDistributionsIds,
     setAbsenceDistributionsIds,
-    nextDistributionIndex,
     distributions,
     subscription,
     subscriptionAbsences,
@@ -55,33 +53,26 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
     getCatalogAbsences();
   }, [getCatalogAbsences, subscription]);
 
-  const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(4);
+  // const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(4);
 
   React.useEffect(() => {
     if (!subscriptionAbsences) return;
-
-    // If the user already has a subscription with absences
-    // in admin mode, we can add new absences
-    const nbOfAbsenceDays = adminMode
-      ? catalog?.absentDistribsMaxNb || 0
-      : subscriptionAbsences.absentDistribIds.length;
-    setNbOfAbsenceDays(nbOfAbsenceDays);
     setAbsenceDistributionsIds(subscriptionAbsences.absentDistribIds);
-  }, [setAbsenceDistributionsIds, subscriptionAbsences]);
-
-  const handleNbOfAbsenceDaysChange = (event: SelectChangeEvent<number>) => {
-    const { value } = event.target;
-    const nb = typeof value === 'string' ? parseInt(value) : value;
-    setNbOfAbsenceDays(nb);
-    setAbsenceDistributionsIds(Array(nb).fill(''));
-  };
+  }, [
+    setAbsenceDistributionsIds,
+    subscriptionAbsences
+  ]);
 
   const handleAbsenceDistributionsChange = (index: number, value: number) => {
     const newAbsenceDistributions = absenceDistributionsIds
       ? [...absenceDistributionsIds]
       : [];
-    newAbsenceDistributions[index] = value;
-    setAbsenceDistributionsIds(newAbsenceDistributions);
+    if(value < 0)
+      delete newAbsenceDistributions[index];
+    else
+      newAbsenceDistributions[index] = value;
+    newAbsenceDistributions.sort();
+    setAbsenceDistributionsIds(newAbsenceDistributions.filter(x => x !== undefined));
   };
 
   const passedDistributions: RestDistributionEnriched[] = React.useMemo(() => {
@@ -127,7 +118,6 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
   }, [
     catalogAbsences,
     distributions,
-    nextDistributionIndex,
     passedDistributions,
     subscriptionAbsences,
     subscription,
@@ -135,11 +125,10 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
 
   const isDisabledDistribution = React.useCallback(
     (index: number) => {
-      return absenceDistributionsIds
-        ? passedDistributions.findIndex(
+      return !!absenceDistributionsIds && 
+        passedDistributions.some(
             (d) => d.id === absenceDistributionsIds[index],
-          ) > -1
-        : false;
+          );
     },
     [absenceDistributionsIds, passedDistributions],
   );
@@ -203,7 +192,7 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
           })}
         </Typography>
 
-        {!subscription && (
+        {/* {!subscription && (
           <Box width={{ xs: '100%', md: '70%' }} mx="auto" my={3}>
             <FormControl fullWidth>
               <InputLabel id="nb-absence-select-label">
@@ -226,11 +215,11 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
               </Select>
             </FormControl>
           </Box>
-        )}
+        )} */}
 
         <Box width={{ xs: '100%', md: '70%' }} mx="auto" mt={3} mb={1}>
-          {nbOfAbsenceDays > 0 &&
-            Array.from(Array(nbOfAbsenceDays).keys()).map((i) => (
+          {
+            Array.from(Array(absentDistribsMaxNb).keys()).map((i) => (
               <Box key={`distribution_${i}`} my={1}>
                 <Tooltip
                   title={
@@ -248,9 +237,9 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
                     <Select
                       labelId="nb-absence-select-label"
                       value={
-                        absenceDistributionsIds
+                        (!!absenceDistributionsIds && absenceDistributionsIds[i] !== undefined)
                           ? absenceDistributionsIds[i]
-                          : ''
+                          : -1
                       }
                       label={`${t('absence')} #${i + 1}`}
                       onChange={(event: SelectChangeEvent<number>) => {
@@ -261,19 +250,15 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
                       }}
                       disabled={isDisabledDistribution(i)}
                     >
-                      {/* In admin mode, we can add or remove absences */}
-                      {adminMode && (
-                        <MenuItem key={`absence_distrib_${''}`} value={0}>
-                          {'-'}
-                        </MenuItem>
-                      )}
+                      <MenuItem key={`absence_distrib_none`} value={-1}>
+                        {'-'}
+                      </MenuItem>
 
                       {possibleAbsentDistribs
-                        .filter((d) => {
-                          if (!absenceDistributionsIds) return false;
-                          const index = absenceDistributionsIds.indexOf(d.id);
-                          if (index > -1 && index !== i) return false;
-                          return true;
+                        .filter((distribution) => { // remove options that are selected in the other boxes, preserving the current selected value for consistency
+                          if (!absenceDistributionsIds) return true;
+                          const distributionIndexInAbsenceArray = absenceDistributionsIds.indexOf(distribution.id);
+                          return distributionIndexInAbsenceArray < 0 || distributionIndexInAbsenceArray === i;
                         })
                         .map((distribution) => (
                           <MenuItem
@@ -298,11 +283,11 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
         <Box width="100%" textAlign="center" mt={1}>
           <LoadingButton
             loading={loading}
-            disabled={
-              !!absenceDistributionsIds &&
-              absenceDistributionsIds.length > 0 &&
-              absenceDistributionsIds.indexOf('') !== -1
-            }
+            // disabled={
+            //   !!absenceDistributionsIds &&
+            //   absenceDistributionsIds.length > 0 &&
+            //   absenceDistributionsIds.indexOf('') !== -1
+            // }
             variant="contained"
             onClick={onButtonClick}
           >
