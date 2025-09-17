@@ -145,7 +145,7 @@ const getTableData = (
   const { attendanceClassicContract } = data;
   const subscriptions = sortBy(
     attendanceClassicContract.subscriptions,
-    (sub) => sub.user.lastName,
+    (sub) => sub.user.lastName.toLowerCase(),
   );
   const distributions = sortBy(attendanceClassicContract.distributions, 'date');
   const products = sortBy(attendanceClassicContract.catalog.products, 'name');
@@ -239,28 +239,27 @@ const getTableData = (
       }
     }
 
-    distributions
-      .map((distrib) => {
-        const res: AttendanceBodyCell = {
-          value: '',
-          align: 'center',
-        };
-        if (
-          sub.absentDistribIds &&
-          sub.absentDistribIds
-            .split(',')
-            .some((dId) => parseInt(dId, 10) === distrib.id)
-        ) {
-          return { ...res, value: '🌴' };
-        }
-        if (!distrib.userOrders.some((uo) => uo.userId === sub.user.id)) {
-          return { ...res, value: '❌' };
-        }
-        return res;
-      })
-      .forEach((ud) => {
-        row.push(ud);
-      });
+    row.push(
+      ...distributions
+        .map((distrib) => {
+          const res: AttendanceBodyCell = {
+            value: '',
+            align: 'center',
+          };
+          if (
+            sub.absentDistribIds &&
+            sub.absentDistribIds
+              .split(',')
+              .some((dId) => parseInt(dId, 10) === distrib.id)
+          ) {
+            return { ...res, value: '🌴' };
+          }
+          if (!distrib.userOrders.some((uo) => uo.userId === sub.user.id)) {
+            return { ...res, value: '❌' };
+          }
+          return res;
+        })
+    );
 
     rows.push(row);
     return rows;
