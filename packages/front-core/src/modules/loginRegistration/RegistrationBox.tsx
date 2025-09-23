@@ -106,7 +106,7 @@ const RegistrationBox = ({
       });
       if (data && data.register) {
         setSubmitting(false);
-        window.dataLayer.push({
+        window.dataLayer && window.dataLayer.push({
           event: 'sign_up',
           redirectUrl,
           invitedGroupId,
@@ -114,8 +114,8 @@ const RegistrationBox = ({
         redirect();
         return;
       }
-    } catch (e) {
-      if (e.message === 'emailAlreadyRegistered') {
+    } catch (e:unknown) {
+      if (e instanceof Error && e.message === 'emailAlreadyRegistered') {
         toggleLoginWithPrefilledEmail(values.email);
         return;
       }
@@ -125,7 +125,10 @@ const RegistrationBox = ({
           password: '',
         },
       });
-      if (!e.message || !i18n.exists(`errors:${e.message}`)) return;
+      if (!(e instanceof Error) || !i18n.exists(`errors:${e.message}`)) {
+        console.error(e);
+        return;
+      }
       dialogContentRef?.scrollTo({ top: 0, behavior: 'smooth' });
       setError(e.message);
     }
@@ -150,15 +153,15 @@ const RegistrationBox = ({
                 confirmPassword: '',
                 firstName: invitedUser.firstName,
                 lastName: invitedUser.lastName,
-                phone: invitedUser.phone,
-                zipCode: invitedUser.zipCode,
+                phone: invitedUser.phone ?? '',
+                zipCode: invitedUser.zipCode ?? '',
                 address1:
                   invitedUser.address1 && invitedUser.address2
                     ? `${invitedUser.address1} ${invitedUser.address2}`
                     : invitedUser.address1
                     ? invitedUser.address1
-                    : invitedUser.address2,
-                city: invitedUser.city,
+                    : invitedUser.address2 ?? '',
+                city: invitedUser.city ?? '',
                 tos: false,
                 email2: invitedUser.email2,
                 firstName2: invitedUser.firstName2,
