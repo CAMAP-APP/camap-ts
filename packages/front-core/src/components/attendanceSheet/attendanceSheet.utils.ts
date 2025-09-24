@@ -227,24 +227,32 @@ export const exportAttendanceXlsx = async (
   );
 };
 
+function capitalizeName(name:string) {
+  return `${name.substring(0,1).toUpperCase()}${name.substring(1).toLowerCase()}`;
+}
+function initializeName(name: string) {
+  if(name.length <= 3) return capitalizeName(name);
+  return `${capitalizeName(name).slice(0, 3)}.`;
+}
+
 export const formatUserSubNames = (
   user: Pick<User, 'lastName' | 'firstName'>,
   { fullFirstName = false }: { fullFirstName?: boolean } = {},
 ) => {
   const { lastName, firstName } = user;
   let first = fullFirstName
-    ? firstName
-    : `${firstName.slice(0, 1).toUpperCase()}.`;
+    ? capitalizeName(firstName)
+    : initializeName(firstName);
 
   if (first.length > 18) {
-    first = `${first.slice(0, 18)}...`;
+    first = `${first.slice(0, 15)}...`;
   }
 
-  if (lastName.length <= 18) {
-    return `${lastName} ${first}`;
-  }
-
-  return `${lastName.slice(0, 18)}... ${first}`;
+  let last = lastName.toUpperCase();
+  if(last.length + first.length + 1 > 37)
+    return `${last.slice(0, 15)}... ${first}`;
+  
+  return `${last} ${first}`;
 };
 
 export const formatUserPartnerSubNames = (
@@ -269,7 +277,7 @@ export const formatVolunteer = (
     res += `${volunteerRole.name} : `;
   }
 
-  res += `${user.lastName} ${user.firstName} (`;
+  res += `${formatUserSubNames(user, { fullFirstName: true })} (`;
 
   if (user.phone) {
     res += `${user.phone})`;
@@ -331,7 +339,7 @@ export const saveAttendanceUserFormat = (newFormat: CsaAttendanceFormat) => {
 export const formatCatalogContact = (
   user: Pick<User, 'firstName' | 'lastName' | 'phone' | 'email'>,
 ) => {
-  let res = `${user.firstName} ${user.lastName}`;
+  let res = `${user.lastName.toUpperCase()} ${capitalizeName(user.firstName)}`;
   if (user.phone) {
     res = `${res} - ${user.phone}`;
   }

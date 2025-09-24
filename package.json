@@ -30,14 +30,18 @@
     "schema:sync": "npm run --prefix packages/api-core typeorm schema:sync"
   },
   "devDependencies": {
-    "eslint": "^6.8.0",
+    "eslint": "^9.34.0",
     "prettier": "^2.0.5",
     "typescript": "^4.6.3"
   },
   "dependencies": {
     "core-js": "^3.6.5",
     "dotenv": "^8.2.0",
-    "typeorm": "^0.2.29",
-    "webpack": "^4.44.2"
+    "sass": "^1.92.0",
+    "typeorm": "^0.2.45",
+    "webpack": "^5.98.0"
+  },
+  "volta": {
+    "node": "20.12.1"
   }
 }

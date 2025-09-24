@@ -8,7 +8,7 @@ Cela permet de facilement peupler une instance de dev ou de test avec des donné
 
 ## Code
 
-Ce module est codé en TS et utilier [Faker](https://fakerjs.dev/) pour générer des données.
+Ce module est codé en TS et utilise [Faker](https://fakerjs.dev/) pour générer des données.
 
 La fonction `datasetGenerators` prend en paramètre une application Nest et retourne les fonctions de génération de données.
 
@@ -60,7 +60,7 @@ On peut utiliser la commande `npm run dataset <isletName> [options]`, depuis la 
 **Options**
 
 -   `-c, --clean` : permet de supprimer toutes les données de la bdd avant la génération de données.
--   `--noFail` : si l'îlot n'existe pas, permet de charger l'îlot par défaut (`packages/api-core/src/dev/islets/dafault.islet.ts`).
+-   `--noFail` : si l'îlot n'existe pas, permet de charger l'îlot par défaut (`packages/api-core/src/dev/islets/default.islet.ts`).
 
 ## Storybook
 

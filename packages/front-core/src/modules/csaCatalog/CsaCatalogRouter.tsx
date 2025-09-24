@@ -142,7 +142,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
-      absentDistribIds: absenceDistributionsIds as number[] | null,
+      absentDistribIds: absenceDistributionsIds
     });
 
     if (!subscriptionSucceeded) return;

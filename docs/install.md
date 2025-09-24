@@ -160,3 +160,40 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
 Cela permettra, grâce aux volumes, de lancer les conteneurs docker avec les fichiers compilés locaux de la machine hote.
 
 exécuter ```docker-compose up -d```
+
+Vous pouvez-maintenant lancer l'initialisation en visitant l'adresse [https://camap.localdomain/install]
+
+### Developpemetn sous Apple Silicon ou arm
+l'image camap-hx nécessite d'etre lancée en mode emulation amd64 pour fonctionner sur une machine de dev en arm (puces apple M ou arm pour windows/linux)
+ajouter a `docker-compose.yml`
+```yaml
+neko-loc-camap:
+  platform: "linux/amd64"
+  ...
+```
+
+### Troubleshooting 1ere installation
+Une fois `docker compose up -d` lancé naviguez vers [https://camap.localdomain]
+Si vous rencontrez une page 403, il y a eu un probleme a l'installation
+Il se peut que lix ai échoué silencieusement à installer les dépendences du projet haXe
+
+#### Reinstaller le backend haXe manuellement
+Il va falloir relancer les étapes de build de l'image camap-hx
+Connectez-vous à l'instance Docker en mode interactif
+```sh
+docker exec -it neko-loc-camap sh
+```
+
+executer
+```sh
+cd /srv/backend
+lix download
+haxe build.hxml -D i18n_generation
+cd /srv/lang/fr/tpl/
+neko ../../../backend/temploc2.n -macros macros.mtt -output ../tmp/ *.mtt */*.mtt */*/*.mtt
+cd /srv/frontend
+lix download
+haxe build.hxml
+```
+
+Le site devrais être servi, mais a potentiellement d'autres erreurs, pour celà se référer à la doc [./troubleshooting.md]

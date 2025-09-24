@@ -41,7 +41,7 @@ const InnerLogin = () => {
     if (parts && parts.length === 2) sid = parts.pop()!.split(';').shift()!;
     const { data } = await login({
       variables: {
-        input: { email: 'admin@camap.localdomain', password: 'admin', sid },
+        input: { email: 'admin@camap.tld', password: 'admin', sid },
       },
     });
     if (data && data.login) {

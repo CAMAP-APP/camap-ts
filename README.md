@@ -45,6 +45,11 @@ L'application se compose de 3 modules :
     -   [Templates](/docs/templates.md)
 -   [Maintenance et pérénnité du logiciel sur le long terme](docs/future.md)
 
+## TODO
+- passage a typeorm 0.3.x
+    - actuellement nest est bloqué à v9 car @nestjs/typeorm est limité par typeorm 0.2
+    - passer a typeorm 0.3 nécessite de migrer 73 occurences de code et de refaire les CLI et scripts
+
 ## Historique
 
 -   2013 : François Barbut développe une application web pour les AMAP sur son temps libre sous le nom de **Cagette.net**

@@ -750,12 +750,12 @@ const genBaseConfig = async (app: INestApplication) => {
 
 const genAdmin = async (app: INestApplication) => {
   const userRepo = app.get<Repository<UserEntity>>(getRepositoryToken(UserEntity));
-  let admin = await userRepo.findOne({ email: 'admin@camap.localdomain' });
+  let admin = await userRepo.findOne({ email: 'admin@camap.tld' });
   if (!admin) {
     admin = await genUser(app, {
       firstName: 'Harry',
       lastName: 'Covert',
-      email: 'admin@camap.localdomain',
+      email: 'admin@camap.tld',
       phone: '0607080905',
       rights: [RightSite.SuperAdmin],
     });

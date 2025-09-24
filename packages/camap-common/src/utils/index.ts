@@ -58,3 +58,5 @@ export const generatePaymentCode = (
   }-${user.id}`;
 
 export const roundPrice = (value: number) => Math.round(value * 100) / 100;
+
+export type DateRange = { from: Date, to: Date }
