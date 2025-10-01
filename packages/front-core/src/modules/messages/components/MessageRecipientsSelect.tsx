@@ -118,9 +118,7 @@ const MessageRecipientsSelect = ({
   const [freeValue, setFreeValue] = React.useState<Recipient[]>([]);
   const [freeValueInput, setFreeValueInput] = React.useState<string>('');
   const [listValue, setListValue] = React.useState<RecipientOption[]>([]);
-  const [groupOpenByKey, setGroupOpenByKey] = React.useState(
-    new Map<number, boolean>(),
-  );
+  const [groupOpenByKey, setGroupOpenByKey] = React.useState({} as Record<string, boolean>);
   const [contractsRecipientsOptions, setContractsRecipientsOptions] =
     React.useState([DEFAULT_CONTRACT_OPTION]);
   const [distributionsRecipientsOptions, setDistributionsRecipientsOptions] =
@@ -192,7 +190,7 @@ const MessageRecipientsSelect = ({
 
   React.useEffect(() => {
     setError(userListInGroupByListTypeError);
-  }, [userListInGroupByListTypeError]);
+  }, [setError, userListInGroupByListTypeError]);
 
   React.useEffect(() => {
     if (
@@ -203,7 +201,7 @@ const MessageRecipientsSelect = ({
       setListValue([]);
       setFreeValue([]);
     }
-  }, [field.value]);
+  }, [field.value, showFreeList]);
 
   React.useEffect(() => {
     if (
@@ -234,24 +232,24 @@ const MessageRecipientsSelect = ({
       });
     }
     previousSelectedList.current = selectedUserList;
-  }, [selectedUserList]);
+  }, [getActiveVendorsFromGroup, getUserListInGroupByListType, groupId, me, selectedUserList, setRecipients, showFreeList, userListInGroupByListTypeData]);
 
   React.useEffect(() => {
     if (!userListInGroupByListTypeData) return;
     if (selectedUserList && selectedUserList.type === 'test') return;
     setRecipients(userListInGroupByListTypeData.getUserListInGroupByListType);
-  }, [userListInGroupByListTypeData]);
+  }, [selectedUserList, setRecipients, userListInGroupByListTypeData]);
 
   React.useEffect(() => {
     if (!vendorsData) return;
     if (!selectedUserList || selectedUserList.type !== 'vendors') return;
     setRecipients(vendorsData.getActiveVendorsFromGroup.map(mapVendorToUser));
-  }, [vendorsData]);
+  }, [selectedUserList, setRecipients, vendorsData]);
 
   React.useEffect(() => {
     if (!vendorsError) return;
     setError(vendorsError);
-  }, [vendorsError]);
+  }, [setError, vendorsError]);
 
   React.useEffect(() => {
     if (showFreeList) return;
@@ -282,7 +280,7 @@ const MessageRecipientsSelect = ({
     }
     if (newSelectedList === selectedUserList) return;
     setSelectedUserList(newSelectedList);
-  }, [listValue]);
+  }, [listValue, selectedUserList, setSelectedUserList, showFreeList]);
 
   React.useEffect(() => {
     if (!contractsListData?.getContractsUserLists) return;
@@ -315,7 +313,7 @@ const MessageRecipientsSelect = ({
         };
       }),
     );
-  }, [contractsListData?.getContractsUserLists]);
+  }, [contractsListData?.getContractsUserLists, tLists]);
 
   React.useEffect(() => {
     if (!distributionsListData?.getDistributionsUserLists) return;
@@ -349,7 +347,7 @@ const MessageRecipientsSelect = ({
         };
       }),
     );
-  }, [distributionsListData?.getDistributionsUserLists]);
+  }, [distributionsListData?.getDistributionsUserLists, tLists]);
 
   const onFreeValueInputChange = (
     _event: React.SyntheticEvent,
@@ -466,7 +464,7 @@ const MessageRecipientsSelect = ({
 
   const onListValueChange = (
     _event: any,
-    value: RecipientOption[] | string[],
+    value: (RecipientOption | string)[],
   ) => {
     const lastValue = value[value.length - 1];
     if (typeof lastValue === 'string') {
@@ -544,9 +542,10 @@ const MessageRecipientsSelect = ({
   const renderGroup = (params: AutocompleteRenderGroupParams) => {
     const { key } = params;
     if (!!params.group && groupOpenByKey[key] === undefined) {
-      const newGroupOpenByKey = { ...groupOpenByKey };
-      newGroupOpenByKey[key] = false;
-      setGroupOpenByKey(newGroupOpenByKey);
+      setGroupOpenByKey({
+        ...groupOpenByKey,
+        key: false
+      });
     }
 
     const isDefault = params.group === RecipientOptionGroup.DEFAULT;
@@ -561,9 +560,10 @@ const MessageRecipientsSelect = ({
         getDistributionsUserLists();
       }
 
-      const newGroupOpenByKey = { ...groupOpenByKey };
-      newGroupOpenByKey[key] = !groupOpenByKey[key];
-      setGroupOpenByKey(newGroupOpenByKey);
+      setGroupOpenByKey({
+        ...groupOpenByKey,
+        key: !groupOpenByKey[key]
+      });
     };
 
     const renderNestedList = () => {
@@ -658,7 +658,7 @@ const MessageRecipientsSelect = ({
         groupBy={(option) => option.group}
         getOptionDisabled={(option) => option.disabled}
         fullWidth
-        getOptionLabel={(option) => option.label}
+        getOptionLabel={(option) => (typeof option == 'string') ? option : option.label}
         renderTags={(value: RecipientOption[], getTagProps) => (
           <Chip
             variant="outlined"

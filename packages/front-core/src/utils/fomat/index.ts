@@ -14,7 +14,7 @@ export const firstLetterUppercase = (s: string) =>
 export const formatUserName = (user: { firstName: string; lastName: string }) =>
   `${user.lastName.toUpperCase()} ${firstLetterUppercase(user.firstName)}`;
 
-export const formatUserAndPartnerNames = (user: User) => {
+export const formatUserAndPartnerNames = (user: Pick<User, 'firstName' | 'lastName' | 'firstName2' | 'lastName2'>) => {
   const userName = formatUserName(user);
 
   if (user.firstName2 && user.lastName2) {
@@ -40,7 +40,7 @@ export const formatAbsoluteDate = (
   uppercased = true,
   showYear = false,
   showDayOfWeek = true,
-) => {
+): string => {
   if (Number.isNaN(date.getTime())) return '';
   let pattern = 'd MMMM';
   if (showDayOfWeek) pattern = `EEEE ${pattern}`;

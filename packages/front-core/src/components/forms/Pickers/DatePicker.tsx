@@ -14,7 +14,7 @@ const DatePicker = ({
   textFieldProps?: MuiTextFieldProps;
 }) => {
   const OpenablePicker = React.useMemo(
-    () => withOpenablePicker(MuiDatePicker),
+    () => withOpenablePicker(MuiDatePicker as any),
     [],
   );
 

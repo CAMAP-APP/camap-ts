@@ -37,7 +37,7 @@ const TextEditorColorButton = () => {
   const isMarkActive = (color: string) => {
     try {
       const marks = Editor.marks(editor);
-      return marks ? marks[color] === true : false;
+      return (marks && color in marks) ? marks[color as keyof typeof marks] === true : false;
     } catch {
       return false;
     }

@@ -126,8 +126,8 @@ export const SLATE_INITIAL_VALUE = [
 ];
 
 const CustomEditable = (props: EditableProps) => {
-  const renderElement = useCallback((props) => <Element {...props} />, []);
-  const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+  const renderElement = useCallback((props: RenderElementProps) => <Element {...props} />, []);
+  const renderLeaf = useCallback((props: RenderLeafProps) => <Leaf {...props} />, []);
 
   return (
     <Editable

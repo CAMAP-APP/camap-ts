@@ -21,7 +21,6 @@ import {
   useQuery,
 } from 'react-query';
 import { useLoginMutation, useLogoutMutation, useMeQuery } from '../gql';
-import { PAGE_HEADER_ID } from '../modules/pageHeader/PageHeader.module';
 import { getCookie, setCookie } from '../utils/cookie';
 
 export interface DatasetProviderProps {
@@ -77,7 +76,7 @@ const DatasetToolbar = ({
       <AppBar
         position="relative"
         sx={{ mb: extendedToolbar ? 0 : 4 }}
-        id={PAGE_HEADER_ID}
+        // id={PAGE_HEADER_ID}
       >
         <Toolbar>
           <BugReportIcon />

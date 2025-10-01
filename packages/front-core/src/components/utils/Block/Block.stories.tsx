@@ -1,7 +1,7 @@
 /* eslint-disable i18next/no-literal-string */
 import { ClosedCaption } from '@mui/icons-material';
 import { Box } from '@mui/material';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import BlockComponent from './Block';
 import SubBlockComponent from './SubBlock';
 
@@ -26,4 +26,4 @@ export const Block = () => {
 export default {
   title: 'components/utils/Block',
   component: BlockComponent,
-} as ComponentMeta<typeof BlockComponent>;
+} as Meta<typeof BlockComponent>;

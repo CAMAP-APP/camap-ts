@@ -55,7 +55,7 @@ function MembersTable({ members, loading, allMembers }: MembersTableProps) {
 
   const formattedMembers: FormattedMember[] = React.useMemo(() => {
     return members.map((m) => formatMember(m));
-  }, [members, allMembers, selectedUserList]);
+  }, [members]);
 
   React.useEffect(() => {
     const { length } = members;
@@ -63,7 +63,7 @@ function MembersTable({ members, loading, allMembers }: MembersTableProps) {
       setPage(0);
     }
     setSelected([]);
-  }, [members]);
+  }, [members, page, rowsPerPage]);
 
   React.useEffect(() => {
     if (toggleRefetch === undefined) return;

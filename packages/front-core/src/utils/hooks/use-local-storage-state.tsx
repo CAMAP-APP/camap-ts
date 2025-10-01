@@ -24,10 +24,10 @@ export const useLocalStorageState = <T,>(
     loadFromLs<T>(key) || initValue,
   );
 
-  const setValue = (value: T) => {
+  const setValue = ((value: React.SetStateAction<T>) => {
     saveToLs(key, value);
     _setValue(value);
-  };
+  }) satisfies React.Dispatch<React.SetStateAction<T>>;
 
   /** */
   return [innerValue, setValue];

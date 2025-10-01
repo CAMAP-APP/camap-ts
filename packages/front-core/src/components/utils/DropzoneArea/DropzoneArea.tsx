@@ -88,7 +88,7 @@ const DropzoneArea = ({
 
   React.useEffect(() => {
     onChange(fileObjects.map((fileObject) => fileObject.file));
-  }, [fileObjects]);
+  }, [fileObjects, onChange]);
 
   const handleDropAccepted = async (acceptedFiles: File[], _: DropEvent) => {
     // Retrieve fileObjects data

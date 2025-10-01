@@ -65,6 +65,15 @@ export const aUser = (
       overrides && overrides.hasOwnProperty('email2')
         ? overrides.email2!
         : null,
+    notifications:
+      overrides && overrides.hasOwnProperty('notifications')
+        ? overrides.notifications!
+        : {
+          __typename: "UserNotifications",
+          hasEmailNotif4h: true,
+          hasEmailNotif24h: true,
+          hasEmailNotifOuverture: true
+        } ,
   };
 };
 
@@ -92,5 +101,29 @@ export const aGroup = (
       overrides && overrides.hasOwnProperty('hasMembership')
         ? overrides.hasMembership!
         : false,
+    betaFlags:
+      overrides && overrides.hasOwnProperty('betaFlags')
+        ? overrides.betaFlags!
+        : 0,
+    currencyCode:
+      overrides && overrides.hasOwnProperty('currencyCode')
+        ? overrides.currencyCode!
+        : 'EUR',
+    flags: 
+      overrides && overrides.hasOwnProperty('flags')
+        ? overrides.flags!
+        : 0,
+    hasAddressRequired:
+      overrides && overrides.hasOwnProperty('hasAddressRequired')
+        ? overrides.hasAddressRequired!
+        :false,
+    hasPhoneRequired:
+      overrides && overrides.hasOwnProperty('hasPhoneRequired')
+        ? overrides.hasPhoneRequired!
+        :false,
+    multiDistribs:
+      overrides && overrides.hasOwnProperty('multiDistribs')
+        ? overrides.multiDistribs!
+        :[]
   };
 };

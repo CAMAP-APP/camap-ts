@@ -168,7 +168,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
             <TableRow>
               <TableCell colSpan={2}>
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body) }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageBody) }} />
               </TableCell>
             </TableRow>
           </TableBody>

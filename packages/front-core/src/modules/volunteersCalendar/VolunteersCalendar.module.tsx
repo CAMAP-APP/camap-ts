@@ -97,7 +97,7 @@ const VolunteersCalendar = ({
     });
     if (isSameArray) {
       const news = { ...shouldDisableButton };
-      news[`${lastClickedButton}`] = true;
+      if(lastClickedButton) news[`${lastClickedButton}`] = true;
       setShouldDisableButton(news);
       return;
     }

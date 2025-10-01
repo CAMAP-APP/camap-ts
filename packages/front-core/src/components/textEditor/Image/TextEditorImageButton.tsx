@@ -14,7 +14,7 @@ import { encodeFileToBase64String } from '@utils/encoding';
 import { getBase64EncodedImage } from '@utils/image';
 import { logError } from '@utils/logger';
 import imageCompression from 'browser-image-compression';
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSlateStatic } from 'slate-react';
 import { TextEditorComponents } from '../TextEditorComponents';
@@ -56,7 +56,7 @@ const TextEditorImageButton = ({
     });
   }, [getActiveCatalogs, groupId]);
 
-  const openMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
     setIsActive(true);
     setAnchorEl(event.currentTarget);
   };
@@ -66,7 +66,7 @@ const TextEditorImageButton = ({
     setIsActive(false);
   };
 
-  const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     if (groupId) {
       openMenu(event);
@@ -119,8 +119,8 @@ const TextEditorImageButton = ({
   };
 
   const onCatalogSelected = (
-    _event: React.ChangeEvent,
-    newValue: CatalogType,
+    _event: SyntheticEvent,
+    newValue: CatalogType | null,
     reason: AutocompleteChangeReason,
   ) => {
     if (reason === 'blur' || reason === 'clear') {
@@ -135,7 +135,7 @@ const TextEditorImageButton = ({
   };
 
   const onCatalogInputChange = (
-    _: React.ChangeEvent,
+    _: React.SyntheticEvent,
     newInputValue: string,
   ) => {
     setCatalogInputValue(newInputValue);
