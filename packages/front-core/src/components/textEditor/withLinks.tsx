@@ -5,8 +5,10 @@ import FormatTypes, { CustomEditor } from './TextEditorFormatType';
 
 const isLinkActive = (editor: CustomEditor) => {
   const [link] = Editor.nodes(editor, {
-    match: (n) => 'type' in n && n.type === FormatTypes.hyperlink,
-
+    match: (n) => { // will be called with all nodes in current path
+      console.log('node', n);
+      return 'type' in n && n.type === FormatTypes.hyperlink
+    },
   });
   return !!link;
 };
@@ -19,6 +21,7 @@ const unwrapLink = (editor: CustomEditor) => {
 
 const wrapLink = (editor: CustomEditor, url: string, linkLocation?: Location, text?: string) => {
   if (isLinkActive(editor)) {
+    console.log("we have a link, unwrapping");
     unwrapLink(editor);
   }
 
@@ -53,7 +56,8 @@ const withLinks = (editor: CustomEditor) => {
   };
 
   e.insertText = (text) => {
-    if (text && isUrl(text)) {
+    console.log('insertText', text);
+    if (text && isUrl(text) || isLinkActive(e)) {
       wrapLink(e, text);
     } else {
       insertText(text);
@@ -61,6 +65,7 @@ const withLinks = (editor: CustomEditor) => {
   };
 
   e.insertData = (data) => {
+    console.log('insertData', data);
     const text = data.getData('text/plain');
     const trimmedText = text && text.trim();
     if (trimmedText && isUrl(trimmedText)) {

@@ -458,7 +458,7 @@ const SlateTextEditor = ({
     () =>
       withHtml(
         withImages(
-          withHistory(withReact(createEditor())),
+          withLinks(withHistory(withReact(createEditor()))),
           onAddImagesCustomHandler,
         ),
       ),
@@ -466,9 +466,6 @@ const SlateTextEditor = ({
   ) as CustomEditor;
 
   const editableRef = React.useRef<HTMLDivElement>(null);
-
-
-  useEffect(() => console.log("onSetValueCustomHandler"), [onSetValueCustomHandler]);
 
   const setFormikValue = useCallback((element?: HTMLDivElement) => {
     const editorWidth = element
@@ -489,20 +486,19 @@ const SlateTextEditor = ({
   }, [editor, name, onAddImagesCustomHandler, onChange, onSetValueCustomHandler]);
 
   useEffect(() => {
-    console.log("useEffect is running", customValue);
     if (!customValue) return;
 
     editor.children = customValue;
     setFormikValue(editableRef.current || undefined);
   }, [customValue, editor, setFormikValue]);
 
-  // useEffect(() => {
-  //   if (formikValue === '') {
-  //     // Form has been reset
-  //     editor.selection = null;
-  //     setValue(SLATE_INITIAL_VALUE);
-  //   }
-  // }, [editor, formikValue]);
+  useEffect(() => {
+    if (formikValue === '') {
+      // Form has been reset
+      editor.selection = null;
+      setValue(SLATE_INITIAL_VALUE);
+    }
+  }, [editor, formikValue]);
 
   useEffect(() => {
     if (!!customValue) return;
