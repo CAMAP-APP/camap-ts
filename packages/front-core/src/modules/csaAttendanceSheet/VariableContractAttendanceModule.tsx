@@ -49,7 +49,7 @@ const getTableData = (
 
   const subscriptions = sortBy(
     data.attendanceVariableContract.subscriptions,
-    (sub) => sub.user.lastName,
+    (sub) => sub.user.lastName.toLowerCase(),
   );
 
   const head: AttendanceColumn[] = [];
