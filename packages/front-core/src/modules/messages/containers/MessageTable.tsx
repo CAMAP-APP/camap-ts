@@ -16,7 +16,6 @@ import { useTranslation } from 'react-i18next';
 import SlateViewer from '../../../components/textEditor/SlateViewer';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
-import DOMPurify from 'dompurify';
 
 export interface MessageTableProps {
   messageId: number;
@@ -166,11 +165,11 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
               </TableCell>
             </TableRow>
 
-            <TableRow>
+            {/* <TableRow>
               <TableCell colSpan={2}>
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageBody) }} />
+                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(message.body) }} />
               </TableCell>
-            </TableRow>
+            </TableRow> */}
           </TableBody>
         </Table>
       )}

@@ -1,11 +1,12 @@
 import { isFinishedUrl, isUrl, URL_PATTERN } from '@utils/url';
 import { containsEmail, CONTAINS_EMAIL_REGEX } from 'camap-common';
-import { Editor, Node, NodeEntry, Path, Range, Transforms } from 'slate';
+import { BaseRange, Editor, Location, Node, NodeEntry, Path, Range, Transforms } from 'slate';
 import FormatTypes, { CustomEditor } from './TextEditorFormatType';
 
 const isLinkActive = (editor: CustomEditor) => {
   const [link] = Editor.nodes(editor, {
     match: (n) => 'type' in n && n.type === FormatTypes.hyperlink,
+
   });
   return !!link;
 };
@@ -16,7 +17,7 @@ const unwrapLink = (editor: CustomEditor) => {
   });
 };
 
-const wrapLink = (editor: CustomEditor, url: string, text?: string) => {
+const wrapLink = (editor: CustomEditor, url: string, linkLocation?: Location, text?: string) => {
   if (isLinkActive(editor)) {
     unwrapLink(editor);
   }
@@ -30,26 +31,15 @@ const wrapLink = (editor: CustomEditor, url: string, text?: string) => {
   };
 
   if (isCollapsed) {
-    Transforms.insertNodes(editor, link);
+    Transforms.insertNodes(editor, link, { at: linkLocation });
   } else {
-    Transforms.wrapNodes(editor, link, { split: true });
+    Transforms.wrapNodes(editor, link, { split: true, at: linkLocation });
     Transforms.collapse(editor, { edge: 'end' });
   }
 };
 
-const wrapEmail = (editor: CustomEditor, email: string) => {
-  wrapLink(editor, `mailto:${email}`);
-};
-
-const DEFAULT_SELECTION: Range = {
-  anchor: {
-    path: [0, 0],
-    offset: 0,
-  },
-  focus: {
-    path: [0, 0],
-    offset: 0,
-  },
+const wrapEmail = (editor: CustomEditor, email: string, location: BaseRange) => {
+  wrapLink(editor, `mailto:${email}`, location, email);
 };
 
 const withLinks = (editor: CustomEditor) => {
@@ -101,12 +91,11 @@ const withLinks = (editor: CustomEditor) => {
           const startIndexOfUrl = text.indexOf(url);
           const endIndexOfUrl = startIndexOfUrl + url.length;
 
-          Transforms.setSelection(e, {
+          wrapLink(e, url, {
             focus: { offset: endIndexOfUrl, path: entryPath },
             anchor: { offset: startIndexOfUrl, path: entryPath },
           });
-          wrapLink(e, url);
-          Transforms.setSelection(e, DEFAULT_SELECTION);
+          // Transforms.setSelection(e, sel);
 
           return;
         }
@@ -123,12 +112,10 @@ const withLinks = (editor: CustomEditor) => {
             const startIndexOfUrl = text.indexOf(email);
             const endIndexOfUrl = startIndexOfUrl + email.length;
 
-            Transforms.setSelection(e, {
+            wrapEmail(e, email, {
               focus: { offset: endIndexOfUrl, path: entryPath },
               anchor: { offset: startIndexOfUrl, path: entryPath },
             });
-
-            wrapEmail(e, email);
 
             return;
           }

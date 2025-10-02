@@ -12,7 +12,7 @@ import {
 } from '@mui/icons-material';
 import { Box, styled } from '@mui/material';
 import { FormikHandlers } from 'formik';
-import React, { FocusEvent, useEffect, useMemo, useState } from 'react';
+import React, { FocusEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BaseElement,
@@ -458,7 +458,7 @@ const SlateTextEditor = ({
     () =>
       withHtml(
         withImages(
-          withLinks(withHistory(withReact(createEditor()))),
+          withHistory(withReact(createEditor())),
           onAddImagesCustomHandler,
         ),
       ),
@@ -467,22 +467,10 @@ const SlateTextEditor = ({
 
   const editableRef = React.useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!customValue) return;
 
-    editor.children = customValue;
-    setFormikValue(editableRef.current || undefined);
-  }, [customValue, editor]);
+  useEffect(() => console.log("onSetValueCustomHandler"), [onSetValueCustomHandler]);
 
-  useEffect(() => {
-    if (formikValue === '') {
-      // Form has been reset
-      editor.selection = null;
-      setValue(SLATE_INITIAL_VALUE);
-    }
-  }, [editor, formikValue]);
-
-  const setFormikValue = (element?: HTMLDivElement) => {
+  const setFormikValue = useCallback((element?: HTMLDivElement) => {
     const editorWidth = element
       ? element.clientWidth - EDITOR_PADDING * 2
       : undefined;
@@ -498,12 +486,28 @@ const SlateTextEditor = ({
     );
     if (onSetValueCustomHandler) onSetValueCustomHandler(serializedHtml);
     onChange(name)(serializedHtml);
-  };
+  }, [editor, name, onAddImagesCustomHandler, onChange, onSetValueCustomHandler]);
+
+  useEffect(() => {
+    console.log("useEffect is running", customValue);
+    if (!customValue) return;
+
+    editor.children = customValue;
+    setFormikValue(editableRef.current || undefined);
+  }, [customValue, editor, setFormikValue]);
+
+  // useEffect(() => {
+  //   if (formikValue === '') {
+  //     // Form has been reset
+  //     editor.selection = null;
+  //     setValue(SLATE_INITIAL_VALUE);
+  //   }
+  // }, [editor, formikValue]);
 
   useEffect(() => {
     if (!!customValue) return;
     setFormikValue(editableRef.current || undefined);
-  }, [customValue, value]);
+  }, [customValue, setFormikValue, value]);
 
   const onValueChange = (v: Node[]) => {
     const isEditorFocused = ReactEditor.isFocused(editor);

@@ -443,7 +443,7 @@ const MessageRecipientsSelect = ({
         );
       });
     },
-    [],
+    [t],
   );
 
   const renderFreeValueInput = React.useCallback(

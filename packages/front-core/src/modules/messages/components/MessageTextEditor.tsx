@@ -1,5 +1,5 @@
 import { isEqual } from 'lodash';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { BaseNode, Node } from 'slate';
 import SlateTextEditor, {
   EMPTY_SLATE_VALUE,
@@ -34,7 +34,7 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
 
   const [customValue, setCustomValue] = React.useState<Node[] | undefined>();
 
-  const checkEmbeddedImages = (
+  const checkEmbeddedImages = useCallback((
     newContentValue: BaseNode[],
     attachments: AttachmentUnion[] | undefined,
   ) => {
@@ -93,7 +93,7 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     recursivelyCheckNode(newContentValue);
 
     if (embeddedImagesToAdd.length) addEmbeddedImages(embeddedImagesToAdd);
-  };
+  }, [addEmbeddedImages]);
 
   React.useEffect(() => {
     if (!reuseMessage || !reuseMessage.slateContent) return;
@@ -115,7 +115,7 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
         reuseMessage.attachments || undefined,
       );
     }
-  }, [reuseMessage]);
+  }, [checkEmbeddedImages, customValue, reuseMessage, setSlateContent]);
 
   React.useEffect(() => {
     if (!customValue) return;
@@ -133,7 +133,7 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     }
   };
 
-  const onAddImages = async (files: File[]) => {
+  const onAddImages = useCallback(async (files: File[]) => {
     const base64EncodedFiles = await Promise.all(
       files.map((f) => encodeFileToBase64String(f)),
     );
@@ -146,20 +146,21 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     }));
     if (images.length === 1) addEmbeddedImage(images[0]);
     else addEmbeddedImages(images);
-  };
+  }, [addEmbeddedImage, addEmbeddedImages]);
 
-  const onSetValue = (value: string) => {
-    cleanupEmbeddedImages(value);
-  };
 
-  const cleanupEmbeddedImages = (serializedHtml: string) => {
+  const cleanupEmbeddedImages = useCallback((serializedHtml: string) => {
     const currentEmbeddedImages = [...embeddedImages];
     currentEmbeddedImages.forEach((image) => {
       if (!serializedHtml.includes(image.cid!)) {
         removeEmbeddedImage(image);
       }
     });
-  };
+  }, [embeddedImages, removeEmbeddedImage]);
+
+  const onSetValue = useCallback((value: string) => {
+    cleanupEmbeddedImages(value);
+  }, [cleanupEmbeddedImages]);
 
   return (
     <SlateTextEditor
