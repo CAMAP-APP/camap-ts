@@ -17,13 +17,13 @@ import {
   useCreateMembershipsMutation,
   useInitMembersQuery,
   useMoveBackToWaitingListMutation,
-  User,
   useRemoveUsersFromGroupMutation,
 } from '../../../gql';
-import { formatAbsoluteDate, formatUserName } from '../../../utils/fomat';
+import { formatAbsoluteDate } from '../../../utils/fomat';
 import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
 import MembershipFeeDialog from './MembershipFeeDialog';
+import { formatUserName } from 'camap-common';
 
 type BatchAction = 'membership' | 'exclude' | 'waitingList';
 
@@ -173,7 +173,7 @@ const MembersTableToolbar = ({
               data.errors.map((e: RemoveUsersFromGroupError) => {
                 const user = members.find((m) => m.id === e.userId);
                 return t(e.message, {
-                  name: user && formatUserName(user as User),
+                  name: user && formatUserName(user),
                 });
               }),
             );

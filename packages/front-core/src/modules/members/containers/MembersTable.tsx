@@ -5,7 +5,6 @@ import React from 'react';
 import { User } from '../../../gql';
 import {
   formatUserAddress,
-  formatUserAndPartnerNames,
 } from '../../../utils/fomat';
 import { Order } from '../../../utils/table';
 import { goTo } from '../../../utils/url';
@@ -21,6 +20,7 @@ import MembersTableTitleAndPagination, {
 import MembersTableToolbar from '../components/MembersTableToolbar';
 import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
+import { formatCoupleName } from 'camap-common';
 
 interface FormattedMember extends DefaultFormattedMember {
   address: string;
@@ -29,7 +29,7 @@ interface FormattedMember extends DefaultFormattedMember {
 function formatMember(member: Member): FormattedMember {
   return {
     id: member.id,
-    names: formatUserAndPartnerNames(member),
+    names: formatCoupleName(member),
     address: formatUserAddress(member as User) || '',
   };
 }

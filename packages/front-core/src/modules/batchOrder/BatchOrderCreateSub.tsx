@@ -82,7 +82,6 @@ const BatchOrderCreateSub = ({
       <Modal
         open={showDefaultOrderModal}
         onClose={() => setShowDefaultOrderModal(false)}
-        onBackdropClick={() => setShowDefaultOrderModal(false)}
       >
         <Box
           sx={{

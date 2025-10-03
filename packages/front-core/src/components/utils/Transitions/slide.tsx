@@ -44,14 +44,14 @@ export const getSlideItemSx = (
   firstShowingItem: number,
   totalNbItems: number,
 ): SxProps => ({
-  '&:first-child':
+  '&:first-of-type':
     firstShowingItem > 0
       ? {
           position: 'absolute',
           left: -itemWidth,
         }
       : {},
-  '&:last-child':
+  '&:last-of-type':
     firstShowingItem + nbItemsToShow < totalNbItems
       ? {
           position: 'absolute',
