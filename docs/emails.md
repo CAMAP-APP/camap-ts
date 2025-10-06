@@ -72,3 +72,8 @@ const mail = await this.mailsService.createBufferedJsonMail(
 ### Cron d'envoi des mails en TS
 
 Le cron qui envoie réellement les emails via SMTP est dans `MailsService.sendEmailsFromBuffer()`
+
+## Developement
+
+En développement local le service mailpit tourne depuis docker et capture tout le traffic mail,
+les emails envoyés sont visibles depuis l'interface mailpit sur http://localhost:8025

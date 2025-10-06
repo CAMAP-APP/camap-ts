@@ -99,16 +99,7 @@ const getUserDefaultOrder = (
   if (userOrders.length === 0) return null;
   const products = attendanceClassicContract.catalog.products;
   return userOrders.reduce(
-    (
-      acc,
-      uo: {
-        id: number;
-        userId: number;
-        smartQt: string;
-        productId: number;
-        quantity: number;
-      },
-    ) => {
+    (acc, uo) => {
       const product = products.find((p) => p.id === uo.productId);
       if (!product) return acc;
 
