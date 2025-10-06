@@ -4,7 +4,6 @@ import Table from '@mui/material/Table';
 import TableContainer from '@mui/material/TableContainer';
 import React, { ReactChild } from 'react';
 import { useGetWaitingListsOfGroupQuery, WaitingList } from '../../../gql';
-import { formatUserAndPartnerNames } from '../../../utils/fomat';
 import { Order } from '../../../utils/table';
 import MembersEmptyTable from '../components/MembersEmptyTable';
 import MembersTableBody, {
@@ -18,6 +17,7 @@ import MembersTableTitleAndPagination, {
 import MembersTableToolbar from '../components/MembersTableToolbar';
 import WaitingListButtons from '../components/WaitingListButtons';
 import { MembersContext } from '../MembersContext';
+import { formatCoupleName } from 'camap-common';
 
 interface FormattedWaitingListMember extends DefaultFormattedMember {
   details: string;
@@ -32,7 +32,7 @@ function formatMember(
   const member = waitingList.user;
   return {
     id: member.id,
-    names: formatUserAndPartnerNames(member),
+    names: formatCoupleName(member),
     details: member.phone ? `${member.email} ${member.phone}` : member.email,
     registrationDate: waitingList.date,
     message: waitingList.message,

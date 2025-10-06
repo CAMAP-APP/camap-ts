@@ -5,7 +5,7 @@ import {
 import { Alert, Box, Card, Divider, Typography } from '@mui/material';
 import { formatDateFr, formatUnit } from '@utils/fomat';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
-import { DateRange } from 'camap-common';
+import { DateRange, userSortKey } from 'camap-common';
 import { addMonths } from 'date-fns';
 import { endOfDay, startOfDay } from 'date-fns/esm';
 import { sortBy } from 'lodash';
@@ -136,7 +136,7 @@ const getTableData = (
   const { attendanceClassicContract } = data;
   const subscriptions = sortBy(
     attendanceClassicContract.subscriptions,
-    (sub) => sub.user.lastName.toLowerCase(),
+    (sub) => userSortKey(sub.user),
   );
   const distributions = sortBy(attendanceClassicContract.distributions, 'date');
   const products = sortBy(attendanceClassicContract.catalog.products, 'name');
@@ -408,7 +408,7 @@ export const ClassicContractAttendanceModule = ({
         {tableData && (
           <AttendanceTable
             data={tableData}
-            cellHeight={!format.cellHeight ? 'big' : 'small'}
+            cellHeight={format.cellHeight ?? 'big'}
           />
         )}
       </AttendanceTableWrapper>

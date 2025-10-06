@@ -1,7 +1,7 @@
 import { Typography } from '@mui/material';
 import { User } from '../../../../gql';
-import { formatUserAndPartnerNames } from '../../../../utils/fomat';
 import { useCamapTranslation } from '../../../../utils/hooks/use-camap-translation';
+import { formatCoupleName } from 'camap-common';
 
 interface QuitGroupContentProps {
   user: User;
@@ -16,7 +16,7 @@ const QuitGroupContent = ({ user }: QuitGroupContentProps) => {
   return (
     <>
       <Typography gutterBottom>
-        {t('yourAccount')} : <b>{formatUserAndPartnerNames(user)}</b> (
+        {t('yourAccount')} : <b>{formatCoupleName(user)}</b> (
         {user.email}
         {user.email2 && ` ${tBasics('and')} ${user.email2}`})
       </Typography>

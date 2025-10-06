@@ -10,7 +10,7 @@ import {
   Tooltip,
   useTheme,
 } from '@mui/material';
-import { UserLists, UserListsType } from 'camap-common';
+import { formatUserName, UserLists, UserListsType } from 'camap-common';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import SlateViewer from '../../../components/textEditor/SlateViewer';
@@ -103,7 +103,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
               <TableCell>
                 {message.sender === null
                   ? 'inconnu'
-                  : `${message.sender.firstName} ${message.sender.lastName}`}
+                  : `${formatUserName(message.sender)}`}
               </TableCell>
             </TableRow>
 

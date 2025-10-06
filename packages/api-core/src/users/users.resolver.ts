@@ -9,7 +9,7 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { addressSchemaNotRequired, phoneSchema, userSchema } from 'camap-common';
+import { addressSchemaNotRequired, formatUserName, phoneSchema, userSchema } from 'camap-common';
 import { Request, Response } from 'express';
 import { AuthService, SID_COOKIE_NAME } from '../auth/auth.service';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -209,7 +209,7 @@ export class UsersResolver {
         return this.mailsService.createBufferedJsonMail(
           'aMemberOfYourGroupDeletedHisAccount.twig',
           {
-            userName: `${currentUser.firstName} ${currentUser.lastName}`,
+            userName: formatUserName(currentUser),
             groupName: group.name,
             groupId: group.id,
           },

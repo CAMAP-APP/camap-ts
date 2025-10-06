@@ -11,7 +11,7 @@ import {
   Switch,
   Typography,
 } from '@mui/material';
-import { addressSchema, phoneSchema, userSchema } from 'camap-common';
+import { addressSchema, formatFirstName, formatLastName, phoneSchema, userSchema } from 'camap-common';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ValidationError } from 'yup';
@@ -28,7 +28,6 @@ import {
   useImportAndCreateMembersMutation,
   useSendInvitesToNewMembersMutation,
 } from '../../../gql';
-import { firstLetterUppercase } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import ImportMembersTables from '../components/ImportMembersTables';
 import { MembersContext } from '../MembersContext';
@@ -184,10 +183,10 @@ const ImportMembers = () => {
           );
         }
         // First letter uppercase name
-        if (user[1]) user[1] = firstLetterUppercase(user[1].trim());
-        if (user[5]) user[5] = firstLetterUppercase(user[5].trim());
-        if (user[0]) user[0] = firstLetterUppercase(user[0].trim());
-        if (user[4]) user[4] = firstLetterUppercase(user[4].trim());
+        if (user[1]) user[1] = formatLastName(user[1].trim()); // lastName
+        if (user[5]) user[5] = formatLastName(user[5].trim()); // lastName2
+        if (user[0]) user[0] = formatFirstName(user[0].trim()); // firstName
+        if (user[4]) user[4] = formatFirstName(user[4].trim()); // firstName2
         // Lowercase email
         if (user[2]) {
           user[2] = user[2].toLowerCase().trim();

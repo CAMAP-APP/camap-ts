@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver';
 import { Maybe } from 'graphql/jsutils/Maybe';
 import { CsaAttendanceFormat } from '../../modules/csaAttendanceSheet/attendanceSheetCsa.interface';
 import { AttendanceTableData } from './attendanceSheet.interface';
+import { formatFirstName, formatLastName, formatUserName } from 'camap-common';
 
 export const exportAttendanceCSV = (
   { head, body }: AttendanceTableData,
@@ -227,12 +228,9 @@ export const exportAttendanceXlsx = async (
   );
 };
 
-function capitalizeName(name:string) {
-  return `${name.substring(0,1).toUpperCase()}${name.substring(1).toLowerCase()}`;
-}
 function initializeName(name: string) {
-  if(name.length <= 3) return capitalizeName(name);
-  return `${capitalizeName(name).slice(0, 3)}.`;
+  if(name.length <= 3) return formatFirstName(name);
+  return `${formatFirstName(name).slice(0, 3)}.`;
 }
 
 export const formatUserSubNames = (
@@ -241,30 +239,18 @@ export const formatUserSubNames = (
 ) => {
   const { lastName, firstName } = user;
   let first = fullFirstName
-    ? capitalizeName(firstName)
+    ? formatFirstName(firstName)
     : initializeName(firstName);
 
   if (first.length > 18) {
     first = `${first.slice(0, 15)}...`;
   }
 
-  let last = lastName.toUpperCase();
-  if(last.length + first.length + 1 > 37)
+  let last = formatLastName(lastName);
+  if(last.length + first.length > 36)
     return `${last.slice(0, 15)}... ${first}`;
   
   return `${last} ${first}`;
-};
-
-export const formatUserPartnerSubNames = (
-  user: Pick<User, 'lastName2' | 'firstName2'>,
-  { fullFirstName = false }: { fullFirstName?: boolean } = {},
-) => {
-  const { lastName2, firstName2 } = user;
-  if (!firstName2 || !lastName2) return '';
-  return formatUserSubNames(
-    { firstName: firstName2, lastName: lastName2 },
-    { fullFirstName },
-  );
 };
 
 export const formatVolunteer = (
@@ -339,7 +325,7 @@ export const saveAttendanceUserFormat = (newFormat: CsaAttendanceFormat) => {
 export const formatCatalogContact = (
   user: Pick<User, 'firstName' | 'lastName' | 'phone' | 'email'>,
 ) => {
-  let res = `${user.lastName.toUpperCase()} ${capitalizeName(user.firstName)}`;
+  let res = formatUserName(user);
   if (user.phone) {
     res = `${res} - ${user.phone}`;
   }
