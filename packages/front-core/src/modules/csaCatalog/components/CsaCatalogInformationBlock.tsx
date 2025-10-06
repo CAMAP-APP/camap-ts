@@ -49,9 +49,7 @@ const CsaCatalogInformationBlock = ({
               md: 300,
             },
           }}
-        >
-          <Typography textAlign="left" dangerouslySetInnerHTML={{__html:DOMPurify.sanitize(catalog.description ?? "")}}/>
-        </Typography>
+          textAlign="left" dangerouslySetInnerHTML={{__html:DOMPurify.sanitize(catalog.description ?? "")}}/>
         {catalog.documents.length > 0 && (
           <List sx={{ pb: 0, mb: -1.5, flexShrink: 0 }}>
             {catalog.documents.map((d) => (

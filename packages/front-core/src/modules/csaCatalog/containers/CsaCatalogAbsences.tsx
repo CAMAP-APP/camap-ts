@@ -48,10 +48,10 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
     useRestCatalogAbsencesLazyGet(catalogId);
 
   React.useEffect(() => {
-    if (!!subscription) return;
+    if (!!subscription && !adminMode) return;
 
     getCatalogAbsences();
-  }, [getCatalogAbsences, subscription]);
+  }, [getCatalogAbsences, subscription, adminMode]);
 
   // const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(4);
 
@@ -150,7 +150,7 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
   }
 
   if (
-    (!subscription && !catalogAbsences) ||
+    ((!subscription || adminMode) && !catalogAbsences) ||
     (!!subscription && !subscriptionAbsences)
   )
     return <CircularProgressBox />;

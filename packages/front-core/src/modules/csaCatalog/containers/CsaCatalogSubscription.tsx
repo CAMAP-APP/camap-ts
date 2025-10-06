@@ -2,9 +2,7 @@ import { RemoveCircleOutline, ShoppingBag } from '@mui/icons-material';
 import { Alert, Box, Button, Grid, Modal, Typography } from '@mui/material';
 import { formatCurrency } from 'camap-common';
 import React from 'react';
-import Block from '../../../components/utils/Block/Block';
 import SubBlock from '../../../components/utils/Block/SubBlock';
-import { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
@@ -14,7 +12,6 @@ import { CsaCatalogContext } from '../CsaCatalog.context';
 import { useRestUpdateSubscriptionAbsencesPost } from '../requests';
 import CsaCatalogAbsences from './CsaCatalogAbsences';
 import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
-import MediumActionIcon from './MediumActionIcon';
 
 const CsaCatalogSubscription = () => {
   const { t, tCommon } = useCamapTranslation(
@@ -68,13 +65,7 @@ const CsaCatalogSubscription = () => {
     return <CircularProgressBox />;
 
   return (
-    <Box>
-      <Block
-        title={t('mySubscription')}
-        icon={<MediumActionIcon id={CamapIconId.info} />}
-        sx={{ height: '100%' }}
-        contentSx={{ textAlign: 'center' }}
-      >
+      <Box>
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
             <SubBlock title={t('engagement')}>
@@ -206,25 +197,25 @@ const CsaCatalogSubscription = () => {
             {t('cancelSubscription')}
           </Button>
         </Box>
-      </Block>
-      <Modal
-        open={absencesModalOpen}
-        onClose={onCloseAbsencesModal}
-        onBackdropClick={onCloseAbsencesModal}
-      >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            minWidth: '90%',
-          }}
+
+        <Modal
+          open={absencesModalOpen}
+          onClose={onCloseAbsencesModal}
+          onBackdropClick={onCloseAbsencesModal}
         >
-          <CsaCatalogAbsences onNext={handleAbsences} />
-        </Box>
-      </Modal>
-    </Box>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              minWidth: '90%',
+            }}
+          >
+            <CsaCatalogAbsences onNext={handleAbsences} />
+          </Box>
+        </Modal>
+      </Box>
   );
 };
 
