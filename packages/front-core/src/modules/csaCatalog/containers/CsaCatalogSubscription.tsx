@@ -31,6 +31,7 @@ const CsaCatalogSubscription = () => {
     absenceDistributionsIds,
     setSubscriptionAbsences,
     catalog,
+    adminMode
   } = React.useContext(CsaCatalogContext);
 
   const [
@@ -109,7 +110,7 @@ const CsaCatalogSubscription = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <SubBlock title={t('myAbsences')}>
-              {subscription.absentDistribIds.length > 0 ? (
+              {(subscription.absentDistribIds.length > 0 || adminMode) ? (
                 <>
                   {postAbsencesError && (
                     <Alert severity="error">{postAbsencesError}</Alert>
