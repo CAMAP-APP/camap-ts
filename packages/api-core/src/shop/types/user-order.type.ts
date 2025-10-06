@@ -6,6 +6,10 @@ export class UserOrder {
 
   @Field(() => Float) quantity: number;
 
+  @Field(() => Float) quantityBase: number;
+
+  @Field(() => Float) quantityUnitType: number;
+
   @Field(() => Float) productPrice: number;
 
   @Field(() => Int) productId: number;

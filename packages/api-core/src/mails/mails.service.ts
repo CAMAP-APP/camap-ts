@@ -19,6 +19,7 @@ import { CryptoService } from '../tools/crypto.service';
 import { VariableService } from '../tools/variable.service';
 import { UserEntity } from '../users/models/user.entity';
 import { BufferedJsonMailEntity } from './models/buffered-json-mail.entity';
+import { formatUserName } from 'camap-common';
 
 const REPLY_TO_HEADER_KEY = 'Reply-To';
 
@@ -103,7 +104,7 @@ export class MailsService {
         });
       } else if (sender) {
         rawSender = JSON.stringify({
-          name: `${sender.firstName} ${sender.lastName}`,
+          name: formatUserName(sender),
           email: sender.email,
           userId: sender.id,
         });
@@ -119,9 +120,8 @@ export class MailsService {
               email: r.email,
               userId: r.id,
             };
-            if (r.firstName && r.lastName) {
-              recipient.name = `${r.firstName} ${r.lastName}`;
-            }
+            if(r.firstName && r.lastName)
+              recipient.name = formatUserName({ firstName: r.firstName!, lastName: r.lastName! });
             return recipient;
           }),
         ),

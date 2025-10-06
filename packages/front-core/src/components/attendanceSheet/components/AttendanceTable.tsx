@@ -85,11 +85,11 @@ const StyledTable = ({
 
       '& tbody': {
         '& tr': {
-          '&:nth-child(even)': {
+          '&:nth-of-type(even)': {
             bgcolor: (theme) => theme.palette.grey[100],
           },
 
-          '&:last-child': {
+          '&:last-of-type': {
             '& td': {
               border: 1,
               borderColor: 'black',
@@ -107,12 +107,12 @@ const StyledTable = ({
               ? { height: BIG_CELL_HEIGHT }
               : { height: SMALL_CELL_HEIGHT }),
 
-            '&:first-child': {
+            '&:first-of-type': {
               border: 1,
               borderColor: 'black',
             },
 
-            '&:last-child': {
+            '&:last-of-type': {
               border: 1,
               borderColor: 'black',
             },

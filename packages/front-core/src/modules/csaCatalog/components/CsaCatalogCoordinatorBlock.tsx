@@ -2,10 +2,10 @@ import { Typography } from '@mui/material';
 import Block from '../../../components/utils/Block/Block';
 import SubBlock from '../../../components/utils/Block/SubBlock';
 import { CamapIconId } from '../../../components/utils/CamapIcon';
-import { formatUserName } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import MediumActionIcon from '../containers/MediumActionIcon';
 import { RestCsaCatalog } from '../interfaces';
+import { formatUserName } from 'camap-common';
 
 interface CsaCatalogCoordinatorBlockProps {
   catalog: RestCsaCatalog;

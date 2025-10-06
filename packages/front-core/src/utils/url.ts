@@ -22,6 +22,12 @@ export const goTo = (
       window.location.href = url;
     }
   } else {
-    alert(`Redirect to ${url}`);
+    if(window.confirm(`[DEV] Redirect to ${url}`)) {
+      if (inNewTab) {
+        window.open(url, '_blank');
+      } else {
+        window.location.href = url;
+      }
+    }
   }
 };

@@ -70,11 +70,11 @@ Paramètres SMTP
 
 ```
 MAILER_TRANSPORT=smtp
-SMTP_HOST=smtp.ethereal.email
-SMTP_PORT=587
+SMTP_HOST=mailpit
+SMTP_PORT=1025
 SMTP_SECURE=false
-SMTP_AUTH_USER=user
-SMTP_AUTH_PASS=pass
+SMTP_AUTH_USER=
+SMTP_AUTH_PASS=
 ```
 
 `MAPBOX_KEY` : token d'accès à Mapbox pour le geocoding
