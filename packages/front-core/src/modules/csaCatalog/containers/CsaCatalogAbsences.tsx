@@ -48,10 +48,10 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
     useRestCatalogAbsencesLazyGet(catalogId);
 
   React.useEffect(() => {
-    if (!!subscription) return;
+    if (!!subscription && !adminMode) return;
 
     getCatalogAbsences();
-  }, [getCatalogAbsences, subscription]);
+  }, [getCatalogAbsences, subscription, adminMode]);
 
   // const [nbOfAbsenceDays, setNbOfAbsenceDays] = React.useState<number>(4);
 
@@ -150,18 +150,18 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
   }
 
   if (
-    (!subscription && !catalogAbsences) ||
+    ((!subscription || adminMode) && !catalogAbsences) ||
     (!!subscription && !subscriptionAbsences)
   )
     return <CircularProgressBox />;
 
-  const absentDistribsMaxNb = !subscription
+  const absentDistribsMaxNb = (!subscription || adminMode)
     ? catalogAbsences!.absentDistribsMaxNb
     : subscriptionAbsences!.absentDistribIds.length;
-  const startDate = !subscription
+  const startDate = (!subscription || adminMode)
     ? catalogAbsences!.startDate
     : subscriptionAbsences!.startDate;
-  const endDate = !subscription
+  const endDate = (!subscription || adminMode)
     ? catalogAbsences!.endDate
     : subscriptionAbsences!.endDate;
 
@@ -250,9 +250,12 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
                       }}
                       disabled={isDisabledDistribution(i)}
                     >
-                      <MenuItem key={`absence_distrib_none`} value={-1}>
-                        {'-'}
-                      </MenuItem>
+                      { // cannot opt out of an absence once subscription is achieved because it would change the amount due
+                        (!subscription || adminMode) &&
+                        <MenuItem key={`absence_distrib_none`} value={-1}>
+                          {'-'}
+                        </MenuItem>
+                      }
 
                       {possibleAbsentDistribs
                         .filter((distribution) => { // remove options that are selected in the other boxes, preserving the current selected value for consistency
