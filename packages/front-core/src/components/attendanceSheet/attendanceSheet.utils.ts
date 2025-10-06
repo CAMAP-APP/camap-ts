@@ -4,6 +4,7 @@ import { saveAs } from 'file-saver';
 import { Maybe } from 'graphql/jsutils/Maybe';
 import { CsaAttendanceFormat } from '../../modules/csaAttendanceSheet/attendanceSheetCsa.interface';
 import { AttendanceTableData } from './attendanceSheet.interface';
+import { formatFirstName, formatLastName, formatUserName } from 'camap-common';
 
 export const exportAttendanceCSV = (
   { head, body }: AttendanceTableData,
@@ -227,36 +228,29 @@ export const exportAttendanceXlsx = async (
   );
 };
 
+function initializeName(name: string) {
+  if(name.length <= 3) return formatFirstName(name);
+  return `${formatFirstName(name).slice(0, 3)}.`;
+}
+
 export const formatUserSubNames = (
   user: Pick<User, 'lastName' | 'firstName'>,
   { fullFirstName = false }: { fullFirstName?: boolean } = {},
 ) => {
   const { lastName, firstName } = user;
   let first = fullFirstName
-    ? firstName
-    : `${firstName.slice(0, 1).toUpperCase()}.`;
+    ? formatFirstName(firstName)
+    : initializeName(firstName);
 
   if (first.length > 18) {
-    first = `${first.slice(0, 18)}...`;
+    first = `${first.slice(0, 15)}...`;
   }
 
-  if (lastName.length <= 18) {
-    return `${lastName} ${first}`;
-  }
-
-  return `${lastName.slice(0, 18)}... ${first}`;
-};
-
-export const formatUserPartnerSubNames = (
-  user: Pick<User, 'lastName2' | 'firstName2'>,
-  { fullFirstName = false }: { fullFirstName?: boolean } = {},
-) => {
-  const { lastName2, firstName2 } = user;
-  if (!firstName2 || !lastName2) return '';
-  return formatUserSubNames(
-    { firstName: firstName2, lastName: lastName2 },
-    { fullFirstName },
-  );
+  let last = formatLastName(lastName);
+  if(last.length + first.length > 36)
+    return `${last.slice(0, 15)}... ${first}`;
+  
+  return `${last} ${first}`;
 };
 
 export const formatVolunteer = (
@@ -269,7 +263,7 @@ export const formatVolunteer = (
     res += `${volunteerRole.name} : `;
   }
 
-  res += `${user.lastName} ${user.firstName} (`;
+  res += `${formatUserSubNames(user, { fullFirstName: true })} (`;
 
   if (user.phone) {
     res += `${user.phone})`;
@@ -331,7 +325,7 @@ export const saveAttendanceUserFormat = (newFormat: CsaAttendanceFormat) => {
 export const formatCatalogContact = (
   user: Pick<User, 'firstName' | 'lastName' | 'phone' | 'email'>,
 ) => {
-  let res = `${user.firstName} ${user.lastName}`;
+  let res = formatUserName(user);
   if (user.phone) {
     res = `${res} - ${user.phone}`;
   }

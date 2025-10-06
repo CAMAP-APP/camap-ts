@@ -27,11 +27,9 @@ import {
   Tooltip,
 } from '@mui/material';
 import {
-  formatUserAndPartnerNames,
   formatUserList,
-  formatUserName,
 } from '@utils/fomat';
-import { isEmail, UserLists, UserListsType } from 'camap-common';
+import { formatCoupleName, formatUserName, isEmail, UserLists, UserListsType } from 'camap-common';
 import { FieldInputProps, FieldMetaProps, FormikProps } from 'formik';
 import { fieldToTextField, TextFieldProps } from 'formik-mui';
 import React from 'react';
@@ -404,11 +402,7 @@ const MessageRecipientsSelect = ({
 
         if (isError) title = `${t('form.emailError')}`;
         if (option.firstName !== undefined && option.lastName !== undefined) {
-          if (option.firstName2 && option.lastName2) {
-            title = formatUserAndPartnerNames(option as User);
-          } else {
-            title = formatUserName(option as User);
-          }
+          title = formatCoupleName(option as User);
         }
         let { email } = option;
         if (option.email2) {

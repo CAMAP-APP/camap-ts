@@ -11,23 +11,6 @@ export const formatDateFr = (date: Date, f: string = 'dd/MM/yyyy') =>
 export const firstLetterUppercase = (s: string) =>
   `${s.charAt(0).toUpperCase()}${s.slice(1).toLowerCase()}`;
 
-export const formatUserName = (user: { firstName: string; lastName: string }) =>
-  `${user.lastName.toUpperCase()} ${firstLetterUppercase(user.firstName)}`;
-
-export const formatUserAndPartnerNames = (user: User) => {
-  const userName = formatUserName(user);
-
-  if (user.firstName2 && user.lastName2) {
-    const partnerName = formatUserName({
-      firstName: user.firstName2,
-      lastName: user.lastName2,
-    });
-    return `${userName} & ${partnerName}`;
-  }
-
-  return userName;
-};
-
 export const formatUserAddress = (user: User): string => {
   if (!user.city && !user.zipCode) return '';
 

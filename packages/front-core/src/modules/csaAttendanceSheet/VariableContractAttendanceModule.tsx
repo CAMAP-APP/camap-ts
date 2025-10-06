@@ -30,6 +30,7 @@ import CircularProgressBox from '../../components/utils/CircularProgressBox';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaAttendanceFormat } from './attendanceSheetCsa.interface';
 import VariableContractAttendanceFormatOptions from './components/VariableContractAttendanceFormatOptions';
+import { userSortKey } from 'camap-common';
 
 export interface VariableContractAttendanceModuleProps {
   catalogId: number;
@@ -49,7 +50,7 @@ const getTableData = (
 
   const subscriptions = sortBy(
     data.attendanceVariableContract.subscriptions,
-    (sub) => sub.user.lastName,
+    (sub) => userSortKey(sub.user),
   );
 
   const head: AttendanceColumn[] = [];

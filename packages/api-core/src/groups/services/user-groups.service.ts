@@ -18,6 +18,7 @@ import { CatalogEntity } from '../../vendors/entities/catalog.entity';
 import { ProductsService } from '../../vendors/services/products.service';
 import { GroupEntity } from '../entities/group.entity';
 import { UserGroupEntity } from '../entities/user-group.entity';
+import { userSortCompare } from 'camap-common';
 
 export enum UserRight {
   groupAdmin = 'GroupAdmin',
@@ -69,17 +70,7 @@ export class UserGroupsService {
     const users = await Promise.all(userGroups.map((ug) => ug.user));
     return !sort
       ? users
-      : users.sort((a, b) => {
-        const nameA = a.lastName.toUpperCase();
-        const nameB = b.lastName.toUpperCase();
-        if (nameA < nameB) {
-          return -1;
-        }
-        if (nameA > nameB) {
-          return 1;
-        }
-        return 0;
-      });
+      : users.sort(userSortCompare);
   }
 
   async findByIds(ids: number[]) {
