@@ -235,8 +235,6 @@ type MultiDistrib {
 type UserOrder {
   id: Int!
   quantity: Float!
-  quantityBase: Float!
-  quantityUnitType: Float!
   productPrice: Float!
   productId: Int!
   userId: Int!

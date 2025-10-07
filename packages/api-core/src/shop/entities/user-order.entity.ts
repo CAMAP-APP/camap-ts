@@ -26,12 +26,6 @@ export class UserOrderEntity {
   @Column('double')
   quantity: number;
 
-  @Column('double', { nullable: true })
-  quantityBase: number | null;
-
-  @Column('tinyint', { nullable: true, unsigned: true })
-  quantityUnitType: number | null;
-
   @Column('tinyint', { width: 1 })
   paid: boolean;
 
