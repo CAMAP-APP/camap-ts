@@ -60,18 +60,11 @@ export const formatSmartQt = (
     qt: number | null;
     unitType: number;
   },
-  userOrder: {
-    quantity: number,
-    quantityBase?: number,
-    quantityUnitType?: number
-  }
+  userOrder: { quantity: number }
 ) => {
   let orderQt = userOrder.quantity || 1;
-  let productQt = userOrder.quantityBase || product.qt || 1;
-  let unit = userOrder.quantityUnitType || product.unitType || Unit.Piece;
-
-  console.log("[common/products/format]", userOrder.quantityBase, product.qt);
-  console.log("[common/products/format]", userOrder.quantityUnitType, product.unitType);
+  let productQt = product.qt || 1;
+  let unit = product.unitType || Unit.Piece;
 
   if (hasSmartQt(product)) {
     if (unit == Unit.Piece && productQt == 1) {
@@ -89,7 +82,7 @@ export const formatSmartQt = (
     return `${quantityStr}${product.name}`;
   }
 
-  return `${quantityStr}${product.name} ${productQt}${formatUnit(
+  return `${quantityStr}${product.name} ${product.qt}${formatUnit(
     product.unitType
   )}`;
 };

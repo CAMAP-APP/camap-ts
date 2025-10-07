@@ -199,7 +199,7 @@ export type Group = {
 export enum GroupDisabledReason {
   BLOCKED_BY_ADMIN = 'BLOCKED_BY_ADMIN',
   MOVED = 'MOVED',
-  SUSPENDED = 'SUSPENDED'
+  SUSPENDED = 'SUSPENDED',
 }
 
 export type GroupPreview = {
@@ -790,7 +790,7 @@ export type QueryGetUserListsArgs = {
 
 export type QueryGetUserMembershipsArgs = {
   groupId: Scalars['Int'];
-  ignoreIfNotAllowed?: Scalars['Boolean'];
+  ignoreIfNotAllowed?: InputMaybe<Scalars['Boolean']>;
   userId: Scalars['Int'];
 };
 
@@ -1051,8 +1051,6 @@ export type UserOrder = {
   productId: Scalars['Int'];
   productPrice: Scalars['Float'];
   quantity: Scalars['Float'];
-  quantityBase: Scalars['Float'];
-  quantityUnitType: Scalars['Float'];
   smartQt: Scalars['String'];
   subscriptionId?: Maybe<Scalars['Int']>;
   userId: Scalars['Int'];
