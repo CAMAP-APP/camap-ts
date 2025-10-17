@@ -126,7 +126,8 @@ const modules: Record<string, {
     module: React.lazy(() => import('./modules/vatBox/VatBox.module'))
   },
   vendorHomeWidget: {
-    module: React.lazy(() => import('./modules/vendorDashboard/VendorHomeWidget.module'))
+    module: React.lazy(() => import('./modules/vendorDashboard/VendorHomeWidget.module')),
+    wrapper: ApolloWrapper
   },
   volunteersCalendar: {
     module: React.lazy(() => import('./modules/volunteersCalendar/VolunteersCalendar.module')),

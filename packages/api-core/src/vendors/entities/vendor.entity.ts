@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { FileEntity } from '../../tools/models/file.entity';
 import { CatalogEntity } from './catalog.entity';
+import { UserEntity } from 'src/users/models/user.entity';
 
 export enum VendorDisabledReason {
   IncompleteLegalInfos, //0 : incomplete legal infos
@@ -24,6 +25,12 @@ export enum BetaFlags { }
 export class VendorEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
+  
+  @Column('int', { nullable: true })
+  userId: number | null;
+  @ManyToOne(() => UserEntity, { onDelete: 'SET NULL', onUpdate: 'RESTRICT' })
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
+  user: Promise<UserEntity>;
 
   @Column('varchar', { length: 128 })
   name: string;

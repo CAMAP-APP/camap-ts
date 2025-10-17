@@ -199,7 +199,7 @@ export type Group = {
 export enum GroupDisabledReason {
   BLOCKED_BY_ADMIN = 'BLOCKED_BY_ADMIN',
   MOVED = 'MOVED',
-  SUSPENDED = 'SUSPENDED',
+  SUSPENDED = 'SUSPENDED'
 }
 
 export type GroupPreview = {
@@ -790,7 +790,7 @@ export type QueryGetUserListsArgs = {
 
 export type QueryGetUserMembershipsArgs = {
   groupId: Scalars['Int'];
-  ignoreIfNotAllowed?: InputMaybe<Scalars['Boolean']>;
+  ignoreIfNotAllowed?: Scalars['Boolean'];
   userId: Scalars['Int'];
 };
 
