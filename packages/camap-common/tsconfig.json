@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "outDir": "./dist"
+    "skipLibCheck": true,
+    "outDir": "./dist",
+    "sourceMap": true
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["dist"]

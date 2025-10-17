@@ -80,6 +80,18 @@ const ImportOneMember = () => {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
+    birthDate: new Date(),
+    nationality: 'fr',
+    address1: '',
+    address2: '',
+    zipCode: '',
+    city: '',
+    countryOfResidence: 'fr',
+    firstName2: '',
+    lastName2: '',
+    email2: '',
+    phone2: ''
   };
   const accountCreationModeInitialValues: UserAndPartnerInfosFormValues = {
     firstName: '',
@@ -123,7 +135,7 @@ const ImportOneMember = () => {
       if (newUser.firstName) newUser.firstName = newUser.firstName.trim();
       if (newUser.lastName) newUser.lastName = newUser.lastName.trim();
 
-      Object.keys(newUser).forEach((key) => {
+      (Object.keys(newUser) as (keyof User)[]).forEach((key) => {
         if (newUser[key] === '') newUser[key] = undefined;
       });
 
@@ -137,7 +149,7 @@ const ImportOneMember = () => {
       } catch (e) {
         const resetValues = valuesRef.current;
         const errorPath = (e as ValidationError).path;
-        resetValues[errorPath] = '';
+        resetValues[errorPath as keyof typeof resetValues] = '';
         bagRef.current.resetForm({
           values: resetValues,
           status: {
@@ -211,7 +223,7 @@ const ImportOneMember = () => {
     if (!getUsersFromEmailsData) return;
 
     importMembers();
-  }, [getUsersFromEmailsData]);
+  }, [getUsersFromEmailsData, importMembers]);
 
   const onSubmit = async (
     values: UserAndPartnerInfosFormValues,
@@ -453,9 +465,9 @@ const ImportOneMember = () => {
                           accountCreationModeInitialValues.nationality?.toLocaleLowerCase() ||
                           ''
                         }
-                        onChange={(v: string | null) => {
+                        onChange={(v) => {
                           setFieldTouched('nationality');
-                          setFieldValue('nationality', v?.toUpperCase() || '');
+                          setFieldValue('nationality', String(v)?.toUpperCase() || '');
                         }}
                         value={values.nationality || ''}
                       />
@@ -514,11 +526,11 @@ const ImportOneMember = () => {
                           onBlur: () => setFieldTouched('countryOfResidence'),
                         }}
                         defaultValue={accountCreationModeInitialValues.countryOfResidence?.toLowerCase()}
-                        onChange={(v: string | null) => {
+                        onChange={(v) => {
                           setFieldTouched('countryOfResidence');
                           setFieldValue(
                             'countryOfResidence',
-                            v?.toUpperCase() || '',
+                            String(v)?.toUpperCase() || '',
                           );
                         }}
                         value={values.countryOfResidence || ''}

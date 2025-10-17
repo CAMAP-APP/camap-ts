@@ -4,7 +4,7 @@ import { useCamapTranslation } from '../../../../utils/hooks/use-camap-translati
 import { formatCoupleName } from 'camap-common';
 
 interface QuitGroupContentProps {
-  user: User;
+  user: Pick<User, 'email' | 'email2' | 'firstName' | 'lastName' | 'firstName2' | 'lastName2'>;
 }
 
 const QuitGroupContent = ({ user }: QuitGroupContentProps) => {

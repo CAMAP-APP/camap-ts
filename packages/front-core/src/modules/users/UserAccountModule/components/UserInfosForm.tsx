@@ -65,7 +65,7 @@ const UserInfosForm = ({
       initialValues={initialValues}
       onSubmit={onSubmit}
       validate={(values) => {
-        const errors = {};
+        const errors = {} as Record<string, any>;
         let validationSchema = userSchema;
         if (isPhoneRequired || !!values.phone) {
           validationSchema = validationSchema.concat(phoneSchema);
@@ -92,7 +92,8 @@ const UserInfosForm = ({
           try {
             validationSchema.validateSyncAt(fieldToValidate, values);
           } catch (e) {
-            errors[e.path] = e.message;
+            if(typeof e == 'object' && e && 'path' in e && typeof e.path == 'string' && 'message' in e)
+              errors[e.path] = e.message;
           }
         });
         return errors;
@@ -209,9 +210,9 @@ const UserInfosForm = ({
               defaultValue={
                 initialValues.nationality?.toLocaleLowerCase() || ''
               }
-              onChange={(v: string | null) => {
+              onChange={(v) => {
                 setFieldTouched('nationality');
-                setFieldValue('nationality', v?.toUpperCase() || '');
+                setFieldValue('nationality', String(v)?.toUpperCase() || '');
               }}
               value={values.nationality || ''}
             />
@@ -275,9 +276,9 @@ const UserInfosForm = ({
                 onBlur: () => setFieldTouched('countryOfResidence'),
               }}
               defaultValue={initialValues.countryOfResidence?.toLowerCase()}
-              onChange={(v: string | null) => {
+              onChange={(v) => {
                 setFieldTouched('countryOfResidence');
-                setFieldValue('countryOfResidence', v?.toUpperCase() || '');
+                setFieldValue('countryOfResidence', String(v)?.toUpperCase() || '');
               }}
               value={values.countryOfResidence || ''}
             />

@@ -13,7 +13,7 @@ interface Props {
   initialValue?: string;
   label?: string;
   noOptionsText?: React.ReactNode;
-  onChange: (value: GeoAutocompleteOptionType) => void;
+  onChange: (value: GeoAutocompleteOptionType | null) => void;
 }
 
 function adaptInput(value: string) {
@@ -83,8 +83,8 @@ const GeoAutocomplete = ({
   };
 
   const onAutocompleteChange = (
-    _e: React.ChangeEvent<{}>,
-    value: GeoAutocompleteOptionType,
+    _e: React.SyntheticEvent,
+    value: GeoAutocompleteOptionType | null,
   ) => {
     if (value) {
       setInputValue(getOptionLabel(value));

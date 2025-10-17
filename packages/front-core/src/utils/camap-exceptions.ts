@@ -4,9 +4,10 @@ export const isCamapException = (graphQLError: GraphQLError) => {
   return (
     graphQLError.extensions &&
     graphQLError.extensions.exception &&
-    graphQLError.extensions.exception.status === 500 &&
-    graphQLError.extensions.exception.message === 'Camap Exception' &&
-    graphQLError.extensions.exception.response
+    typeof graphQLError.extensions.exception == 'object' &&
+    'status' in graphQLError.extensions.exception && graphQLError.extensions.exception.status === 500 &&
+    'message' in graphQLError.extensions.exception && graphQLError.extensions.exception.message === 'Camap Exception' &&
+    'response' in graphQLError.extensions.exception && graphQLError.extensions.exception.response
   );
 };
 
@@ -15,5 +16,9 @@ export const findCamapException = (graphQLErrors: readonly GraphQLError[]) => {
 };
 
 export const getCamapExceptionBody = ({ extensions }: GraphQLError) => {
-  return extensions && extensions.exception && extensions.exception.response;
+  return extensions &&
+    extensions.exception &&
+    typeof extensions.exception == 'object' &&
+    ('response' in extensions.exception) &&
+    extensions.exception.response;
 };

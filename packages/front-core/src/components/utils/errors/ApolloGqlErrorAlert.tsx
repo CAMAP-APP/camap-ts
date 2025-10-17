@@ -1,16 +1,15 @@
 import { isANestException } from '@utils/apolloError';
-import { GraphQLError } from 'graphql';
 import { useTranslation } from 'react-i18next';
 import AlertError from '../AlertError';
-import {GraphQLErrorExtensions} from "graphql/error/GraphQLError";
+import {GraphQLErrorExtensions, GraphQLFormattedError} from "graphql/error/GraphQLError";
 
 export interface ApolloGqlErrorAlertProps {
-  graphqlError: GraphQLError;
+  graphqlError: GraphQLFormattedError;
 }
 
 type StandardError = {statusCode:number, message:string, options?:{[key:string]:string}}
 
-const extractResponseFromNestException = (gqlError: GraphQLError) : StandardError => {
+const extractResponseFromNestException = (gqlError: GraphQLFormattedError) : StandardError => {
   if (!isANestException(gqlError))
     throw new Error(
       '[extractResponseFromNestException] invalid next exception',
@@ -20,12 +19,12 @@ const extractResponseFromNestException = (gqlError: GraphQLError) : StandardErro
   let response = extensions.response;
   if (extensions.response == null && extensions.exception != null) {
     response = extensions.exception.response;
-    response.statusCode = gqlError.extensions.code as number
+    response.statusCode = gqlError.extensions?.code as number
   }
 
   if (typeof response === 'string') {
     return {
-      statusCode: gqlError.extensions.code as number,
+      statusCode: gqlError.extensions?.code as number,
       message: gqlError.message,
     };
   }

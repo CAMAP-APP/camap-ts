@@ -31,12 +31,12 @@ const VolunteersCalendarDistributionRole = ({
   const from = new Date();
   const to = new Date();
 
-  const hasVolunteerRole = multiDistrib.hasVolunteerRole[roleId];
+  const hasVolunteerRole = multiDistrib.hasVolunteerRole.get(roleId);
   const volunteer = hasVolunteerRole
-    ? multiDistrib.volunteerForRole[roleId]
+    ? multiDistrib.volunteerForRole.get(roleId)
     : undefined;
 
-  let sxColors: SxProps = {
+  let sxColors: SxProps<Theme> = {
     bgcolor: 'initial',
     color: 'initial',
   };

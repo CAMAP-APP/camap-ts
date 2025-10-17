@@ -3,7 +3,7 @@ import { GetGroupsOnMapQueryVariables, useGetGroupsOnMapLazyQuery } from '@gql';
 import { Box, ButtonBase, Grid, styled } from '@mui/material';
 import { getDistance } from '@utils/geo';
 import { latLng, LatLng } from 'leaflet';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer } from 'react-leaflet';
 import GeoAutocomplete from '../../containers/geo/GeoAutocomplete';
@@ -125,9 +125,9 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
   React.useEffect(() => {
     if (!error) return;
     if (wait) wait.current = false;
-  }, []);
+  }, [error]);
 
-  const doGetGroupsOnMap = async (variables: GetGroupsOnMapQueryVariables) => {
+  const doGetGroupsOnMap = useCallback(async (variables: GetGroupsOnMapQueryVariables) => {
     const { data } = await getGroupsOnMap({ variables });
     if (!data) return;
 
@@ -154,14 +154,14 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       );
     });
     setGroups(orderedNewGroups);
-  };
+  }, [getGroupsOnMap, point]);
 
   const distanceMap = React.useRef(new Map<number, any>());
 
   /**
    *  Call API to find groups at lat and lng
    */
-  async function fetchGroups(lat: number, lng: number) {
+  const fetchGroups = useCallback(async (lat: number, lng: number) => {
     if (wait.current) {
       return;
     } else {
@@ -176,13 +176,13 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
       maxLng: undefined,
     });
     setPoint(latLng(lat, lng));
-  }
+  }, [doGetGroupsOnMap]);
 
   React.useEffect(() => {
     if (initAddress) return;
     if (!initLat || !initLng) return;
     fetchGroups(initLat, initLng);
-  }, [initLng, initLat]);
+  }, [initLng, initLat, initAddress, fetchGroups]);
 
   function openPopup(group: GroupOnMap) {
     setGroupFocusedId(group.place.id);
@@ -228,7 +228,7 @@ const GroupMap = ({ initLat, initLng, initAddress }: GroupMapProps) => {
     return `${distance} m`;
   }
 
-  async function onAutocompleteChange(v: GeoAutocompleteOptionType) {
+  async function onAutocompleteChange(v: GeoAutocompleteOptionType | null) {
     if (v !== null) {
       const coord = v.geometry.coordinates;
       await fetchGroups(coord[1], coord[0]);

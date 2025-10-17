@@ -82,7 +82,7 @@ const MembershipHistory = ({
       });
       onDeleteComplete(true);
     } catch (e) {
-      setGqlError(e);
+      if(e instanceof ApolloError) setGqlError(e);
       onDeleteComplete(false);
     }
   };

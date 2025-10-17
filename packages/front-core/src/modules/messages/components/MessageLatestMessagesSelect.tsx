@@ -38,11 +38,11 @@ const MessageLatestMessagesSelect = ({
 
   React.useEffect(() => {
     setError(error);
-  }, [error]);
+  }, [error, setError]);
 
   React.useEffect(() => {
     if (reuseMessage === undefined) refetch();
-  }, [reuseMessage]);
+  }, [refetch, reuseMessage]);
 
   const onClose = (event: React.ChangeEvent<{}>) => {
     field.onBlur(field.name)(event);
@@ -70,7 +70,10 @@ const MessageLatestMessagesSelect = ({
         onChange={onValueChange}
         onClose={onClose}
         fullWidth
-        options={options}
+        options={options.map(o => ({
+          ...o,
+          group: o.group ?? { name: '' }
+        }))}
         noOptionsText={t('noMessageWithSlateContent')}
         getOptionLabel={optionLabel}
         clearOnEscape

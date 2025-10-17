@@ -49,14 +49,14 @@ const MembersTableBody = <T extends DefaultFormattedMember>({
               idProp = { id: checkboxLabelId };
             cells.push(
               <TableCell
-                key={`${row.id}${cell}`}
+                key={`${row.id}${String(cell)}`}
                 {...idProp}
                 sx={{
                   wordBreak: 'break-word',
                 }}
               >
                 {cell !== 'registrationDate'
-                  ? row[cell]
+                  ? String(row[cell])
                   : formatAbsoluteDate(
                       row[cell] as unknown as Date,
                       true,

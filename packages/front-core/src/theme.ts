@@ -64,10 +64,10 @@ export const themeOptions: ThemeOptions = {
         },
         outlinedPrimary: {
           '&:hover': {
-            color: palette.primary!.main,
+            color: (palette.primary && 'main' in palette.primary) ? palette.primary.main : palette.primary?.[100],
           },
           '&:focus': {
-            color: palette.primary!.main,
+            color: (palette.primary && 'main' in palette.primary) ? palette.primary.main : palette.primary?.[100],
             outline: 0,
             textDecoration: 'none',
           },

@@ -23,7 +23,7 @@ import QuitGroupContent from '../../QuitGroup/components/QuitGroupContent';
 
 export interface UserGroupsProps {
   groups: Pick<Group, 'id' | 'name'>[];
-  user: Pick<User, 'email' | 'email2'>;
+  user: Pick<User, 'firstName' | 'lastName' | 'firstName2' | 'lastName2' | 'email' | 'email2'>;
   currentGroupId?: number;
 }
 

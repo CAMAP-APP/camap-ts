@@ -59,8 +59,8 @@ const LoginBox = ({
           password: '',
         },
       });
-      let errorMessage = e.message;
-      if (e.message === 'wrongPassword') {
+      let errorMessage = (e  instanceof Error) ? e.message : ''+e;
+      if (errorMessage === 'wrongPassword') {
         await recordBadLoginMutation();
         errorMessage = 'wrongCredentials';
       }

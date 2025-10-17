@@ -179,8 +179,8 @@ const ImageUploaderModule = ({
 
   const onCropChange = (position: Point) => setPosition(position);
 
-  const updateScale = (_: any, newScale: number) => {
-    setScale(newScale);
+  const updateScale = (_: any, newScale: number | number[]) => {
+    setScale(Array.isArray(newScale) ? newScale[0] : newScale);
   };
 
   const rotateLeft = () => {

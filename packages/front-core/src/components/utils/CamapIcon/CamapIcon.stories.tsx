@@ -1,5 +1,5 @@
 import { Box } from '@mui/material';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 import CamapIcon, { CamapIconId, CamapIconProps } from './CamapIcon';
 
 export const Default = ({ id }: CamapIconProps) => {
@@ -26,4 +26,4 @@ export default {
       },
     },
   },
-} as ComponentMeta<typeof CamapIcon>;
+} as Meta<typeof CamapIcon>;

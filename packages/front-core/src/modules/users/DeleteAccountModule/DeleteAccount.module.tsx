@@ -35,13 +35,15 @@ const DeleteAccountModule = ({ userId }: DeleteAccountModuleProps) => {
   const [logout] = useLogoutMutation();
 
   const onDeleteAccount = async () => {
+    let deleteAccount = null;
     try {
-      const { data: deleteAccount } = await deleteAccountMutation({
+      const { data } = await deleteAccountMutation({
         variables: {
           userId,
           password,
         },
       });
+      deleteAccount = data;
     } catch (e) {
       throw (e);
     }
