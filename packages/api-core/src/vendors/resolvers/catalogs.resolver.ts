@@ -138,4 +138,10 @@ export class CatalogsResolver {
     }
     return this.subscriptionsService.findByCatalogId(parent.id);
   }
+
+  @ResolveField(() => Int)
+  async subscriptionsCount(@Parent() parent: Catalog) {
+    const subscriptions = await this.subscriptionsService.findByCatalogId(parent.id);
+    return subscriptions.length;
+  }
 }

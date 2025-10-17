@@ -38,6 +38,7 @@ import { VendorService } from '../services/vendor.service';
 import { InitVendorPage } from '../types/initVendorPage.type';
 import { Vendor } from '../types/vendor.type';
 import { VendorImages } from '../types/vendorImages.type';
+import { Catalog } from '../types/catalog.type';
 import DataLoader = require('dataloader');
 
 @Resolver(() => Vendor)
@@ -95,6 +96,47 @@ export class VendorsResolver {
     const activeCatalogs =
       await this.catalogsService.getActiveCatalogsFromActiveVendorsInGroup(groupId);
     return this.vendorsService.getFromCatalogs(activeCatalogs.map((c) => c.id));
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Vendor])
+  async getVendorsByEmail(
+    @Args({ name: 'email', type: () => String }) email: string,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query vendors with their own email
+    if (currentUser.email.toLowerCase() !== email.toLowerCase() && 
+        currentUser.email2?.toLowerCase() !== email.toLowerCase()) {
+      throw new UnauthorizedException();
+    }
+    return this.vendorsService.getByEmail(email);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Vendor])
+  async getVendorsByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    return this.vendorsService.find({ where: { userId } });
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => Boolean)
+  async hasVendorsByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    const count = await this.vendorsService.find({ where: { userId }, take: 1 });
+    return count.length > 0;
   }
 
   @UseGuards(BlackListGuard)
@@ -269,6 +311,11 @@ export class VendorsResolver {
   @ResolveField(() => VendorDisabledReason)
   disabled(@Parent() parent: VendorEntity) {
     return parent.raw_disabled;
+  }
+
+  @ResolveField(() => [Catalog])
+  async catalogs(@Parent() parent: VendorEntity) {
+    return this.catalogsService.findByVendor(parent.id);
   }
 
   /**

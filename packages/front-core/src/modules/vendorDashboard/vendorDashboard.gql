@@ -1,0 +1,35 @@
+query GetVendorsByEmail($email: String!) {
+  getVendorsByEmail(email: $email) {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    catalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+
+query GetVendorsByUserId($userId: Int!) {
+  getVendorsByUserId(userId: $userId) {
+    id
+    name
+  }
+}
+
+query HasVendorsByUserId($userId: Int!) {
+  hasVendorsByUserId(userId: $userId)
+}

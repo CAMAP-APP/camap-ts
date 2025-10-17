@@ -161,6 +161,7 @@ type Catalog {
   products: [Product!]!
   group: Group!
   subscriptions: [CsaSubscriptionType!]!
+  subscriptionsCount: Int!
   vendor: Vendor!
 }
 
@@ -199,6 +200,7 @@ type Vendor {
   companyNumber: String
   country: String
   disabled: VendorDisabledReason
+  catalogs: [Catalog!]!
   image: String
   imageFile: File
   portrait: String!
@@ -526,6 +528,9 @@ type Query {
   vendor(id: Int!): Vendor!
   getVendorWithEmailCheck(vendorId: Int!): Vendor!
   getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
+  getVendorsByEmail(email: String!): [Vendor!]!
+  getVendorsByUserId(userId: Int!): [Vendor!]!
+  hasVendorsByUserId(userId: Int!): Boolean!
   initVendorPage(vendorId: Int!): InitVendorPage!
   getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
   catalog(id: Int!): Catalog!

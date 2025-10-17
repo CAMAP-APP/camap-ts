@@ -1,6 +1,7 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { VendorDisabledReason } from '../entities/vendor.entity';
 import { VendorImages } from './vendorImages.type';
+import { Catalog } from './catalog.type';
 
 registerEnumType(VendorDisabledReason, { name: 'VendorDisabledReason' });
 
@@ -62,4 +63,7 @@ export class Vendor {
 
   @Field(() => VendorDisabledReason, { nullable: true })
   disabled?: VendorDisabledReason;
+
+  @Field(() => [Catalog])
+  catalogs: Catalog[];
 }

@@ -52,6 +52,7 @@ export type Catalog = {
   products: Array<Product>;
   startDate: Scalars['DateTime'];
   subscriptions: Array<CsaSubscriptionType>;
+  subscriptionsCount: Scalars['Int'];
   type: CatalogType;
   user?: Maybe<User>;
   vendor: Vendor;
@@ -657,6 +658,8 @@ export type Query = {
   getUserMessagesForGroup: Array<Message>;
   getUsersFromEmails: Array<User>;
   getVendorWithEmailCheck: Vendor;
+  getVendorsByEmail: Array<Vendor>;
+  getVendorsByUserId: Array<Vendor>;
   getVendorsFromCompanyNumber: Array<Vendor>;
   getWaitingListsOfGroup: Array<WaitingList>;
   group: Group;
@@ -665,6 +668,7 @@ export type Query = {
   groupPreviewMembers: GroupPreviewMembers;
   groupPreviews: Array<GroupPreview>;
   groupPreviews2: Array<GroupPreview>;
+  hasVendorsByUserId: Scalars['Boolean'];
   initVendorPage: InitVendorPage;
   isEmailRegistered: Scalars['Boolean'];
   isGroupAdmin: Scalars['Boolean'];
@@ -810,6 +814,16 @@ export type QueryGetVendorWithEmailCheckArgs = {
 };
 
 
+export type QueryGetVendorsByEmailArgs = {
+  email: Scalars['String'];
+};
+
+
+export type QueryGetVendorsByUserIdArgs = {
+  userId: Scalars['Int'];
+};
+
+
 export type QueryGetVendorsFromCompanyNumberArgs = {
   companyNumber: Scalars['String'];
 };
@@ -837,6 +851,11 @@ export type QueryGroupPreviewCatalogsArgs = {
 
 export type QueryGroupPreviewMembersArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryHasVendorsByUserIdArgs = {
+  userId: Scalars['Int'];
 };
 
 
@@ -1060,6 +1079,7 @@ export type Vendor = {
   __typename?: 'Vendor';
   address1?: Maybe<Scalars['String']>;
   address2?: Maybe<Scalars['String']>;
+  catalogs: Array<Catalog>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
   companyNumber?: Maybe<Scalars['String']>;
@@ -1535,6 +1555,27 @@ export type QuitGroupByControlKeyMutationVariables = Exact<{
 
 
 export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroupByControlKey: { __typename?: 'UserGroup', userId: number, groupId: number } };
+
+export type GetVendorsByEmailQueryVariables = Exact<{
+  email: Scalars['String'];
+}>;
+
+
+export type GetVendorsByEmailQuery = { __typename?: 'Query', getVendorsByEmail: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+
+export type GetVendorsByUserIdQueryVariables = Exact<{
+  userId: Scalars['Int'];
+}>;
+
+
+export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string }> };
+
+export type HasVendorsByUserIdQueryVariables = Exact<{
+  userId: Scalars['Int'];
+}>;
+
+
+export type HasVendorsByUserIdQuery = { __typename?: 'Query', hasVendorsByUserId: boolean };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -3803,3 +3844,126 @@ export function useQuitGroupByControlKeyMutation(baseOptions?: ApolloReactHooks.
 export type QuitGroupByControlKeyMutationHookResult = ReturnType<typeof useQuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationResult = Apollo.MutationResult<QuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationOptions = Apollo.BaseMutationOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;
+export const GetVendorsByEmailDocument = gql`
+    query GetVendorsByEmail($email: String!) {
+  getVendorsByEmail(email: $email) {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    catalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVendorsByEmailQuery__
+ *
+ * To run a query within a React component, call `useGetVendorsByEmailQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVendorsByEmailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVendorsByEmailQuery({
+ *   variables: {
+ *      email: // value for 'email'
+ *   },
+ * });
+ */
+export function useGetVendorsByEmailQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>(GetVendorsByEmailDocument, options);
+      }
+export function useGetVendorsByEmailLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>(GetVendorsByEmailDocument, options);
+        }
+export type GetVendorsByEmailQueryHookResult = ReturnType<typeof useGetVendorsByEmailQuery>;
+export type GetVendorsByEmailLazyQueryHookResult = ReturnType<typeof useGetVendorsByEmailLazyQuery>;
+export type GetVendorsByEmailQueryResult = Apollo.QueryResult<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>;
+export const GetVendorsByUserIdDocument = gql`
+    query GetVendorsByUserId($userId: Int!) {
+  getVendorsByUserId(userId: $userId) {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useGetVendorsByUserIdQuery__
+ *
+ * To run a query within a React component, call `useGetVendorsByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVendorsByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVendorsByUserIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetVendorsByUserIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>(GetVendorsByUserIdDocument, options);
+      }
+export function useGetVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>(GetVendorsByUserIdDocument, options);
+        }
+export type GetVendorsByUserIdQueryHookResult = ReturnType<typeof useGetVendorsByUserIdQuery>;
+export type GetVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useGetVendorsByUserIdLazyQuery>;
+export type GetVendorsByUserIdQueryResult = Apollo.QueryResult<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>;
+export const HasVendorsByUserIdDocument = gql`
+    query HasVendorsByUserId($userId: Int!) {
+  hasVendorsByUserId(userId: $userId)
+}
+    `;
+
+/**
+ * __useHasVendorsByUserIdQuery__
+ *
+ * To run a query within a React component, call `useHasVendorsByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHasVendorsByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHasVendorsByUserIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useHasVendorsByUserIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>(HasVendorsByUserIdDocument, options);
+      }
+export function useHasVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>(HasVendorsByUserIdDocument, options);
+        }
+export type HasVendorsByUserIdQueryHookResult = ReturnType<typeof useHasVendorsByUserIdQuery>;
+export type HasVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useHasVendorsByUserIdLazyQuery>;
+export type HasVendorsByUserIdQueryResult = Apollo.QueryResult<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>;

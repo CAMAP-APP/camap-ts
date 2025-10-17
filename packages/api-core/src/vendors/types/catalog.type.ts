@@ -41,4 +41,7 @@ export class Catalog {
 
   @Field(() => [CsaSubscriptionType])
   subscriptions: CsaSubscriptionType[];
+
+  @Field(() => Int)
+  subscriptionsCount: number;
 }

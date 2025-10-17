@@ -1,59 +1,117 @@
 import { useUserAccountQuery } from "@gql";
 import { CircularProgress } from "@mui/material";
-import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import { useGetVendorsByEmailQuery, useGetVendorsByUserIdQuery } from "@gql";
+import { useTranslation } from "react-i18next";
 
 const VendorHomeWidget = () => {
-    const { t } = useCamapTranslation({
-    });
+    const { t } = useTranslation("vendorDashboard");
 
     const {
         data: userData,
         loading: userLoading,
         error: userError,
-      } = useUserAccountQuery();
+    } = useUserAccountQuery();
 
-    if(userLoading) return <CircularProgress />
-    if(userError) return <></>
+    // Claimable Vendors
+    const {
+        data: { getVendorsByEmail: claimableVendors } = {},
+        loading: claimableVendorsLoading,
+        error: claimableVendorsError,
+    } = useGetVendorsByEmailQuery({
+        variables: { email: userData?.me?.email || "" },
+        skip: !userData?.me?.email,
+    });
 
-    const v = { name: 'dummy', companyNumber: null };
+    // Check if user has claimed vendors (using minimal query)
+    const {
+        data: { getVendorsByUserId: claimedVendors } = {},
+        loading: claimedVendorsLoading,
+        error: claimedVendorsError,
+    } = useGetVendorsByUserIdQuery({
+        variables: { userId: userData?.me?.id || -1 },
+        skip: !userData?.me?.id,
+    });
 
-    return <>
-        <div>
-            <a href="">{t("Go to your vendor dashboard")}</a>
-        </div>
-        <div className="article">
-            <h4>{t("Your email is associated with the following vendors, is that you?")}</h4>
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th />
-                        <th>{t("Name")}</th>
-                        <th>{t("VAT number")}</th>
-                        <th>{t("Groups")}</th>
-                        <th>{t("Contracts")}</th>
-                        <th />
-                        <th />
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td style={{ height: "100%", padding:0, width: "50px", overflow:"hidden"}}>
-                            <img src="::v.getImage()::" width="50px" alt={v.name} />
-                        </td>
-                        <td>{v.name}</td>
-                        <td>{v.companyNumber ?? t("Unknown")}</td>
-                        <td>{}</td>
-                        <td>{}</td>
-                        <td style={{ display: "flex", flexFlow: "row", gap: "0.2em"}}>
-                            <button className="btn btn-sm btn-danger" >{t("Claim")}</button>
-                            <a className="btn btn-sm btn-primary" href={`mailto:+v.getGroupContactMailto()::`}>
-                                <span className="glyphicon glyphicon-envelope" />&nbsp;{t("Contact groups")}
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </>
-}
+    if (userLoading || claimableVendorsLoading || claimedVendorsLoading) {
+        return <CircularProgress />;
+    }
+
+    if (userError || claimableVendorsError || claimedVendorsError) {
+        return <></>;
+    }
+
+    return (
+        <>
+            {claimedVendors && claimedVendors.length > 0 && <div>
+                <a href="/vendor-dashboard">{t("Go to your vendor dashboard")}</a>
+            </div>}
+            <div className="article">
+                <h4>{t("Your email is associated with the following vendors, is that you?")}</h4>
+                <table className="table">
+                    <thead>
+                        <tr>
+                            <th />
+                            <th>{t("Name")}</th>
+                            <th>{t("VAT number")}</th>
+                            <th>{t("Groups")}</th>
+                            <th>{t("Contracts")}</th>
+                            <th />
+                            <th />
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {claimableVendors?.map((vendor) => (
+                            <tr key={vendor.id}>
+                                <td style={{ height: "100%", padding: 0, width: "50px", overflow: "hidden" }}>
+                                    {vendor.image ? (
+                                        <img 
+                                            src={vendor.image} 
+                                            width="50px" 
+                                            alt={vendor.name} 
+                                        />
+                                    ) : (
+                                        <div style={{ width: "50px", height: "50px", backgroundColor: "#f0f0f0" }} />
+                                    )}
+                                </td>
+                                <td>{vendor.name}</td>
+                                <td>{vendor.companyNumber ?? t("Unknown")}</td>
+                                <td>
+                                    {[...new Set(vendor.catalogs?.map(catalog => catalog.group.name))]
+                                        .filter(Boolean)
+                                        .join(", ") || t("None")}
+                                </td>
+                                <td>
+                                    {   vendor.catalogs
+                                        ? <ul>
+                                            {vendor.catalogs?.map(
+                                                catalog => <li>
+                                                    {t('vendorCatalogListItem', {
+                                                        catalogName: catalog.name,
+                                                        subscriptionCount: catalog.subscriptionsCount || 0
+                                                    })}
+                                                </li>
+                                            )}
+                                          </ul>
+                                        : t("None")
+                                    }
+                                </td>
+                                <td style={{ display: "flex", flexFlow: "row", gap: "0.2em" }}>
+                                    <button className="btn btn-sm btn-danger">
+                                        {t("Claim")}
+                                    </button>
+                                    <a 
+                                        className="btn btn-sm btn-primary" 
+                                        href={`mailto:${vendor.email}`}
+                                    >
+                                        <span className="glyphicon glyphicon-envelope" />&nbsp;{t("Contact groups")}
+                                    </a>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
+    );
+};
 export default VendorHomeWidget;
