@@ -30,7 +30,7 @@ Les champs `percentageValue` et `percentageName` ne servent plus. (permettait d'
 
 ### Personnalisation de la fenêtre temporelle de commande
 
-Il est recommandé de [la doc des distributions](./distributions.md) afin d'avoir en tête les différentes tables qui entrent en jeu, il est important d'avoir bien compris le rôle des tables `MultiDistrib` et `Distribution`.
+Il est recommandé de lire [la doc des distributions](./distributions.md) afin d'avoir en tête les différentes tables qui entrent en jeu, il est important d'avoir bien compris le rôle des tables `MultiDistrib` et `Distribution`.
 
 Pour n'importe quel type de commande, CAMAP gère toujours une période pendant laquelle il est possible de commander. Par défaut, ces dates sont stockées dans `MultiDistrib.ordersStartDate` et `MultiDistrib.ordersEndDate`.
 

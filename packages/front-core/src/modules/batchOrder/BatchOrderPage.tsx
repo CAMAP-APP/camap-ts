@@ -62,7 +62,6 @@ const BatchOrderPage = ({
       <Modal
         open={showAbsencesModal}
         onClose={() => setShowAbsencesModal(false)}
-        onBackdropClick={() => setShowAbsencesModal(false)}
       >
         <Box
           sx={{

@@ -70,6 +70,10 @@ const CsaCatalog = React.lazy(
   () => import('./modules/csaCatalog/CsaCatalog.module'),
 );
 
+const CsaCatalogSubscriptionModule = React.lazy(
+  () => import('./modules/csaCatalog/CsaCatalogSubscription.module'),
+);
+
 const VolunteersCalendar = React.lazy(
   () => import('./modules/volunteersCalendar/VolunteersCalendar.module'),
 );
@@ -275,6 +279,14 @@ export const createNeoModule = (
       return (
         <Wrapper showFallback={false}>
           <CsaCatalog {...props} />
+        </Wrapper>
+      );
+    }
+
+    if (moduleName === 'csaCatalogSubscription') {
+      return (
+        <Wrapper showFallback={false}>
+          <CsaCatalogSubscriptionModule {...props} />
         </Wrapper>
       );
     }

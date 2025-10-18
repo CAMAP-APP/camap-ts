@@ -59,6 +59,7 @@ enum PaymentTypeId {
 enum GroupDisabledReason {
   BLOCKED_BY_ADMIN
   MOVED
+  SUSPENDED
 }
 
 type Group {
@@ -513,7 +514,7 @@ type Query {
   myGroups: [GroupPreview!]!
   groupPreviewMembers(id: Int!): GroupPreviewMembers!
   groupPreviewCatalogs(id: Int!): GroupPreviewCatalogs!
-  getUserMemberships(groupId: Int!, userId: Int!, ignoreIfNotAllowed: Boolean = false): [Membership!]!
+  getUserMemberships(groupId: Int!, userId: Int!, ignoreIfNotAllowed: Boolean! = false): [Membership!]!
   getMembershipFormData(groupId: Int!, userId: Int!): MembershipFormData!
   getWaitingListsOfGroup(groupId: Int!): [WaitingList!]!
   getUserLists(groupId: Int!): [UserList!]!

@@ -8,6 +8,7 @@ import CsaCatalogContextProvider from 'modules/csaCatalog/CsaCatalog.context';
 import React, { useEffect } from 'react';
 import BatchOrderCreateSub from './BatchOrderCreateSub';
 import BatchOrderPage from './BatchOrderPage';
+import { formatUserName } from 'camap-common';
 
 interface BatchOrderProps {
   catalogId: number;
@@ -128,7 +129,7 @@ const BatchOrder = ({
             {groupMembers &&
               groupMembers.getUserListInGroupByListType.map((s) => (
                 <MenuItem key={s.id} value={s.id}>
-                  {s.lastName} {s.firstName}
+                  {formatUserName(s)}
                 </MenuItem>
               ))}
           </Select>

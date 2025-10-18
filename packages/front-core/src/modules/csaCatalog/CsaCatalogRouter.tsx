@@ -15,6 +15,9 @@ import {
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
 } from './requests';
+import Block from '@components/utils/Block/Block';
+import MediumActionIcon from './containers/MediumActionIcon';
+import { CamapIconId } from '@components/utils/CamapIcon';
 
 interface CsaCatalogRouterProps {
   userId: number;
@@ -142,7 +145,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
-      absentDistribIds: absenceDistributionsIds as number[] | null,
+      absentDistribIds: absenceDistributionsIds
     });
 
     if (!subscriptionSucceeded) return;
@@ -240,7 +243,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
         </Box>
       )}
-      {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} />}
+      {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
       {showOrders && catalog && (
         <>
           {isConstOrders ? (
@@ -252,7 +255,14 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       )}
       {showOrders && !!subscription && !adminMode && (
         <Box mt={3}>
-          <CsaCatalogSubscription />
+            <Block
+              title={t('mySubscription')}
+              icon={<MediumActionIcon id={CamapIconId.info} />}
+              sx={{ height: '100%' }}
+              contentSx={{ textAlign: 'center' }}
+            >
+              <CsaCatalogSubscription />
+            </Block>
         </Box>
       )}
     </>

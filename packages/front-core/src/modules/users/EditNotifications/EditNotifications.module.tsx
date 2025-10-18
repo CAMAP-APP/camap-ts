@@ -5,12 +5,12 @@ import {
   useUpdateUserNotificationsMutation,
 } from '@gql';
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import { formatUserAndPartnerNames } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import UserNotificationsForm, {
   UserNotificationsFormBag,
   UserNotificationsFormValues,
 } from '../UserAccountModule/components/UserNotificationsForm';
+import { formatCoupleName } from 'camap-common';
 
 export interface EditNotificationsProps {
   userId: number;
@@ -86,7 +86,7 @@ const EditNotificationsModule = ({
           {t('editYourNotifications')}
         </Typography>
         <Typography>
-          {t('yourAccount')} : <b>{formatUserAndPartnerNames(user)}</b> (
+          {t('yourAccount')} : <b>{formatCoupleName(user)}</b> (
           {user.email}
           {user.email2 && ` ${tBasics('and')} ${user.email2}`})
         </Typography>

@@ -2,7 +2,8 @@
 import { watch } from 'chokidar';
 import { copyFileSync, existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import * as glob from 'glob';
-import * as nodeSass from 'node-sass';
+// import * as nodeSass from 'node-sass';
+import * as nodeSass from 'sass';
 import { dirname, join } from 'path';
 import * as rimraf from 'rimraf';
 
