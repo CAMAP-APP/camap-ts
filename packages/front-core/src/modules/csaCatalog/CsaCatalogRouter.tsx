@@ -115,6 +115,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
+<<<<<<< HEAD
       absentDistribIds: absenceDistributionsIds,
       initialOrders: Object.keys(updatedOrders)
         .filter((distributionId) => !absenceDistributionsIds?.includes(parseInt(distributionId, 10)))
@@ -125,6 +126,9 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
             qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
           })).filter((order) => order.qty > 0),
       }))
+=======
+      absentDistribIds: absenceDistributionsIds
+>>>>>>> 4589780 (v2.0.7 (#72))
     });
 
     if (!subscriptionSucceeded) return false;
@@ -208,6 +212,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           </Box>
         )}
 
+<<<<<<< HEAD
         {/* This is the flow when user is not subscribed */}
         {step === 'presentation' && (
           adminMode 
@@ -249,11 +254,44 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
             <Block
               title={t('mySubscription')}
               icon={<MediumActionIcon id={CamapIconId.subscription} />}
+=======
+      {showPresentation && (
+        <CsaCatalogPresentation onNext={onPresentationNext} />
+      )}
+      {showDefaultOrder && (
+        <Box
+          width={{
+            xs: '100%',
+            sm: '75%',
+            md: '50%',
+          }}
+          mx="auto"
+        >
+          <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
+        </Box>
+      )}
+      {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
+      {showOrders && catalog && (
+        <>
+          {isConstOrders ? (
+            <CsaCatalogDefaultOrder onNext={onOrderNext} />
+          ) : (
+            <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
+          )}
+        </>
+      )}
+      {showOrders && !!subscription && !adminMode && (
+        <Box mt={3}>
+            <Block
+              title={t('mySubscription')}
+              icon={<MediumActionIcon id={CamapIconId.info} />}
+>>>>>>> 4589780 (v2.0.7 (#72))
               sx={{ height: '100%' }}
               contentSx={{ textAlign: 'center' }}
             >
               <CsaCatalogSubscription />
             </Block>
+<<<<<<< HEAD
           </Box>
         )}
       </Box>
@@ -262,6 +300,8 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       {error && (
         <Box mb={2}>
           <Alert severity="error">{error}</Alert>
+=======
+>>>>>>> 4589780 (v2.0.7 (#72))
         </Box>
       )}
     </>
