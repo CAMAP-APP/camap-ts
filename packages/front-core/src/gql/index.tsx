@@ -376,6 +376,7 @@ export type Mutation = {
   __typename?: 'Mutation';
   approveRequest: UserGroup;
   cancelRequest: WaitingList;
+  claimVendor: Scalars['Int'];
   createMembership: Membership;
   createMemberships: CreateMembershipsResponse;
   createMessage: Message;
@@ -411,6 +412,11 @@ export type MutationApproveRequestArgs = {
 export type MutationCancelRequestArgs = {
   groupId: Scalars['Int'];
   userId: Scalars['Int'];
+};
+
+
+export type MutationClaimVendorArgs = {
+  vendorId: Scalars['Int'];
 };
 
 
@@ -643,6 +649,7 @@ export type Query = {
   distributionCycles: Array<DistributionCycle>;
   getActiveCatalogs: Array<Catalog>;
   getActiveVendorsFromGroup: Array<Vendor>;
+  getClaimableVendors: Array<Vendor>;
   getContractsUserLists: Array<UserList>;
   getDistributionsUserLists: Array<UserList>;
   getGroupsOnMap: Array<GroupPreviewMap>;
@@ -658,7 +665,6 @@ export type Query = {
   getUserMessagesForGroup: Array<Message>;
   getUsersFromEmails: Array<User>;
   getVendorWithEmailCheck: Vendor;
-  getVendorsByEmail: Array<Vendor>;
   getVendorsByUserId: Array<Vendor>;
   getVendorsFromCompanyNumber: Array<Vendor>;
   getWaitingListsOfGroup: Array<WaitingList>;
@@ -811,11 +817,6 @@ export type QueryGetUsersFromEmailsArgs = {
 
 export type QueryGetVendorWithEmailCheckArgs = {
   vendorId: Scalars['Int'];
-};
-
-
-export type QueryGetVendorsByEmailArgs = {
-  email: Scalars['String'];
 };
 
 
@@ -1556,12 +1557,10 @@ export type QuitGroupByControlKeyMutationVariables = Exact<{
 
 export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroupByControlKey: { __typename?: 'UserGroup', userId: number, groupId: number } };
 
-export type GetVendorsByEmailQueryVariables = Exact<{
-  email: Scalars['String'];
-}>;
+export type GetClaimableVendorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetVendorsByEmailQuery = { __typename?: 'Query', getVendorsByEmail: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
 
 export type GetVendorsByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
@@ -1576,6 +1575,13 @@ export type HasVendorsByUserIdQueryVariables = Exact<{
 
 
 export type HasVendorsByUserIdQuery = { __typename?: 'Query', hasVendorsByUserId: boolean };
+
+export type ClaimVendorMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type ClaimVendorMutation = { __typename?: 'Mutation', claimVendor: number };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -3844,9 +3850,9 @@ export function useQuitGroupByControlKeyMutation(baseOptions?: ApolloReactHooks.
 export type QuitGroupByControlKeyMutationHookResult = ReturnType<typeof useQuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationResult = Apollo.MutationResult<QuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationOptions = Apollo.BaseMutationOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;
-export const GetVendorsByEmailDocument = gql`
-    query GetVendorsByEmail($email: String!) {
-  getVendorsByEmail(email: $email) {
+export const GetClaimableVendorsDocument = gql`
+    query GetClaimableVendors {
+  getClaimableVendors {
     id
     name
     email
@@ -3872,32 +3878,31 @@ export const GetVendorsByEmailDocument = gql`
     `;
 
 /**
- * __useGetVendorsByEmailQuery__
+ * __useGetClaimableVendorsQuery__
  *
- * To run a query within a React component, call `useGetVendorsByEmailQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetVendorsByEmailQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useGetClaimableVendorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetClaimableVendorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useGetVendorsByEmailQuery({
+ * const { data, loading, error } = useGetClaimableVendorsQuery({
  *   variables: {
- *      email: // value for 'email'
  *   },
  * });
  */
-export function useGetVendorsByEmailQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>) {
+export function useGetClaimableVendorsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>(GetVendorsByEmailDocument, options);
+        return ApolloReactHooks.useQuery<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>(GetClaimableVendorsDocument, options);
       }
-export function useGetVendorsByEmailLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>) {
+export function useGetClaimableVendorsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>(GetVendorsByEmailDocument, options);
+          return ApolloReactHooks.useLazyQuery<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>(GetClaimableVendorsDocument, options);
         }
-export type GetVendorsByEmailQueryHookResult = ReturnType<typeof useGetVendorsByEmailQuery>;
-export type GetVendorsByEmailLazyQueryHookResult = ReturnType<typeof useGetVendorsByEmailLazyQuery>;
-export type GetVendorsByEmailQueryResult = Apollo.QueryResult<GetVendorsByEmailQuery, GetVendorsByEmailQueryVariables>;
+export type GetClaimableVendorsQueryHookResult = ReturnType<typeof useGetClaimableVendorsQuery>;
+export type GetClaimableVendorsLazyQueryHookResult = ReturnType<typeof useGetClaimableVendorsLazyQuery>;
+export type GetClaimableVendorsQueryResult = Apollo.QueryResult<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>;
 export const GetVendorsByUserIdDocument = gql`
     query GetVendorsByUserId($userId: Int!) {
   getVendorsByUserId(userId: $userId) {
@@ -3967,3 +3972,34 @@ export function useHasVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.La
 export type HasVendorsByUserIdQueryHookResult = ReturnType<typeof useHasVendorsByUserIdQuery>;
 export type HasVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useHasVendorsByUserIdLazyQuery>;
 export type HasVendorsByUserIdQueryResult = Apollo.QueryResult<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>;
+export const ClaimVendorDocument = gql`
+    mutation ClaimVendor($vendorId: Int!) {
+  claimVendor(vendorId: $vendorId)
+}
+    `;
+export type ClaimVendorMutationFn = Apollo.MutationFunction<ClaimVendorMutation, ClaimVendorMutationVariables>;
+
+/**
+ * __useClaimVendorMutation__
+ *
+ * To run a mutation, you first call `useClaimVendorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClaimVendorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [claimVendorMutation, { data, loading, error }] = useClaimVendorMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useClaimVendorMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ClaimVendorMutation, ClaimVendorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ClaimVendorMutation, ClaimVendorMutationVariables>(ClaimVendorDocument, options);
+      }
+export type ClaimVendorMutationHookResult = ReturnType<typeof useClaimVendorMutation>;
+export type ClaimVendorMutationResult = Apollo.MutationResult<ClaimVendorMutation>;
+export type ClaimVendorMutationOptions = Apollo.BaseMutationOptions<ClaimVendorMutation, ClaimVendorMutationVariables>;

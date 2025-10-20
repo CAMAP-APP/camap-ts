@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { resolve } from 'path';
 import {
@@ -15,6 +15,8 @@ import { VariableNames, VariableService } from '../../tools/variable.service';
 import { CatalogEntity } from '../entities/catalog.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
 import fs = require('fs');
+import { UsersService } from 'src/users/users.service';
+import { CatalogsService } from './catalogs.service';
 
 /**
  * Vendor Service
@@ -27,6 +29,10 @@ export class VendorService {
     @InjectRepository(VendorEntity)
     private readonly vendorsRepo: Repository<VendorEntity>,
     private readonly variableService: VariableService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
+    @Inject(forwardRef(() => CatalogsService))
+    private readonly catalogService: CatalogsService,
   ) {}
 
   findAll() {
@@ -194,5 +200,36 @@ export class VendorService {
     const vendor = await this.findOne(vendorId, true);
     vendor.disabled = null;
     return this.update(vendor);
+  }
+
+  @Transactional()
+  async claim(userId: number, vendorId: number): Promise<number> {
+    const [user,vendor] = await Promise.all([
+      this.usersService.findOne(userId),
+      this.getVendorFormIdOrEntity(vendorId)
+    ]);
+    if(!user) throw new NotFoundException(`Unkown user ${userId}`);
+    if(!vendor) throw new NotFoundException(`Unkown vendor ${vendorId}`);
+
+    if(vendor.userId != null)
+      throw new UnauthorizedException(`vendor ${vendor.id} is already claimed`);
+
+    if(vendor.email != user.email && vendor.email != user.email2)
+      throw new UnauthorizedException(`user ${user.id} does not have the same email as vendor ${vendor.id}`);
+
+    // if there's already a vendor linked to this user, squash
+    const refVendor = await this.vendorsRepo.findOne({ where: { userId } });
+    if(refVendor){
+      this.catalogService.migrateVendor(vendor, refVendor);
+      this.vendorsRepo.delete({ id: vendor.id });
+      return refVendor.id
+    } else {
+      this.update({
+        id: vendor.id,
+        userId
+      });
+
+      return vendorId;
+    }
   }
 }

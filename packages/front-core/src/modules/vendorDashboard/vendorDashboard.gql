@@ -1,5 +1,5 @@
-query GetVendorsByEmail($email: String!) {
-  getVendorsByEmail(email: $email) {
+query GetClaimableVendors {
+  getClaimableVendors {
     id
     name
     email
@@ -32,4 +32,8 @@ query GetVendorsByUserId($userId: Int!) {
 
 query HasVendorsByUserId($userId: Int!) {
   hasVendorsByUserId(userId: $userId)
+}
+
+mutation ClaimVendor($vendorId: Int!) {
+  claimVendor(vendorId: $vendorId)
 }

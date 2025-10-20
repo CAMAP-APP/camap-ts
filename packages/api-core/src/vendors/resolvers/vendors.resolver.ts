@@ -100,16 +100,13 @@ export class VendorsResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => [Vendor])
-  async getVendorsByEmail(
-    @Args({ name: 'email', type: () => String }) email: string,
+  async getClaimableVendors(
     @CurrentUser() currentUser: UserEntity,
   ) {
-    // Only allow users to query vendors with their own email
-    if (currentUser.email.toLowerCase() !== email.toLowerCase() && 
-        currentUser.email2?.toLowerCase() !== email.toLowerCase()) {
-      throw new UnauthorizedException();
-    }
-    return this.vendorsService.getByEmail(email);
+    return (await Promise.all([
+      this.vendorsService.getByEmail(currentUser.email),
+      this.vendorsService.getByEmail(currentUser.email2),
+    ])).flat().filter(v => v.userId == null);
   }
 
   @UseGuards(GqlAuthGuard)
@@ -188,6 +185,16 @@ export class VendorsResolver {
   /**
    * MUTATIONS
    */
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => Int)
+  async claimVendor(
+    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    return this.vendorsService.claim(currentUser.id, vendorId);
+  }
+
   @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => Vendor)

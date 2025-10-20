@@ -528,7 +528,7 @@ type Query {
   vendor(id: Int!): Vendor!
   getVendorWithEmailCheck(vendorId: Int!): Vendor!
   getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
-  getVendorsByEmail(email: String!): [Vendor!]!
+  getClaimableVendors: [Vendor!]!
   getVendorsByUserId(userId: Int!): [Vendor!]!
   hasVendorsByUserId(userId: Int!): Boolean!
   initVendorPage(vendorId: Int!): InitVendorPage!
@@ -568,6 +568,7 @@ type Mutation {
   moveBackToWaitingList(userIds: [Int!]!, groupId: Int!, message: String!): MoveBackToWaitingListResponse!
   cancelRequest(userId: Int!, groupId: Int!): WaitingList!
   approveRequest(userId: Int!, groupId: Int!): UserGroup!
+  claimVendor(vendorId: Int!): Int!
   setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
   setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
   login(input: LoginInput!): User!

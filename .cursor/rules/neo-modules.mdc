@@ -1,4 +1,8 @@
-# Neo Modules
+---
+description: NeoModules
+globs: ["packages/front-core/src/modules/**/*.modules.tsx"]
+alwaysApply: false
+---
 
 ## Structure
 - React function components with default export

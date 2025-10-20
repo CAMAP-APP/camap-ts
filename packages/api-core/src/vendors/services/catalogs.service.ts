@@ -199,4 +199,16 @@ export class CatalogsService {
 
     return catalog;
   }
+
+  @Transactional()
+  async migrateVendor(
+    from: Pick<VendorEntity, 'id'>,
+    to: Pick<VendorEntity, 'id'>
+  ) {
+    return this.catalogsRepo.update({
+      vendorId: from.id
+    }, {
+      vendorId: to.id
+    })
+  }
 }
