@@ -129,6 +129,10 @@ export class UserGroupsService {
     // super-admin
     if (user.rights === 1) return true;
 
+    // claimed vendor
+    if((await catalog.vendor).userId === user.id)
+      return true;
+
     const ug = await this.get(user, catalog.groupId);
     if (!ug || !ug.rights) return false;
 

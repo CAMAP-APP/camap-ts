@@ -15,8 +15,9 @@ import { VariableNames, VariableService } from '../../tools/variable.service';
 import { CatalogEntity } from '../entities/catalog.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
 import fs = require('fs');
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../../users/users.service';
 import { CatalogsService } from './catalogs.service';
+import { UserGroupsService } from '../../groups/services/user-groups.service';
 
 /**
  * Vendor Service
@@ -33,6 +34,8 @@ export class VendorService {
     private readonly usersService: UsersService,
     @Inject(forwardRef(() => CatalogsService))
     private readonly catalogService: CatalogsService,
+    @Inject(forwardRef(() => UserGroupsService))
+    private readonly userGroupsService: UserGroupsService,
   ) {}
 
   findAll() {
@@ -217,6 +220,17 @@ export class VendorService {
     if(vendor.email != user.email && vendor.email != user.email2)
       throw new UnauthorizedException(`user ${user.id} does not have the same email as vendor ${vendor.id}`);
 
+    // ensure user is in vendor's groups
+    await Promise.all(
+      (await this.catalogService.findByVendor(vendorId))
+        .map(async(catalog) => 
+          this.userGroupsService.getOrCreate(
+            userId,
+            catalog.groupId
+          )
+      )
+    )
+
     // if there's already a vendor linked to this user, squash
     const refVendor = await this.vendorsRepo.findOne({ where: { userId } });
     if(refVendor){
@@ -257,7 +271,7 @@ export class VendorService {
     if (otherVendors.length === 0) {
       return true; // No other vendors to consolidate
     }
-
+    
     // Migrate catalogs from other vendors to the target vendor
     for (const vendor of otherVendors) {
       await this.catalogService.migrateVendor(vendor, targetVendor);

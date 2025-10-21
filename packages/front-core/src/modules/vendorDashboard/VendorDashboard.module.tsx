@@ -55,9 +55,16 @@ const VendorDashboard = () => {
 
     if(claimedVendors?.length < 1) {
         return <>
-            <h4>{tVendorDash("noVendorProfiles")}</h4>
-
-            {claims}
+            <div className="col-md-12">
+                <div className="row">
+                    <div className="col-md-12">
+                        <h4>{tVendorDash("noVendorProfiles")}</h4>
+                    </div>
+                </div>
+                <div className="row">
+                {claims}
+                </div>
+            </div>
         </>
     }
     
@@ -112,6 +119,13 @@ const VendorDashboard = () => {
                         </div>
                     </div>
                 </div>
+                <VendorConsolidation
+                    open={selectedVendor != null}
+                    onClose={handleCancelConsolidation}
+                    selectedVendor={selectedVendor}
+                    vendorsToConsolidate={claimedVendors}
+                    onConsolidationComplete={handleConsolidationComplete}
+                />
 
 
                 <div className="row">
@@ -119,24 +133,21 @@ const VendorDashboard = () => {
                 </div>
                     
             </div>
-            <VendorConsolidation
-                open={selectedVendor != null}
-                onClose={handleCancelConsolidation}
-                selectedVendor={selectedVendor}
-                vendorsToConsolidate={claimedVendors}
-                onConsolidationComplete={handleConsolidationComplete}
-            />
         </>
     }
 
+    const [vendor] = claimedVendors;
     return <>
         <div className="col-md-12">
-            {claimedVendors?.map(v => <div className="col-md-12" key={v.id}>
-                {v.name}
-            </div>)}
+            <div className="row">
+                <div className="col-md-12">
+                    {vendor.name}
+                </div>
+            </div>
+            <div className="row">
+            {claims}
+            </div>
         </div>
-
-        {claims}
     </>
 }
 
