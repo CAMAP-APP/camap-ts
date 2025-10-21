@@ -1,6 +1,9 @@
-import { useClaimVendorMutation, useGetClaimableVendorsQuery, useUserAccountQuery } from "@gql";
+import { useClaimVendorMutation, useGetClaimableVendorsQuery, useGetDefaultVendorByUserIdQuery, Vendor } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
+import { VendorImage } from "./VendorImage";
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import VendorsMergeMessage from "./VendorsMergeMessage";
 
 export const VendorClaims = (
     props: {
@@ -10,12 +13,7 @@ export const VendorClaims = (
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
 
     const [claimingVendorId, setClaimingVendorId] = useState<number | null>(null);
-
-    const {
-        data: userData,
-        loading: userLoading,
-        error: userError,
-    } = useUserAccountQuery();
+    const [vendorToClaim, setVendorToClaim] = useState<Pick<Vendor, "id"|"name"|"companyNumber"|"image"> | null>(null);
 
     // Claimable Vendors
     const {
@@ -23,33 +21,50 @@ export const VendorClaims = (
         loading: claimableVendorsLoading,
         error: claimableVendorsError,
         refetch: refetchClaimableVendors
-    } = useGetClaimableVendorsQuery({
-        skip: !userData?.me?.email,
+    } = useGetClaimableVendorsQuery();
+
+    const {
+        data: { getDefaultVendorByUserId: defaultVendor } = {},
+        refetch: refetchDefaultVendor,
+    } = useGetDefaultVendorByUserIdQuery({
+        variables: { userId: window._Camap.userId || -1 }
     });
 
     // Claim vendor mutation
     const [claimVendorMutation] = useClaimVendorMutation();
 
-    const handleClaimVendor = async (vendorId: number) => {
+    const handleClaimButtonClick = (vendorId: number) => {
+        setVendorToClaim(claimableVendors?.find(v => v.id === vendorId) ?? null);
+    };
+
+    const handleConfirmClaim = async () => {
+        if (!vendorToClaim) return;
+        
         try {
-            setClaimingVendorId(vendorId);
+            setClaimingVendorId(vendorToClaim.id);
             await claimVendorMutation({
-                variables: { vendorId },
+                variables: { vendorId: vendorToClaim.id },
             });
             
             refetchClaimableVendors();
-            props.onClaim(vendorId);
+            refetchDefaultVendor();
+            props.onClaim(vendorToClaim.id);
             
         } catch (error) {
             console.error('Error claiming vendor:', error);
         } finally {
             setClaimingVendorId(null);
+            setVendorToClaim(null);
         }
     };
 
+    const handleCancelClaim = () => {
+        setVendorToClaim(null);
+    };
+
     if (
-        userLoading || claimableVendorsLoading ||
-        userError || claimableVendorsError ||
+        claimableVendorsLoading ||
+        claimableVendorsError ||
         claimableVendors && claimableVendors.length === 0
     ) {
         return <></>;
@@ -72,15 +87,7 @@ export const VendorClaims = (
                 {claimableVendors?.map((vendor) => (
                     <tr key={vendor.id}>
                         <td style={{ height: "100%", padding: 0, width: "50px", overflow: "hidden" }}>
-                            {vendor.image ? (
-                                <img 
-                                    src={vendor.image} 
-                                    width="50px" 
-                                    alt={vendor.name} 
-                                />
-                            ) : (
-                                <div style={{ width: "50px", height: "50px", backgroundColor: "#f0f0f0" }} />
-                            )}
+                            <VendorImage vendor={vendor} width={"50px"} height={"50px"}/>
                         </td>
                         <td>{vendor.name}</td>
                         <td>{vendor.companyNumber ?? tVendorDash("unknown")}</td>
@@ -107,7 +114,7 @@ export const VendorClaims = (
                         <td style={{ display: "flex", flexFlow: "row", gap: "0.2em", justifyContent: "flex-end" }}>
                             <button 
                                 className="btn btn-sm btn-danger"
-                                onClick={() => handleClaimVendor(vendor.id)}
+                                onClick={() => handleClaimButtonClick(vendor.id)}
                                 disabled={claimingVendorId === vendor.id}
                             >
                                 {claimingVendorId === vendor.id ? tVendorDash("claiming") : tVendorDash("claim")}
@@ -123,5 +130,62 @@ export const VendorClaims = (
                 ))}
             </tbody>
         </table>
+        
+        {/* Confirmation Dialog */}
+        <Dialog
+            open={vendorToClaim != null}
+            closeAfterTransition={false}
+            onClose={handleCancelClaim}
+            maxWidth="sm"
+            fullWidth
+        >
+            <DialogTitle>
+                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography variant="h4" component="span" sx={{ fontWeight: 'bold' }}>
+                        {tVendorDash("confirmClaim")}
+                    </Typography>
+                </Box>
+            </DialogTitle>
+            
+            <DialogContent>
+                <Alert severity="warning" sx={{ marginBottom: 2 }}>
+                    <Typography variant="body2">
+                        <strong>{tVendorDash("warning")}</strong> {tVendorDash("actionCannotBeUndone")}
+                    </Typography>
+                </Alert>
+                <Alert severity="warning" sx={{ marginBottom: 2 }}>
+                    <Typography variant="body2">
+                        {tVendorDash("claimConfirmationMessage")}
+                    </Typography>
+                </Alert>
+                <Alert severity="info" sx={{ marginBottom: 2 }}>
+                    <Typography variant="body2">
+                        {tVendorDash("claimConfirmationInfoRights")}
+                    </Typography>
+                </Alert>
+                <Typography variant="h5">
+                    {tVendorDash("claimConfirmationMerge")}
+                </Typography>
+                {defaultVendor && vendorToClaim && <VendorsMergeMessage
+                    mergeTarget={defaultVendor}
+                    mergedVendors={[vendorToClaim]}
+                />}
+            </DialogContent>
+            <DialogActions>
+                <Button
+                    onClick={handleCancelClaim}
+                >
+                    {tVendorDash("noCancel")}
+                </Button>
+                <Button 
+                    onClick={handleConfirmClaim}
+                    variant="contained"
+                    color="primary"
+                    disabled={claimingVendorId !== null}
+                >
+                    {claimingVendorId !== null ? tVendorDash("claiming") : tVendorDash("yesClaim")}
+                </Button>
+            </DialogActions>
+        </Dialog>
     </div>;
 }

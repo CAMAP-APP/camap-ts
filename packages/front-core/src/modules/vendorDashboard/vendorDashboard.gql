@@ -48,6 +48,31 @@ query GetVendorsByUserId($userId: Int!) {
   }
 }
 
+query GetDefaultVendorByUserId($userId: Int!) {
+  getDefaultVendorByUserId(userId: $userId) {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    catalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+
 query HasVendorsByUserId($userId: Int!) {
   hasVendorsByUserId(userId: $userId)
 }

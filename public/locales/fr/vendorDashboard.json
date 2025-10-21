@@ -25,5 +25,11 @@
     "groups": "AMAP",
     "claiming": "En cours...",
     "claim": "Revendiquer",
-    "contactGroups": "Contacter les AMAP"
+    "contactGroups": "Contacter les AMAP",
+    "confirmClaim": "Êtes-vous sûr de vouloir revendiquer cette fiche producteur ?",
+    "claimConfirmationMessage": "Celà vous donnera accès à cette fiche producteur et empêchera tout autre utilisateur de la modifier.",
+    "claimConfirmationInfoRights": "Les utilisateurs qui le peuvent continueront de pouvoir modifier les Catalogues associés à cette fiche producteur.",
+    "claimConfirmationMerge": "Cette fiche producteur va être consolidée avec votre fiche existante",
+    "yesClaim": "Oui, revendiquer",
+    "noCancel": "Non, annuler"
 }

@@ -123,6 +123,19 @@ export class VendorsResolver {
   }
 
   @UseGuards(GqlAuthGuard)
+  @Query(() => Vendor)
+  async getDefaultVendorByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    return (await this.vendorsService.find({ where: { userId }, take: 1 })).shift();
+  }
+
+  @UseGuards(GqlAuthGuard)
   @Query(() => Boolean)
   async hasVendorsByUserId(
     @Args({ name: 'userId', type: () => Int }) userId: number,
