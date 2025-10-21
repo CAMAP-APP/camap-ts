@@ -199,13 +199,14 @@ type Vendor {
   images: VendorImages!
   companyNumber: String
   country: String
+  profession: Int
+  production2: Int
+  production3: Int
   disabled: VendorDisabledReason
   catalogs: [Catalog!]!
   image: String
   imageFile: File
   portrait: String!
-  profession: String!
-  professionId: Int
 }
 
 enum VendorDisabledReason {
@@ -262,6 +263,11 @@ type Distribution {
 type InitVendorPage {
   vendor: Vendor!
   nextDistributions: [Distribution!]!
+}
+
+type VendorProfession {
+  id: Int!
+  name: String!
 }
 
 type AttendanceClassicContract {
@@ -534,6 +540,7 @@ type Query {
   hasVendorsByUserId(userId: Int!): Boolean!
   initVendorPage(vendorId: Int!): InitVendorPage!
   getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
+  getVendorProfessions: [VendorProfession!]!
   catalog(id: Int!): Catalog!
   getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
   getActiveCatalogs(groupId: Int!): [Catalog!]!
@@ -571,6 +578,7 @@ type Mutation {
   approveRequest(userId: Int!, groupId: Int!): UserGroup!
   claimVendor(vendorId: Int!): Int!
   consolidateVendors(vendorId: Int!): Boolean!
+  updateVendor(vendorId: Int!, name: String!, email: String!, city: String!, zipCode: String!, address1: String, address2: String, phone: String, linkText: String, desc: String, linkUrl: String, country: String, longDesc: String, profession: Int, production2: Int, production3: Int, peopleName: String): Vendor!
   setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
   setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
   login(input: LoginInput!): User!

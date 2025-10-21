@@ -61,6 +61,15 @@ export class Vendor {
   @Field({ nullable: true })
   country?: string;
 
+  @Field(() => Int, { nullable: true })
+  profession?: number;
+
+  @Field(() => Int, { nullable: true })
+  production2?: number;
+
+  @Field(() => Int, { nullable: true })
+  production3?: number;
+
   @Field(() => VendorDisabledReason, { nullable: true })
   disabled?: VendorDisabledReason;
 

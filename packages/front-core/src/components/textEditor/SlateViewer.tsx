@@ -7,7 +7,7 @@ const SlateViewer = ({ value }: { value: Descendant[] }) => {
   const editor = useMemo(() => withReact(createEditor()), []);
 
   return (
-    <Slate editor={editor} value={value} onChange={() => {}}>
+    <Slate editor={editor} initialValue={value} onChange={() => {}}>
       <CustomEditable readOnly />
     </Slate>
   );

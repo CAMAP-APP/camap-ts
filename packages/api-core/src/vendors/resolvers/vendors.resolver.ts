@@ -38,6 +38,7 @@ import { VendorService } from '../services/vendor.service';
 import { InitVendorPage } from '../types/initVendorPage.type';
 import { Vendor } from '../types/vendor.type';
 import { VendorImages } from '../types/vendorImages.type';
+import { VendorProfession } from '../types/vendorProfession.type';
 import { Catalog } from '../types/catalog.type';
 import DataLoader = require('dataloader');
 
@@ -195,6 +196,11 @@ export class VendorsResolver {
     return this.vendorsService.getFromCompanyNumber(companyNumber);
   }
 
+  @Query(() => [VendorProfession])
+  async getVendorProfessions() {
+    return this.vendorsService.getVendorProfessions();
+  }
+
   /**
    * MUTATIONS
    */
@@ -216,6 +222,92 @@ export class VendorsResolver {
     @CurrentUser() currentUser: UserEntity,
   ) {
     return this.vendorsService.consolidateVendors(vendorId, currentUser.id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => Vendor)
+  async updateVendor(
+    @CurrentUser() currentUser: UserEntity,
+    @Args({ name: 'vendorId', type: () => Int })
+    vendorId: number,
+    @Args({ name: 'name', type: () => String })
+    name: string,
+    @Args({ name: 'email', type: () => String })
+    email: string,
+    @Args({ name: 'city', type: () => String })
+    city: string,
+    @Args({ name: 'zipCode', type: () => String })
+    zipCode: string,
+    @Args({ name: 'address1', type: () => String, nullable: true })
+    address1?: string,
+    @Args({ name: 'address2', type: () => String, nullable: true })
+    address2?: string,
+    @Args({ name: 'phone', type: () => String, nullable: true })
+    phone?: string,
+    @Args({ name: 'linkText', type: () => String, nullable: true })
+    linkText?: string,
+    @Args({ name: 'desc', type: () => String, nullable: true })
+    desc?: string,
+    @Args({ name: 'linkUrl', type: () => String, nullable: true })
+    linkUrl?: string,
+    @Args({ name: 'country', type: () => String, nullable: true })
+    country?: string,
+    @Args({ name: 'longDesc', type: () => String, nullable: true })
+    longDesc?: string,
+    @Args({ name: 'profession', type: () => Int, nullable: true })
+    profession?: number,
+    @Args({ name: 'production2', type: () => Int, nullable: true })
+    production2?: number,
+    @Args({ name: 'production3', type: () => Int, nullable: true })
+    production3?: number,
+    @Args({ name: 'peopleName', type: () => String, nullable: true })
+    peopleName?: string,
+  ) {
+    const vendor = await this.vendorsService.findOne(vendorId, true);
+    if (!vendor) throw new NotFoundException();
+
+    // Check if user can manage this vendor (either owns it or can manage its catalogs)
+    if (vendor.userId !== currentUser.id && !(await this.userIsAllowedToManageCatalogOfVendor(currentUser, vendor))) {
+      throw new ForbiddenException(`Current user cannot update vendor ${vendorId}.`);
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Validate description length
+    if (desc && desc.length > 1000) {
+      throw new Error('Description must be less than 1000 characters');
+    }
+
+    // Format link URL
+    let formattedLinkUrl = linkUrl;
+    if (linkUrl && !linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+      formattedLinkUrl = 'http://' + linkUrl;
+    }
+
+    return this.vendorsService.update({
+      id: vendor.id,
+      name,
+      email,
+      city,
+      address1,
+      address2,
+      zipCode,
+      phone,
+      linkText,
+      desc,
+      linkUrl: formattedLinkUrl,
+      country,
+      longDesc,
+      profession,
+      production2,
+      production3,
+      peopleName,
+    });
   }
 
   @UseGuards(GqlAuthGuard)
@@ -326,16 +418,9 @@ export class VendorsResolver {
     return images;
   }
 
-  @ResolveField(() => String)
-  async profession(@Parent() parent: VendorEntity): Promise<string> {
-    if (!parent.profession) return '';
-    const professions = this.vendorsService.getVendorProfessions();
-    return professions.find((p) => p.id === parent.profession).name;
-  }
-
   @ResolveField(() => Int, { nullable: true })
-  async professionId(@Parent() parent: VendorEntity): Promise<number | null> {
-    return parent.profession;
+  async profession(@Parent() parent: VendorEntity): Promise<number | null> {
+    return parent.profession
   }
 
   @ResolveField(() => VendorDisabledReason)

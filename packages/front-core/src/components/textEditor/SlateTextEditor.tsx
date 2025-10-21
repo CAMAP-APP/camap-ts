@@ -554,7 +554,7 @@ const SlateTextEditor = ({
       mt={2}
       mb={1}
     >
-      <Slate editor={editor} value={value} onChange={onValueChange}>
+      <Slate editor={editor} initialValue={value} onChange={onValueChange}>
         <Box
           position="relative"
           bgcolor={theme.palette.divider}

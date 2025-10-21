@@ -1,5 +1,6 @@
 import { VendorClaims } from "./VendorClaims";
 import VendorConsolidation from "./VendorConsolidation";
+import VendorForm from "./VendorForm";
 import { CircularProgress } from "@mui/material";
 import { useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
 import { useState } from "react";
@@ -41,6 +42,11 @@ const VendorDashboard = () => {
         // Refetch the vendors list to show the updated state
         refetchClaimedVendors();
         setSelectedVendor(null);
+    };
+
+    const handleVendorFormSuccess = () => {
+        // Refetch the vendors list to show the updated state
+        refetchClaimedVendors();
     };
 
     if (userLoading || claimedVendorsLoading) {
@@ -141,7 +147,7 @@ const VendorDashboard = () => {
         <div className="col-md-12">
             <div className="row">
                 <div className="col-md-12">
-                    {vendor.name}
+                    <VendorForm vendorId={vendor.id} onSuccess={handleVendorFormSuccess} />
                 </div>
             </div>
             <div className="row">

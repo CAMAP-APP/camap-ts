@@ -1,0 +1,6 @@
+---
+globs: packages/front-core/**/*.tsx
+alwaysApply: false
+---
+
+- use formik for forms
