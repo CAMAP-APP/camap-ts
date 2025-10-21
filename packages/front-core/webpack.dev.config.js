@@ -13,9 +13,8 @@ const DIST_PATH = path.resolve(__dirname, '../../public/neostatic');
 
 module.exports = {
   mode: MODE,
-	cache: { type: 'memory'
-	 },
-	 devtool :"eval",
+	cache: { type: 'memory' },
+  devtool :"eval",
   entry: { neo: './src/neo.tsx' },
   resolve: {
     plugins: [new TsconfigPathsPlugin()],

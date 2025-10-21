@@ -27,6 +27,24 @@ query GetVendorsByUserId($userId: Int!) {
   getVendorsByUserId(userId: $userId) {
     id
     name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    catalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
   }
 }
 
@@ -36,4 +54,8 @@ query HasVendorsByUserId($userId: Int!) {
 
 mutation ClaimVendor($vendorId: Int!) {
   claimVendor(vendorId: $vendorId)
+}
+
+mutation ConsolidateVendors($vendorId: Int!) {
+  consolidateVendors(vendorId: $vendorId)
 }

@@ -377,6 +377,7 @@ export type Mutation = {
   approveRequest: UserGroup;
   cancelRequest: WaitingList;
   claimVendor: Scalars['Int'];
+  consolidateVendors: Scalars['Boolean'];
   createMembership: Membership;
   createMemberships: CreateMembershipsResponse;
   createMessage: Message;
@@ -416,6 +417,11 @@ export type MutationCancelRequestArgs = {
 
 
 export type MutationClaimVendorArgs = {
+  vendorId: Scalars['Int'];
+};
+
+
+export type MutationConsolidateVendorsArgs = {
   vendorId: Scalars['Int'];
 };
 
@@ -1567,7 +1573,7 @@ export type GetVendorsByUserIdQueryVariables = Exact<{
 }>;
 
 
-export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string }> };
+export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
 
 export type HasVendorsByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
@@ -1582,6 +1588,13 @@ export type ClaimVendorMutationVariables = Exact<{
 
 
 export type ClaimVendorMutation = { __typename?: 'Mutation', claimVendor: number };
+
+export type ConsolidateVendorsMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type ConsolidateVendorsMutation = { __typename?: 'Mutation', consolidateVendors: boolean };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -3908,6 +3921,24 @@ export const GetVendorsByUserIdDocument = gql`
   getVendorsByUserId(userId: $userId) {
     id
     name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    catalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
   }
 }
     `;
@@ -4003,3 +4034,34 @@ export function useClaimVendorMutation(baseOptions?: ApolloReactHooks.MutationHo
 export type ClaimVendorMutationHookResult = ReturnType<typeof useClaimVendorMutation>;
 export type ClaimVendorMutationResult = Apollo.MutationResult<ClaimVendorMutation>;
 export type ClaimVendorMutationOptions = Apollo.BaseMutationOptions<ClaimVendorMutation, ClaimVendorMutationVariables>;
+export const ConsolidateVendorsDocument = gql`
+    mutation ConsolidateVendors($vendorId: Int!) {
+  consolidateVendors(vendorId: $vendorId)
+}
+    `;
+export type ConsolidateVendorsMutationFn = Apollo.MutationFunction<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>;
+
+/**
+ * __useConsolidateVendorsMutation__
+ *
+ * To run a mutation, you first call `useConsolidateVendorsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConsolidateVendorsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [consolidateVendorsMutation, { data, loading, error }] = useConsolidateVendorsMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useConsolidateVendorsMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>(ConsolidateVendorsDocument, options);
+      }
+export type ConsolidateVendorsMutationHookResult = ReturnType<typeof useConsolidateVendorsMutation>;
+export type ConsolidateVendorsMutationResult = Apollo.MutationResult<ConsolidateVendorsMutation>;
+export type ConsolidateVendorsMutationOptions = Apollo.BaseMutationOptions<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>;

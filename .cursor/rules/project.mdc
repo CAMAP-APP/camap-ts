@@ -11,8 +11,8 @@ alwaysApply: true
 # Generated Files
 
 ## NEVER EDIT GENERATED FILES
-- `packages/api-core/src/schema.gql` - Auto-generated from resolvers
-- `packages/front-core/src/gql/index.tsx` - Auto-generated from queries
+- `packages/api-core/src/schema.gql` - Auto-generated from resolvers, modify the resolver instead
+- `packages/front-core/src/gql/index.tsx` - Auto-generated from queries, run ```npm run gen:gql``` instead
 - `dist/` directories - Build outputs
 - `node_modules/` - Dependencies
 

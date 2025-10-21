@@ -5,6 +5,6 @@ export const palette: PaletteOptions = {
     main: '#eb702f',
   },
   secondary: {
-    main: '#eb702f',
+    main: '#f6a96c',
   },
 };

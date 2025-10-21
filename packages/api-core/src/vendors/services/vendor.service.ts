@@ -232,4 +232,41 @@ export class VendorService {
       return vendorId;
     }
   }
+
+  @Transactional()
+  async consolidateVendors(vendorId: number, userId: number): Promise<boolean> {
+    // Get the target vendor
+    const targetVendor = await this.findOne(vendorId);
+    if (!targetVendor) {
+      throw new NotFoundException(`Vendor ${vendorId} not found`);
+    }
+
+    // Verify the user has access to this vendor
+    if (targetVendor.userId !== userId) {
+      throw new UnauthorizedException(`User ${userId} does not have access to vendor ${vendorId}`);
+    }
+
+    // Find all other vendors with the same userId
+    const otherVendors = await this.vendorsRepo.find({ 
+      where: { 
+        userId,
+        id: Not(vendorId) 
+      } 
+    });
+
+    if (otherVendors.length === 0) {
+      return true; // No other vendors to consolidate
+    }
+
+    // Migrate catalogs from other vendors to the target vendor
+    for (const vendor of otherVendors) {
+      await this.catalogService.migrateVendor(vendor, targetVendor);
+    }
+
+    // Delete the other vendors
+    const otherVendorIds = otherVendors.map(v => v.id);
+    await this.vendorsRepo.delete(otherVendorIds);
+
+    return true;
+  }
 }

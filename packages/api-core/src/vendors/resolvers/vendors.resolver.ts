@@ -197,6 +197,16 @@ export class VendorsResolver {
 
   @UseGuards(GqlAuthGuard)
   @Transactional()
+  @Mutation(() => Boolean)
+  async consolidateVendors(
+    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    return this.vendorsService.consolidateVendors(vendorId, currentUser.id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
   @Mutation(() => Vendor)
   async setVendorImage(
     @Args({ name: 'vendorId', type: () => Int })
