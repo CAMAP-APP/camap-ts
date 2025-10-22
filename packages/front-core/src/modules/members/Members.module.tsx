@@ -1,7 +1,6 @@
 import { Box, Button, Grid, Paper, Typography } from '@mui/material';
-import { CaveaRouter } from '@utils/cavea-router';
 import { useTranslation } from 'react-i18next';
-import { Route, Routes } from 'react-router-dom';
+import { HashRouter, Route, Routes } from 'react-router-dom';
 import MembersAlert from './components/MembersAlert';
 import ImportMembers from './containers/ImportMembers';
 import ImportOneMember from './containers/ImportOneMember';
@@ -25,7 +24,7 @@ const Members = ({ groupId, token }: MembersProps) => {
   /** */
   return (
     <MembersContextProvider groupId={groupId} token={token}>
-      <CaveaRouter>
+      <HashRouter>
         <Routes>
           <Route path="/import" element={<ImportMembers />} />
           <Route path="/insert" element={<ImportOneMember />} />
@@ -69,7 +68,7 @@ const Members = ({ groupId, token }: MembersProps) => {
             }
           />
         </Routes>
-      </CaveaRouter>
+      </HashRouter>
     </MembersContextProvider>
   );
 };
