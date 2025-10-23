@@ -96,6 +96,7 @@ export class VendorService {
   }
 
   async getByEmail(email: string) {
+    if(email == null) return [];
     return VendorEntity.find({ where: { email } });
   }
 
