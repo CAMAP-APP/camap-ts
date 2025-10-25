@@ -53,19 +53,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-					
-			- name: Debug workspace
-				run: |
-					pwd
-					echo "---- root ----"
-					ls -la
-					echo "---- expected paths ----"
-					ls -la packages || true
-					ls -la public   || true
-					ls -la scripts  || true
-					ls -la package.json package-lock.json || true
-					echo "---- .dockerignore ----"
-					[ -f .dockerignore ] && sed -n '1,200p' .dockerignore || echo "(absent)"
+      - name: Debug workspace
+        run: |
+          pwd
+          echo "---- root ----"
+          ls -la
+          echo "---- expected paths ----"
+          ls -la packages || true
+          ls -la public   || true
+          ls -la scripts  || true
+          ls -la package.json package-lock.json || true
+          echo "---- .dockerignore ----"
+          [ -f .dockerignore ] && sed -n '1,200p' .dockerignore || echo "(absent)"
 
       - name: Build & push
         uses: docker/build-push-action@v6
