@@ -7,3 +7,7 @@ README.md
 Dockerfile
 **/*~
 .git
+camaphx-config.xml
+camapts.env
+mysql/dumps/
+node_modules/
