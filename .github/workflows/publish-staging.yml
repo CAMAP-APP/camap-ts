@@ -31,7 +31,7 @@ jobs:
     needs: verify-staging
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/<OWNER>/camap-ts
+      IMAGE_NAME: ghcr.io/camap-app/camap-ts
     steps:
       - uses: actions/checkout@v4
 
