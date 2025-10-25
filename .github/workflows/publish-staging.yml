@@ -3,8 +3,11 @@ name: Publish staging image to GHCR (camap-ts)
 on:
   push:
     tags:
-      - 'staging-v*'
-      - 'staging-*'
+      - 'staging-[0-9]*'        # ex: staging-2.0.8
+      - 'staging-v[0-9]*'       # ex: staging-v2.0.8
+      - 'staging-[0-9]*-rc*'    # ex: staging-2.0.8-rc1
+      - 'staging-v[0-9]*-rc*'   # ex: staging-v2.0.8-rc1
+
 
 permissions:
   contents: read
