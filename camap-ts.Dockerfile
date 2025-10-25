@@ -9,10 +9,10 @@ WORKDIR /srv
 RUN chown interamap:interamap /srv
 
 # code & deps (sans .env)
-COPY --chown=interamap:interamap camap-ts/orm*.js camap-ts/package.json camap-ts/package-lock.json /srv/
-COPY --chown=interamap:interamap camap-ts/packages/ /srv/packages
-COPY --chown=interamap:interamap camap-ts/public/  /srv/public
-COPY --chown=interamap:interamap camap-ts/scripts/ /srv/scripts
+COPY --chown=interamap:interamap ./orm*.js ./package.json ./package-lock.json /srv/
+COPY --chown=interamap:interamap ./packages/ /srv/packages
+COPY --chown=interamap:interamap ./public/  /srv/public
+COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 USER interamap
 RUN npm install --fetch-retries 4 && npm cache clean --force
