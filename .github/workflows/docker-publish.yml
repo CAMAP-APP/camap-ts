@@ -1,106 +1,108 @@
-name: Docker
+name: Publish production image to GHCR (camap-ts)
+
 on:
   push:
     branches: [ "master" ]
-    # Publish semver tags as releases.
-    tags: [ 'v*.*.*' ]
+    # On capture tous les v* ici (glob), puis on filtre strictement plus bas.
+    tags: [ 'v*' ]
   workflow_dispatch:
 
-env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  # github.repository as <account>/<repo>
-  IMAGE_NAME: ${{ github.repository }}
+permissions:
+  contents: read
+  packages: write
 
 jobs:
-  build-and-push-images:
-    name: Build camap-ts & mysql container
+  verify-prod:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false      
-      matrix:
-        include:
-          - dockerfile: ./camap-ts.Dockerfile
-            image: ghcr.io/${{ github.repository_owner }}/camap-ts
-          - dockerfile: ./mysql.Dockerfile
-            image: ghcr.io/${{ github.repository_owner }}/mysql    
-    permissions:
-      contents: read
-      packages: write
-      attestations: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-     
-      - name: Get camap-ts.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/${{ github.repository_owner }}/camap-docker/main/camap-ts.Dockerfile |  sed 's!camap-ts/!./!g' > camap-ts.Dockerfile
-     
-      - name: Get .env from camap-docker
-        run: curl https://raw.githubusercontent.com/${{ github.repository_owner }}/camap-docker/main/.env > .env
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: Get mysql.Dockerfile from camap-docker
-        run: curl https://raw.githubusercontent.com/${{ github.repository_owner }}/camap-docker/main/mysql.Dockerfile |  sed 's!camap-ts/!!g' > mysql.Dockerfile
-     
-      # Install the cosign tool except on PR
-      # https://github.com/sigstore/cosign-installer
-      - name: Install cosign
-        uses: sigstore/cosign-installer@59acb6260d9c0ba8f4a2f9d9b48431a222b68e20 #v3.5.0
-        with:
-          cosign-release: 'v2.2.4'
+      - name: Extract tag and validate semver vX.Y.Z
+        id: tag
+        shell: bash
+        run: |
+          ref="${GITHUB_REF##*/}"        # ex: v2.0.8, v2.0.8-rc1, etc.
+          echo "ref_name=$ref" >> $GITHUB_OUTPUT
+          if [[ ! "$ref" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "❌ Tag non conforme (attendu: vX.Y.Z), reçu: $ref"
+            exit 1
+          fi
+          echo "✅ Tag conforme: $ref"
 
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
-        uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
+      - name: Ensure tag commit is contained in origin/master
+        shell: bash
+        run: |
+          git fetch origin +refs/heads/master:refs/remotes/origin/master
+          if ! git branch --remotes --contains HEAD | grep -q 'origin/master'; then
+            echo "❌ Ce tag n'est pas créé depuis la branche master."
+            exit 1
+          fi
+          echo "✅ Tag créé depuis un commit présent dans origin/master"
+
+  build-and-push:
+    needs: verify-prod
+    # Ceinture-bretelles : n’exécute vraiment que pour des tags vX.Y.Z sans suffixe
+    if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ghcr.io/camap-app/camap-ts
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract versions
+        id: ver
+        shell: bash
+        run: |
+          tag="${GITHUB_REF##*/}"
+          semver="${tag#v}"
+          major="${semver%%.*}"
+          minor_patch="${semver#${major}.}"
+          minor="${minor_patch%%.*}"
+          major_minor="${major}.${minor}"
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "semver=$semver" >> $GITHUB_OUTPUT
+          echo "major=$major" >> $GITHUB_OUTPUT
+          echo "major_minor=$major_minor" >> $GITHUB_OUTPUT
+          echo "▶ tag=$tag semver=$semver major=$major major_minor=$major_minor"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@96383f45573cb7f253c731d3b3ab81c87ef81934 # v5.0.0
-        with:
-          images: ${{ matrix.image }}
-      
-      # Build and push Docker image with Buildx (don't push on PR)
-      # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@0565240e2d4ab88bba5387d719585280857ece09 # v5.0.0
+      - name: Debug workspace
+        run: |
+          pwd
+          echo "---- root ----"
+          ls -la
+          echo "---- expected paths ----"
+          ls -la packages || true
+          ls -la public   || true
+          ls -la scripts  || true
+          ls -la package.json package-lock.json || true
+          echo "---- .dockerignore ----"
+          [ -f .dockerignore ] && sed -n '1,200p' .dockerignore || echo "(absent)"
+
+      - name: Build & push (prod)
+        uses: docker/build-push-action@v6
         with:
           context: .
-          file: ${{ matrix.dockerfile }}
+          file: ./camap-ts.Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
- 
-    
-      # Sign the resulting Docker image digest except on PRs.
-      # This will only write to the public Rekor transparency log when the Docker
-      # repository is public to avoid leaking data.  If you would like to publish
-      # transparency data even for private images, pass --force to cosign below.
-      # https://github.com/sigstore/cosign
-      - name: Sign the published Docker image
-        env:
-          # https://docs.github.com/en/actions/security-guides/security-hardening-for-github-actions#using-an-intermediate-environment-variable
-          TAGS: ${{ steps.meta.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push.outputs.digest }}
-        # This step uses the identity token to provision an ephemeral certificate
-        # against the sigstore community Fulcio instance.
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
-
-      - name: générer des usages d'attestation d'artefact
-        uses: actions/attest-build-provenance@v1 
-        with: 
-          subject-name: ${{ matrix.image }} 
-          subject-digest: ${{ steps.build-and-push.outputs.digest }} 
-          push-to-registry: true
-
-  
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
