@@ -25,8 +25,12 @@ RUN npm rebuild sharp --prefix packages/api-core || true
 RUN npm run build
 RUN npm prune --production
 
-COPY --chown=interamap:interamap ./scripts/ /srv/scripts
+RUN set -eux; \
+    test -d /srv/packages/api-core/dist/mails; \
+    mkdir -p /srv/mails; \
+    cp -a /srv/packages/api-core/dist/mails /srv/mails/dist
 
+COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
 FROM node:20.12.1
@@ -50,7 +54,6 @@ RUN echo "Europe/Paris" > /etc/timezone
 WORKDIR /srv
 COPY --from=builder /srv/ /srv/
 # ⚠️ pas de COPY de .env ici : il sera monté par docker-compose
-
 USER interamap
 
 CMD ["node", "packages/api-core/dist/main.js"]
