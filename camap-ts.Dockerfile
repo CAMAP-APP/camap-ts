@@ -1,4 +1,4 @@
-FROM node:20.12.1 AS builder
+FROM node:20.12.1-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     g++ libconfig-tiny-perl libtest-script-perl make python3 && \
@@ -33,7 +33,7 @@ RUN set -eux; \
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
-FROM node:20.12.1
+FROM node:20.12.1-slim
 
 LABEL org.opencontainers.image.authors="InterAMAP44 inter@amap44.org"
 LABEL org.opencontainers.image.vendor="InterAMAP 44"
