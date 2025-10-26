@@ -30,10 +30,6 @@ RUN set -eux; \
     mkdir -p /srv/mails; \
     cp -a /srv/packages/api-core/dist/mails /srv/mails/dist;
 
-RUN set -eux; \
-	test -d /srv/src; \
-	mkdir -p /srv/src;
-	
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
@@ -57,6 +53,7 @@ RUN echo "Europe/Paris" > /etc/timezone
 
 WORKDIR /srv
 COPY --from=builder /srv/ /srv/
+RUN install -d -o interamap -g interamap -m 0775 /srv/src
 # ⚠️ pas de COPY de .env ici : il sera monté par docker-compose
 USER interamap
 
