@@ -28,8 +28,12 @@ RUN npm prune --production
 RUN set -eux; \
     test -d /srv/packages/api-core/dist/mails; \
     mkdir -p /srv/mails; \
-    cp -a /srv/packages/api-core/dist/mails /srv/mails/dist
+    cp -a /srv/packages/api-core/dist/mails /srv/mails/dist;
 
+RUN set -eux; \
+	test -d /srv/src; \
+	mkdir -p /srv/src;
+	
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
