@@ -48,7 +48,9 @@ RUN apt-get update && apt-get install -y \
 		virtual-mysql-client-core \
 		procps \
 		&& rm -rf /var/lib/apt/lists/*
-ENV TZ="Europe/Paris"
+ENV TZ="Europe/Paris" \
+	NODE_ENV="production"
+
 RUN echo "Europe/Paris" > /etc/timezone
 
 WORKDIR /srv
