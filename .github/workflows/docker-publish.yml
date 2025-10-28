@@ -49,13 +49,21 @@ jobs:
           echo "✅ Le tag pointe bien sur origin/master"
 
   build-and-push:
+<<<<<<< HEAD
     name: Build & push camap-ts (prod)
+=======
+    name: Build & push camap-hx (prod)
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
     needs: verify-prod
     if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     runs-on: ubuntu-latest
 
     env:
+<<<<<<< HEAD
       IMAGE_NAME: ghcr.io/camap-app/camap-ts
+=======
+      IMAGE_NAME: ghcr.io/camap-app/camap-hx
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
 
     steps:
       - uses: actions/checkout@v4
@@ -71,13 +79,19 @@ jobs:
           minor_patch="${semver#${major}.}"
           minor="${minor_patch%%.*}"
           major_minor="${major}.${minor}"
+<<<<<<< HEAD
           sha8="$(git rev-parse --short=8 HEAD)"
+=======
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
 
           echo "tag=$tag"           >> $GITHUB_OUTPUT
           echo "semver=$semver"     >> $GITHUB_OUTPUT
           echo "major=$major"       >> $GITHUB_OUTPUT
           echo "major_minor=$major_minor" >> $GITHUB_OUTPUT
+<<<<<<< HEAD
           echo "sha8=$sha8"   >> $GITHUB_OUTPUT
+=======
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
 
       # Multi-arch prerequisites
       - uses: docker/setup-qemu-action@v3
@@ -97,19 +111,30 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+<<<<<<< HEAD
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           build-args: |
             GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
+=======
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64,linux/arm64
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
           provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
             ${{ env.IMAGE_NAME }}:latest
+<<<<<<< HEAD
           cache-from: type=gha,scope=camap-ts
           cache-to:   type=gha,scope=camap-ts,mode=max
+=======
+          cache-from: type=gha,scope=camap-hx
+          cache-to:   type=gha,scope=camap-hx,mode=max
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
 
       # --- En cas d’échec ARM64, fallback amd64-only ---
       - name: Build & push (fallback amd64-only)
@@ -117,16 +142,27 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+<<<<<<< HEAD
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
           build-args: |
             GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
+=======
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
           provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
             ${{ env.IMAGE_NAME }}:latest
+<<<<<<< HEAD
           cache-from: type=gha,scope=camap-ts
           cache-to:   type=gha,scope=camap-ts,mode=max
+=======
+          cache-from: type=gha,scope=camap-hx
+          cache-to:   type=gha,scope=camap-hx,mode=max
+>>>>>>> 8122f1f (Update Docker publish workflow for GHCR)
