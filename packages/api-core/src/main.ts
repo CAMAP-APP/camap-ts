@@ -54,16 +54,20 @@ async function bootstrap() {
     }),
   );
 
-  // IMPORTANT : exposer uniquement les bundles front sous /neostatic
+  // Expose uniquement les bundles front sous /neostatic
   // WORKDIR = /srv  =>  process.cwd() === "/srv"
   // Les assets sont en /srv/public/neostatic (cf. Dockerfile camap-ts)
   app.useStaticAssets(join(process.cwd(), 'public', 'neostatic'), {
     prefix: '/neostatic/',
-    maxAge: 31536000000, // 365 jours
-    cacheControl: true,
+    maxAge: 31536000000, // 365 jours en ms
+    // Certaines versions de @types/serve-static n'ont pas 'cacheControl'/'immutable'.
+    // On force donc l'en-tête via setHeaders pour rester compatible.
+    setHeaders: (res /*, path, stat*/) => {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
   });
 
-  // (Optionnel) si tu avais besoin d’exposer d’autres fichiers statiques :
+  // (Optionnel) si besoin d’autres fichiers statiques :
   // app.useStaticAssets(resolve(__dirname, '../../../public'));
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
