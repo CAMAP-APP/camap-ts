@@ -1,13 +1,11 @@
-name: Publish staging image to GHCR (camap-ts)
+name: Publish staging image to GHCR (camap-hx)
 
 on:
   push:
     tags:
-      - 'staging-[0-9]*'        # ex: staging-2.0.8
-      - 'staging-v[0-9]*'       # ex: staging-v2.0.8
-      - 'staging-[0-9]*-rc*'    # ex: staging-2.0.8-rc1
+      - 'staging-v[0-9]*'       # ex: staging-v2.0.8    (glob, pas regex)
       - 'staging-v[0-9]*-rc*'   # ex: staging-v2.0.8-rc1
-
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -15,37 +13,57 @@ permissions:
 
 jobs:
   verify-staging:
+    name: Verify tag & branch
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/staging-v')
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
-      - name: Ensure HEAD is contained in origin/staging
+
+      - name: Validate tag format (staging-vX.Y.Z[-rcN])
+        id: tag
+        shell: bash
+        run: |
+          ref="${GITHUB_REF##*/}"        # ex: staging-v2.0.8-rc1
+          short="${ref#staging-}"        #      v2.0.8-rc1
+          # v obligatoire, semver strict X.Y.Z, rc optionnel
+          if [[ ! "$short" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]; then
+            echo "❌ Tag non conforme: $ref (attendu: staging-vX.Y.Z ou staging-vX.Y.Z-rcN)"
+            exit 1
+          fi
+          echo "tag=$ref"     >> $GITHUB_OUTPUT
+          echo "short=$short" >> $GITHUB_OUTPUT
+          echo "✅ Tag conforme: $ref"
+
+      - name: Ensure tag commit is contained in origin/staging
+        shell: bash
         run: |
           git fetch origin +refs/heads/staging:refs/remotes/origin/staging
           if ! git branch --remotes --contains HEAD | grep -q 'origin/staging'; then
-            echo "❌ Ce tag n'est pas créé depuis la branche staging." >&2
+            echo "❌ Ce tag n'est pas créé depuis la branche staging."
             exit 1
           fi
+          echo "✅ Tag créé depuis un commit présent dans origin/staging"
 
   build-and-push:
+    name: Build & push camap-hx
     needs: verify-staging
+    if: startsWith(github.ref, 'refs/tags/staging-v')
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/camap-app/camap-ts
+      IMAGE_NAME: ghcr.io/camap-app/camap-hx
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract version from tag
+      - name: Set versions
         id: ver
         run: |
-          ref="${GITHUB_REF##*/}"
-          echo "tag=$ref" >> $GITHUB_OUTPUT
-          echo "short=${ref#staging-}" >> $GITHUB_OUTPUT
+          ref="${GITHUB_REF##*/}"      # staging-v2.0.8[-rcN]
+          short="${ref#staging-}"      # v2.0.8[-rcN]
+          echo "tag=$ref"     >> $GITHUB_OUTPUT
+          echo "short=$short" >> $GITHUB_OUTPUT
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -53,29 +71,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Debug workspace
-        run: |
-          pwd
-          echo "---- root ----"
-          ls -la
-          echo "---- expected paths ----"
-          ls -la packages || true
-          ls -la public   || true
-          ls -la scripts  || true
-          ls -la package.json package-lock.json || true
-          echo "---- .dockerignore ----"
-          [ -f .dockerignore ] && sed -n '1,200p' .dockerignore || echo "(absent)"
 
       - name: Build & push
         uses: docker/build-push-action@v6
+        env: { BUILDKIT_PROGRESS: plain }
         with:
           context: .
-          file: ./camap-ts.Dockerfile
+          file: ./camap-hx.Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}    # staging-vX.Y.Z[-rcN]
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}  # vX.Y.Z[-rcN]
             ${{ env.IMAGE_NAME }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max

@@ -1,52 +1,62 @@
-name: Publish production image to GHCR (camap-ts)
+name: Publish production image to GHCR (camap-hx)
 
 on:
   push:
-    branches: [ "master" ]
-    # On capture tous les v* ici (glob), puis on filtre strictement plus bas.
-    tags: [ 'v*' ]
-  workflow_dispatch:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'      # déclenche UNIQUEMENT sur un tag vX.Y.Z
+  workflow_dispatch:                 # exécution manuelle
 
 permissions:
   contents: read
   packages: write
 
+# Empêche deux builds simultanés sur le même tag
+concurrency:
+  group: prod-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify-prod:
+    name: Verify tag is vX.Y.Z from master
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
 
-      - name: Extract tag and validate semver vX.Y.Z
+      - name: Validate tag format vX.Y.Z
         id: tag
-        shell: bash
         run: |
-          ref="${GITHUB_REF##*/}"        # ex: v2.0.8, v2.0.8-rc1, etc.
+          ref="${GITHUB_REF##*/}"
           echo "ref_name=$ref" >> $GITHUB_OUTPUT
+
           if [[ ! "$ref" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "❌ Tag non conforme (attendu: vX.Y.Z), reçu: $ref"
             exit 1
           fi
-          echo "✅ Tag conforme: $ref"
+
+          echo "✅ Tag conforme : $ref"
 
       - name: Ensure tag commit is contained in origin/master
-        shell: bash
         run: |
           git fetch origin +refs/heads/master:refs/remotes/origin/master
+
           if ! git branch --remotes --contains HEAD | grep -q 'origin/master'; then
-            echo "❌ Ce tag n'est pas créé depuis la branche master."
+            echo "❌ Ce tag n'est pas créé depuis un commit présent dans origin/master."
             exit 1
           fi
-          echo "✅ Tag créé depuis un commit présent dans origin/master"
+
+          echo "✅ Le tag pointe bien sur origin/master"
 
   build-and-push:
+    name: Build & push camap-hx (prod)
     needs: verify-prod
-    # Ceinture-bretelles : n’exécute vraiment que pour des tags vX.Y.Z sans suffixe
     if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     runs-on: ubuntu-latest
+
     env:
-      IMAGE_NAME: ghcr.io/camap-app/camap-ts
+      IMAGE_NAME: ghcr.io/camap-app/camap-hx
+
     steps:
       - uses: actions/checkout@v4
 
@@ -56,21 +66,20 @@ jobs:
         run: |
           tag="${GITHUB_REF##*/}"
           semver="${tag#v}"
+
           major="${semver%%.*}"
           minor_patch="${semver#${major}.}"
           minor="${minor_patch%%.*}"
           major_minor="${major}.${minor}"
-          echo "tag=$tag" >> $GITHUB_OUTPUT
-          echo "semver=$semver" >> $GITHUB_OUTPUT
-          echo "major=$major" >> $GITHUB_OUTPUT
+
+          echo "tag=$tag"           >> $GITHUB_OUTPUT
+          echo "semver=$semver"     >> $GITHUB_OUTPUT
+          echo "major=$major"       >> $GITHUB_OUTPUT
           echo "major_minor=$major_minor" >> $GITHUB_OUTPUT
-          echo "▶ tag=$tag semver=$semver major=$major major_minor=$major_minor"
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      # Multi-arch prerequisites
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
         uses: docker/login-action@v3
@@ -79,30 +88,39 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Debug workspace
-        run: |
-          pwd
-          echo "---- root ----"
-          ls -la
-          echo "---- expected paths ----"
-          ls -la packages || true
-          ls -la public   || true
-          ls -la scripts  || true
-          ls -la package.json package-lock.json || true
-          echo "---- .dockerignore ----"
-          [ -f .dockerignore ] && sed -n '1,200p' .dockerignore || echo "(absent)"
-
-      - name: Build & push (prod)
+      # --- Build multi-arch (ARM64 peut échouer si mod-neko indisponible) ---
+      - name: Build & push (try multi-arch)
+        id: build_multi
+        continue-on-error: true
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./camap-ts.Dockerfile
+          file: ./camap-hx.Dockerfile
           push: true
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
+          provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=camap-hx
+          cache-to:   type=gha,scope=camap-hx,mode=max
+
+      # --- En cas d’échec ARM64, fallback amd64-only ---
+      - name: Build & push (fallback amd64-only)
+        if: steps.build_multi.outcome == 'failure'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64
+          provenance: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
+            ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha,scope=camap-hx
+          cache-to:   type=gha,scope=camap-hx,mode=max
