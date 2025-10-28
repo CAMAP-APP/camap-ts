@@ -67,6 +67,15 @@ async function bootstrap() {
     },
   });
 
+  // Servir les traductions i18n
+  app.useStaticAssets(join(process.cwd(), 'public', 'locales'), {
+    prefix: '/locales/',
+    maxAge: 86400000, // 1 jour
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+    },
+  });
+
   // (Optionnel) si besoin d’autres fichiers statiques :
   // app.useStaticAssets(resolve(__dirname, '../../../public'));
 

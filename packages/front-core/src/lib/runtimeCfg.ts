@@ -19,8 +19,7 @@ export function getGraphqlUrl(): string {
 
 export function getLocalesLoadPath(): string {
   const cfg = getRuntimeCfg();
-  // 1) si FRONT_URL défini, on l’utilise comme base
-  // 2) sinon fallback relatif (proxifié par Apache vers nest-devcamap:3010)
-  const base = cfg.FRONT_URL || '';
+  // Préfère CAMAP_HOST, sinon chemin relatif
+  const base = cfg.CAMAP_HOST || '';
   return `${base}/locales/{{lng}}/{{ns}}.json`;
 }
