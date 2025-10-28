@@ -1,4 +1,4 @@
-name: Publish staging image to GHCR (camap-ts)
+name: Publish staging image to GHCR (camap-hx)
 
 on:
   push:
@@ -85,8 +85,8 @@ jobs:
           build-args: |
             GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}    # staging-vX.Y.Z[-rcN]
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}  # vX.Y.Z[-rcN]
             ${{ env.IMAGE_NAME }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max
