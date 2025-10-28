@@ -1,0 +1,129 @@
+name: Publish feature image to GHCR (camap-hx)
+
+on:
+  push:
+    # Tags du type "feature-…" (ex: feature-producteur, feature-foo-1)
+    tags:
+      - 'feature-*'
+    # Branches "feature/*" ET "feature-*"
+    branches:
+      - 'feature/**'
+      - 'feature-*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/camap-app/camap-hx
+  # Mets à "true" si tu veux interdire le build quand le commit est déjà mergé dans master/staging
+  ENFORCE_NOT_IN_MAINLINE: "false"
+
+jobs:
+  verify-feature:
+    name: Verify ref complies with feature rules
+    runs-on: ubuntu-latest
+    # Ne s’exécute que pour branches/tags "feature"
+    if: startsWith(github.ref, 'refs/heads/feature') || startsWith(github.ref, 'refs/tags/feature-')
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: (Optional) block if commit already in master/staging
+        shell: bash
+        run: |
+          if [[ "${ENFORCE_NOT_IN_MAINLINE}" == "true" ]]; then
+            git fetch --prune origin \
+              +refs/heads/master:refs/remotes/origin/master \
+              +refs/heads/staging:refs/remotes/origin/staging
+            if git branch -r --contains HEAD | grep -Eq 'origin/(master|staging)'; then
+              echo "❌ Commit déjà contenu dans master ou staging." >&2
+              exit 1
+            fi
+            echo "✅ Commit pas (encore) dans master/staging."
+          else
+            echo "ℹ️ ENFORCE_NOT_IN_MAINLINE=false : pas de blocage master/staging."
+          fi
+
+  build-and-push:
+    name: Build & push camap-hx
+    needs: verify-feature
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/heads/feature') || startsWith(github.ref, 'refs/tags/feature-')
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # ===== Tags "feature-*" =====
+      - name: Prepare tag-based metadata
+        id: tag_meta
+        if: github.ref_type == 'tag'
+        shell: bash
+        run: |
+          set -euo pipefail
+          ref="${GITHUB_REF_NAME}"                         # ex: feature-produit-1
+          # docker tag : lowercase, remplace tout ce qui n'est pas [a-z0-9._-] par '-'
+          safe_tag="$(printf '%s' "$ref" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' \
+            | cut -c1-128)"
+          sha8="$(git rev-parse --short=8 HEAD)"
+          echo "tag=$safe_tag"           >> "$GITHUB_OUTPUT"
+          echo "tag_sha=${safe_tag}-${sha8}" >> "$GITHUB_OUTPUT"
+
+      - name: Build & push (tag feature-*)
+        if: github.ref_type == 'tag'
+        uses: docker/build-push-action@v6
+        env: { BUILDKIT_PROGRESS: plain }
+        with:
+          context: .
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.tag_meta.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.tag_meta.outputs.tag_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ===== Branches "feature/*" OU "feature-*" =====
+      - name: Prepare branch-based metadata
+        id: branch_meta
+        if: github.ref_type == 'branch'
+        shell: bash
+        run: |
+          set -euo pipefail
+          b="${GITHUB_REF_NAME}"                            # ex: feature/foo, feature-foo
+          # remplacer "/" par "-", normaliser pour docker tag
+          safe_branch="$(printf '%s' "$b" \
+            | sed 's#/#-#g' \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed -E 's/[^a-z0-9._-]+/-/g; s/^-+|-+$//g' \
+            | cut -c1-128)"
+          sha8="$(git rev-parse --short=8 HEAD)"
+          echo "branch=$safe_branch"                >> "$GITHUB_OUTPUT"
+          echo "branch_sha=${safe_branch}-${sha8}"  >> "$GITHUB_OUTPUT"
+
+      - name: Build & push (feature branches)
+        if: github.ref_type == 'branch'
+        uses: docker/build-push-action@v6
+        env: { BUILDKIT_PROGRESS: plain }
+        with:
+          context: .
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.branch_meta.outputs.branch }}
+            ${{ env.IMAGE_NAME }}:${{ steps.branch_meta.outputs.branch_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
