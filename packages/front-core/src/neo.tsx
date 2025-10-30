@@ -133,6 +133,10 @@ const modules: Record<string, {
     module: React.lazy(() => import('./modules/vendorDashboard/VendorDashboard.module')),
     wrapper: ApolloWrapper
   },
+  vendorProfile: {
+    module: React.lazy(() => import('./modules/vendorProfile/VendorProfile.module')),
+    wrapper: ApolloWrapper
+  },
   volunteersCalendar: {
     module: React.lazy(() => import('./modules/volunteersCalendar/VolunteersCalendar.module')),
     props: { showFallback: false }

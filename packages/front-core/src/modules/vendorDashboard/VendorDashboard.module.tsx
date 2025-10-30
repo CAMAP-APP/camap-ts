@@ -5,7 +5,7 @@ import { CircularProgress } from "@mui/material";
 import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
 import { useState } from "react";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
-import { VendorImage } from "./VendorImage";
+import { VendorImage } from "../../components/vendor/VendorImage";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import DashboardLayout from "layout/DashboardLayout";
 import {

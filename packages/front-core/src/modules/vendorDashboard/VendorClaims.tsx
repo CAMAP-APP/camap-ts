@@ -1,7 +1,7 @@
 import { useClaimVendorMutation, useGetClaimableVendorsQuery, useGetDefaultVendorByUserIdQuery, Vendor } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
-import { VendorImage } from "./VendorImage";
+import { VendorImage } from "../../components/vendor/VendorImage";
 import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
 import VendorsMergeMessage from "./VendorsMergeMessage";
 

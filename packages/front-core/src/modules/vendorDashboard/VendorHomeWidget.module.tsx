@@ -35,7 +35,7 @@ const VendorHomeWidget = () => {
         <>
             <VendorClaims onClaim={() => refetchClaimedVendors()}/>
             {claimedVendors && <div className="col-md-12 text-center" style={{ marginBottom: "1em"}}>
-                <a className="btn btn-lg btn-primary" href="/vendor">
+                <a className="btn btn-lg btn-primary" href="/vendor/dashboard">
                     <i className="icon icon-farmer" />&nbsp;{tVendorDash("goToVendorDashboard")}
                 </a>
             </div>}

@@ -6,5 +6,5 @@ export const palette: PaletteOptions = {
   },
   secondary: {
     main: '#f6a96c',
-  },
+  }
 };
