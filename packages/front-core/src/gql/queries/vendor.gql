@@ -1,0 +1,53 @@
+query vendorCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    catalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      groupId
+      vendorId
+      subscriptionsCount
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+
+query vendorDocuments($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    documents {
+      id
+      documentType
+      data
+      file {
+        id
+        name
+        data
+        cDate
+      }
+    }
+    catalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      documents {
+        id
+        documentType
+        data
+        file {
+            id
+            name
+            data
+            cDate
+        }
+      }
+    }
+  }
+}

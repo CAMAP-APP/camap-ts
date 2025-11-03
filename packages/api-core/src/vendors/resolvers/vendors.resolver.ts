@@ -30,6 +30,7 @@ import { DistributionEntity } from '../../shop/entities/distribution.entity';
 import { DistributionsService } from '../../shop/services/distributions.service';
 import { EntityFileService } from '../../tools/entityFile.service';
 import { EntityFileEntity } from '../../tools/models/entity-file.entity';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorPortraitsLoader } from '../../tools/tools.loader';
 import { UserEntity } from '../../users/models/user.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
@@ -431,6 +432,26 @@ export class VendorsResolver {
   @ResolveField(() => [Catalog])
   async catalogs(@Parent() parent: VendorEntity) {
     return this.catalogsService.findByVendor(parent.id);
+  }
+
+  @ResolveField(() => [EntityFile])
+  async documents(@Parent() parent: VendorEntity): Promise<EntityFile[]> {
+    const entityFiles = await this.entityFilesService.getAllByEntity(
+      parent.id,
+      'vendor',
+      'document'
+    );
+    if (!entityFiles || entityFiles.length === 0) {
+      return [];
+    }
+    return entityFiles.map((ef) => ({
+      id: ef.id,
+      entityType: ef.entityType,
+      documentType: ef.documentType,
+      entityId: ef.entityId,
+      fileId: ef.fileId,
+      data: ef.data,
+    }));
   }
 
   /**

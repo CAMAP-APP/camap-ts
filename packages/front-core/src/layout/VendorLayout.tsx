@@ -1,6 +1,10 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, styled, Typography } from '@mui/material';
 import PublicLayout, { PublicLayoutTabProps } from './PublicLayout';
 import GroupMap from '@components/map/GroupMap';
+import { usePlaceQuery } from '@gql';
+import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
+import CircularProgressBox from '@components/utils/CircularProgressBox';
+import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 
 type VendorLike = {
   id: number,
@@ -29,9 +33,24 @@ type VendorLike = {
   longDesc?: string,
 };
 
+const StyledMap = styled(MapContainer)(() => ({
+  width: '100%',
+  height: '100%',
+}));
 const VendorMap = ({vendor}: {
   vendor: VendorLike,
 }) => {
+  const { data, loading, error } = usePlaceQuery({
+    variables: { id: 0 },
+  });
+  const place = data?.place;
+
+  /** */
+  if (error) return <ApolloErrorAlert error={error} />;
+  if (loading || !place) return <CircularProgressBox />;
+
+  const center = { lat: place.lat || 0, lng: place.lng || 0 };
+
   return <Box
     sx={{
       width: '100%',
@@ -42,7 +61,13 @@ const VendorMap = ({vendor}: {
       justifyContent: 'center',
     }}
   >
-    <GroupMap />
+    <StyledMap center={center} zoom={13}>
+      <TileLayer
+        attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <Marker position={center} />
+    </StyledMap>
   </Box>
 }
 

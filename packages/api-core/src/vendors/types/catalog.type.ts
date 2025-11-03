@@ -1,4 +1,5 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { CsaSubscriptionType } from '../../groups/types/csa-subscription.type';
 import { Group } from '../../groups/types/group.type';
 import { User } from '../../users/types/user.type';
@@ -44,4 +45,7 @@ export class Catalog {
 
   @Field(() => Int)
   subscriptionsCount: number;
+
+  @Field(() => [EntityFile])
+  documents: EntityFile[];
 }

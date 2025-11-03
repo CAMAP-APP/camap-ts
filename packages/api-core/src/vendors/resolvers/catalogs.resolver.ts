@@ -11,6 +11,8 @@ import {
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
+import { FilesService } from '../../files/file.service';
+import { File } from '../../files/models/file.type';
 import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions.service';
@@ -18,6 +20,9 @@ import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
 import { Group } from '../../groups/types/group.type';
 import { MultiDistribsService } from '../../shop/services/multi-distribs.service';
+import { EntityFileService } from '../../tools/entityFile.service';
+import { EntityFileEntity } from '../../tools/models/entity-file.entity';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { UserEntity } from '../../users/models/user.entity';
 import { User } from '../../users/types/user.type';
 import { UsersService } from '../../users/users.service';
@@ -41,6 +46,8 @@ export class CatalogsResolver {
     private readonly groupsService: GroupsService,
     private readonly subscriptionsService: CsaSubscriptionsService,
     private readonly userGroupsService: UserGroupsService,
+    private readonly entityFilesService: EntityFileService,
+    private readonly filesService: FilesService,
   ) {}
 
   @Query(() => Catalog)
@@ -143,5 +150,70 @@ export class CatalogsResolver {
   async subscriptionsCount(@Parent() parent: Catalog) {
     const subscriptions = await this.subscriptionsService.findByCatalogId(parent.id);
     return subscriptions.length;
+  }
+
+  @ResolveField(() => [EntityFile])
+  async documents(
+    @Parent() parent: Catalog,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<EntityFile[]> {
+    const entityFiles = await this.entityFilesService.getAllByEntity(
+      parent.id,
+      'catalog',
+      'document',
+    );
+    if (!entityFiles || entityFiles.length === 0) {
+      return [];
+    }
+
+    let filteredFiles: EntityFileEntity[];
+
+    // If no user, return only public documents
+    if (!currentUser) {
+      filteredFiles = entityFiles.filter((file) => file.data === 'public');
+    } else {
+      // Get the group to check membership
+      const group = await this.groupsService.findOne(parent.groupId);
+      if (!group) {
+        return [];
+      }
+
+      // Check if user is subscribed to this catalog (CSA mode)
+      // This matches the logic in Catalog.hx getVisibleDocuments()
+      const subscriptions = await this.subscriptionsService.findByCatalogId(
+        parent.id,
+      );
+      const isSubscribedToCatalog = subscriptions.some(
+        (sub) => sub.userId === currentUser.id || sub.userId2 === currentUser.id,
+      );
+
+      // If subscribed to catalog, return all documents
+      if (isSubscribedToCatalog) {
+        filteredFiles = entityFiles;
+      } else {
+        // Check if user is a member of the group
+        const isGroupMember = await this.userGroupsService.isGroupMember(
+          currentUser,
+          group,
+        );
+
+        // If member of group (but not subscribed), return documents where data != 'subscribers'
+        if (isGroupMember) {
+          filteredFiles = entityFiles.filter((file) => file.data !== 'subscribers');
+        } else {
+          // Otherwise, return only public documents
+          filteredFiles = entityFiles.filter((file) => file.data === 'public');
+        }
+      }
+    }
+
+    return filteredFiles.map((ef) => ({
+      id: ef.id,
+      entityType: ef.entityType,
+      documentType: ef.documentType,
+      entityId: ef.entityId,
+      fileId: ef.fileId,
+      data: ef.data,
+    }));
   }
 }

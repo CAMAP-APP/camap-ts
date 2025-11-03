@@ -1,6 +1,7 @@
 import { HttpModule } from '@nestjs/axios';
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { FilesModule } from '../files/files.module';
 import { UsersModule } from '../users/users.module';
 import { CacheService } from './cache.service';
 import { CrontabService } from './crontab.service';
@@ -11,6 +12,7 @@ import { EntityFileEntity } from './models/entity-file.entity';
 import { PermalinkEntity } from './models/permalink.entity';
 import { VariableEntity } from './models/variable.entity';
 import { PermalinkService } from './permalink.service';
+import { EntityFileResolver } from './resolvers/entity-file.resolver';
 import { ToolsController } from './tools.controller';
 import { VendorPagesLoader, VendorPortraitsLoader } from './tools.loader';
 import { VariableService } from './variable.service';
@@ -35,6 +37,7 @@ import { VariableService } from './variable.service';
     ]),
     HttpModule,
     forwardRef(() => UsersModule),
+    forwardRef(() => FilesModule),
   ],
   providers: [
     VariableService,
@@ -45,6 +48,7 @@ import { VariableService } from './variable.service';
     CryptoService,
     VendorPagesLoader,
     VendorPortraitsLoader,
+    EntityFileResolver,
   ],
   exports: [
     PermalinkService,

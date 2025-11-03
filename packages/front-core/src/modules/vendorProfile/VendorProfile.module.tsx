@@ -4,6 +4,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { reactRouterDefaultProps } from "react-router-config";
 import { DeliveryList } from "@components/DeliveryInfoCard";
 import VendorLayout from "layout/VendorLayout";
+import VendorDocuments from "./VendorDocuments";
 
 type VendorLike = {
     id: number,
@@ -91,26 +92,6 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
                 }))
         ]} />
     </>
-  );
-
-  const documentsContent = (
-    <Box>
-      <Typography variant="body1" paragraph>
-        Available documents:
-      </Typography>
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-        {['Group Charter.pdf', 'Membership Rules.pdf', 'Product Catalog.pdf'].map((doc, i) => (
-          <Button
-            key={i}
-            variant="text"
-            startIcon={<i className="icon icon-file-pdf" />}
-            sx={{ justifyContent: 'flex-start' }}
-          >
-            {doc}
-          </Button>
-        ))}
-      </Box>
-    </Box>
   );
 
   const suppliersContent = (
@@ -209,7 +190,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
         label: 'Documents',
         icon: <span className="glyphicon glyphicon-file" />,
         path: "/documents",
-        content: documentsContent
+        content: <VendorDocuments vendorId={vendor.id} />
     },
     {
         id: 'suppliers',
@@ -228,10 +209,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
                     tabs={tabs}
                 />
             }>
-                <Route path={tabs[0].path} element={tabs[0].content} />
-                <Route path={tabs[1].path} element={tabs[1].content} />
-                <Route path={tabs[2].path} element={tabs[2].content} />
-                <Route path={tabs[3].path} element={tabs[3].content} />
+                {tabs.map(t => <Route key={t.path} path={t.path} element={t.content} />)}
                 <Route index element={<Navigate to="/description" replace />} />
             </Route>
         </Routes>

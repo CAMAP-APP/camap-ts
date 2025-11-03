@@ -44,6 +44,7 @@ export type AttendanceVariableContract = {
 
 export type Catalog = {
   __typename?: 'Catalog';
+  documents: Array<EntityFile>;
   endDate: Scalars['DateTime'];
   group: Group;
   groupId: Scalars['Int'];
@@ -166,12 +167,23 @@ export type EmbeddedImageAttachment = {
   content: Scalars['String'];
 };
 
+export type EntityFile = {
+  __typename?: 'EntityFile';
+  data?: Maybe<Scalars['String']>;
+  documentType: Scalars['String'];
+  entityId: Scalars['Int'];
+  entityType: Scalars['String'];
+  file?: Maybe<File>;
+  fileId: Scalars['Int'];
+  id: Scalars['Int'];
+};
+
 export type File = {
   __typename?: 'File';
   cDate?: Maybe<Scalars['DateTime']>;
   data: Scalars['String'];
   id: Scalars['Int'];
-  name: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type Group = {
@@ -1122,6 +1134,7 @@ export type Vendor = {
   country?: Maybe<Scalars['String']>;
   desc?: Maybe<Scalars['String']>;
   disabled?: Maybe<VendorDisabledReason>;
+  documents: Array<EntityFile>;
   email?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   image?: Maybe<Scalars['String']>;
@@ -1138,7 +1151,6 @@ export type Vendor = {
   production2?: Maybe<Scalars['Int']>;
   production3?: Maybe<Scalars['Int']>;
   profession?: Maybe<Scalars['Int']>;
-  professionId?: Maybe<Scalars['Int']>;
   zipCode?: Maybe<Scalars['String']>;
 };
 
@@ -1250,6 +1262,20 @@ export type IsGroupAdminQueryVariables = Exact<{
 
 
 export type IsGroupAdminQuery = { __typename?: 'Query', isGroupAdmin: boolean };
+
+export type VendorCatalogsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, vendorId: number, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> } };
+
+export type VendorDocumentsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }> }> } };
 
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -2047,6 +2073,118 @@ export function useIsGroupAdminLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type IsGroupAdminQueryHookResult = ReturnType<typeof useIsGroupAdminQuery>;
 export type IsGroupAdminLazyQueryHookResult = ReturnType<typeof useIsGroupAdminLazyQuery>;
 export type IsGroupAdminQueryResult = Apollo.QueryResult<IsGroupAdminQuery, IsGroupAdminQueryVariables>;
+export const VendorCatalogsDocument = gql`
+    query vendorCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    catalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      groupId
+      vendorId
+      subscriptionsCount
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorCatalogsQuery__
+ *
+ * To run a query within a React component, call `useVendorCatalogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorCatalogsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorCatalogsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+      }
+export function useVendorCatalogsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+        }
+export type VendorCatalogsQueryHookResult = ReturnType<typeof useVendorCatalogsQuery>;
+export type VendorCatalogsLazyQueryHookResult = ReturnType<typeof useVendorCatalogsLazyQuery>;
+export type VendorCatalogsQueryResult = Apollo.QueryResult<VendorCatalogsQuery, VendorCatalogsQueryVariables>;
+export const VendorDocumentsDocument = gql`
+    query vendorDocuments($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    documents {
+      id
+      documentType
+      data
+      file {
+        id
+        name
+        data
+        cDate
+      }
+    }
+    catalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      documents {
+        id
+        documentType
+        data
+        file {
+          id
+          name
+          data
+          cDate
+        }
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorDocumentsQuery__
+ *
+ * To run a query within a React component, call `useVendorDocumentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorDocumentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorDocumentsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorDocumentsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorDocumentsQuery, VendorDocumentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorDocumentsQuery, VendorDocumentsQueryVariables>(VendorDocumentsDocument, options);
+      }
+export function useVendorDocumentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorDocumentsQuery, VendorDocumentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorDocumentsQuery, VendorDocumentsQueryVariables>(VendorDocumentsDocument, options);
+        }
+export type VendorDocumentsQueryHookResult = ReturnType<typeof useVendorDocumentsQuery>;
+export type VendorDocumentsLazyQueryHookResult = ReturnType<typeof useVendorDocumentsLazyQuery>;
+export type VendorDocumentsQueryResult = Apollo.QueryResult<VendorDocumentsQuery, VendorDocumentsQueryVariables>;
 export const AttendanceClassicContractDocument = gql`
     query AttendanceClassicContract($catalogId: Int!, $startDate: DateTime, $endDate: DateTime) {
   attendanceClassicContract(

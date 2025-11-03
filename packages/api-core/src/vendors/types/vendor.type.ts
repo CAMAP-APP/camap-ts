@@ -1,4 +1,6 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { File } from '../../files/models/file.type';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorDisabledReason } from '../entities/vendor.entity';
 import { VendorImages } from './vendorImages.type';
 import { Catalog } from './catalog.type';
@@ -75,4 +77,7 @@ export class Vendor {
 
   @Field(() => [Catalog])
   catalogs: Catalog[];
+
+  @Field(() => [EntityFile])
+  documents: EntityFile[];
 }

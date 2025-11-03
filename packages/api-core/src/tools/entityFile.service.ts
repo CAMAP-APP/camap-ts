@@ -27,6 +27,19 @@ export class EntityFileService {
   }
 
   /**
+		Get all documents linked to an entity
+	* */
+  getAllByEntity(id: number, type: string, documentType?: string) {
+    const findConditions: FindConditions<EntityFileEntity> = {
+      entityId: id,
+      entityType: type,
+    };
+    if (documentType) findConditions.documentType = documentType;
+
+    return this.entityfileRepo.find({ where: findConditions, relations: ['file'] });
+  }
+
+  /**
 		Get vendors portrait
 	* */
   async findVendorsPortrait(
