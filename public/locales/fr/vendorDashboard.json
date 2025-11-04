@@ -58,5 +58,10 @@
     "saveChanges": "Sauvegarder les modifications",
     "reset": "Réinitialiser",
     "errorLoadingVendor": "Erreur lors du chargement du producteur",
-    "vendorNotFound": "Producteur non trouvé"
+    "vendorNotFound": "Producteur non trouvé",
+    "noDocumentName": "Fichier sans nom",
+    "uploadFile": "Téléverser un fichier",
+    "inGroupGroupName": "Dans le groupe {{groupName}}",
+    "noVendorPublicFile": "Pas de document publique Producteur",
+    "noCatalogPublicFile": "Pas de document"
 }

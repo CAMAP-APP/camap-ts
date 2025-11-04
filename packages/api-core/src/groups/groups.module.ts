@@ -35,6 +35,8 @@ import { MembershipsService } from './services/memberships.service';
 import { UserGroupsService } from './services/user-groups.service';
 import { VolunteersService } from './services/volunteers.service';
 import { WaitingListsService } from './services/waitingLists.service';
+import { CatalogsService } from 'src/vendors/services/catalogs.service';
+import { CatalogEntity } from 'src/vendors/entities/catalog.entity';
 
 @Module({
   imports: [
@@ -48,12 +50,13 @@ import { WaitingListsService } from './services/waitingLists.service';
       VolunteerEntity,
       OperationEntity,
       UserOrderEntity,
+      CatalogEntity
     ]),
     DiscoveryModule,
     MailsModule,
     PlacesModule,
     VendorsModule,
-    ToolsModule,
+    forwardRef(() => ToolsModule),
     forwardRef(() => PaymentsModule),
     forwardRef(() => UsersModule),
     forwardRef(() => ShopModule),
@@ -61,6 +64,7 @@ import { WaitingListsService } from './services/waitingLists.service';
   ],
   providers: [
     GroupsService,
+    CatalogsService,
     UserGroupsService,
     MembershipsService,
     WaitingListsService,

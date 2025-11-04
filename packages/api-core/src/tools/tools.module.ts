@@ -3,6 +3,8 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilesModule } from '../files/files.module';
 import { UsersModule } from '../users/users.module';
+import { GroupsModule } from '../groups/groups.module';
+import { VendorsModule } from '../vendors/vendors.module';
 import { CacheService } from './cache.service';
 import { CrontabService } from './crontab.service';
 import { CryptoService } from './crypto.service';
@@ -38,6 +40,8 @@ import { VariableService } from './variable.service';
     HttpModule,
     forwardRef(() => UsersModule),
     forwardRef(() => FilesModule),
+    forwardRef(() => GroupsModule),
+    forwardRef(() => VendorsModule),
   ],
   providers: [
     VariableService,

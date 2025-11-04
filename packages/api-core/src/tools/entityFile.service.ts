@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindConditions, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { checkDeleted } from '../common/utils';
 import { EntityFileEntity } from './models/entity-file.entity';
 
 @Injectable()
@@ -76,5 +77,27 @@ export class EntityFileService {
   @Transactional()
   async updateOrCreate(entityFile: DeepPartial<EntityFileEntity>) {
     return this.entityfileRepo.save(entityFile);
+  }
+
+  async findOne(id: number) {
+    return this.entityfileRepo.findOne(id);
+  }
+
+  @Transactional()
+  async delete(id: number) {
+    const result = await this.entityfileRepo.delete({ id });
+    return checkDeleted(result) ? id : null;
+  }
+
+  async findByFileId(fileId: number, excludeId?: number) {
+    const query = this.entityfileRepo
+      .createQueryBuilder('ef')
+      .where('ef.fileId = :fileId', { fileId });
+    
+    if (excludeId) {
+      query.andWhere('ef.id != :excludeId', { excludeId });
+    }
+    
+    return query.getMany();
   }
 }

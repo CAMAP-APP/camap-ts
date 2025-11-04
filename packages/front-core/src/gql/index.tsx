@@ -56,8 +56,7 @@ export type Catalog = {
   subscriptionsCount: Scalars['Int'];
   type: CatalogType;
   user?: Maybe<User>;
-  vendor: Vendor;
-  vendorId: Scalars['Int'];
+  vendor?: Maybe<Vendor>;
 };
 
 export enum CatalogType {
@@ -390,10 +389,12 @@ export type Mutation = {
   cancelRequest: WaitingList;
   claimVendor: Scalars['Int'];
   consolidateVendors: Scalars['Boolean'];
+  createDocument: EntityFile;
   createMembership: Membership;
   createMemberships: CreateMembershipsResponse;
   createMessage: Message;
   deleteAccount: Scalars['Int'];
+  deleteDocument: Scalars['Int'];
   deleteMembership: Scalars['String'];
   deleteOperation?: Maybe<Scalars['Int']>;
   importAndCreateMembers: SendInvitesToNewMembersResponse;
@@ -439,6 +440,16 @@ export type MutationConsolidateVendorsArgs = {
 };
 
 
+export type MutationCreateDocumentArgs = {
+  base64EncodedFile: Scalars['String'];
+  entityId: Scalars['Int'];
+  entityType: Scalars['String'];
+  fileName: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
+  visibility: Scalars['String'];
+};
+
+
 export type MutationCreateMembershipArgs = {
   input: CreateMembershipInput;
 };
@@ -457,6 +468,11 @@ export type MutationCreateMessageArgs = {
 export type MutationDeleteAccountArgs = {
   password: Scalars['String'];
   userId: Scalars['Int'];
+};
+
+
+export type MutationDeleteDocumentArgs = {
+  id: Scalars['Int'];
 };
 
 
@@ -1242,6 +1258,25 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null } };
 
+export type CreateDocumentMutationVariables = Exact<{
+  entityType: Scalars['String'];
+  entityId: Scalars['Int'];
+  base64EncodedFile: Scalars['String'];
+  fileName: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
+  visibility: Scalars['String'];
+}>;
+
+
+export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null } | null } };
+
+export type DeleteDocumentMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeleteDocumentMutation = { __typename?: 'Mutation', deleteDocument: number };
+
 export type GroupPreviewQueryVariables = Exact<{
   id: Scalars['Int'];
 }>;
@@ -1268,14 +1303,14 @@ export type VendorCatalogsQueryVariables = Exact<{
 }>;
 
 
-export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, vendorId: number, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> } };
+export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor?: { __typename?: 'Vendor', id: number } | null, group: { __typename?: 'Group', id: number, name: string } }> } };
 
 export type VendorDocumentsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
 }>;
 
 
-export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }> }> } };
+export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }> }> } };
 
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -1284,7 +1319,7 @@ export type AttendanceClassicContractQueryVariables = Exact<{
 }>;
 
 
-export type AttendanceClassicContractQuery = { __typename?: 'Query', attendanceClassicContract: { __typename?: 'AttendanceClassicContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null }, products: Array<{ __typename?: 'Product', id: number, name: string, unitType: number, qt: number }> }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, smartQt: string, productId: number, quantity: number }> }>, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null }, user2?: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } | null }> } };
+export type AttendanceClassicContractQuery = { __typename?: 'Query', attendanceClassicContract: { __typename?: 'AttendanceClassicContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor?: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null } | null, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null }, products: Array<{ __typename?: 'Product', id: number, name: string, unitType: number, qt: number }> }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, smartQt: string, productId: number, quantity: number }> }>, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null }, user2?: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } | null }> } };
 
 export type AttendanceVariableContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -1292,7 +1327,7 @@ export type AttendanceVariableContractQueryVariables = Exact<{
 }>;
 
 
-export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
+export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor?: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null } | null, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
 
 export type GetCatalogSubscriptionsQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -1557,7 +1592,7 @@ export type GetActiveCatalogsPicturesQueryVariables = Exact<{
 }>;
 
 
-export type GetActiveCatalogsPicturesQuery = { __typename?: 'Query', getActiveCatalogs: Array<{ __typename?: 'Catalog', id: number, vendor: { __typename?: 'Vendor', id: number, name: string, image?: string | null } }> };
+export type GetActiveCatalogsPicturesQuery = { __typename?: 'Query', getActiveCatalogs: Array<{ __typename?: 'Catalog', id: number, vendor?: { __typename?: 'Vendor', id: number, name: string, image?: string | null } | null }> };
 
 export type GetActiveVendorsFromGroupQueryVariables = Exact<{
   groupId: Scalars['Int'];
@@ -1962,6 +1997,90 @@ export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptio
 export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
 export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
 export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
+export const CreateDocumentDocument = gql`
+    mutation createDocument($entityType: String!, $entityId: Int!, $base64EncodedFile: String!, $fileName: String!, $name: String, $visibility: String!) {
+  createDocument(
+    entityType: $entityType
+    entityId: $entityId
+    base64EncodedFile: $base64EncodedFile
+    fileName: $fileName
+    name: $name
+    visibility: $visibility
+  ) {
+    id
+    entityType
+    entityId
+    documentType
+    data
+    file {
+      id
+      name
+    }
+  }
+}
+    `;
+export type CreateDocumentMutationFn = Apollo.MutationFunction<CreateDocumentMutation, CreateDocumentMutationVariables>;
+
+/**
+ * __useCreateDocumentMutation__
+ *
+ * To run a mutation, you first call `useCreateDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDocumentMutation, { data, loading, error }] = useCreateDocumentMutation({
+ *   variables: {
+ *      entityType: // value for 'entityType'
+ *      entityId: // value for 'entityId'
+ *      base64EncodedFile: // value for 'base64EncodedFile'
+ *      fileName: // value for 'fileName'
+ *      name: // value for 'name'
+ *      visibility: // value for 'visibility'
+ *   },
+ * });
+ */
+export function useCreateDocumentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateDocumentMutation, CreateDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateDocumentMutation, CreateDocumentMutationVariables>(CreateDocumentDocument, options);
+      }
+export type CreateDocumentMutationHookResult = ReturnType<typeof useCreateDocumentMutation>;
+export type CreateDocumentMutationResult = Apollo.MutationResult<CreateDocumentMutation>;
+export type CreateDocumentMutationOptions = Apollo.BaseMutationOptions<CreateDocumentMutation, CreateDocumentMutationVariables>;
+export const DeleteDocumentDocument = gql`
+    mutation deleteDocument($id: Int!) {
+  deleteDocument(id: $id)
+}
+    `;
+export type DeleteDocumentMutationFn = Apollo.MutationFunction<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+
+/**
+ * __useDeleteDocumentMutation__
+ *
+ * To run a mutation, you first call `useDeleteDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDocumentMutation, { data, loading, error }] = useDeleteDocumentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteDocumentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteDocumentMutation, DeleteDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteDocumentMutation, DeleteDocumentMutationVariables>(DeleteDocumentDocument, options);
+      }
+export type DeleteDocumentMutationHookResult = ReturnType<typeof useDeleteDocumentMutation>;
+export type DeleteDocumentMutationResult = Apollo.MutationResult<DeleteDocumentMutation>;
+export type DeleteDocumentMutationOptions = Apollo.BaseMutationOptions<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
 export const GroupPreviewDocument = gql`
     query GroupPreview($id: Int!) {
   groupPreview(id: $id) {
@@ -2083,7 +2202,9 @@ export const VendorCatalogsDocument = gql`
       startDate
       endDate
       groupId
-      vendorId
+      vendor {
+        id
+      }
       subscriptionsCount
       group {
         id
@@ -2124,6 +2245,7 @@ export type VendorCatalogsQueryResult = Apollo.QueryResult<VendorCatalogsQuery, 
 export const VendorDocumentsDocument = gql`
     query vendorDocuments($vendorId: Int!) {
   vendor(id: $vendorId) {
+    id
     documents {
       id
       documentType

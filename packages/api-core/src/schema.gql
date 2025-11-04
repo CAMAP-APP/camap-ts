@@ -2,28 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type File {
-  id: Int!
-  name: String
-  data: String!
-  cDate: DateTime
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-type EntityFile {
-  id: Int!
-  entityType: String!
-  documentType: String!
-  entityId: Int!
-  fileId: Int!
-  data: String
-  file: File
-}
-
 type UserNotifications {
   hasEmailNotif4h: Boolean!
   hasEmailNotif24h: Boolean!
@@ -49,6 +27,11 @@ type User {
   phone2: String
   notifications: UserNotifications!
 }
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type GroupPreview {
   id: Int!
@@ -114,18 +97,21 @@ type Place {
   lng: Float
 }
 
-type CsaSubscriptionType {
+type File {
   id: Int!
-  startDate: DateTime!
-  endDate: DateTime!
-  userId: Int!
-  user: User!
-  catalogId: Int!
-  catalog: Catalog!
-  userId2: Int
-  user2: User
-  absentDistribIds: String
-  balance: Float!
+  name: String
+  data: String!
+  cDate: DateTime
+}
+
+type EntityFile {
+  id: Int!
+  entityType: String!
+  documentType: String!
+  entityId: Int!
+  fileId: Int!
+  data: String
+  file: File
 }
 
 type Product {
@@ -164,28 +150,6 @@ enum StockTrackingPerDistribution {
   AlwaysTheSame
   FrequencyBased
   PerPeriod
-}
-
-type Catalog {
-  id: Int!
-  name: String!
-  type: CatalogType!
-  groupId: Int!
-  startDate: DateTime!
-  endDate: DateTime!
-  vendorId: Int!
-  user: User
-  products: [Product!]!
-  group: Group!
-  subscriptions: [CsaSubscriptionType!]!
-  subscriptionsCount: Int!
-  documents: [EntityFile!]!
-  vendor: Vendor!
-}
-
-enum CatalogType {
-  TYPE_CONSTORDERS
-  TYPE_VARORDER
 }
 
 type VendorImages {
@@ -234,6 +198,41 @@ enum VendorDisabledReason {
   Banned
 }
 
+type Catalog {
+  id: Int!
+  name: String!
+  type: CatalogType!
+  groupId: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  vendor: Vendor
+  user: User
+  products: [Product!]!
+  group: Group!
+  subscriptions: [CsaSubscriptionType!]!
+  subscriptionsCount: Int!
+  documents: [EntityFile!]!
+}
+
+enum CatalogType {
+  TYPE_CONSTORDERS
+  TYPE_VARORDER
+}
+
+type CsaSubscriptionType {
+  id: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  userId: Int!
+  user: User!
+  catalogId: Int!
+  catalog: Catalog!
+  userId2: Int
+  user2: User
+  absentDistribIds: String
+  balance: Float!
+}
+
 type MultiDistrib {
   id: Int!
   placeId: Int!
@@ -270,16 +269,6 @@ type Distribution {
   userOrders: [UserOrder!]!
   multiDistrib: MultiDistrib!
   end: DateTime!
-}
-
-type InitVendorPage {
-  vendor: Vendor!
-  nextDistributions: [Distribution!]!
-}
-
-type VendorProfession {
-  id: Int!
-  name: String!
 }
 
 type AttendanceClassicContract {
@@ -367,6 +356,16 @@ type SubscriptionTotalOperationTypeData {
 
 type MembershipOperationTypeData {
   year: Int!
+}
+
+type InitVendorPage {
+  vendor: Vendor!
+  nextDistributions: [Distribution!]!
+}
+
+type VendorProfession {
+  id: Int!
+  name: String!
 }
 
 type InvitedUser {
@@ -526,6 +525,27 @@ type Query {
   canManageAllCatalogs(groupId: Int!): Boolean!
   getUsersFromEmails(emails: [String!]!): [User!]!
   getInvitedUserToRegister(email: String!): InvitedUser
+  distribution(id: Int!): Distribution!
+  multiDistribution(id: Int!): MultiDistrib!
+  multiDistribs(groupId: Int!, fromDate: DateTime!, toDate: DateTime!, nextMultiDistribIfEmpty: Boolean): [MultiDistrib!]!
+  distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
+  attendanceClassicContract(catalogId: Int!, startDate: DateTime, endDate: DateTime): AttendanceClassicContract!
+  attendanceVariableContract(catalogId: Int!, distributionId: Int!): AttendanceVariableContract!
+  distributionCycles(groupId: Int!): [DistributionCycle!]!
+  place(id: Int!): Place!
+  vendor(id: Int!): Vendor!
+  getVendorWithEmailCheck(vendorId: Int!): Vendor!
+  getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
+  getClaimableVendors: [Vendor!]!
+  getVendorsByUserId(userId: Int!): [Vendor!]!
+  getDefaultVendorByUserId(userId: Int!): Vendor!
+  hasVendorsByUserId(userId: Int!): Boolean!
+  initVendorPage(vendorId: Int!): InitVendorPage!
+  getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
+  getVendorProfessions: [VendorProfession!]!
+  catalog(id: Int!): Catalog!
+  getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
+  getActiveCatalogs(groupId: Int!): [Catalog!]!
   group(id: Int!): Group!
   groupPreview(id: Int!): GroupPreview!
   groupPreviews: [GroupPreview!]!
@@ -542,27 +562,6 @@ type Query {
   getDistributionsUserLists(groupId: Int!): [UserList!]!
   getUserListInGroupByListType(listType: String!, groupId: Int!, data: String): [User!]!
   userGroup(groupId: Int!, userId: Int!): UserGroup
-  place(id: Int!): Place!
-  vendor(id: Int!): Vendor!
-  getVendorWithEmailCheck(vendorId: Int!): Vendor!
-  getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
-  getClaimableVendors: [Vendor!]!
-  getVendorsByUserId(userId: Int!): [Vendor!]!
-  getDefaultVendorByUserId(userId: Int!): Vendor!
-  hasVendorsByUserId(userId: Int!): Boolean!
-  initVendorPage(vendorId: Int!): InitVendorPage!
-  getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
-  getVendorProfessions: [VendorProfession!]!
-  catalog(id: Int!): Catalog!
-  getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
-  getActiveCatalogs(groupId: Int!): [Catalog!]!
-  distribution(id: Int!): Distribution!
-  multiDistribution(id: Int!): MultiDistrib!
-  multiDistribs(groupId: Int!, fromDate: DateTime!, toDate: DateTime!, nextMultiDistribIfEmpty: Boolean): [MultiDistrib!]!
-  distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
-  attendanceClassicContract(catalogId: Int!, startDate: DateTime, endDate: DateTime): AttendanceClassicContract!
-  attendanceVariableContract(catalogId: Int!, distributionId: Int!): AttendanceVariableContract!
-  distributionCycles(groupId: Int!): [DistributionCycle!]!
   isEmailRegistered(email: String!): Boolean!
   getMessagesForGroup(groupId: Int!): [Message!]!
   getUserMessagesForGroup(groupId: Int!): [Message!]!
@@ -574,8 +573,13 @@ type Mutation {
   updateUser(input: UpdateUserInput!): UpdateUserResult!
   updateUserNotifications(input: UpdateUserNotificationsInput!): User!
   deleteAccount(userId: Int!, password: String!): Int!
-  validateOperation(id: Int!, type: PaymentTypeId): Operation!
-  deleteOperation(id: Int!): Int
+  createDocument(entityType: String!, entityId: Int!, base64EncodedFile: String!, fileName: String!, name: String, visibility: String!): EntityFile!
+  deleteDocument(id: Int!): Int!
+  claimVendor(vendorId: Int!): Int!
+  consolidateVendors(vendorId: Int!): Boolean!
+  updateVendor(vendorId: Int!, name: String!, email: String!, city: String!, zipCode: String!, address1: String, address2: String, phone: String, linkText: String, desc: String, linkUrl: String, country: String, longDesc: String, profession: Int, production2: Int, production3: Int, peopleName: String): Vendor!
+  setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
+  setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
   quitGroup(groupId: Int!): UserGroup!
   quitGroupByControlKey(groupId: Int!, userId: Int!, controlKey: String!): UserGroup!
   setGroupImage(groupId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Group!
@@ -588,11 +592,8 @@ type Mutation {
   moveBackToWaitingList(userIds: [Int!]!, groupId: Int!, message: String!): MoveBackToWaitingListResponse!
   cancelRequest(userId: Int!, groupId: Int!): WaitingList!
   approveRequest(userId: Int!, groupId: Int!): UserGroup!
-  claimVendor(vendorId: Int!): Int!
-  consolidateVendors(vendorId: Int!): Boolean!
-  updateVendor(vendorId: Int!, name: String!, email: String!, city: String!, zipCode: String!, address1: String, address2: String, phone: String, linkText: String, desc: String, linkUrl: String, country: String, longDesc: String, profession: Int, production2: Int, production3: Int, peopleName: String): Vendor!
-  setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
-  setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
+  validateOperation(id: Int!, type: PaymentTypeId): Operation!
+  deleteOperation(id: Int!): Int
   login(input: LoginInput!): User!
   recordBadLogin: Int!
   register(input: RegisterInput!): User!

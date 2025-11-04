@@ -9,9 +9,10 @@ import { VendorImage } from "../../components/vendor/VendorImage";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import DashboardLayout from "layout/DashboardLayout";
 import {
-    Person as PersonIcon,
+    Person as PersonIcon
   } from '@mui/icons-material';
 import { reactRouterDefaultProps } from "react-router-config";
+import VendorEditDocuments from "./VendorEditDocuments";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -155,7 +156,18 @@ const VendorDashboardRouter = () => {
     const vendor = claimedVendors[0];
 
     const nav = [
-        {label: tVendorDash('vendorDashboardProfile'), icon: <PersonIcon />, path: 'edit'}
+        {
+            label: tVendorDash('vendorDashboardProfile'),
+            icon: <PersonIcon />,
+            path: 'edit',
+            element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
+        },
+        {
+            label: tVendorDash('vendorDashboardDocuments'),
+            icon: <i className="icon icon-file-pdf" />,
+            path: 'documents',
+            element: <VendorEditDocuments vendorId={vendor.id} />
+        }
     ]
 
     return <HashRouter {...reactRouterDefaultProps}>
@@ -171,7 +183,7 @@ const VendorDashboardRouter = () => {
                 />
             }>
                 <Route path="/" element={<VendorDashContent vendor={vendor} refetchClaimedVendors={refetchClaimedVendors} />} />
-                <Route path="edit" element={<VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />} />
+                {nav.map(({ element, path }) => <Route key={path} element={element} path={path} />)}
             </Route>
         </Routes>
     </HashRouter>

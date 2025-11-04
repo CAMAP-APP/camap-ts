@@ -44,8 +44,8 @@ import { MultiDistribsService } from './services/multi-distribs.service';
     forwardRef(() => GroupsModule),
     forwardRef(() => PaymentsModule),
     forwardRef(() => UsersModule),
-    MailsModule,
-    ToolsModule,
+    forwardRef(() => MailsModule),
+    forwardRef(() => ToolsModule),
   ],
   providers: [
     DistributionsService,

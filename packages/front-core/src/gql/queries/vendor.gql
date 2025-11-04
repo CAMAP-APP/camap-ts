@@ -7,7 +7,9 @@ query vendorCatalogs($vendorId: Int!) {
       startDate
       endDate
       groupId
-      vendorId
+      vendor {
+        id
+      }
       subscriptionsCount
       group {
         id
@@ -19,6 +21,7 @@ query vendorCatalogs($vendorId: Int!) {
 
 query vendorDocuments($vendorId: Int!) {
   vendor(id: $vendorId) {
+    id
     documents {
       id
       documentType

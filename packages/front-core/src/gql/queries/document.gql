@@ -1,0 +1,32 @@
+mutation createDocument(
+  $entityType: String!
+  $entityId: Int!
+  $base64EncodedFile: String!
+  $fileName: String!
+  $name: String
+  $visibility: String!
+) {
+  createDocument(
+    entityType: $entityType
+    entityId: $entityId
+    base64EncodedFile: $base64EncodedFile
+    fileName: $fileName
+    name: $name
+    visibility: $visibility
+  ) {
+    id
+    entityType
+    entityId
+    documentType
+    data
+    file {
+      id
+      name
+    }
+  }
+}
+
+mutation deleteDocument($id: Int!) {
+  deleteDocument(id: $id)
+}
+

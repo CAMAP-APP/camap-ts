@@ -5,6 +5,7 @@ import { Group } from '../../groups/types/group.type';
 import { User } from '../../users/types/user.type';
 import { CatalogType } from '../catalog.interface';
 import { Product } from './product.type';
+import { Vendor } from './vendor.type';
 
 registerEnumType(CatalogType, { name: 'CatalogType' });
 
@@ -28,8 +29,8 @@ export class Catalog {
   @Field()
   endDate: Date;
 
-  @Field(() => Int)
-  vendorId: number;
+  @Field(() => Vendor, { nullable: true })
+  vendor?: Vendor;
 
   @Field(() => User, { nullable: true })
   user?: User;

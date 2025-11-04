@@ -28,6 +28,18 @@ export class CsaSubscriptionsService {
     return this.subscriptionsRepo.findOne(id);
   }
 
+  findByUserIdAndCatalogId(
+    userId: number,
+    catalogId: number
+  ) {
+    return this.subscriptionsRepo.findOne({
+      where: {
+        userId,
+        catalogId
+      },
+    });
+  }
+
   findByCatalogId(catalogId: number) {
     return this.subscriptionsRepo.find({
       where: {
