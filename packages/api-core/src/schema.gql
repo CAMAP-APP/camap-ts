@@ -205,7 +205,7 @@ type Catalog {
   groupId: Int!
   startDate: DateTime!
   endDate: DateTime!
-  vendor: Vendor
+  vendor: Vendor!
   user: User
   products: [Product!]!
   group: Group!

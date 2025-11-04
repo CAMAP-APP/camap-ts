@@ -525,6 +525,8 @@ const ImportMembers = () => {
                   {loading ? (
                     <Box
                       minHeight={250}
+                      height="100%"
+                      flexGrow={1}
                       display="flex"
                       alignItems="center"
                       justifyContent="center"
@@ -550,18 +552,20 @@ const ImportMembers = () => {
               <Grid item sm>
                 <Typography>
                   {t('help.1')}
-                  <li>
-                    {t('help.2-1')}
-                    <CamapLink href="/adherents.xls">{t('help.2-2')}</CamapLink>
-                    .
-                  </li>
-                  <li>{t('help.3-1')}</li>
-                  <li>{t('help.3-2')}</li>
-                  <li>{t('help.4')}</li>
-                  <li>{t('help.5')}</li>
-                  <li>{t('help.6')}</li>
-                  <li>{t('help.7')}</li>
                 </Typography>
+                  <ol>
+                    <li>
+                      {t('help.2-1')}
+                      <CamapLink href="/adherents.xls">{t('help.2-2')}</CamapLink>
+                      .
+                    </li>
+                    <li>{t('help.3-1')}</li>
+                    <li>{t('help.3-2')}</li>
+                    <li>{t('help.4')}</li>
+                    <li>{t('help.5')}</li>
+                    <li>{t('help.6')}</li>
+                    <li>{t('help.7')}</li>
+                  </ol>
               </Grid>
             </Grid>
           )}

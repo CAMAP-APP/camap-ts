@@ -1,19 +1,21 @@
 import { Box, Button, Grid, Paper, Typography } from '@mui/material';
 import { useTranslation } from 'react-i18next';
-import { HashRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import MembersAlert from './components/MembersAlert';
 import ImportMembers from './containers/ImportMembers';
 import ImportOneMember from './containers/ImportOneMember';
 import MemberLists from './containers/MemberLists';
 import MembersTableAndActions from './containers/MembersTableAndActions';
 import MembersContextProvider from './MembersContext';
+import { reactRouterDefaultProps } from 'react-router-config';
 
 export interface MembersProps {
   groupId: number;
   token: string;
+  basePath: string;
 }
 
-const Members = ({ groupId, token }: MembersProps) => {
+const Members = ({ groupId, token, basePath }: MembersProps) => {
   const { t } = useTranslation([
     'members/default',
     'members/lists',
@@ -24,7 +26,7 @@ const Members = ({ groupId, token }: MembersProps) => {
   /** */
   return (
     <MembersContextProvider groupId={groupId} token={token}>
-      <HashRouter>
+      <BrowserRouter {...reactRouterDefaultProps} basename={basePath}>
         <Routes>
           <Route path="/import" element={<ImportMembers />} />
           <Route path="/insert" element={<ImportOneMember />} />
@@ -68,7 +70,7 @@ const Members = ({ groupId, token }: MembersProps) => {
             }
           />
         </Routes>
-      </HashRouter>
+      </BrowserRouter>
     </MembersContextProvider>
   );
 };

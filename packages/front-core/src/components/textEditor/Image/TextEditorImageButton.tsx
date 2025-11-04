@@ -130,7 +130,7 @@ const TextEditorImageButton = ({
     }
     if (!newValue) return;
     closeMenu();
-    const image = newValue.vendor.image as string;
+    const image = newValue.vendor?.image as string;
     insertImage(editor, `${process.env.CAMAP_HOST}${image}`);
   };
 
@@ -143,7 +143,7 @@ const TextEditorImageButton = ({
 
   const catalogsWithImage =
     activeContractsData?.getActiveCatalogs &&
-    activeContractsData?.getActiveCatalogs.filter((c) => !!c.vendor.image);
+    activeContractsData?.getActiveCatalogs.filter((c) => !!c.vendor?.image);
 
   return (
     <TextEditorComponents
@@ -183,7 +183,7 @@ const TextEditorImageButton = ({
             <ListItem>
               <Autocomplete
                 options={catalogsWithImage}
-                getOptionLabel={(option) => (option ? option.vendor.name : '')}
+                getOptionLabel={(option) => (option?.vendor?.name ?? '')}
                 renderInput={(params) => (
                   <TextField
                     {...params}

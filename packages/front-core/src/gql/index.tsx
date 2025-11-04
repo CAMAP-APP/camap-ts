@@ -56,7 +56,7 @@ export type Catalog = {
   subscriptionsCount: Scalars['Int'];
   type: CatalogType;
   user?: Maybe<User>;
-  vendor?: Maybe<Vendor>;
+  vendor: Vendor;
 };
 
 export enum CatalogType {
@@ -1303,7 +1303,7 @@ export type VendorCatalogsQueryVariables = Exact<{
 }>;
 
 
-export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor?: { __typename?: 'Vendor', id: number } | null, group: { __typename?: 'Group', id: number, name: string } }> } };
+export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
 
 export type VendorDocumentsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1319,7 +1319,7 @@ export type AttendanceClassicContractQueryVariables = Exact<{
 }>;
 
 
-export type AttendanceClassicContractQuery = { __typename?: 'Query', attendanceClassicContract: { __typename?: 'AttendanceClassicContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor?: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null } | null, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null }, products: Array<{ __typename?: 'Product', id: number, name: string, unitType: number, qt: number }> }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, smartQt: string, productId: number, quantity: number }> }>, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null }, user2?: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } | null }> } };
+export type AttendanceClassicContractQuery = { __typename?: 'Query', attendanceClassicContract: { __typename?: 'AttendanceClassicContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null }, products: Array<{ __typename?: 'Product', id: number, name: string, unitType: number, qt: number }> }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, smartQt: string, productId: number, quantity: number }> }>, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null }, user2?: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } | null }> } };
 
 export type AttendanceVariableContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -1327,7 +1327,7 @@ export type AttendanceVariableContractQueryVariables = Exact<{
 }>;
 
 
-export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor?: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null } | null, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
+export type AttendanceVariableContractQuery = { __typename?: 'Query', attendanceVariableContract: { __typename?: 'AttendanceVariableContract', catalog: { __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, user?: { __typename?: 'User', id: number, firstName: string, lastName: string, phone?: string | null, email: string } | null, vendor: { __typename?: 'Vendor', id: number, name: string, phone?: string | null, email?: string | null }, group: { __typename?: 'Group', id: number, name: string, txtDistrib?: string | null } }, subscriptions: Array<{ __typename?: 'CsaSubscriptionType', id: number, balance: number, absentDistribIds?: string | null, user: { __typename?: 'User', id: number, lastName: string, firstName: string, lastName2?: string | null, firstName2?: string | null, phone?: string | null } }>, distribution: { __typename?: 'Distribution', id: number, date: any, userOrders: Array<{ __typename?: 'UserOrder', id: number, userId: number, quantity: number, smartQt: string, subscriptionId?: number | null, productPrice: number, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, price: number } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, volunteers: Array<{ __typename?: 'Volunteer', volunteerRole: { __typename?: 'VolunteerRole', id: number, name: string, catalogId?: number | null, groupId: number }, user: { __typename?: 'User', id: number, lastName: string, firstName: string, phone?: string | null, email: string } }> } } } };
 
 export type GetCatalogSubscriptionsQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -1592,7 +1592,7 @@ export type GetActiveCatalogsPicturesQueryVariables = Exact<{
 }>;
 
 
-export type GetActiveCatalogsPicturesQuery = { __typename?: 'Query', getActiveCatalogs: Array<{ __typename?: 'Catalog', id: number, vendor?: { __typename?: 'Vendor', id: number, name: string, image?: string | null } | null }> };
+export type GetActiveCatalogsPicturesQuery = { __typename?: 'Query', getActiveCatalogs: Array<{ __typename?: 'Catalog', id: number, vendor: { __typename?: 'Vendor', id: number, name: string, image?: string | null } }> };
 
 export type GetActiveVendorsFromGroupQueryVariables = Exact<{
   groupId: Scalars['Int'];

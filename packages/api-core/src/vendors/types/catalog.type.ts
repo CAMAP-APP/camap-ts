@@ -29,8 +29,8 @@ export class Catalog {
   @Field()
   endDate: Date;
 
-  @Field(() => Vendor, { nullable: true })
-  vendor?: Vendor;
+  @Field(() => Vendor)
+  vendor: Vendor;
 
   @Field(() => User, { nullable: true })
   user?: User;

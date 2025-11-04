@@ -34,14 +34,12 @@ import CircularProgressBox from '../../components/utils/CircularProgressBox';
 import { CsaAttendanceFormat } from './attendanceSheetCsa.interface';
 import ClassicContractAttendanceFormatOptions from './components/ClassicContractAttendanceFormatOptions';
 
-type Catalog = {
-  __typename?: 'Catalog';
+type CatalogLike = {
   id: number;
   name: string;
   startDate: any;
   endDate: any;
   user?: {
-    __typename?: 'User';
     id: number;
     firstName: string;
     lastName: string;
@@ -49,20 +47,17 @@ type Catalog = {
     email: string;
   } | null;
   vendor: {
-    __typename?: 'Vendor';
     id: number;
     name: string;
     phone?: string | null;
     email?: string | null;
   };
   group: {
-    __typename?: 'Group';
     id: number;
     name: string;
     txtDistrib?: string | null;
   };
   products: Array<{
-    __typename?: 'Product';
     id: number;
     name: string;
     unitType: number;
@@ -277,7 +272,7 @@ export const ClassicContractAttendanceModule = ({
     useAttendanceClassicContractLazyQuery();
   const tableData = data ? getTableData(data, format, t) : undefined;
 
-  const [catalog, setCatalog] = React.useState<Catalog>();
+  const [catalog, setCatalog] = React.useState<CatalogLike>();
 
   React.useEffect(() => {
     if (!data) return;

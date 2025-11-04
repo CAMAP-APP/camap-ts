@@ -132,7 +132,7 @@ const DropzoneArea = ({
   const previewsInDropzoneVisible = fileObjects.length > 0;
 
   return (
-    <>
+    <Box m={1}>
       {rejectedFiles &&
         rejectedFiles.length > 0 &&
         rejectedFiles.map((rejectedFile) => (
@@ -222,7 +222,7 @@ const DropzoneArea = ({
           </div>
         )}
       </Dropzone>
-    </>
+    </Box>
   );
 };
 

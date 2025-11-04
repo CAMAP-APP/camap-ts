@@ -6,7 +6,7 @@ import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuer
 import { useState } from "react";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { VendorImage } from "../../components/vendor/VendorImage";
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import DashboardLayout from "layout/DashboardLayout";
 import {
     Person as PersonIcon
@@ -111,7 +111,7 @@ const VendorDashContent = ({
     </>
 }
 
-const VendorDashboardRouter = () => {
+const VendorDashboardRouter = (props: {basePath: string}) => {
 
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });const {
         data: userData,
@@ -170,7 +170,7 @@ const VendorDashboardRouter = () => {
         }
     ]
 
-    return <HashRouter {...reactRouterDefaultProps}>
+    return <BrowserRouter {...reactRouterDefaultProps} basename={props.basePath} >
         <Routes>
             <Route element={
                 <DashboardLayout
@@ -186,7 +186,7 @@ const VendorDashboardRouter = () => {
                 {nav.map(({ element, path }) => <Route key={path} element={element} path={path} />)}
             </Route>
         </Routes>
-    </HashRouter>
+    </BrowserRouter>
 }
 
 export default VendorDashboardRouter;
