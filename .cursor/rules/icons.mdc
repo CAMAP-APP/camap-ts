@@ -1,0 +1,6 @@
+---
+globs: *.tsx
+alwaysApply: false
+---
+
+- Always use a CamapIcon when a suitable CamapIcon is available

@@ -1,5 +1,4 @@
 import { FetchResult } from '@apollo/client';
-import DeleteIcon from '@mui/icons-material/Delete';
 import { alpha, Box, Button } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
@@ -24,6 +23,7 @@ import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
 import MembershipFeeDialog from './MembershipFeeDialog';
 import { formatUserName } from 'camap-common';
+import CamapIcon from '@components/utils/CamapIcon';
 
 type BatchAction = 'membership' | 'exclude' | 'waitingList';
 
@@ -304,7 +304,7 @@ const MembersTableToolbar = ({
                 aria-label={t('removeFromGroup')}
                 onClick={() => doBatchAction('exclude')}
               >
-                <DeleteIcon />
+                <CamapIcon id="delete" />
               </ExcludeActionButtonForwadedRef>
             </Tooltip>
           </Box>

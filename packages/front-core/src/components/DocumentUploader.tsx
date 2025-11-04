@@ -112,14 +112,14 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
     }
     
     // Validate size (10MB max)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    const maxSize = 10; // 10MB
     if (droppedFile.size > maxSize) {
       setError('Le document importé est trop volumineux. Il ne doit pas dépasser 10 Mo.');
       return;
     }
     
     setFile(droppedFile);
-    setDocumentName(droppedFile.name);
+    setDocumentName(droppedFile.name.split('.').slice(0,-1).join('-'));
     setError(null);
   }, []);
 
@@ -197,54 +197,51 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
           onChange={handleFileDrop}
         />
       ) : (
-        <>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="body1">
-              Fichier sélectionné: <strong>{file.name}</strong> ({(file.size / 1024 / 1024).toFixed(2)} Mo)
-            </Typography>
-            
-            <TextField
-              label="Nom du document"
-              value={documentName}
-              onChange={(e) => setDocumentName(e.target.value)}
-              fullWidth
-              helperText="Par défaut, le nom du fichier sera utilisé"
-            />
-            
-            <FormControl fullWidth>
-              <InputLabel>Visibilité</InputLabel>
-              <Select
-                value={visibility}
-                label="Visibilité"
-                onChange={(e) => setVisibility(e.target.value as DocumentVisibility)}
-              >
-                {visibilityOptions.map((option) => (
-                  <MenuItem key={option.value} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-              <LoadingButton
-                variant="outlined"
-                onClick={handleReset}
-                disabled={loading}
-              >
-                Annuler
-              </LoadingButton>
-              <LoadingButton
-                variant="contained"
-                onClick={handleUpload}
-                loading={loading}
-                disabled={!file || !documentName.trim()}
-              >
-                Téléverser
-              </LoadingButton>
-            </Box>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, m: 2 }}>
+          <Typography variant="body1">
+            Fichier sélectionné: <strong>{file.name}</strong> ({(file.size).toFixed(2)} Mo)
+          </Typography>
+          
+          <TextField
+            label="Nom du document"
+            value={documentName}
+            onChange={(e) => setDocumentName(e.target.value)}
+            fullWidth
+          />
+          
+          <FormControl fullWidth>
+            <InputLabel>Visibilité</InputLabel>
+            <Select
+              value={visibility}
+              label="Visibilité"
+              onChange={(e) => setVisibility(e.target.value as DocumentVisibility)}
+            >
+              {visibilityOptions.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+            <LoadingButton
+              variant="outlined"
+              onClick={handleReset}
+              disabled={loading}
+            >
+              Revenir à la sélection
+            </LoadingButton>
+            <LoadingButton
+              variant="contained"
+              onClick={handleUpload}
+              loading={loading}
+              disabled={!file || !documentName.trim()}
+            >
+              Téléverser
+            </LoadingButton>
           </Box>
-        </>
+        </Box>
       )}
     </Box>
   );

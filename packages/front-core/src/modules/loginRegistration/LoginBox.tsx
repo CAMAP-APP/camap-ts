@@ -1,5 +1,4 @@
 import SimpleField from '@components/utils/SimpleField';
-import { Person } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
 import { Box, Container } from '@mui/material';
 import { loginSchema } from 'camap-common';
@@ -12,6 +11,7 @@ import { useLoginMutation, useRecordBadLoginMutation } from '../../gql';
 import i18n from '../../lib/i18n';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { LoginRegistrationProps } from './LoginRegistration.module';
+import CamapIcon from '@components/utils/CamapIcon';
 
 export interface LoginBoxFormValues {
   password: string;
@@ -100,7 +100,7 @@ const LoginBox = ({
                 fullWidth
                 onClick={() => handleSubmit()}
                 variant="contained"
-                startIcon={<Person />}
+                startIcon={<CamapIcon id="user" />}
                 disabled={isSubmitting}
               >
                 {t('login')}

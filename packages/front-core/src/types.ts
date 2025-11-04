@@ -14,6 +14,7 @@ declare global {
       userId?: number;
       userName?: string;
       userEmail?: string;
+      version: string;
     };
     // GTM data layer
     dataLayer: any[];

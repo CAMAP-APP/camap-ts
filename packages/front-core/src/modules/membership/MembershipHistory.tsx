@@ -1,5 +1,4 @@
 import { ApolloError } from '@apollo/client';
-import { Delete } from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -22,6 +21,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ApolloErrorAlert from '../../components/utils/errors/ApolloErrorAlert';
 import { useDeleteMembershipMutation } from '../../gql';
+import CamapIcon from '@components/utils/CamapIcon';
 
 const HeadTableCellSx = {
   backgroundColor: Colors.background3,
@@ -142,7 +142,7 @@ const MembershipHistory = ({
                       onClick={onClick}
                       size="large"
                     >
-                      <Delete />
+                      <CamapIcon id="delete" />
                     </IconButton>
                   </TableCell>
                 </TableRow>

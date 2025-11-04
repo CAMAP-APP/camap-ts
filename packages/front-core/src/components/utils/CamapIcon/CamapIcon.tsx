@@ -37,6 +37,7 @@ export enum CamapIconId {
   file = 'file',
   fork = 'fork',
   github = 'github',
+  group = 'group',
   home = 'home',
   info = 'info',
   image = 'image',
@@ -65,11 +66,14 @@ export enum CamapIconId {
   vacation = 'vacation',
   wholesale = 'wholesale',
   world = 'world',
+  warning = 'warning',
   youtube = 'youtube',
+
+  subscription = 'book',
 }
 
 export interface CamapIconProps {
-  id: CamapIconId;
+  id: CamapIconId | keyof typeof CamapIconId;
   className?: string;
 }
 

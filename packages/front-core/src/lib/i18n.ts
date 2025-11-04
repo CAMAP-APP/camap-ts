@@ -4,19 +4,21 @@ import HttpBackend from 'i18next-http-backend';
 import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
 
+const PRODUCTION = process.env.NODE_ENV === 'production';
+
 i18n
   .use(ChainedBackend)
   .use(initReactI18next)
   .init({
     lng: 'fr',
     fallbackLng: 'fr',
-    debug: process.env.NODE_ENV !== 'production' && false,
+    debug: !PRODUCTION,
 
     backend: {
       backends: [LocalStorageBackend, HttpBackend],
       backendOptions: [
         {
-          expirationTime: 1 * 24 * 60 * 60 * 1000, // 1 days
+          expirationTime: PRODUCTION ? 1 * 24 * 60 * 60 * 1000 : 0, // 1 days
           defaultVersion: 'v1.9',
         },
         {

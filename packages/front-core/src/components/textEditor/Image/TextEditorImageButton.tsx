@@ -1,5 +1,4 @@
 import { Catalog, useGetActiveCatalogsPicturesLazyQuery, Vendor } from '@gql';
-import { Image } from '@mui/icons-material';
 import {
   Autocomplete,
   Box,
@@ -19,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useSlateStatic } from 'slate-react';
 import { TextEditorComponents } from '../TextEditorComponents';
 import { insertImage } from './withImage';
+import CamapIcon from '@components/utils/CamapIcon';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -155,7 +155,7 @@ const TextEditorImageButton = ({
       {loading ? (
         <CircularProgress size={24 - 3.6} />
       ) : (
-        <Image sx={{ display: 'block' }} />
+        <CamapIcon id="image" sx={{ display: 'block' }} />
       )}
       {groupId && (
         <Menu

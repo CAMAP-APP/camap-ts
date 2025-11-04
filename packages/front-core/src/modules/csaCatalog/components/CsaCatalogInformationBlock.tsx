@@ -1,4 +1,3 @@
-import { InsertDriveFile } from '@mui/icons-material';
 import {
   Box,
   List,
@@ -9,7 +8,7 @@ import {
 } from '@mui/material';
 import Block from '../../../components/utils/Block/Block';
 import SubBlock from '../../../components/utils/Block/SubBlock';
-import { CamapIconId } from '../../../components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import MediumActionIcon from '../containers/MediumActionIcon';
 import { RestCsaCatalog } from '../interfaces';
@@ -68,7 +67,7 @@ const CsaCatalogInformationBlock = ({
                     },
                   }}
                 >
-                  <InsertDriveFile />
+                  <CamapIcon id="file" />
                 </ListItemIcon>
                 <ListItemText
                   primary={d.name}

@@ -53,11 +53,13 @@ const modules: Record<string, {
   },
   csaCatalog: {
     module: React.lazy(() => import('./modules/csaCatalog/CsaCatalog.module')),
-    props: { showFallback: false }
+    props: { showFallback: false },
+    wrapper: ApolloWrapper
   },
   csaCatalogSubscription: {
     module: React.lazy(() => import('./modules/csaCatalog/CsaCatalogSubscription.module')),
-    props: { showFallback: false }
+    props: { showFallback: false },
+    wrapper: ApolloWrapper
   },
   deleteAccount: {
     module: React.lazy(() => import('./modules/users/DeleteAccountModule/DeleteAccount.module')),

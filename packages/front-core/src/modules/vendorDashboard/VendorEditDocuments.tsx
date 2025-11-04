@@ -1,75 +1,16 @@
-import { Box, CircularProgress, Alert, Typography, Modal, ListItemButton, ListItemIcon, ListItemText, Button, ListItem, IconButton, Card, CardHeader, CardContent, CardActions } from "@mui/material";
-import { Catalog, EntityFile, Group, useDeleteDocumentMutation, useVendorCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
+import DocumentList from "@components/DocumentList";
 import DocumentUploader from "@components/DocumentUploader";
-import { useState } from "react";
-import { Delete } from "@mui/icons-material";
+import { Catalog, EntityFile, Group, useVendorCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
+import { Close as CloseIcon } from "@mui/icons-material";
+import { Alert, Box, Card, CardActions, CardContent, CircularProgress, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Stub } from "@utils/gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import { useState } from "react";
 
 
 type EntityFileLike = Pick<EntityFile, "id" | "documentType" | "data" | "file">;
 type GroupLike = Pick<Group, "id" | "name">;
 type CatalogLike = Pick<Catalog, "id" | "name"> & { group: GroupLike };
-
-const DocLine = ({doc, onChange}:{ doc: EntityFileLike, onChange: () => void }) => {
-    
-    const { tVendor } = useCamapTranslation({ tVendor: "vendorDashboard" });
-
-    const [ deleteDocument ] = useDeleteDocumentMutation({
-        variables: {
-            id: doc.id
-        }
-    });
-
-    const [deleting, setDeleting] = useState(false);
-
-    const onClick = () => {
-        if (doc.file?.data) {
-            // Convert base64 to blob and download
-            const byteCharacters = atob(doc.file?.data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${doc.file?.name ?? "No name"}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
-    };
-
-    return <ListItem
-        secondaryAction={
-            <IconButton edge="end"
-                aria-label="delete"
-                onClick={async () => {
-                    setDeleting(true);
-                    await deleteDocument();
-                    onChange();
-                }}
-                disabled={deleting}
-            >
-                {deleting && <CircularProgress />}
-                {!deleting && <Delete/>}
-            </IconButton>
-        }
-    >
-        <ListItemButton
-            component="a"
-            sx={{ wordBreak: 'break-all' }}
-            onClick={onClick}
-        >
-            <i className="icon icon-file-pdf" />
-            {doc.file?.name ?? tVendor("noDocumentName")}
-        </ListItemButton>
-    </ListItem>
-}
 
 function VendorEditDocuments({ vendorId }: { vendorId: number }) {
 
@@ -83,7 +24,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
     })
 
 
-    const [uploadToEntity, setUploadToEntity] = useState<Stub<Vendor | Group | Catalog> | null>(null);
+    const [uploadToEntity, setUploadToEntity] = useState<Stub<Vendor> | Group | Catalog | null>(null);
     const [uploadError, setUploadError] = useState<Error | null>(null);
 
     if (loadingDocuments || loadingCatalogs) {
@@ -117,13 +58,17 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
         }
     })
 
+    const uploadToEntityName = !!uploadToEntity
+    ? uploadToEntity.__typename === "Vendor"
+        ? tVendor("defaultVendorName")
+        : (uploadToEntity as Group | Catalog).name
+    : ''
+
     return (
         <>
             <Box>
                 <Box sx={{ paddingBottom: 3 }}>
-                    {vendorDocuments?.documents?.map((doc) => (
-                        <DocLine key={doc.id} doc={doc} onChange={refetchDocuments}/>
-                    ))}
+                    {vendorDocuments && <DocumentList documents={vendorDocuments?.documents} editable onDelete={refetchDocuments} />}
                     {vendorDocuments?.documents.length === 0 &&
                         <Typography>{tVendor("noVendorPublicFile")}</Typography>
                     }
@@ -139,9 +84,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                                 <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 350 }}>
                                     <CardContent sx={{ height: 'auto', flexGrow: 1 }}>
                                         <Typography variant='h5'>{cat.name}</Typography>
-                                        {cat.documents.map((doc) => (
-                                            <DocLine key={doc.id} doc={doc} onChange={refetchDocuments}/>
-                                        ))}
+                                        <DocumentList documents={cat.documents} editable onDelete={refetchDocuments} />
                                         {cat.documents.length === 0 &&
                                             <Typography>{tVendor("noCatalogPublicFile")}</Typography>
                                         }
@@ -155,21 +98,39 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                     </Box>
                 ))}
             </Box>
-            <Modal
+            <Dialog
                 open={uploadToEntity != null}
                 closeAfterTransition={false}
                 sx={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  p: 1
                 }}
+                
                 onClose={() => setUploadToEntity(null)}
             >
+                <DialogTitle>{tVendor("uploadDialogTitle", { entity: uploadToEntityName })}</DialogTitle>
+                <IconButton
+                    aria-label="close"
+                    onClick={() => setUploadToEntity(null)}
+                    sx={(theme) => ({
+                        position: 'absolute',
+                        right: 8,
+                        top: 8,
+                        color: theme.palette.grey[500],
+                    })}
+                    >
+                    <CloseIcon />
+                </IconButton>
                 <>
                 {!!uploadError && <Alert>{uploadError.message}</Alert>}
-                {!!uploadToEntity && <DocumentUploader entity={uploadToEntity} onError={setUploadError} onSuccess={() => { setUploadToEntity(null); refetchDocuments(); }}/>}
+                {!!uploadToEntity && <DocumentUploader entity={uploadToEntity}
+                    onError={setUploadError}
+                    onSuccess={() => { setUploadToEntity(null); refetchDocuments(); }}
+                />}
                 </>
-            </Modal>
+            </Dialog>
         </>
     );
 }

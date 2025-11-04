@@ -8,11 +8,9 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { VendorImage } from "../../components/vendor/VendorImage";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import DashboardLayout from "layout/DashboardLayout";
-import {
-    Person as PersonIcon
-  } from '@mui/icons-material';
 import { reactRouterDefaultProps } from "react-router-config";
 import VendorEditDocuments from "./VendorEditDocuments";
+import CamapIcon from "@components/utils/CamapIcon";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -158,13 +156,13 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
     const nav = [
         {
             label: tVendorDash('vendorDashboardProfile'),
-            icon: <PersonIcon />,
+            icon: <CamapIcon id="user" />,
             path: 'edit',
             element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
         },
         {
             label: tVendorDash('vendorDashboardDocuments'),
-            icon: <i className="icon icon-file-pdf" />,
+            icon: <CamapIcon id="file" />,
             path: 'documents',
             element: <VendorEditDocuments vendorId={vendor.id} />
         }
@@ -176,8 +174,8 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
                 <DashboardLayout
                     navigation={nav}
                     home={{
-                        label: tVendorDash('vendorDashboardHome'),
-                        icon: <PersonIcon />,
+                        label: tVendorDash('vendorDashboardHome', { vendorName: vendor.name }),
+                        icon: <CamapIcon id="farmer" />,
                         path: '/'
                     }}
                 />

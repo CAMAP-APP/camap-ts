@@ -1,15 +1,7 @@
-import {
-  Settings as SettingsIcon,
-  Email as EmailIcon,
-  Info as InfoIcon,
-  Groups as GroupsIcon,
-  Person as PersonIcon,
-} from '@mui/icons-material';
-import {
-  Home as HomeIcon,
-} from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
+import CamapIcon from '@components/utils/CamapIcon';
+import { Announcement } from '@mui/icons-material';
 
 const AdminLayout = () => {
   const { t } = useTranslation(['admin', 'translation']);
@@ -18,42 +10,42 @@ const AdminLayout = () => {
     {
       path: '/admin/errors',
       label: 'Errors',
-      icon: <SettingsIcon />
+      icon: <CamapIcon id="home" />
     },
     {
       path: '/admin/emails',
       label: 'Emails',
-      icon: <EmailIcon />
+      icon: <CamapIcon id="mail" />
     },
     {
       path: '/admin/messages',
       label: 'Message Général',
-      icon: <InfoIcon />
+      icon: <Announcement />
     },
     {
       path: '/admin/attention',
       label: 'Message Groupes',
-      icon: <InfoIcon />
+      icon: <Announcement />
     },
     {
       path: '/admin/attentionAdmins',
       label: 'Message Admins Groupes',
-      icon: <InfoIcon />
+      icon: <Announcement />
     },
     {
       path: '/admin/group',
       label: 'Groupes',
-      icon: <GroupsIcon />
+      icon: <CamapIcon id="group" />
     },
     {
       path: '/admin/user',
       label: 'Utilisateurs',
-      icon: <PersonIcon />
+      icon: <CamapIcon id="user" />
     },
   ];
   return <DashboardLayout home={{
     label: t('admin', { ns: 'admin' }),
-    icon: <HomeIcon />,
+    icon: <CamapIcon id="home" />,
     path: '/admin'
   }}
   navigation={navigationItems} />

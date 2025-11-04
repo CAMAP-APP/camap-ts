@@ -63,5 +63,10 @@
     "uploadFile": "Téléverser un fichier",
     "inGroupGroupName": "Dans le groupe {{groupName}}",
     "noVendorPublicFile": "Pas de document publique Producteur",
-    "noCatalogPublicFile": "Pas de document"
+    "noCatalogPublicFile": "Pas de document",
+    "uploadDialogTitle": "Téléverser un document pour {{entity}}",
+    "defaultVendorName": "la fiche Producteur",
+    "vendorDashboardHome": "{{vendorName}}",
+    "vendorDashboardProfile": "Profile",
+    "vendorDashboardDocuments": "Documents"
 }
