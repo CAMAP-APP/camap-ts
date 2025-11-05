@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import DashboardLayout from './DashboardLayout';
-import CamapIcon from '@components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { Announcement } from '@mui/icons-material';
 
 const AdminLayout = () => {
@@ -10,12 +10,12 @@ const AdminLayout = () => {
     {
       path: '/admin/errors',
       label: 'Errors',
-      icon: <CamapIcon id="home" />
+      icon: <CamapIcon id={CamapIconId.home} />
     },
     {
       path: '/admin/emails',
       label: 'Emails',
-      icon: <CamapIcon id="mail" />
+      icon: <CamapIcon id={CamapIconId.mail} />
     },
     {
       path: '/admin/messages',
@@ -35,17 +35,17 @@ const AdminLayout = () => {
     {
       path: '/admin/group',
       label: 'Groupes',
-      icon: <CamapIcon id="group" />
+      icon: <CamapIcon id={CamapIconId.group} />
     },
     {
       path: '/admin/user',
       label: 'Utilisateurs',
-      icon: <CamapIcon id="user" />
+      icon: <CamapIcon id={CamapIconId.user} />
     },
   ];
   return <DashboardLayout home={{
     label: t('admin', { ns: 'admin' }),
-    icon: <CamapIcon id="home" />,
+    icon: <CamapIcon id={CamapIconId.home} />,
     path: '/admin'
   }}
   navigation={navigationItems} />

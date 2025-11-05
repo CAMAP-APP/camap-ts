@@ -10,7 +10,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import DashboardLayout from "layout/DashboardLayout";
 import { reactRouterDefaultProps } from "react-router-config";
 import VendorEditDocuments from "./VendorEditDocuments";
-import CamapIcon from "@components/utils/CamapIcon";
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -156,13 +156,13 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
     const nav = [
         {
             label: tVendorDash('vendorDashboardProfile'),
-            icon: <CamapIcon id="user" />,
+            icon: <CamapIcon id={CamapIconId.user} />,
             path: 'edit',
             element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
         },
         {
             label: tVendorDash('vendorDashboardDocuments'),
-            icon: <CamapIcon id="file" />,
+            icon: <CamapIcon id={CamapIconId.file} />,
             path: 'documents',
             element: <VendorEditDocuments vendorId={vendor.id} />
         }
@@ -175,7 +175,7 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
                     navigation={nav}
                     home={{
                         label: tVendorDash('vendorDashboardHome', { vendorName: vendor.name }),
-                        icon: <CamapIcon id="farmer" />,
+                        icon: <CamapIcon id={CamapIconId.farmer} />,
                         path: '/'
                     }}
                 />

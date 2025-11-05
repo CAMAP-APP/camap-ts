@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { useSlateStatic } from 'slate-react';
 import { TextEditorComponents } from '../TextEditorComponents';
 import { insertImage } from './withImage';
-import CamapIcon from '@components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -155,7 +155,7 @@ const TextEditorImageButton = ({
       {loading ? (
         <CircularProgress size={24 - 3.6} />
       ) : (
-        <CamapIcon id="image" sx={{ display: 'block' }} />
+        <CamapIcon id={CamapIconId.image} sx={{ display: 'block' }} />
       )}
       {groupId && (
         <Menu

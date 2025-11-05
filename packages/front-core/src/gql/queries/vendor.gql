@@ -54,3 +54,42 @@ query vendorDocuments($vendorId: Int!) {
     }
   }
 }
+
+query InitVendorPage($vendorId: Int!) {
+  initVendorPage(vendorId: $vendorId) {
+    vendor {
+      id
+      name
+    }
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalogId
+        catalog {
+          id
+          name
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}

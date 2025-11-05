@@ -20,17 +20,14 @@ import { Loader } from '../../common/decorators/dataloder.decorator';
 import { IsAdmin } from '../../common/decorators/is-admin.decorator';
 import { BlackListGuard } from '../../common/guards/black-list.guard';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
-import { hasFlag } from '../../common/haxeCompat';
 import { compressImage } from '../../common/image';
 import { FilesService } from '../../files/file.service';
 import { File } from '../../files/models/file.type';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
-import { GroupFlags } from '../../groups/types/interfaces';
 import { DistributionEntity } from '../../shop/entities/distribution.entity';
 import { DistributionsService } from '../../shop/services/distributions.service';
 import { EntityFileService } from '../../tools/entityFile.service';
 import { EntityFileEntity } from '../../tools/models/entity-file.entity';
-import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorPortraitsLoader } from '../../tools/tools.loader';
 import { UserEntity } from '../../users/models/user.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
@@ -42,6 +39,9 @@ import { VendorImages } from '../types/vendorImages.type';
 import { VendorProfession } from '../types/vendorProfession.type';
 import { Catalog } from '../types/catalog.type';
 import DataLoader = require('dataloader');
+import { GroupEntity } from 'src/groups/entities/group.entity';
+import { CatalogEntity } from '../entities/catalog.entity';
+import { Distribution } from 'src/shop/types/distribution.type';
 
 @Resolver(() => Vendor)
 export class VendorsResolver {
@@ -164,29 +164,38 @@ export class VendorsResolver {
     catalogs = catalogs.filter((c) => isAfter(c.endDate, new Date()));
     const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
       catalogs.map((c) => c.id),
+      4
     );
-    const groups = await Promise.all(catalogs.map((c) => c.group));
 
-    var nextDistributionsByGroupId = new Map<number, DistributionEntity>();
+    const nextDistributionsByGroupId = new Map<number, {
+      distributions: DistributionEntity[]
+      group: GroupEntity
+    }>();
+    await Promise.all(distribs.map(async (distribution) => {
+      const catalog = await distribution.catalog;
+      const group = await catalog.group;
 
-    distribs.forEach((d) => {
-      const index = catalogs.findIndex((c) => c.id === d.catalogId);
-      if (index < 0) return;
-      const group = groups[index];
+      // console.log(distribution, catalog, group);
 
-      if (!hasFlag(GroupFlags.CamapNetwork, group.flags)) return;
-
-      const d2 = nextDistributionsByGroupId.get(group.id);
-      if (!d2) {
-        nextDistributionsByGroupId.set(group.id, d);
-      } else if (d2.date.getTime() > d.date.getTime()) {
-        nextDistributionsByGroupId.set(group.id, d);
+      const dists = nextDistributionsByGroupId.get(group.id);
+      if (!dists) {
+        nextDistributionsByGroupId.set(group.id, { distributions: [distribution], group });
+      } else {
+        dists.distributions.push(distribution);
       }
-    });
+    }));
+
+
+    const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
+    .map(([groupId, { distributions, group }]) => ({
+      group,
+      distributions: distributions
+        .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
+    }));
 
     return {
       vendor,
-      nextDistributions: Array.from(nextDistributionsByGroupId.values()),
+      nextDistributions
     };
   }
 
@@ -434,8 +443,8 @@ export class VendorsResolver {
     return this.catalogsService.findByVendor(parent.id);
   }
 
-  @ResolveField(() => [EntityFile])
-  async documents(@Parent() parent: VendorEntity): Promise<EntityFile[]> {
+  @ResolveField(() => [EntityFileEntity])
+  async documents(@Parent() parent: VendorEntity): Promise<EntityFileEntity[]> {
     const entityFiles = await this.entityFilesService.getAllByEntity(
       parent.id,
       'vendor',
@@ -444,14 +453,7 @@ export class VendorsResolver {
     if (!entityFiles || entityFiles.length === 0) {
       return [];
     }
-    return entityFiles.map((ef) => ({
-      id: ef.id,
-      entityType: ef.entityType,
-      documentType: ef.documentType,
-      entityId: ef.entityId,
-      fileId: ef.fileId,
-      data: ef.data,
-    }));
+    return entityFiles;
   }
 
   /**

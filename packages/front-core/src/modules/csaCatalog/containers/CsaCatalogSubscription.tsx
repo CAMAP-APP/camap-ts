@@ -11,7 +11,7 @@ import { CsaCatalogContext } from '../CsaCatalog.context';
 import { useRestUpdateSubscriptionAbsencesPost } from '../requests';
 import CsaCatalogAbsences from './CsaCatalogAbsences';
 import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
-import CamapIcon from '@components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 const CsaCatalogSubscription = () => {
   const { t, tCommon } = useCamapTranslation(
@@ -184,14 +184,14 @@ const CsaCatalogSubscription = () => {
           <Button
             variant="outlined"
             sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-            startIcon={<CamapIcon id="subscription" />}
+            startIcon={<CamapIcon id={CamapIconId.subscription} />}
             href={`/history/subscriptionOrders/${subscription.id}`}
           >
             {t('orders')}
           </Button>
           <Button
             variant="outlined"
-            startIcon={<CamapIcon id="delete" />}
+            startIcon={<CamapIcon id={CamapIconId.delete} />}
             href={`/subscriptions/delete/${subscription.id}`}
           >
             {t('cancelSubscription')}

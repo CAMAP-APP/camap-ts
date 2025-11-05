@@ -10,6 +10,11 @@ import { MultiDistribsService } from '../services/multi-distribs.service';
 import { Distribution } from '../types/distribution.type';
 import { MultiDistrib } from '../types/multi-distrib.type';
 import { UserOrder } from '../types/user-order.type';
+import { Catalog } from 'src/vendors/types/catalog.type';
+import { Place } from 'src/places/types/place.type';
+import { CatalogsService } from 'src/vendors/services/catalogs.service';
+import { PlacesService } from 'src/places/services/places.service';
+import { CatalogEntity } from 'src/vendors/entities/catalog.entity';
 
 @Resolver(() => Distribution)
 export class DistributionsResolver {
@@ -17,6 +22,8 @@ export class DistributionsResolver {
     private readonly distributionsService: DistributionsService,
     private readonly multiDistribsService: MultiDistribsService,
     private readonly ordersService: OrdersService,
+    private readonly catalogService: CatalogsService,
+    private readonly placeService: PlacesService
   ) {}
 
   /**
@@ -64,6 +71,26 @@ export class DistributionsResolver {
     @Parent() parent: Distribution & Pick<DistributionEntity, 'raw_orderEndDate'>,
   ) {
     return zonedTimeToUtc(parent.raw_orderEndDate, TZ_PARIS);
+  }
+
+  @ResolveField(() => Catalog)
+  async catalog(
+    @Parent() parent: Distribution & { catalog?: Promise<CatalogEntity> },
+  ) {
+    if (parent.catalog) {
+      return parent.catalog;
+    }
+    return await this.catalogService.findOneById(parent.catalogId);
+  }
+
+  @ResolveField(() => Place)
+  async place(
+    @Parent() parent: Distribution & { place?: Promise<Catalog> },
+  ) {
+    if (parent.place) {
+      return parent.place;
+    }
+    return await this.placeService.findOne(parent.placeId);
   }
 
   @ResolveField(() => [UserOrder])

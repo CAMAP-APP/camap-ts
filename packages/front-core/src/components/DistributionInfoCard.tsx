@@ -1,16 +1,21 @@
-import { Distribution, MultiDistrib, Place } from '@gql';
+import { Catalog, MultiDistrib, Place } from '@gql';
 import { Box, Link, styled } from '@mui/material';
 import CamapIcon from './utils/CamapIcon/CamapIcon';
 import { CamapIconId } from './utils/CamapIcon/CamapIcon';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
-import theme from 'theme';
 
-interface DeliveryInfoCardProps {
-  multiDistrib: Pick<MultiDistrib, 'id' | 'distribStartDate' | 'distribEndDate'>;
-  distributions: Array<Pick<Distribution, 'id'> & { catalog: { name: string } }>;
-  place?: Pick<Place, 'id' | 'name' | 'address1' | 'address2' | 'city' | 'zipCode'>;
-  isFirst?: boolean;
-  onPlaceClick?: (placeId: number) => void;
+interface DistributionInfoCardProps {
+  id: number,
+  date: Date,
+  catalogId: number,
+  orderEndDate: Date,
+  orderStartDate: Date,
+  end: Date,
+  catalog: Pick<Catalog, "id"|"name">,
+  place: Pick<Place, "id"|"name"|"address1"|"city"|"zipCode">,
+  multiDistrib: Pick<MultiDistrib, "id"|"distribStartDate"|"distribEndDate">,
+  isFirst?: boolean,
+  onPlaceClick?: (placeId: number) => void
 }
 
 const DateBox = styled(Box)(({ theme }) => ({
@@ -51,7 +56,7 @@ const DateBoxHeader = (props: { from: Date, to: Date }) => {
       </Box>
 };
 
-const DeliveryCatalogs = styled(Box)(({ theme }) => ({
+const DistributionCatalogs = styled(Box)(({ theme }) => ({
   flexShrink: 0,
   flexGrow: 1,
   backgroundColor: 'rgba(255,255,255,20%)',
@@ -69,7 +74,7 @@ const DeliveryCatalogs = styled(Box)(({ theme }) => ({
   }
 }));
 
-const DeliveryPlace = styled(Box)(({ theme }) => ({
+const DistributionPlace = styled(Box)(({ theme }) => ({
   flexShrink: 0,
   flexGrow: 0,
   lineHeight: '13px',
@@ -95,13 +100,19 @@ const DeliveryPlace = styled(Box)(({ theme }) => ({
   }
 }));
 
-const DeliveryInfoCard = ({
-  multiDistrib,
-  distributions,
+const DistributionInfoCard = ({
+  id,
+  date,
+  catalogId,
+  orderEndDate,
+  orderStartDate,
+  end,
+  catalog,
   place,
+  multiDistrib,
   isFirst = false,
   onPlaceClick,
-}: DeliveryInfoCardProps) => {
+}: DistributionInfoCardProps) => {
 
     const {t} = useCamapTranslation({});
 
@@ -118,33 +129,27 @@ const DeliveryInfoCard = ({
     <DateBox className='dateBox'>
       <DateBoxHeader from={startDate} to={endDate} />
 
-      {/* Catalogs List */}
-      {distributions.length > 0 && (
-        <DeliveryCatalogs>
-          <Box component="ul" sx={{ 
-            textAlign: 'left',
-            paddingLeft: '16px',
+      <DistributionCatalogs>
+        <Box component="ul" sx={{ 
+          textAlign: 'left',
+          paddingLeft: '16px',
+          margin: 0,
+          '& > li': {
+            padding: 0,
             margin: 0,
-            '& > li': {
-              padding: 0,
-              margin: 0,
-            }
-          }}>
-            {distributions.map((distribution) => (
-              <Box
-                key={distribution.id}
-                component="li"
-              >
-                {distribution.catalog.name}
-              </Box>
-            ))}
-          </Box>
-        </DeliveryCatalogs>
-      )}
+          }
+        }}>
+          <Box
+              component="li"
+            >
+              {catalog.name}
+            </Box>
+        </Box>
+      </DistributionCatalogs>
 
       {/* Place Information */}
       {place && (
-        <DeliveryPlace>
+        <DistributionPlace>
           <CamapIcon id={CamapIconId.mapMarker} style={{ fontSize: '13px' }} />
           {onPlaceClick ? (
             <Link
@@ -155,35 +160,39 @@ const DeliveryInfoCard = ({
             </Link>
           ) : place.name
           }
-        </DeliveryPlace>
+        </DistributionPlace>
       )}
     </DateBox>
   );
 };
 
-const StyledDeliveryList = styled(Box)(({ theme }) => ({
+const StyledDistributionsList = styled(Box)(({ theme }) => ({
   padding: '24px 8px',
   display: 'flex',
   flexWrap: 'wrap',
   gap: '8px',
 }));
 
-export const DeliveryList = ({ 
-  deliveries 
+export const DistributionList = ({ 
+  distributions,
+  onPlaceClick
 }: { 
-  deliveries: Omit<DeliveryInfoCardProps, 'isFirst'>[] 
+  distributions: Omit<DistributionInfoCardProps, 'isFirst' | 'onPlaceClick'>[]
+  onPlaceClick?: (placeId: number) => void;
 }) => {
+
   return (
-    <StyledDeliveryList>
-      {deliveries.slice(0,4).map((d, i) => (
-        <DeliveryInfoCard 
+    <StyledDistributionsList>
+      {distributions.slice(0,4).map((d, i) => (
+        <DistributionInfoCard 
           key={d.multiDistrib.id} 
-          {...d} 
+          {...d}
+          onPlaceClick={onPlaceClick}
           isFirst={i === 0}
         />
       ))}
-    </StyledDeliveryList>
+    </StyledDistributionsList>
   );
 };
 
-export default DeliveryInfoCard;
+export default DistributionInfoCard;

@@ -68,5 +68,9 @@
     "defaultVendorName": "la fiche Producteur",
     "vendorDashboardHome": "{{vendorName}}",
     "vendorDashboardProfile": "Profile",
-    "vendorDashboardDocuments": "Documents"
+    "vendorDashboardDocuments": "Documents",
+    "publicTabDescription": "Description",
+    "publicTabDeliveries": "Prochaines Distributions",
+    "publicTabDocuments": "Documents",
+    "publicTabProducts": "Produits"
 }

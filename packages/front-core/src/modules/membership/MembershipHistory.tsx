@@ -21,7 +21,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import ApolloErrorAlert from '../../components/utils/errors/ApolloErrorAlert';
 import { useDeleteMembershipMutation } from '../../gql';
-import CamapIcon from '@components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 const HeadTableCellSx = {
   backgroundColor: Colors.background3,
@@ -142,7 +142,7 @@ const MembershipHistory = ({
                       onClick={onClick}
                       size="large"
                     >
-                      <CamapIcon id="delete" />
+                      <CamapIcon id={CamapIconId.delete} />
                     </IconButton>
                   </TableCell>
                 </TableRow>

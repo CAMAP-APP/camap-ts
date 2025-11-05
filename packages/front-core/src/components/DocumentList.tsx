@@ -1,5 +1,5 @@
 import { CircularProgress, IconButton, List, ListItem, ListItemButton } from "@mui/material";
-import CamapIcon from "./utils/CamapIcon";
+import CamapIcon, { CamapIconId } from "./utils/CamapIcon";
 import { EntityFile, useDeleteDocumentMutation } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
@@ -52,7 +52,7 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
                 disabled={deleting}
             >
                 {deleting && <CircularProgress />}
-                {!deleting && <CamapIcon id="delete" />}
+                {!deleting && <CamapIcon id={CamapIconId.delete} />}
             </IconButton>
         }
     >

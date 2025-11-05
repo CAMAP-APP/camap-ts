@@ -265,6 +265,7 @@ type Distribution {
   catalog: Catalog!
   orderEndDate: DateTime!
   orderStartDate: DateTime!
+  placeId: Int!
   place: Place!
   userOrders: [UserOrder!]!
   multiDistrib: MultiDistrib!
@@ -358,9 +359,14 @@ type MembershipOperationTypeData {
   year: Int!
 }
 
+type InitVendorPageDistribution {
+  group: Group!
+  distributions: [Distribution!]!
+}
+
 type InitVendorPage {
   vendor: Vendor!
-  nextDistributions: [Distribution!]!
+  nextDistributions: [InitVendorPageDistribution!]!
 }
 
 type VendorProfession {

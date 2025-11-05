@@ -70,10 +70,11 @@ export enum CamapIconId {
   youtube = 'youtube',
 
   subscription = 'book',
+  delivery = 'clock',
 }
 
 export interface CamapIconProps {
-  id: CamapIconId | keyof typeof CamapIconId;
+  id: CamapIconId;
   className?: string;
 }
 

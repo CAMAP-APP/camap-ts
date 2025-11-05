@@ -67,7 +67,7 @@ const CsaCatalogInformationBlock = ({
                     },
                   }}
                 >
-                  <CamapIcon id="file" />
+                  <CamapIcon id={CamapIconId.file} />
                 </ListItemIcon>
                 <ListItemText
                   primary={d.name}

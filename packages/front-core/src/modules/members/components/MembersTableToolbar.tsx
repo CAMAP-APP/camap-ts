@@ -23,7 +23,7 @@ import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
 import MembershipFeeDialog from './MembershipFeeDialog';
 import { formatUserName } from 'camap-common';
-import CamapIcon from '@components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 type BatchAction = 'membership' | 'exclude' | 'waitingList';
 
@@ -87,8 +87,8 @@ const MembersTableToolbar = ({
     </Button>
   );
 
-  const cancelButtonLabel = React.useMemo(() => tBasics('cancel'), []);
-  const confirmButtonLabel = React.useMemo(() => tBasics('confirm'), []);
+  const cancelButtonLabel = React.useMemo(() => tBasics('cancel'), [tBasics]);
+  const confirmButtonLabel = React.useMemo(() => tBasics('confirm'), [tBasics]);
 
   const MembershipActionButton = withConfirmDialog(ToolbarButton, {
     title: t(`membershipConfirmDialogTitle`),
@@ -304,7 +304,7 @@ const MembersTableToolbar = ({
                 aria-label={t('removeFromGroup')}
                 onClick={() => doBatchAction('exclude')}
               >
-                <CamapIcon id="delete" />
+                <CamapIcon id={CamapIconId.delete} />
               </ExcludeActionButtonForwadedRef>
             </Tooltip>
           </Box>

@@ -2,9 +2,11 @@ import { Box, Button, Card, CardContent, Grid, Typography } from "@mui/material"
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { reactRouterDefaultProps } from "react-router-config";
-import { DeliveryList } from "@components/DeliveryInfoCard";
 import VendorLayout from "layout/VendorLayout";
 import VendorDocuments from "./VendorDocuments";
+import VendorDescription from "./VendorDescription";
+import VendorDistributions from "./VendorDistributions";
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 
 type VendorLike = {
     id: number,
@@ -38,61 +40,6 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
     console.log(vendor);
 
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
-
-  // Tab content examples
-  const descriptionContent = (
-    <Box>
-      <Typography variant="body1" paragraph>
-        This is a sample group description. It can contain rich text content,
-        images, and other elements to describe the group's mission and activities.
-      </Typography>
-      <Typography variant="body1" paragraph>
-        The group focuses on sustainable agriculture and local food distribution,
-        bringing together producers and consumers in a community-supported agriculture model.
-      </Typography>
-    </Box>
-  );
-
-  const deliveriesContent = (
-    <>
-        <Typography>
-            Groupe CAMAP 1
-        </Typography>
-        <DeliveryList deliveries={[
-            ...[1, 2, 3].map((_,i) => ({
-                    distributions: [
-                        { id: 1001, catalog: { name: "AMAP Variable Legumes"} },
-                        { id: 1002, catalog: { name: "Poulets gros poulet kot kot kot"} },
-                        { id: 1003, catalog: { name: "Contrat confiture long long long"} }
-                    ],
-                    multiDistrib: {
-                        id: 100+i,
-                        distribStartDate: `2025-1${i}-30 18:30`,
-                        distribEndDate: `2025-1${i}-30 21:00`,
-                    },
-                    place: { id: 10, name: "Place du Marché à longerons les chataignes", address1: "1 place du marché", address2:"", city:"Longerons-Les-Chataignes", zipCode: "99886"}
-                }))
-        ]} />
-        <Typography>
-            Groupe CAMAP 2
-        </Typography>
-        <DeliveryList deliveries={[
-            ...[1, 2, 3].map((_,i) => ({
-                    distributions: [
-                        { id: 1001, catalog: { name: "AMAP Variable Legumes"} },
-                        { id: 1002, catalog: { name: "Poulets gros poulet kot kot kot"} },
-                        { id: 1003, catalog: { name: "Contrat confiture long long long"} }
-                    ],
-                    multiDistrib: {
-                        id: 100+i,
-                        distribStartDate: `2025-1${i}-30 18:30`,
-                        distribEndDate: `2025-1${i}-30 21:00`,
-                    },
-                    place: { id: 10, name: "Place du Marché à longerons les chataignes", address1: "1 place du marché", address2:"", city:"Longerons-Les-Chataignes", zipCode: "99886"}
-                }))
-        ]} />
-    </>
-  );
 
   const suppliersContent = (
     <Box>
@@ -173,30 +120,30 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
   const tabs = [
     {
         id: 'description',
-        label: 'Description',
-        icon: <span className="glyphicon glyphicon-info-sign"/>,
+        label: tVendorDash('publicTabDescription'),
+        icon: <CamapIcon id={CamapIconId.info} />,
         path: "/description",
-        content: descriptionContent
+        content: <VendorDescription vendor={vendor} />
     },
     {
         id: 'deliveries',
-        label: 'Next deliveries',
-        icon: <span className="glyphicon glyphicon-time" />,
+        label: tVendorDash('publicTabDeliveries'),
+        icon: <CamapIcon id={CamapIconId.delivery} />,
         path: "/deliveries",
-        content: deliveriesContent
+        content: <VendorDistributions vendor={vendor} />
     },
     {
         id: 'documents',
-        label: 'Documents',
-        icon: <span className="glyphicon glyphicon-file" />,
+        label: tVendorDash('publicTabDocuments'),
+        icon: <CamapIcon id={CamapIconId.file} />,
         path: "/documents",
         content: <VendorDocuments vendorId={vendor.id} />
     },
     {
-        id: 'suppliers',
-        label: 'Suppliers and products',
-        icon: <span className="glyphicon glyphicon-user" />,
-        path: "/vendors",
+        id: 'products',
+        label: tVendorDash('publicTabProducts'),
+        icon: <CamapIcon id={CamapIconId.products} />,
+        path: "/products",
         content: suppliersContent
     },
 ]

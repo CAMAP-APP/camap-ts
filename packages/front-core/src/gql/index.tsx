@@ -259,8 +259,14 @@ export type GroupPreviewMembers = {
 
 export type InitVendorPage = {
   __typename?: 'InitVendorPage';
-  nextDistributions: Array<Distribution>;
+  nextDistributions: Array<InitVendorPageDistribution>;
   vendor: Vendor;
+};
+
+export type InitVendorPageDistribution = {
+  __typename?: 'InitVendorPageDistribution';
+  distributions: Array<Distribution>;
+  group: Group;
 };
 
 export type InvitedUser = {
@@ -1312,6 +1318,13 @@ export type VendorDocumentsQueryVariables = Exact<{
 
 export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }> }> } };
 
+export type InitVendorPageQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type InitVendorPageQuery = { __typename?: 'Query', initVendorPage: { __typename?: 'InitVendorPage', vendor: { __typename?: 'Vendor', id: number, name: string }, nextDistributions: Array<{ __typename?: 'InitVendorPageDistribution', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
+
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
   startDate?: InputMaybe<Scalars['DateTime']>;
@@ -2307,6 +2320,74 @@ export function useVendorDocumentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type VendorDocumentsQueryHookResult = ReturnType<typeof useVendorDocumentsQuery>;
 export type VendorDocumentsLazyQueryHookResult = ReturnType<typeof useVendorDocumentsLazyQuery>;
 export type VendorDocumentsQueryResult = Apollo.QueryResult<VendorDocumentsQuery, VendorDocumentsQueryVariables>;
+export const InitVendorPageDocument = gql`
+    query InitVendorPage($vendorId: Int!) {
+  initVendorPage(vendorId: $vendorId) {
+    vendor {
+      id
+      name
+    }
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalogId
+        catalog {
+          id
+          name
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useInitVendorPageQuery__
+ *
+ * To run a query within a React component, call `useInitVendorPageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInitVendorPageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInitVendorPageQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useInitVendorPageQuery(baseOptions: ApolloReactHooks.QueryHookOptions<InitVendorPageQuery, InitVendorPageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<InitVendorPageQuery, InitVendorPageQueryVariables>(InitVendorPageDocument, options);
+      }
+export function useInitVendorPageLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<InitVendorPageQuery, InitVendorPageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<InitVendorPageQuery, InitVendorPageQueryVariables>(InitVendorPageDocument, options);
+        }
+export type InitVendorPageQueryHookResult = ReturnType<typeof useInitVendorPageQuery>;
+export type InitVendorPageLazyQueryHookResult = ReturnType<typeof useInitVendorPageLazyQuery>;
+export type InitVendorPageQueryResult = Apollo.QueryResult<InitVendorPageQuery, InitVendorPageQueryVariables>;
 export const AttendanceClassicContractDocument = gql`
     query AttendanceClassicContract($catalogId: Int!, $startDate: DateTime, $endDate: DateTime) {
   attendanceClassicContract(
