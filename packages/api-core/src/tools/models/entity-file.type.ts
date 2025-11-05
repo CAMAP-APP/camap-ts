@@ -18,11 +18,12 @@ export class EntityFile {
   @Field(() => Int)
   fileId: number;
 
-  @Field({ nullable: true })
-  data: string | null;
+  @Field(() => String)
+  visibility: string | null;
 
-  @Field(() => File, { nullable: true })
-  file?: File;
+  @Field(() => String)
+  url: string;
+
+  @Field(() => String, { nullable: true })
+  name: string | null;
 }
-
-

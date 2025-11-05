@@ -97,21 +97,15 @@ type Place {
   lng: Float
 }
 
-type File {
-  id: Int!
-  name: String
-  data: String!
-  cDate: DateTime
-}
-
 type EntityFile {
   id: Int!
   entityType: String!
   documentType: String!
   entityId: Int!
   fileId: Int!
-  data: String
-  file: File
+  visibility: String!
+  url: String!
+  name: String
 }
 
 type Product {
@@ -133,6 +127,7 @@ type Product {
   ref: String
   multiWeight: Boolean!
   active: Boolean!
+  currency: String!
   image: String!
   price: Float!
   vendorId: Int!
@@ -359,6 +354,13 @@ type MembershipOperationTypeData {
   year: Int!
 }
 
+type File {
+  id: Int!
+  name: String
+  data: String!
+  cDate: DateTime
+}
+
 type InitVendorPageDistribution {
   group: Group!
   distributions: [Distribution!]!
@@ -552,6 +554,7 @@ type Query {
   catalog(id: Int!): Catalog!
   getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
   getActiveCatalogs(groupId: Int!): [Catalog!]!
+  vendorProductsSample(vendorId: Int!): [Product!]!
   group(id: Int!): Group!
   groupPreview(id: Int!): GroupPreview!
   groupPreviews: [GroupPreview!]!

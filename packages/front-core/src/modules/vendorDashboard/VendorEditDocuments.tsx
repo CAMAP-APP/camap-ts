@@ -8,7 +8,7 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
 
 
-type EntityFileLike = Pick<EntityFile, "id" | "documentType" | "data" | "file">;
+type EntityFileLike = Pick<EntityFile, "id" | "documentType" | "visibility" | "name" | "url">;
 type GroupLike = Pick<Group, "id" | "name">;
 type CatalogLike = Pick<Catalog, "id" | "name"> & { group: GroupLike };
 

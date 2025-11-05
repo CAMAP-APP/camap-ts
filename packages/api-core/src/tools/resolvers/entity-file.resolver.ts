@@ -36,10 +36,19 @@ export class EntityFileResolver {
     private readonly userGroupsService: UserGroupsService,
   ) {}
 
-  @ResolveField(() => File, { nullable: true })
-  async file(@Parent() parent: EntityFile): Promise<File | null> {
-    if (!parent.fileId) return null;
-    return this.filesService.findOneAndConvertToFile(parent.fileId);
+  @ResolveField(() => String)
+  async url(@Parent() parent: EntityFile) {
+    return this.filesService.getUrl(parent.fileId);
+  }
+
+  @ResolveField(() => String)
+  async name(@Parent() parent: EntityFile) {
+    return (await this.filesService.findOne(parent.fileId)).name;
+  }
+
+  @ResolveField(() => String)
+  visibility(@Parent() parent: EntityFileEntity) {
+    return parent.data;
   }
 
   @UseGuards(GqlAuthGuard)

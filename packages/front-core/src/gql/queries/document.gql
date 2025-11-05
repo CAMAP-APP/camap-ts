@@ -18,11 +18,9 @@ mutation createDocument(
     entityType
     entityId
     documentType
-    data
-    file {
-      id
-      name
-    }
+    visibility
+    url
+    name
   }
 }
 

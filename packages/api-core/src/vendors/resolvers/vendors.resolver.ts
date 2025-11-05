@@ -42,6 +42,7 @@ import DataLoader = require('dataloader');
 import { GroupEntity } from 'src/groups/entities/group.entity';
 import { CatalogEntity } from '../entities/catalog.entity';
 import { Distribution } from 'src/shop/types/distribution.type';
+import { GroupsService } from 'src/groups/services/groups.service';
 
 @Resolver(() => Vendor)
 export class VendorsResolver {
@@ -463,6 +464,8 @@ export class VendorsResolver {
     currentUser: UserEntity,
     vendor: VendorEntity,
   ) {
+    if(vendor.userId === currentUser.id) return true;
+
     // Check if the user can manage one of the vendor's catalogs
     const catalogs = await this.catalogsService.findByVendor(vendor.id);
     const hasRights = await Promise.all(

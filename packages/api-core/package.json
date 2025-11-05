@@ -111,6 +111,7 @@
     "i18next-fs-backend": "^1.0.7",
     "inline-css": "4.0.2",
     "md5": "^2.3.0",
+    "metric-lcs": "^1.0.3",
     "mysql2": "^2",
     "nodemailer": "^6.7.2",
     "passport": "^0.7.0",

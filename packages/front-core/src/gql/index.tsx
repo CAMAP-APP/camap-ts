@@ -134,6 +134,7 @@ export type Distribution = {
   orderEndDate: Scalars['DateTime'];
   orderStartDate: Scalars['DateTime'];
   place: Place;
+  placeId: Scalars['Int'];
   userOrders: Array<UserOrder>;
 };
 
@@ -168,13 +169,14 @@ export type EmbeddedImageAttachment = {
 
 export type EntityFile = {
   __typename?: 'EntityFile';
-  data?: Maybe<Scalars['String']>;
   documentType: Scalars['String'];
   entityId: Scalars['Int'];
   entityType: Scalars['String'];
-  file?: Maybe<File>;
   fileId: Scalars['Int'];
   id: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
+  url: Scalars['String'];
+  visibility: Scalars['String'];
 };
 
 export type File = {
@@ -679,6 +681,7 @@ export type Product = {
   bulk: Scalars['Boolean'];
   catalogId: Scalars['Int'];
   catalogName: Scalars['String'];
+  currency: Scalars['String'];
   desc?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   image: Scalars['String'];
@@ -751,6 +754,7 @@ export type Query = {
   user: User;
   userGroup?: Maybe<UserGroup>;
   vendor: Vendor;
+  vendorProductsSample: Array<Product>;
 };
 
 
@@ -980,6 +984,11 @@ export type QueryUserGroupArgs = {
 
 export type QueryVendorArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryVendorProductsSampleArgs = {
+  vendorId: Scalars['Int'];
 };
 
 export type RegisterInput = {
@@ -1274,7 +1283,7 @@ export type CreateDocumentMutationVariables = Exact<{
 }>;
 
 
-export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null } | null } };
+export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, visibility: string, url: string, name?: string | null } };
 
 export type DeleteDocumentMutationVariables = Exact<{
   id: Scalars['Int'];
@@ -1316,7 +1325,14 @@ export type VendorDocumentsQueryVariables = Exact<{
 }>;
 
 
-export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, data?: string | null, file?: { __typename?: 'File', id: number, name?: string | null, data: string, cDate?: any | null } | null }> }> } };
+export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }> }> } };
+
+export type VendorProductsSampleQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
 
 export type InitVendorPageQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -2024,11 +2040,9 @@ export const CreateDocumentDocument = gql`
     entityType
     entityId
     documentType
-    data
-    file {
-      id
-      name
-    }
+    visibility
+    url
+    name
   }
 }
     `;
@@ -2262,13 +2276,9 @@ export const VendorDocumentsDocument = gql`
     documents {
       id
       documentType
-      data
-      file {
-        id
-        name
-        data
-        cDate
-      }
+      visibility
+      name
+      url
     }
     catalogs {
       id
@@ -2280,13 +2290,9 @@ export const VendorDocumentsDocument = gql`
       documents {
         id
         documentType
-        data
-        file {
-          id
-          name
-          data
-          cDate
-        }
+        visibility
+        name
+        url
       }
     }
   }
@@ -2320,6 +2326,50 @@ export function useVendorDocumentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type VendorDocumentsQueryHookResult = ReturnType<typeof useVendorDocumentsQuery>;
 export type VendorDocumentsLazyQueryHookResult = ReturnType<typeof useVendorDocumentsLazyQuery>;
 export type VendorDocumentsQueryResult = Apollo.QueryResult<VendorDocumentsQuery, VendorDocumentsQueryVariables>;
+export const VendorProductsSampleDocument = gql`
+    query vendorProductsSample($vendorId: Int!) {
+  vendorProductsSample(vendorId: $vendorId) {
+    id
+    name
+    desc
+    organic
+    bulk
+    image
+    price
+    currency
+    qt
+    unitType
+  }
+}
+    `;
+
+/**
+ * __useVendorProductsSampleQuery__
+ *
+ * To run a query within a React component, call `useVendorProductsSampleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorProductsSampleQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorProductsSampleQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorProductsSampleQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>(VendorProductsSampleDocument, options);
+      }
+export function useVendorProductsSampleLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>(VendorProductsSampleDocument, options);
+        }
+export type VendorProductsSampleQueryHookResult = ReturnType<typeof useVendorProductsSampleQuery>;
+export type VendorProductsSampleLazyQueryHookResult = ReturnType<typeof useVendorProductsSampleLazyQuery>;
+export type VendorProductsSampleQueryResult = Apollo.QueryResult<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>;
 export const InitVendorPageDocument = gql`
     query InitVendorPage($vendorId: Int!) {
   initVendorPage(vendorId: $vendorId) {

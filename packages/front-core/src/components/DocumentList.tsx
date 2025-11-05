@@ -4,7 +4,7 @@ import { EntityFile, useDeleteDocumentMutation } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
 
-type EntityFileLike = Pick<EntityFile, "id" | "data" | "file">;
+type EntityFileLike = Pick<EntityFile, "id" | "visibility" | "url" | "name">;
 const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editable?:boolean, onDelete?: () => void }) => {
     
     const { t } = useCamapTranslation({});
@@ -18,24 +18,12 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
     const [deleting, setDeleting] = useState(false);
 
     const onClick = () => {
-        if (doc.file?.data) {
-            // Convert base64 to blob and download
-            const byteCharacters = atob(doc.file?.data);
-            const byteNumbers = new Array(byteCharacters.length);
-            for (let i = 0; i < byteCharacters.length; i++) {
-                byteNumbers[i] = byteCharacters.charCodeAt(i);
-            }
-            const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([byteArray], { type: 'application/pdf' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `${doc.file?.name ?? "No name"}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(url);
-        }
+        const link = document.createElement('a');
+        link.href = doc.url;
+        link.download = `${doc.name ?? "No name"}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     return <ListItem
@@ -62,7 +50,7 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
             onClick={onClick}
         >
             <i className="icon icon-file-pdf" style={{ marginRight: '0.2em' }}/>
-            {doc.file?.name ?? t("noDocumentName")}
+            {doc.name ?? t("noDocumentName")}
         </ListItemButton>
     </ListItem>
 }

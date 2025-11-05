@@ -158,7 +158,7 @@ export class CatalogsResolver {
   async documents(
     @Parent() parent: Catalog,
     @CurrentUser() currentUser: UserEntity,
-  ): Promise<EntityFile[]> {
+  ): Promise<EntityFileEntity[]> {
     const entityFiles = await this.entityFilesService.getAllByEntity(
       parent.id,
       'catalog',
@@ -192,13 +192,6 @@ export class CatalogsResolver {
       }
     }
 
-    return filteredFiles.map((ef) => ({
-      id: ef.id,
-      entityType: ef.entityType,
-      documentType: ef.documentType,
-      entityId: ef.entityId,
-      fileId: ef.fileId,
-      data: ef.data,
-    }));
+    return filteredFiles;
   }
 }

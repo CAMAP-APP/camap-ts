@@ -25,13 +25,9 @@ query vendorDocuments($vendorId: Int!) {
     documents {
       id
       documentType
-      data
-      file {
-        id
-        name
-        data
-        cDate
-      }
+      visibility
+      name
+      url
     }
     catalogs {
       id
@@ -43,15 +39,26 @@ query vendorDocuments($vendorId: Int!) {
       documents {
         id
         documentType
-        data
-        file {
-            id
-            name
-            data
-            cDate
-        }
+        visibility
+        name
+        url
       }
     }
+  }
+}
+
+query vendorProductsSample($vendorId: Int!) {
+  vendorProductsSample(vendorId: $vendorId) {
+    id
+    name
+    desc
+    organic
+    bulk
+    image
+    price
+    currency
+    qt
+    unitType
   }
 }
 

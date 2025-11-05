@@ -171,15 +171,15 @@ export const formatUnit = (
 ): string => {
   switch (u) {
     case ProductUnit.Kilogram:
-      return 'Kg.';
+      return 'Kg';
     case ProductUnit.Gram:
-      return 'g.';
+      return 'g';
     case ProductUnit.Litre:
-      return 'L.';
+      return 'L';
     case ProductUnit.Centilitre:
-      return 'cl.';
+      return 'cl';
     case ProductUnit.Millilitre:
-      return 'ml.';
+      return 'ml';
     case ProductUnit.Piece:
     default:
       if (!t) return '';
@@ -195,9 +195,14 @@ export const formatPricePerUnit = (
   price: number,
   qt?: number,
   unit?: ProductUnit,
+  currency?: string,
   t?: TFunction,
 ): string => {
-  if (!qt || !price) return '';
+  if (!price) return '';
+
+  if(!qt || !unit)
+    return formatCurrency(price, currency);
+
   let ppu = price / qt;
   let u = unit;
 
@@ -219,7 +224,7 @@ export const formatPricePerUnit = (
       default:
     }
   }
-  return `${formatCurrency(ppu)}/${formatUnit(u, qt, t)}`;
+  return `${formatCurrency(ppu, currency)}/${formatUnit(u, qt, t)}`;
 };
 
 export const round = (number: number): number => {

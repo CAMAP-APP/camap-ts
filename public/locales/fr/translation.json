@@ -54,5 +54,6 @@
   "catalog": "Catalogue",
   "catalog_plural": "Catalogues",
   "st": "er",
-  "th": "ème"
+  "th": "ème",
+  "noDocumentName": "Document Sans Nom"
 }
