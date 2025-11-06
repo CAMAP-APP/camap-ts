@@ -122,7 +122,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
   return (
     <Block
       title={t(isConstOrders ? 'subscription' : 'enterYourDefaultOrder')}
-      icon={<MediumActionIcon id={CamapIconId.products} />}
+      icon={<MediumActionIcon id={CamapIconId.basket} />}
       sx={{ height: '100%' }}
       contentSx={{
         maxHeight: 'calc(100vh - 132px)',
