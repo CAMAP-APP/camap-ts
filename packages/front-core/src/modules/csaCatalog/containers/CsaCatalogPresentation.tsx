@@ -153,6 +153,7 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
+              onClick={() => { window.location.href = `/vendor/view/${catalog.vendor.id}` }}
             >
               <Box textAlign="center">
                 <Avatar
