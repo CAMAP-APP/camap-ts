@@ -1339,7 +1339,7 @@ export type InitVendorPageQueryVariables = Exact<{
 }>;
 
 
-export type InitVendorPageQuery = { __typename?: 'Query', initVendorPage: { __typename?: 'InitVendorPage', vendor: { __typename?: 'Vendor', id: number, name: string }, nextDistributions: Array<{ __typename?: 'InitVendorPageDistribution', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
+export type InitVendorPageQuery = { __typename?: 'Query', initVendorPage: { __typename?: 'InitVendorPage', vendor: { __typename?: 'Vendor', id: number, name: string }, nextDistributions: Array<{ __typename?: 'InitVendorPageDistribution', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
 
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -2398,6 +2398,8 @@ export const InitVendorPageDocument = gql`
           address1
           city
           zipCode
+          lng
+          lat
         }
         multiDistrib {
           id

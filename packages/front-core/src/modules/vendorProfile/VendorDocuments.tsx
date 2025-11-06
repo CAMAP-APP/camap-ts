@@ -48,11 +48,11 @@ function VendorDocuments({ vendorId }: { vendorId: number }) {
                 {Array.from(groups?.values() ?? []).map(({ group, catalogs }) => (
                     <Box key={group.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                         <Typography variant='h4'>{tVendor("inGroupGroupName", { groupName: group.name })}</Typography>
-                        <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                        <Box sx={{ display: 'flex', flexFlow: 'row wrap', gap: 1 }}>
                             {catalogs.map((cat) => (
-                                <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 350 }}>
+                                <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 290 }}>
                                     <CardContent sx={{ height: 'auto', flexGrow: 1 }}>
-                                        <Typography variant='h5'>{cat.name}</Typography>
+                                        <Typography>{cat.name}</Typography>
                                         <DocumentList documents={cat.documents} />
                                         {cat.documents.length === 0 &&
                                             <Typography>{tVendor("noCatalogPublicFile")}</Typography>

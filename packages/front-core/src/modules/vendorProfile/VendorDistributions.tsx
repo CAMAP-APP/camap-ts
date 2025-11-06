@@ -1,26 +1,8 @@
 import { DistributionList } from "@components/DistributionInfoCard";
-import CircularProgressBox from "@components/utils/CircularProgressBox";
-import { useInitVendorPageQuery, Vendor } from "@gql";
-import { Alert, Box, Typography } from "@mui/material";
-import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import { InitVendorPageQuery } from "@gql";
+import { Box, Typography } from "@mui/material";
 
-function VendorDistributions({ vendor: { id: vendorId } }: {vendor: Pick<Vendor, "id">}) {
-
-    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
-
-    const {
-        data: { initVendorPage : { nextDistributions } = {} } = {},
-        loading,
-        error
-    } = useInitVendorPageQuery({
-        variables: { vendorId: vendorId }
-    });
-
-    if(error)
-        return <Alert severity="error">{error.message}</Alert>
-
-    if(loading)
-        return <CircularProgressBox />
+function VendorDistributions({ nextDistributions }: {nextDistributions?: InitVendorPageQuery["initVendorPage"]["nextDistributions"]}) {
 
     return <>
         {nextDistributions?.map(({ group, distributions }) => (<Box key={group.id}>

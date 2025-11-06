@@ -46,7 +46,7 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
     >
         <ListItemButton
             component="a"
-            sx={{ wordBreak: 'break-all', pl: 1 }}
+            sx={{ wordBreak: 'break-all', pl: 1, fontSize: '13px', lineHeight: '13px' }}
             onClick={onClick}
         >
             <i className="icon icon-file-pdf" style={{ marginRight: '0.2em' }}/>

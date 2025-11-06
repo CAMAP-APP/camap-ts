@@ -89,6 +89,8 @@ query InitVendorPage($vendorId: Int!) {
           address1
           city
           zipCode
+          lng
+          lat
         }
         multiDistrib {
           id

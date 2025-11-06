@@ -1,11 +1,13 @@
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import { useInitVendorPageQuery } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import VendorLayout, { PlaceLike, VendorMapContext } from "layout/VendorLayout";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { reactRouterDefaultProps } from "react-router-config";
-import VendorLayout from "layout/VendorLayout";
-import VendorDocuments from "./VendorDocuments";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import VendorDescription from "./VendorDescription";
 import VendorDistributions from "./VendorDistributions";
-import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import VendorDocuments from "./VendorDocuments";
 import VendorProducts from "./VendorProducts";
 
 type VendorLike = {
@@ -39,6 +41,38 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
 
   const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
 
+  const [selectedDistributionPlace, setSelectedDistributionPlace] = useState<PlaceLike|undefined>(undefined);
+  const [distributionPlaces, setDistributionPlace] = useState([] as PlaceLike[]);
+  const addDistributionPlace = useCallback((p:PlaceLike) => {
+    setDistributionPlace(places => {
+      const set = new Set(places);
+      set.add(p);
+      return Array.from(set);
+    });
+  }, [])
+  const vendorMap = useMemo(() => {
+    return {
+      distributionPlaces,
+      selectedDistributionPlace,
+      setSelectedDistributionPlace,
+      addDistributionPlace
+    };
+  }, [
+    distributionPlaces,
+    selectedDistributionPlace,
+    addDistributionPlace
+  ]);
+
+  const {
+      data: { initVendorPage : { nextDistributions } = {} } = {},
+  } = useInitVendorPageQuery({
+      variables: { vendorId: vendor.id }
+  });
+
+  useEffect(() => {
+      nextDistributions?.forEach(d => d.distributions.length > 0 && addDistributionPlace(d.distributions[0].place))
+  }, [nextDistributions, addDistributionPlace]);
+
   const tabs = [
     {
         id: 'description',
@@ -52,7 +86,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
         label: tVendorDash('publicTabDeliveries'),
         icon: <CamapIcon id={CamapIconId.delivery} />,
         path: "/deliveries",
-        content: <VendorDistributions vendor={vendor} />
+        content: <VendorDistributions nextDistributions={nextDistributions} />
     },
     {
         id: 'documents',
@@ -71,6 +105,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
 ]
 
     return <BrowserRouter {...reactRouterDefaultProps} basename={basePath}>
+        <VendorMapContext.Provider value={vendorMap}>
         <Routes>
             <Route element={
                 <VendorLayout
@@ -82,6 +117,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
                 <Route index element={<Navigate to="/description" replace />} />
             </Route>
         </Routes>
+        </VendorMapContext.Provider>
     </BrowserRouter>
 }
 
