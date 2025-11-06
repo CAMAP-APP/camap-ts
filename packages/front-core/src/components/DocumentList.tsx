@@ -27,9 +27,11 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
     };
 
     return <ListItem
-        sx={{ pl: 0 }}
+        sx={{ pl: 0, pr: 0 }}
         secondaryAction={
-            editable && <IconButton edge="end"
+            editable && <IconButton
+                sx={{mr: -3}}
+                edge="end"
                 size="small"
                 aria-label="delete"
                 onClick={async () => {
@@ -46,10 +48,10 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
     >
         <ListItemButton
             component="a"
-            sx={{ wordBreak: 'break-all', pl: 1, fontSize: '13px', lineHeight: '13px' }}
+            sx={{ wordBreak: 'break-all', pl: 1, fontSize: '14px', lineHeight: '16px' }}
             onClick={onClick}
         >
-            <i className="icon icon-file-pdf" style={{ marginRight: '0.2em' }}/>
+            <i className="icon icon-file-pdf" style={{ fontSize: '15px', marginRight: '0.2em' }}/>
             {doc.name ?? t("noDocumentName")}
         </ListItemButton>
     </ListItem>

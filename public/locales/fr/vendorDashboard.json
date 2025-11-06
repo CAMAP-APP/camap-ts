@@ -62,17 +62,18 @@
     "noDocumentName": "Fichier sans nom",
     "uploadFile": "Téléverser un fichier",
     "inGroupGroupName": "Dans le groupe {{groupName}}",
-    "noVendorPublicFile": "Pas de document publique Producteur",
+    "noVendorPublicFile": "Aucun document publique sur votre fiche Producteur",
     "noCatalogPublicFile": "Pas de document",
     "uploadDialogTitle": "Téléverser un document pour {{entity}}",
     "defaultVendorName": "la fiche Producteur",
     "vendorDashboardHome": "{{vendorName}}",
-    "vendorDashboardProfile": "Profile",
+    "vendorDashboardProfile": "Profil",
     "vendorDashboardDocuments": "Documents",
     "publicTabDescription": "Description",
     "publicTabDeliveries": "Prochaines Distributions",
     "publicTabDocuments": "Documents",
     "publicTabProducts": "Produits",
     "productSamplePageDesc": "Extrait non exhaustif des produits proposés",
-    "subscriptionBoxTitle": "Ce producteur est présent dans les AMAP"
+    "subscriptionBoxTitle": "Ce producteur est présent dans les AMAP",
+    "welcome": "Bienvenue {{vendorName}}"
 }

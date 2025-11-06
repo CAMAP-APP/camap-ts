@@ -1,16 +1,17 @@
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
+import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
+import { Typography } from "@mui/material";
+import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import DashboardLayout from "layout/DashboardLayout";
+import { useState } from "react";
+import { reactRouterDefaultProps } from "react-router-config";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { VendorImage } from "../../components/vendor/VendorImage";
 import { VendorClaims } from "./VendorClaims";
 import VendorConsolidation from "./VendorConsolidation";
-import VendorForm from "./VendorForm";
-import { CircularProgress } from "@mui/material";
-import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { useState } from "react";
-import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
-import { VendorImage } from "../../components/vendor/VendorImage";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import DashboardLayout from "layout/DashboardLayout";
-import { reactRouterDefaultProps } from "react-router-config";
 import VendorEditDocuments from "./VendorEditDocuments";
-import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import VendorForm from "./VendorForm";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -100,18 +101,17 @@ const VendorDashContent = ({
     vendor: GetVendorsByUserIdQuery["getVendorsByUserId"][number]
     refetchClaimedVendors: () => void
 }) => {
-
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
     return <>
-        <h1>Bienvenue {vendor.name}</h1>
-        <div className="row">
-            <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
-        </div>
+        <Typography variant="h2" gutterBottom>{tVendorDash("welcome", { vendorName: vendor.name })}</Typography>
+        <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
     </>
 }
 
 const VendorDashboardRouter = (props: {basePath: string}) => {
 
-    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });const {
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+    const {
         data: userData,
         loading: userLoading,
         error: userError,
@@ -129,7 +129,7 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
     });
 
     if (userLoading || claimedVendorsLoading) {
-        return <CircularProgress />;
+        return <CircularProgressBox />;
     }
 
     if (userError || claimedVendorsError || !claimedVendors) {
@@ -157,13 +157,13 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
         {
             label: tVendorDash('vendorDashboardProfile'),
             icon: <CamapIcon id={CamapIconId.user} />,
-            path: 'edit',
+            path: '/edit',
             element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
         },
         {
             label: tVendorDash('vendorDashboardDocuments'),
             icon: <CamapIcon id={CamapIconId.file} />,
-            path: 'documents',
+            path: '/documents',
             element: <VendorEditDocuments vendorId={vendor.id} />
         }
     ]

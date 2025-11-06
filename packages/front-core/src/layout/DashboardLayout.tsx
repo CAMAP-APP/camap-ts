@@ -8,7 +8,7 @@ import {
     Paper,
     Typography,
   } from '@mui/material';
-  import { Link, useLocation, Outlet } from 'react-router-dom';
+  import { Link, useLocation, Outlet, NavLink } from 'react-router-dom';
   import { ReactNode } from 'react';
   
   interface NavigationItem {
@@ -22,19 +22,29 @@ import {
     navigation?: NavigationItem[]
   }) => {
     const location = useLocation();
-  
+    console.log(location.pathname, props.navigation);
     return (
       <>
-        <Box sx={{ 
+        <Box sx={{
+          width: "100%",
           display: 'flex',
           minHeight: '50vh',
-          marginBottom: '12px'
+          marginBottom: '12px',
+          flexFlow: {
+            xs: 'column nowrap',
+            sm: 'row nowrap'
+          }
         }}>
           {/* Sidebar */}
           <Box
             sx={{
-              width: 300,
+              width: {
+                xs: "100%",
+                sm: '160px',
+              },
               minHeight: '100%',
+              flexGrow: 0,
+              flexShrink: 0,
               bgcolor: 'background.paper',
               borderRight: 1,
               borderColor: 'divider',
@@ -61,37 +71,34 @@ import {
               </Box>
   
               {/* Navigation */}
-              <List sx={{ p: 1 }}>
+              <List sx={{ p: 1 }} dense>
                 {props.navigation?.map((item) => (
                   <ListItem key={item.path} disablePadding>
                     <ListItemButton
-                      component={Link}
+                      component={NavLink}
                       to={item.path}
                       selected={location.pathname === item.path}
                       sx={{
                         borderRadius: 1,
                         mb: 0.5,
-                        '&.Mui-selected': {
+                        '&.selected': {
                           bgcolor: 'warning.light',
                           color: 'warning.contrastText',
                           '&:hover': {
                             bgcolor: 'warning.main',
                           },
                         },
+                        '& .MuiListItemIcon-root': {
+                          minWidth: 0,
+                          marginRight: 1,
+                        },
                       }}
                     >
-                      <ListItemIcon
-                        sx={{
-                          color: location.pathname === item.path ? 'inherit' : 'text.secondary',
-                        }}
-                      >
+                      <ListItemIcon >
                         {item.icon}
                       </ListItemIcon>
                       <ListItemText
                         primary={item.label}
-                        primaryTypographyProps={{
-                          fontSize: '0.875rem',
-                        }}
                       />
                     </ListItemButton>
                   </ListItem>
@@ -101,7 +108,7 @@ import {
           </Box>
   
           {/* Main Content */}
-          <Box sx={{ flexGrow: 1, p: 1 }}>  
+          <Box sx={{ flexGrow: 1, pl: 2, pr: 2 }}>  
             <Outlet />
           </Box>
         </Box>

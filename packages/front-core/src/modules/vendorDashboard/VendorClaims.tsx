@@ -2,8 +2,19 @@ import { useClaimVendorMutation, useGetClaimableVendorsQuery, useGetDefaultVendo
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
 import { VendorImage } from "../../components/vendor/VendorImage";
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from "@mui/material";
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, styled, Typography } from "@mui/material";
 import VendorsMergeMessage from "./VendorsMergeMessage";
+
+const TD = styled(Box)(({ theme }) => ({
+    display: "flex",
+    flexFlow: "row",
+    gap: "0.2em",
+    justifyContent: "flex-end",
+    padding: '0 !important',
+    [theme.breakpoints.down("md")]: {
+        flexFlow: "column"
+    }
+}))
 
 export const VendorClaims = (
     props: {
@@ -70,8 +81,8 @@ export const VendorClaims = (
         return <></>;
     }
 
-    return <div className="col-md-12">
-        <h4>{tVendorDash("yourEmailAssociatedVendors")}</h4>
+    return <Box>
+        <Typography variant="h5">{tVendorDash("yourEmailAssociatedVendors")}</Typography>
         <table className="table">
             <thead>
                 <tr>
@@ -111,7 +122,7 @@ export const VendorClaims = (
                                 : tVendorDash("none")
                             }
                         </td>
-                        <td style={{ display: "flex", flexFlow: "row", gap: "0.2em", justifyContent: "flex-end" }}>
+                        <TD component="td">
                             <button 
                                 className="btn btn-sm btn-danger"
                                 onClick={() => handleClaimButtonClick(vendor.id)}
@@ -125,7 +136,7 @@ export const VendorClaims = (
                             >
                                 <span className="glyphicon glyphicon-envelope" />&nbsp;{tVendorDash("contactGroups")}
                             </a>
-                        </td>
+                        </TD>
                     </tr>
                 ))}
             </tbody>
@@ -187,5 +198,5 @@ export const VendorClaims = (
                 </Button>
             </DialogActions>
         </Dialog>
-    </div>;
+    </Box>;
 }
