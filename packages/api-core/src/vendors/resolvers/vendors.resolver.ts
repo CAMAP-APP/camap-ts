@@ -14,6 +14,7 @@ import {
   Resolver,
 } from '@nestjs/graphql';
 import { isAfter } from 'date-fns';
+import { GroupEntity } from 'src/groups/entities/group.entity';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
@@ -33,16 +34,12 @@ import { UserEntity } from '../../users/models/user.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
 import { CatalogsService } from '../services/catalogs.service';
 import { VendorService } from '../services/vendor.service';
+import { Catalog } from '../types/catalog.type';
 import { InitVendorPage } from '../types/initVendorPage.type';
 import { Vendor } from '../types/vendor.type';
 import { VendorImage } from '../types/vendorImages.type';
 import { VendorProfession } from '../types/vendorProfession.type';
-import { Catalog } from '../types/catalog.type';
 import DataLoader = require('dataloader');
-import { GroupEntity } from 'src/groups/entities/group.entity';
-import { CatalogEntity } from '../entities/catalog.entity';
-import { Distribution } from 'src/shop/types/distribution.type';
-import { GroupsService } from 'src/groups/services/groups.service';
 
 @Resolver(() => Vendor)
 export class VendorsResolver {

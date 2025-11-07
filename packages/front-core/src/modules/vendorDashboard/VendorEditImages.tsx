@@ -1,10 +1,9 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
-import { useDeleteDocumentMutation, useVendorImagesQuery, useVendorQuery } from "@gql";
-import { Alert, Box, Button, Card, CardActionArea, CardHeader, CardMedia, CircularProgress, Grid, IconButton } from "@mui/material";
+import { useDeleteDocumentMutation, useVendorImagesQuery } from "@gql";
+import { Alert, Box, Button, Card, CardHeader, CardMedia, CircularProgress, Grid, IconButton } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import ImageUploader, { ImageUploaderContext } from "modules/imageUploader/ImageUploader";
 import { useState } from "react";
-import { ref } from "yup";
 
 function VendorEditImages({ vendorId }: { vendorId: number }) {
 
