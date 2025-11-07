@@ -61,16 +61,16 @@ export class DistributionsResolver {
   @ResolveField(() => Date)
   orderStartDate(
     @Parent()
-    parent: Distribution & Pick<DistributionEntity, 'raw_orderStartDate'>,
+    parent: Distribution & Pick<DistributionEntity, 'orderStartDate'>,
   ) {
-    return zonedTimeToUtc(parent.raw_orderStartDate, TZ_PARIS);
+    return parent.orderStartDate;
   }
 
   @ResolveField(() => Date)
   orderEndDate(
-    @Parent() parent: Distribution & Pick<DistributionEntity, 'raw_orderEndDate'>,
+    @Parent() parent: Distribution & Pick<DistributionEntity, 'orderEndDate'>,
   ) {
-    return zonedTimeToUtc(parent.raw_orderEndDate, TZ_PARIS);
+    return parent.orderEndDate;
   }
 
   @ResolveField(() => Catalog)
