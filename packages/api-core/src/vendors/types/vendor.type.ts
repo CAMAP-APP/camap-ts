@@ -2,7 +2,7 @@ import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
 import { File } from '../../files/models/file.type';
 import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorDisabledReason } from '../entities/vendor.entity';
-import { VendorImages } from './vendorImages.type';
+import { VendorImage } from './vendorImages.type';
 import { Catalog } from './catalog.type';
 
 registerEnumType(VendorDisabledReason, { name: 'VendorDisabledReason' });
@@ -53,9 +53,8 @@ export class Vendor {
 
   @Field({ nullable: true })
   longDesc?: string;
-
-  @Field()
-  images: VendorImages;
+  @Field(() => [VendorImage])
+  media: VendorImage[];
 
   @Field({ nullable: true })
   companyNumber?: string;

@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import React from 'react';
 import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { TextEditorComponents } from './TextEditorComponents';
 
 const TextEditorColorButton = () => {

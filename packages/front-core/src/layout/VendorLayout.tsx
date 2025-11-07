@@ -1,5 +1,5 @@
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
-import { Group, Place, useVendorCatalogsQuery } from '@gql';
+import { Group, Place, useVendorCatalogsQuery, useVendorImagesQuery, VendorCatalogsQuery } from '@gql';
 import { Box, Button, Dialog, styled, Typography } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import { createContext, useContext, useMemo, useState } from 'react';
@@ -14,15 +14,6 @@ type VendorLike = {
   phone?: string,
   peopleName?: string,
   image?: string,
-  images: {
-    logo?: string,
-    portrait?: string,
-    banner?: string,
-    farm1?: string,
-    farm2?: string,
-    farm3?: string,
-    farm4?: string,
-  },
   address1?: string,
   address2?: string,
   zipCode: string,
@@ -88,14 +79,18 @@ const ImageGallery = ({vendor}: {
   vendor: VendorLike,
 }) => {
   
-  const images = Object.entries(vendor.images).filter(([k,image]) => !!image && k !== 'logo');
+  const { data: { vendor: { media: vendorImages } = {}} = {}} = useVendorImagesQuery({
+    variables: { vendorId: vendor.id }
+  })
 
-  const [[selectedKey, selectedImage] = [], setSelectedImage] = useState<[string, string]>();
+  const images = (vendorImages ? vendorImages : []);
+
+  const [selectedImage, setSelectedImage] = useState<(typeof images)[number]>();
 
   return <>
-      {images.map(([key, image]) => (
+      {images.map((image) => (
         <Button
-          key={key}
+          key={image.id}
           sx={{
             width: '75px',
             height: '78px',
@@ -105,11 +100,11 @@ const ImageGallery = ({vendor}: {
             overflow: 'hidden',
             minWidth: 'unset',
           }}
-          onClick={() => setSelectedImage([key, image])}
+          onClick={() => setSelectedImage(image)}
         >
           <img
-            src={image}
-            alt={key}
+            src={image.url}
+            alt={image.name ?? ''}
             style={{
               objectFit: 'cover',
               width: '100%',
@@ -119,13 +114,13 @@ const ImageGallery = ({vendor}: {
         </Button>
       ))}
       <Dialog
-        open={!!selectedKey}
+        open={selectedImage !== undefined}
         onClose={() => setSelectedImage(undefined)}
         closeAfterTransition={false}
       >
-        { selectedKey && <img
-          src={selectedImage}
-          alt={selectedKey}
+        { selectedImage !== undefined && <img
+          src={selectedImage.url}
+          alt={selectedImage.name ?? ''}
           style={{
             objectFit: 'cover',
             width: '100%',
@@ -150,7 +145,7 @@ const SubscriptionPanel = ({vendor}: {
   });
 
   const groups = useMemo(() => {
-      return catalogs?.reduce((groups, cat) => {
+      return catalogs?.reduce((groups, cat: VendorCatalogsQuery["vendor"]["catalogs"][number]) => {
         groups.add(cat.group);
         return groups;
       }, new Set<GroupLike>()) ?? []
@@ -188,7 +183,7 @@ const VendorLayout = ({
 
   return <PublicLayout
       title={vendor.name}
-      logo={vendor.images.logo}
+      logo={vendor.image}
       contactInfo={{
         name: vendor.peopleName,
         email: vendor.email,

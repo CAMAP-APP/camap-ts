@@ -22,7 +22,7 @@ import {
     navigation?: NavigationItem[]
   }) => {
     const location = useLocation();
-    console.log(location.pathname, props.navigation);
+    
     return (
       <>
         <Box sx={{

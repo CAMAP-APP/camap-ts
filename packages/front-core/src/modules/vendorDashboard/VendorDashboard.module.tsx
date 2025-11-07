@@ -1,7 +1,7 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { Typography } from "@mui/material";
+import { Button, Divider, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
@@ -12,6 +12,7 @@ import { VendorClaims } from "./VendorClaims";
 import VendorConsolidation from "./VendorConsolidation";
 import VendorEditDocuments from "./VendorEditDocuments";
 import VendorForm from "./VendorForm";
+import VendorEditImages from "./VendorEditImages";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -103,7 +104,9 @@ const VendorDashContent = ({
 }) => {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
     return <>
-        <Typography variant="h2" gutterBottom>{tVendorDash("welcome", { vendorName: vendor.name })}</Typography>
+        <Typography variant="h2" gutterBottom>{tVendorDash("welcome")}</Typography>
+        <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+        <Divider sx={{ mt:2, mb: 2 }} />
         <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
     </>
 }
@@ -165,6 +168,12 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
             icon: <CamapIcon id={CamapIconId.file} />,
             path: '/documents',
             element: <VendorEditDocuments vendorId={vendor.id} />
+        },
+        {
+            label: tVendorDash('vendorDashboardImages'),
+            icon: <CamapIcon id={CamapIconId.image} />,
+            path: '/images',
+            element: <VendorEditImages vendorId={vendor.id} />
         }
     ]
 

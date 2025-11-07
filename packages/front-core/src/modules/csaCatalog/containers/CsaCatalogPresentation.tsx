@@ -21,7 +21,7 @@ import Product from '../../../components/utils/Product/Product';
 import ProductModal, {
   ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import CsaCatalogCoordinatorBlock from '../components/CsaCatalogCoordinatorBlock';
@@ -35,7 +35,7 @@ interface CsaCatalogPresentationProps {
 }
 
 const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
-  const { t, tCommon, tUnit } = useCamapTranslation(
+  const { t, tCommon } = useCamapTranslation(
     { t: 'csa-catalog', tUnit: 'unit' },
     true,
   );
@@ -158,7 +158,6 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
               <Box textAlign="center">
                 <Avatar
                   src={
-                    catalog.vendor.images.portrait ||
                     catalog.vendor.image ||
                     undefined
                   }

@@ -18,7 +18,7 @@ import {
 import MuiDialogTitle from '@mui/material/DialogTitle';
 import React from 'react';
 import AlertError from '../../components/utils/AlertError';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { goTo } from '../../utils/url';
 import LoginBox from './LoginBox';

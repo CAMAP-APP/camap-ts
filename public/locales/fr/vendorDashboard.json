@@ -69,11 +69,14 @@
     "vendorDashboardHome": "{{vendorName}}",
     "vendorDashboardProfile": "Profil",
     "vendorDashboardDocuments": "Documents",
+    "vendorDashboardImages": "Images",
     "publicTabDescription": "Description",
     "publicTabDeliveries": "Prochaines Distributions",
     "publicTabDocuments": "Documents",
     "publicTabProducts": "Produits",
     "productSamplePageDesc": "Extrait non exhaustif des produits proposés",
     "subscriptionBoxTitle": "Ce producteur est présent dans les AMAP",
-    "welcome": "Bienvenue {{vendorName}}"
+    "welcome": "Bienvenue",
+    "visitPublicProfile": "Voir votre page publique",
+    "uploadMedia": "Téléverser une image"
 }

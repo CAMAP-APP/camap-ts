@@ -57,21 +57,16 @@ export class EntityFileService {
 
   async findVendorImages(
     vendorId: number,
-  ): Promise<Pick<EntityFileEntity, 'fileId' | 'entityId' | 'documentType'>[]> {
+  ): Promise<EntityFileEntity[]> {
     return this.entityfileRepo
-      .createQueryBuilder('e')
-      .select(['fileId', 'entityId, documentType'])
-      .where(
-        `e.entityId = ${vendorId} AND e.entityType = 'vendor' 
-        AND (e.documentType = 'portrait' 
-          OR e.documentType = 'banner' 
-          OR e.documentType = 'logo' 
-          OR e.documentType = 'farm1' 
-          OR e.documentType = 'farm2' 
-          OR e.documentType = 'farm3'
-          OR e.documentType = 'farm4')`,
-      )
-      .getRawMany<Pick<EntityFileEntity, 'fileId' | 'entityId' | 'documentType'>>();
+      .find({
+        where: {
+          entityId: vendorId,
+          entityType: 'vendor',
+          documentType: 'media'
+        },
+        relations: ['file']
+      });
   }
 
   @Transactional()

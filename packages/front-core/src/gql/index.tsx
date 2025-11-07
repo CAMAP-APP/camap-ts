@@ -401,6 +401,7 @@ export type Mutation = {
   createMembership: Membership;
   createMemberships: CreateMembershipsResponse;
   createMessage: Message;
+  createVendorImage: VendorImage;
   deleteAccount: Scalars['Int'];
   deleteDocument: Scalars['Int'];
   deleteMembership: Scalars['String'];
@@ -470,6 +471,15 @@ export type MutationCreateMembershipsArgs = {
 
 export type MutationCreateMessageArgs = {
   input: CreateMessageInput;
+};
+
+
+export type MutationCreateVendorImageArgs = {
+  base64EncodedImage: Scalars['String'];
+  fileName: Scalars['String'];
+  maxWidth: Scalars['Int'];
+  mimeType: Scalars['String'];
+  vendorId: Scalars['Int'];
 };
 
 
@@ -1171,10 +1181,10 @@ export type Vendor = {
   image?: Maybe<Scalars['String']>;
   imageFile?: Maybe<File>;
   imageId?: Maybe<Scalars['Int']>;
-  images: VendorImages;
   linkText?: Maybe<Scalars['String']>;
   linkUrl?: Maybe<Scalars['String']>;
   longDesc?: Maybe<Scalars['String']>;
+  media: Array<VendorImage>;
   name: Scalars['String'];
   peopleName?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
@@ -1191,15 +1201,11 @@ export enum VendorDisabledReason {
   NotCompliantWithPolicy = 'NotCompliantWithPolicy'
 }
 
-export type VendorImages = {
-  __typename?: 'VendorImages';
-  banner?: Maybe<Scalars['String']>;
-  farm1?: Maybe<Scalars['String']>;
-  farm2?: Maybe<Scalars['String']>;
-  farm3?: Maybe<Scalars['String']>;
-  farm4?: Maybe<Scalars['String']>;
-  logo?: Maybe<Scalars['String']>;
-  portrait?: Maybe<Scalars['String']>;
+export type VendorImage = {
+  __typename?: 'VendorImage';
+  id: Scalars['Float'];
+  name?: Maybe<Scalars['String']>;
+  url: Scalars['String'];
 };
 
 export type VendorProfession = {
@@ -1327,6 +1333,13 @@ export type VendorDocumentsQueryVariables = Exact<{
 
 export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }> }> } };
 
+export type VendorImagesQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorImagesQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, media: Array<{ __typename?: 'VendorImage', id: number, name?: string | null, url: string }> } };
+
 export type VendorProductsSampleQueryVariables = Exact<{
   vendorId: Scalars['Int'];
 }>;
@@ -1418,6 +1431,17 @@ export type SetVendorImageMutationVariables = Exact<{
 
 
 export type SetVendorImageMutation = { __typename?: 'Mutation', setVendorImage: { __typename?: 'Vendor', id: number } };
+
+export type CreateVendorImageMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+  base64EncodedImage: Scalars['String'];
+  mimeType: Scalars['String'];
+  fileName: Scalars['String'];
+  maxWidth: Scalars['Int'];
+}>;
+
+
+export type CreateVendorImageMutation = { __typename?: 'Mutation', createVendorImage: { __typename?: 'VendorImage', name?: string | null, url: string } };
 
 export type GetInvitedUserToRegisterQueryVariables = Exact<{
   email: Scalars['String'];
@@ -2326,6 +2350,46 @@ export function useVendorDocumentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQ
 export type VendorDocumentsQueryHookResult = ReturnType<typeof useVendorDocumentsQuery>;
 export type VendorDocumentsLazyQueryHookResult = ReturnType<typeof useVendorDocumentsLazyQuery>;
 export type VendorDocumentsQueryResult = Apollo.QueryResult<VendorDocumentsQuery, VendorDocumentsQueryVariables>;
+export const VendorImagesDocument = gql`
+    query vendorImages($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    media {
+      id
+      name
+      url
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorImagesQuery__
+ *
+ * To run a query within a React component, call `useVendorImagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorImagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorImagesQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorImagesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorImagesQuery, VendorImagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorImagesQuery, VendorImagesQueryVariables>(VendorImagesDocument, options);
+      }
+export function useVendorImagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorImagesQuery, VendorImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorImagesQuery, VendorImagesQueryVariables>(VendorImagesDocument, options);
+        }
+export type VendorImagesQueryHookResult = ReturnType<typeof useVendorImagesQuery>;
+export type VendorImagesLazyQueryHookResult = ReturnType<typeof useVendorImagesLazyQuery>;
+export type VendorImagesQueryResult = Apollo.QueryResult<VendorImagesQuery, VendorImagesQueryVariables>;
 export const VendorProductsSampleDocument = gql`
     query vendorProductsSample($vendorId: Int!) {
   vendorProductsSample(vendorId: $vendorId) {
@@ -2918,6 +2982,50 @@ export function useSetVendorImageMutation(baseOptions?: ApolloReactHooks.Mutatio
 export type SetVendorImageMutationHookResult = ReturnType<typeof useSetVendorImageMutation>;
 export type SetVendorImageMutationResult = Apollo.MutationResult<SetVendorImageMutation>;
 export type SetVendorImageMutationOptions = Apollo.BaseMutationOptions<SetVendorImageMutation, SetVendorImageMutationVariables>;
+export const CreateVendorImageDocument = gql`
+    mutation createVendorImage($vendorId: Int!, $base64EncodedImage: String!, $mimeType: String!, $fileName: String!, $maxWidth: Int!) {
+  createVendorImage(
+    vendorId: $vendorId
+    base64EncodedImage: $base64EncodedImage
+    mimeType: $mimeType
+    fileName: $fileName
+    maxWidth: $maxWidth
+  ) {
+    name
+    url
+  }
+}
+    `;
+export type CreateVendorImageMutationFn = Apollo.MutationFunction<CreateVendorImageMutation, CreateVendorImageMutationVariables>;
+
+/**
+ * __useCreateVendorImageMutation__
+ *
+ * To run a mutation, you first call `useCreateVendorImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateVendorImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createVendorImageMutation, { data, loading, error }] = useCreateVendorImageMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *      base64EncodedImage: // value for 'base64EncodedImage'
+ *      mimeType: // value for 'mimeType'
+ *      fileName: // value for 'fileName'
+ *      maxWidth: // value for 'maxWidth'
+ *   },
+ * });
+ */
+export function useCreateVendorImageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateVendorImageMutation, CreateVendorImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateVendorImageMutation, CreateVendorImageMutationVariables>(CreateVendorImageDocument, options);
+      }
+export type CreateVendorImageMutationHookResult = ReturnType<typeof useCreateVendorImageMutation>;
+export type CreateVendorImageMutationResult = Apollo.MutationResult<CreateVendorImageMutation>;
+export type CreateVendorImageMutationOptions = Apollo.BaseMutationOptions<CreateVendorImageMutation, CreateVendorImageMutationVariables>;
 export const GetInvitedUserToRegisterDocument = gql`
     query getInvitedUserToRegister($email: String!) {
   getInvitedUserToRegister(email: $email) {

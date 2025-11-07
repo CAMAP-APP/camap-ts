@@ -11,7 +11,6 @@ import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
 import { FilesService } from '../../files/file.service';
-import { File } from '../../files/models/file.type';
 import { CatalogsService } from '../../vendors/services/catalogs.service';
 import { VendorService } from '../../vendors/services/vendor.service';
 import { GroupsService } from '../../groups/services/groups.service';

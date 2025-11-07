@@ -24,7 +24,7 @@ import {
 } from 'slate';
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, useSlate, withReact } from 'slate-react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { removeAccents, removeSpaces } from '../../utils/fomat/string';
 import CustomEditable from './CustomEditable';
 import TextEditorImageButton from './Image/TextEditorImageButton';

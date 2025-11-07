@@ -26,7 +26,7 @@ import {
   SlideDirection,
 } from '../../../components/utils/Transitions/slide';
 import { CatalogType } from '../../../gql';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import CsaCatalogDistribution from '../components/CsaCatalogDistribution';

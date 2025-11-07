@@ -47,6 +47,17 @@ query vendorDocuments($vendorId: Int!) {
   }
 }
 
+query vendorImages($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    media {
+      id
+      name
+      url
+    }
+  }
+}
+
 query vendorProductsSample($vendorId: Int!) {
   vendorProductsSample(vendorId: $vendorId) {
     id

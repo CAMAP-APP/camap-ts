@@ -8,7 +8,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './lib/i18n';
 import withApollo from './lib/withApollo';
-import theme from './theme';
+import theme from './theme/default/theme';
 
 class LocalizedUtils extends AdapterDateFns {
   getDatePickerHeaderText(date: Date) {

@@ -2,7 +2,7 @@ import DocumentList from "@components/DocumentList";
 import DocumentUploader from "@components/DocumentUploader";
 import { Catalog, EntityFile, Group, useVendorCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { Alert, Box, Card, CardActions, CardContent, CircularProgress, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardActions, CardContent, CircularProgress, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Stub } from "@utils/gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
@@ -72,7 +72,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                     <Typography>{tVendor("noVendorPublicFile")}</Typography>
                 }
                 {!!vendorDocuments &&
-                    <button className="btn btn-primary" onClick={() => setUploadToEntity(vendorDocuments)}>{tVendor("uploadFile")}</button>
+                    <Button variant="contained" onClick={() => setUploadToEntity(vendorDocuments)}>{tVendor("uploadFile")}</Button>
                 }
             </Box>
             {Array.from(groups?.values() ?? []).map(({ group, catalogs }) => (
@@ -89,7 +89,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                                     }
                                 </CardContent>
                                 <CardActions>
-                                    <button style={{ width: "100%" }} className="btn btn-primary" onClick={() => setUploadToEntity(cat)}>{tVendor("uploadFile")}</button>
+                                    <Button variant="contained" style={{ width: "100%" }} onClick={() => setUploadToEntity(cat)}>{tVendor("uploadFile")}</Button>
                                 </CardActions>
                             </Card>
                         ))}

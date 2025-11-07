@@ -35,7 +35,7 @@ import { CatalogsService } from '../services/catalogs.service';
 import { VendorService } from '../services/vendor.service';
 import { InitVendorPage } from '../types/initVendorPage.type';
 import { Vendor } from '../types/vendor.type';
-import { VendorImages } from '../types/vendorImages.type';
+import { VendorImage } from '../types/vendorImages.type';
 import { VendorProfession } from '../types/vendorProfession.type';
 import { Catalog } from '../types/catalog.type';
 import DataLoader = require('dataloader');
@@ -368,6 +368,58 @@ export class VendorsResolver {
     });
   }
 
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => VendorImage)
+  async createVendorImage(
+    @Args({ name: 'vendorId', type: () => Int })
+    vendorId: number,
+    @Args({ name: 'base64EncodedImage' })
+    base64EncodedImage: string,
+    @Args({ name: 'mimeType' })
+    mimeType: string,
+    @Args({ name: 'fileName' })
+    fileName: string,
+    @Args({ name: 'maxWidth', type: () => Int })
+    maxWidth: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    const vendor = await this.vendorsService.findOne(vendorId, true);
+    if (!vendor) throw new NotFoundException();
+
+    if (!(await this.userIsAllowedToManageCatalogOfVendor(currentUser, vendor))) {
+      throw new ForbiddenException(`Current user cannot update vendor ${vendorId}.`);
+    }
+
+    const imageData = base64EncodedImage.substring(
+      `data:${mimeType};base64,`.length,
+    );
+    const compressedImage = await compressImage(
+      Buffer.from(imageData, 'base64'),
+      mimeType,
+      maxWidth,
+    );
+
+    const newImage = await this.filesService.createFromBytes(
+      compressedImage,
+      fileName,
+    );
+
+    const ef = await this.entityFilesService.updateOrCreate({
+      entityType: 'vendor',
+      entityId: vendorId,
+      documentType: "media",
+      data: "public",
+      file: newImage
+    });
+
+    return {
+      id: ef.id,
+      name: newImage.name,
+      url: this.filesService.getUrl(newImage.id)
+    };
+  }
+
   /**
    * RESOLVE FIELDS
    */
@@ -397,36 +449,14 @@ export class VendorsResolver {
     return this.filesService.getUrl(portrait.fileId);
   }
 
-  @ResolveField(() => VendorImages)
-  async images(@Parent() parent: Vendor): Promise<VendorImages> {
-    const entityFiles = await this.entityFilesService.findVendorImages(parent.id);
-    const images: VendorImages = {};
-    for (const image of entityFiles) {
-      switch (image.documentType) {
-        case 'portrait':
-          images.portrait = this.filesService.getUrl(image.fileId);
-          break;
-        case 'banner':
-          images.banner = this.filesService.getUrl(image.fileId);
-          break;
-        case 'logo':
-          images.logo = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm1':
-          images.farm1 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm2':
-          images.farm2 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm3':
-          images.farm3 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm4':
-          images.farm4 = this.filesService.getUrl(image.fileId);
-          break;
-      }
-    }
-    return images;
+  @ResolveField(() => [VendorImage])
+  async media(@Parent() parent: Vendor): Promise<VendorImage[]> {
+    return (await this.entityFilesService.findVendorImages(parent.id))
+      .map(ef => ({
+        id: ef.id,
+        name: ef.file.name,
+        url: this.filesService.getUrl(ef.file.id)
+      }));
   }
 
   @ResolveField(() => Int, { nullable: true })
@@ -464,7 +494,10 @@ export class VendorsResolver {
     currentUser: UserEntity,
     vendor: VendorEntity,
   ) {
-    if(vendor.userId === currentUser.id) return true;
+    if(vendor.userId !== null)
+      return vendor.userId === currentUser.id;
+
+    if(currentUser.rights === 1) return true;
 
     // Check if the user can manage one of the vendor's catalogs
     const catalogs = await this.catalogsService.findByVendor(vendor.id);

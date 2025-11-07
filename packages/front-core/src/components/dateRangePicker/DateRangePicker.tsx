@@ -25,7 +25,7 @@ import {
 } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import * as React from 'react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import {
   CalendarMarker,

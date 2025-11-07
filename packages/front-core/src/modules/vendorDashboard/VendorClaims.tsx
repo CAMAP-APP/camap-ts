@@ -123,19 +123,19 @@ export const VendorClaims = (
                             }
                         </td>
                         <TD component="td">
-                            <button 
-                                className="btn btn-sm btn-danger"
+                            <Button variant='contained' color="warning"
                                 onClick={() => handleClaimButtonClick(vendor.id)}
                                 disabled={claimingVendorId === vendor.id}
                             >
                                 {claimingVendorId === vendor.id ? tVendorDash("claiming") : tVendorDash("claim")}
-                            </button>
-                            <a 
+                            </Button>
+                            <Button
+                                variant="outlined"
                                 className="btn btn-sm btn-primary" 
                                 href={`mailto:${vendor.email}`}
                             >
                                 <span className="glyphicon glyphicon-envelope" />&nbsp;{tVendorDash("contactGroups")}
-                            </a>
+                            </Button>
                         </TD>
                     </tr>
                 ))}

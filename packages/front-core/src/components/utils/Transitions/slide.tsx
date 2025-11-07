@@ -1,5 +1,5 @@
 import { SxProps } from '@mui/material';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 
 export type SlideDirection = 'left' | 'right';
 

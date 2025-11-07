@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import React from 'react';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 
 export interface AttendanceTableWrapperProps {
   children: React.ReactNode;

@@ -2,7 +2,7 @@ import { CloudUpload } from '@mui/icons-material';
 import { Alert, Box, Typography } from '@mui/material';
 import * as React from 'react';
 import Dropzone, { DropEvent, FileRejection } from 'react-dropzone';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import PreviewList from './PreviewList';
 
 export type FileObjectType = {

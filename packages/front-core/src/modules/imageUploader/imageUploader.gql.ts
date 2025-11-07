@@ -59,3 +59,25 @@ export const setVendorImage = gql`
     }
   }
 `;
+
+export const createVendorImage = gql`
+  mutation createVendorImage(
+    $vendorId: Int!
+    $base64EncodedImage: String!
+    $mimeType: String!
+    $fileName: String!
+    $maxWidth: Int!
+  ) {
+    createVendorImage(
+      vendorId: $vendorId
+      base64EncodedImage: $base64EncodedImage
+      mimeType: $mimeType
+      fileName: $fileName
+      maxWidth: $maxWidth
+    ) {
+      name
+      url
+    }
+  }
+`;
+
