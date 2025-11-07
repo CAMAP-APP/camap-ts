@@ -108,7 +108,7 @@ export class DistributionEntity {
   raw_orderStartDate: Date;
 
   get orderStartDate() {
-    return isNaN(this.raw_orderStartDate.getTime()) ? new Date(0) : zonedTimeToUtc(this.raw_orderStartDate, TZ_PARIS);
+    return zonedTimeToUtc(this.raw_orderStartDate, TZ_PARIS);
   }
 
   set orderStartDate(dateUtc: Date) {

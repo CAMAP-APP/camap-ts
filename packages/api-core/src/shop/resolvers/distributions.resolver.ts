@@ -61,16 +61,16 @@ export class DistributionsResolver {
   @ResolveField(() => Date)
   orderStartDate(
     @Parent()
-    parent: Distribution & Pick<DistributionEntity, 'orderStartDate'>,
+    parent: Distribution & Pick<DistributionEntity, 'raw_orderStartDate'>,
   ) {
-    return parent.orderStartDate;
+    return isNaN(parent.raw_orderStartDate.getTime()) ? new Date(0) : zonedTimeToUtc(parent.raw_orderStartDate, TZ_PARIS);
   }
 
   @ResolveField(() => Date)
   orderEndDate(
-    @Parent() parent: Distribution & Pick<DistributionEntity, 'orderEndDate'>,
+    @Parent() parent: Distribution & Pick<DistributionEntity, 'raw_orderEndDate'>,
   ) {
-    return parent.orderEndDate;
+    return zonedTimeToUtc(parent.raw_orderEndDate, TZ_PARIS);
   }
 
   @ResolveField(() => Catalog)
