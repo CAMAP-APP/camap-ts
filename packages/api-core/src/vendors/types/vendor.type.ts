@@ -81,4 +81,10 @@ export class Vendor {
 
   @Field(() => [EntityFile])
   documents: EntityFile[];
+
+  @Field({ nullable: true })
+  lat?: number;
+
+  @Field({ nullable: true })
+  lng?: number;
 }

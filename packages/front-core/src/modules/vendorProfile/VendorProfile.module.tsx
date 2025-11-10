@@ -50,16 +50,20 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
       return Array.from(set);
     });
   }, [])
+  const setSelectedPlaceId = useCallback((placeId:number) => {
+    setSelectedDistributionPlace(distributionPlaces.find(p => p.id === placeId));
+  }, [setSelectedDistributionPlace, distributionPlaces]);
   const vendorMap = useMemo(() => {
     return {
       distributionPlaces,
       selectedDistributionPlace,
-      setSelectedDistributionPlace,
+      setSelectedDistributionPlace: setSelectedPlaceId,
       addDistributionPlace
     };
   }, [
     distributionPlaces,
     selectedDistributionPlace,
+    setSelectedPlaceId,
     addDistributionPlace
   ]);
 

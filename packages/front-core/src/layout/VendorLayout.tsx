@@ -5,6 +5,7 @@ import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import { createContext, useContext, useMemo, useState } from 'react';
 import { MapContainer, Marker, TileLayer } from 'react-leaflet';
 import PublicLayout, { PublicLayoutTabProps } from './PublicLayout';
+import { Icon, LatLngTuple, Point } from 'leaflet';
 
 type VendorLike = {
   id: number,
@@ -22,14 +23,16 @@ type VendorLike = {
   linkUrl?: string,
   desc?: string,
   longDesc?: string,
+  lat?: number,
+  lng?: number,
 };
 
-export type PlaceLike = Pick<Place, "lat"|"lng">;
+export type PlaceLike = Pick<Place, "id"|"lat"|"lng"|"name">;
 export const VendorMapContext = createContext({
   distributionPlaces: [] as PlaceLike[],
   selectedDistributionPlace: undefined as PlaceLike | undefined,
   addDistributionPlace(p: PlaceLike) {},
-  setSelectedDistributionPlace(p: PlaceLike) {}
+  setSelectedDistributionPlace(placeId:number) {}
 });
 
 const DEFAULT_LAT = 46.52863469527167; // center of France
@@ -45,10 +48,33 @@ const VendorMap = ({vendor}: {
   vendor: VendorLike,
 }) => {
   
+  const vendorPlace = (vendor.lat && vendor.lng) ? { lat: vendor.lat, lng: vendor.lng } : null;
+
   const {distributionPlaces, selectedDistributionPlace} = useContext(VendorMapContext);
 
-  const focus = selectedDistributionPlace ?? (distributionPlaces.length > 0 ? distributionPlaces[0] : undefined);
-  const center = { lat: focus?.lat ?? DEFAULT_LAT, lng: focus?.lng ?? DEFAULT_LNG }
+  const focus = selectedDistributionPlace ?? vendorPlace ?? (distributionPlaces.length > 0 ? distributionPlaces[0] : undefined);
+  let center = [ DEFAULT_LAT, DEFAULT_LNG ] as LatLngTuple | undefined;
+  if(focus) center = [ focus.lat ?? DEFAULT_LAT, focus?.lng ?? DEFAULT_LNG ];
+  const bounds = [
+    vendorPlace,
+    ...distributionPlaces
+  ].filter(x => !!x).filter((x): x is {lat: number, lng: number} => !!x.lat && !!x.lng).map(x => [x.lat, x.lng] as LatLngTuple);
+  if(!selectedDistributionPlace && bounds.length > 1)
+    center = undefined;
+
+  const icon = useMemo(() => {
+    if(!vendor.image) return undefined;
+    return new Icon({
+      iconUrl: vendor.image,
+      iconAnchor: new Point(20, 45),
+      popupAnchor: undefined,
+      shadowUrl: undefined,
+      shadowSize: undefined,
+      shadowAnchor: undefined,
+      iconSize: new Point(40, 40),
+      className: 'leaflet-div-icon'
+    });
+  }, [vendor]);
 
   return <Box
     sx={{
@@ -60,16 +86,41 @@ const VendorMap = ({vendor}: {
       justifyContent: 'center',
     }}
   >
-    <StyledMap center={center} zoom={!focus ? EMPTY_ZOOM : DEFAULT_ZOOM} key={focus?.lat}>
+    <StyledMap
+      center={center}
+      zoom={!focus ? EMPTY_ZOOM : DEFAULT_ZOOM}
+      key={`${distributionPlaces.length}-${focus?.lat}`}
+      sx={{
+        '& .leaflet-div-icon': {
+          borderRadius: '50%',
+          borderWidth: 2,
+          borderColor: theme => theme.palette.primary.main
+        }
+      }}
+      bounds={!center ? bounds : undefined}
+      boundsOptions={{
+        maxZoom: DEFAULT_ZOOM,
+        paddingTopLeft: new Point(25,50),
+        paddingBottomRight: new Point(25,10)
+      }}
+    >
       <TileLayer
         attribution='&amp;copy <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+      {vendorPlace && <Marker
+        position={{ lat: vendorPlace.lat, lng: vendorPlace.lng }}
+        icon={icon}
+      />}
       {distributionPlaces.map(p => {
-        const { lat, lng } = p;
+        const { lat, lng,  } = p;
         if(lat && lng)
-            return <Marker key={`${lat}-${lng}`} position={{ lat, lng }} />
-          return false;
+          return <Marker
+            key={`${lat}-${lng}`}
+            position={{ lat, lng }}
+            title={p.name}
+          />
+        return false;
       })}
     </StyledMap>
   </Box>

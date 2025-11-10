@@ -153,7 +153,7 @@ const DistributionInfoCard = ({
           <CamapIcon id={CamapIconId.mapMarker} style={{ fontSize: '13px' }} />
           {onPlaceClick ? (
             <Link
-              component="button"
+              component="a"
               onClick={handlePlaceClick}
             >
               {place.name}

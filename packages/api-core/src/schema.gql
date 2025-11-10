@@ -179,6 +179,8 @@ type Vendor {
   activeCatalogs: [Catalog!]!
   allCatalogs: [Catalog!]!
   documents: [EntityFile!]!
+  lat: Float
+  lng: Float
   image: String
   imageFile: File
   portrait: String!
