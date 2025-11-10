@@ -42,6 +42,8 @@ interface VendorFormData {
   production2?: number | null;
   production3?: number | null;
   peopleName?: string;
+  lat?: number | null,
+  lng?: number | null
 }
 
 const validationSchema = yup.object({
@@ -61,6 +63,8 @@ const validationSchema = yup.object({
   production2: yup.number().nullable(),
   production3: yup.number().nullable(),
   peopleName: yup.string(),
+  lat: yup.number().nullable(),
+  lng: yup.number().nullable(),
 });
 
 const countries = [
@@ -105,6 +109,8 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
     production2: vendor?.production2 || null,
     production3: vendor?.production3 || null,
     peopleName: vendor?.peopleName || '',
+    lat: vendor?.lat || null,
+    lng: vendor?.lng || null,
   };
 
   const onSubmit = async (values: VendorFormData) => {
@@ -325,6 +331,45 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
                         </MenuItem>
                       ))}
                     </Select>
+                  </FormControl>
+                )}
+              </Field>
+            </Grid>
+
+            {/* Map */}
+            <Grid item xs={12}>
+              <Typography variant="h6" gutterBottom sx={{ mt: 2 }}>
+                {tVendorDash('mapPoint')}
+              </Typography>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Field name="lat">
+                {({ field, meta }: any) => (
+                  <FormControl fullWidth error={meta.touched && !!meta.error}>
+                    <TextField
+                      {...field}
+                      label={tVendorDash('lat')}
+                      fullWidth
+                      error={meta.touched && !!meta.error}
+                      helperText={meta.touched && meta.error ? meta.error : ''}
+                    />
+                  </FormControl>
+                )}
+              </Field>
+            </Grid>
+
+            <Grid item xs={6}>
+              <Field name="lng">
+                {({ field, meta }: any) => (
+                  <FormControl fullWidth error={meta.touched && !!meta.error}>
+                    <TextField
+                      {...field}
+                      label={tVendorDash('lng')}
+                      fullWidth
+                      error={meta.touched && !!meta.error}
+                      helperText={meta.touched && meta.error ? meta.error : ''}
+                    />
                   </FormControl>
                 )}
               </Field>

@@ -605,8 +605,10 @@ export type MutationUpdateVendorArgs = {
   country?: InputMaybe<Scalars['String']>;
   desc?: InputMaybe<Scalars['String']>;
   email: Scalars['String'];
+  lat?: InputMaybe<Scalars['Float']>;
   linkText?: InputMaybe<Scalars['String']>;
   linkUrl?: InputMaybe<Scalars['String']>;
+  lng?: InputMaybe<Scalars['Float']>;
   longDesc?: InputMaybe<Scalars['String']>;
   name: Scalars['String'];
   peopleName?: InputMaybe<Scalars['String']>;
@@ -1182,8 +1184,10 @@ export type Vendor = {
   image?: Maybe<Scalars['String']>;
   imageFile?: Maybe<File>;
   imageId?: Maybe<Scalars['Int']>;
+  lat?: Maybe<Scalars['Float']>;
   linkText?: Maybe<Scalars['String']>;
   linkUrl?: Maybe<Scalars['String']>;
+  lng?: Maybe<Scalars['Float']>;
   longDesc?: Maybe<Scalars['String']>;
   media: Array<VendorImage>;
   name: Scalars['String'];
@@ -1765,7 +1769,7 @@ export type VendorQueryVariables = Exact<{
 }>;
 
 
-export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null } };
+export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
 
 export type UpdateVendorMutationVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1785,10 +1789,12 @@ export type UpdateVendorMutationVariables = Exact<{
   production2?: InputMaybe<Scalars['Int']>;
   production3?: InputMaybe<Scalars['Int']>;
   peopleName?: InputMaybe<Scalars['String']>;
+  lat?: InputMaybe<Scalars['Float']>;
+  lng?: InputMaybe<Scalars['Float']>;
 }>;
 
 
-export type UpdateVendorMutation = { __typename?: 'Mutation', updateVendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null } };
+export type UpdateVendorMutation = { __typename?: 'Mutation', updateVendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
 
 export const UserFragmentDoc = gql`
     fragment User on User {
@@ -4756,6 +4762,8 @@ export const VendorDocument = gql`
     production2
     production3
     peopleName
+    lat
+    lng
   }
 }
     `;
@@ -4788,7 +4796,7 @@ export type VendorQueryHookResult = ReturnType<typeof useVendorQuery>;
 export type VendorLazyQueryHookResult = ReturnType<typeof useVendorLazyQuery>;
 export type VendorQueryResult = Apollo.QueryResult<VendorQuery, VendorQueryVariables>;
 export const UpdateVendorDocument = gql`
-    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $profession: Int, $production2: Int, $production3: Int, $peopleName: String) {
+    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
   updateVendor(
     vendorId: $vendorId
     name: $name
@@ -4807,6 +4815,8 @@ export const UpdateVendorDocument = gql`
     production2: $production2
     production3: $production3
     peopleName: $peopleName
+    lat: $lat
+    lng: $lng
   ) {
     id
     name
@@ -4825,6 +4835,8 @@ export const UpdateVendorDocument = gql`
     production2
     production3
     peopleName
+    lat
+    lng
   }
 }
     `;
@@ -4860,6 +4872,8 @@ export type UpdateVendorMutationFn = Apollo.MutationFunction<UpdateVendorMutatio
  *      production2: // value for 'production2'
  *      production3: // value for 'production3'
  *      peopleName: // value for 'peopleName'
+ *      lat: // value for 'lat'
+ *      lng: // value for 'lng'
  *   },
  * });
  */

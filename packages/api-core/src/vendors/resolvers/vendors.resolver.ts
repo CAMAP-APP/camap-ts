@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   Args,
+  Float,
   Int,
   Mutation,
   Parent,
@@ -270,6 +271,10 @@ export class VendorsResolver {
     production3?: number,
     @Args({ name: 'peopleName', type: () => String, nullable: true })
     peopleName?: string,
+    @Args({ name: 'lat', type: () => Float, nullable: true })
+    lat?: number,
+    @Args({ name: 'lng', type: () => Float, nullable: true })
+    lng?: number,
   ) {
     const vendor = await this.vendorsService.findOne(vendorId, true);
     if (!vendor) throw new NotFoundException();
@@ -314,6 +319,8 @@ export class VendorsResolver {
       production2,
       production3,
       peopleName,
+      lat,
+      lng
     });
   }
 

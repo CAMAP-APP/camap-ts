@@ -24,6 +24,8 @@ query Vendor($id: Int!) {
     production2
     production3
     peopleName
+    lat
+    lng
   }
 }
 
@@ -45,6 +47,8 @@ mutation UpdateVendor(
   $production2: Int
   $production3: Int
   $peopleName: String
+  $lat: Float
+  $lng: Float
 ) {
   updateVendor(
     vendorId: $vendorId
@@ -64,6 +68,8 @@ mutation UpdateVendor(
     production2: $production2
     production3: $production3
     peopleName: $peopleName
+    lat: $lat
+    lng: $lng
   ) {
     id
     name
@@ -82,5 +88,7 @@ mutation UpdateVendor(
     production2
     production3
     peopleName
+    lat
+    lng
   }
 }
