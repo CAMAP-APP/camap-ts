@@ -1,10 +1,98 @@
-import { useClaimVendorMutation, useGetClaimableVendorsQuery, useGetDefaultVendorByUserIdQuery, Vendor } from "@gql";
-import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { GetClaimableVendorsQuery, useClaimVendorMutation, useGetClaimableVendorsQuery, useGetDefaultVendorByUserIdQuery, Vendor } from "@gql";
+import { Alert, Box, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItem, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { PropsFrom } from "@utils/ts-react";
 import { useState } from "react";
 import { VendorImage } from "../../components/vendor/VendorImage";
 import VendorsMergeMessage from "./VendorsMergeMessage";
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+
+const VendorClaimRow = ({ vendor, onClaim }: {
+    vendor: GetClaimableVendorsQuery['getClaimableVendors'][number],
+    onClaim: (vendorId:number) => void
+}) => {
+    const [open, setOpen] = useState(false);
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+
+    const groups = [...new Set(vendor.activeCatalogs?.map(catalog => catalog.group.name))];
+
+    const groupsList = groups.length > 0
+        ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
+            {groups.map(g => <ListItem key={g}>{g}</ListItem>)}
+            </List>
+        : tVendorDash("none");
+    const contractsList = vendor.activeCatalogs.length > 0
+        ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
+            {vendor.activeCatalogs?.map(
+                catalog => <ListItem key={catalog.id}>
+                    {tVendorDash('vendorCatalogListItem', {
+                        catalogName: catalog.name,
+                        subscriptionCount: catalog.subscriptionsCount || 0
+                    })}
+                </ListItem>
+            )}
+            </List>
+        : tVendorDash("none")
+
+    return <>
+        <TableRow sx={{ '& > td': { borderBottom: 'unset' } }}>
+            <TableCell>
+                <IconButton
+                    aria-label="expand row"
+                    size="small"
+                    onClick={() => setOpen(!open)}
+                >
+                    <CamapIcon id={open ? CamapIconId.chevronUp : CamapIconId.chevronDown} />
+                </IconButton>
+            </TableCell>
+            <TableCell style={{ height: "100%", padding: 0, width: "50px", overflow: "hidden" }}>
+                <VendorImage vendor={vendor} width={"50px"} height={"50px"}/>
+            </TableCell>
+            <TableCell>{vendor.name}</TableCell>
+            <TableCell sx={{ display: { xs: 'none', md: 'revert' } }}>
+                {(vendor.companyNumber && vendor.companyNumber !== '') ? vendor.companyNumber : tVendorDash("unknownVAT")}
+            </TableCell>
+            <TableCell sx={{ display: { xs: 'none', md: 'revert' } }}>
+                {groupsList}
+            </TableCell>
+            <TableCell sx={{ display: { xs: 'none', md: 'revert' } }}>
+                {contractsList}
+            </TableCell>
+            <TableCell>
+                <Box sx={{ display: "flex", flexFlow: "column" }}>
+                    <Button variant='contained' color="warning" size="small"
+                        onClick={() => onClaim(vendor.id)}
+                    >
+                        {tVendorDash("claim")}
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        size="small"
+                        href={`mailto:${vendor.email}`}
+                    >
+                        <span className="glyphicon glyphicon-envelope" />&nbsp;{tVendorDash("contactGroups")}
+                    </Button>
+                </Box>
+            </TableCell>
+        </TableRow>
+        <TableRow>
+            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+                <Collapse in={open} timeout="auto" unmountOnExit>
+                <Box sx={{ margin: 1 }}>
+                    <Typography variant="body1">{tVendorDash("vatNumber")}</Typography>
+                    <Typography variant="body2">
+                        {(vendor.companyNumber && vendor.companyNumber !== '') ? vendor.companyNumber : tVendorDash("unknownVAT")}
+                    </Typography>
+                    <Typography variant="body1">{tVendorDash("groups")}</Typography>
+                    {groupsList}
+                    <Typography variant="body1">{tVendorDash("contracts")}</Typography>
+                    {contractsList}
+                </Box>
+                </Collapse>
+            </TableCell>
+        </TableRow>
+    </>
+}
 
 export const VendorClaims = (
     props: {
@@ -78,68 +166,22 @@ export const VendorClaims = (
                 '& ul, & li': { m: 0, p:0 },
                 '& td:not(:last-child)': { pr: 1 }
             }}>
-            <Table sx={{ minWidth: 650 }} size="small" padding="none">
+            <Table size="small" padding="none">
                 <TableHead>
                     <TableRow>
+                        <TableCell sx={{ width: "15px" }} />
                         <TableCell />
                         <TableCell>{tVendorDash("name")}</TableCell>
-                        <TableCell sx={{ width: "115px" }} >{tVendorDash("vatNumber")}</TableCell>
-                        <TableCell>{tVendorDash("groups")}</TableCell>
-                        <TableCell>{tVendorDash("contracts")}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'revert' }, width: "115px" }} >{tVendorDash("vatNumber")}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'revert' } }}>{tVendorDash("groups")}</TableCell>
+                        <TableCell sx={{ display: { xs: 'none', md: 'revert' } }}>{tVendorDash("contracts")}</TableCell>
                         <TableCell sx={{ width: "200px" }} />
                     </TableRow>
                 </TableHead>
                 <TableBody>
-                    {claimableVendors?.map((vendor) => {
-                        const groups = [...new Set(vendor.activeCatalogs?.map(catalog => catalog.group.name))];
-                        return <TableRow key={vendor.id}>
-                            <TableCell style={{ height: "100%", padding: 0, width: "50px", overflow: "hidden" }}>
-                                <VendorImage vendor={vendor} width={"50px"} height={"50px"}/>
-                            </TableCell>
-                            <TableCell>{vendor.name}</TableCell>
-                            <TableCell>{(vendor.companyNumber && vendor.companyNumber !== '') ? vendor.companyNumber : tVendorDash("unknownVAT")}</TableCell>
-                            <TableCell>
-                                {groups.length > 0
-                                    ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
-                                        {groups.map(g => <ListItem key={g}>{g}</ListItem>)}
-                                        </List>
-                                    : tVendorDash("none")
-                                }
-                            </TableCell>
-                            <TableCell>
-                                {   vendor.activeCatalogs.length > 0
-                                    ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
-                                        {vendor.activeCatalogs?.map(
-                                            catalog => <ListItem key={catalog.id}>
-                                                {tVendorDash('vendorCatalogListItem', {
-                                                    catalogName: catalog.name,
-                                                    subscriptionCount: catalog.subscriptionsCount || 0
-                                                })}
-                                            </ListItem>
-                                        )}
-                                        </List>
-                                    : tVendorDash("none")
-                                }
-                            </TableCell>
-                            <TableCell>
-                                <Box sx={{ display: "flex", flexFlow: "column" }}>
-                                    <Button variant='contained' color="warning" size="small"
-                                        onClick={() => handleClaimButtonClick(vendor.id)}
-                                        disabled={claimingVendorId === vendor.id}
-                                    >
-                                        {claimingVendorId === vendor.id ? tVendorDash("claiming") : tVendorDash("claim")}
-                                    </Button>
-                                    <Button
-                                        variant="outlined"
-                                        size="small"
-                                        href={`mailto:${vendor.email}`}
-                                    >
-                                        <span className="glyphicon glyphicon-envelope" />&nbsp;{tVendorDash("contactGroups")}
-                                    </Button>
-                                </Box>
-                            </TableCell>
-                        </TableRow>
-                    })}
+                    {claimableVendors?.map((vendor) => 
+                        <VendorClaimRow key={vendor.id} vendor={vendor} onClaim={handleClaimButtonClick} />
+                    )}
                 </TableBody>
             </Table>
         </TableContainer>

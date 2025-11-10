@@ -56,13 +56,18 @@ const VendorsMergeMessage = (props:{
                     {tVendorDash("contractsToBeReattached", {
                         nbCatalogsMoved: props.mergedVendors
                             .filter(v => v.id !== props.mergeTarget.id)
-                            .reduce((total: number, vendor: any) => total + vendor.catalogs?.length, 0),
+                            .reduce((total: number, vendor: any) => total + (vendor.catalogs?.length ?? 0), 0),
                         nbSubsMoved: props.mergedVendors
                             .filter(v => v.id !== props.mergeTarget.id)
                             .reduce((total: number, vendor: any) => 
-                                total + (vendor.catalogs?.reduce((catalogTotal: number, catalog: any) => 
-                                    catalogTotal + (catalog.subscriptionsCount || 0), 0) || 0), 0
-                        ),
+                                total + (
+                                    vendor.catalogs?.reduce(
+                                        (catalogTotal: number, catalog: any) => 
+                                            catalogTotal + (catalog.subscriptionsCount || 0), 0
+                                        )
+                                    ?? 0),
+                                0
+                            ),
                         vendor: props.mergeTarget.name
                     })}
                 </Typography>
@@ -72,8 +77,14 @@ const VendorsMergeMessage = (props:{
                     {[...props.mergedVendors
                         .filter(v => v.id !== props.mergeTarget.id)
                         .reduce(
-                            (groups: Set<string>, vendor: any) => vendor.catalogs?.reduce((groups: Set<string>, c: any) => groups.add(c.group.name), groups),
-                            new Set<string>())
+                            (groups: Set<string>, vendor: any) => (
+                                vendor.catalogs?.reduce(
+                                    (groups: Set<string>, c: any) => groups.add(c.group.name),
+                                    groups
+                                ) ?? groups
+                            ),
+                            new Set<string>()
+                        )
                     ].map((groupName, i) => <span key={`group-${i}`} style={{ marginRight: '1em'}}>
                             <i className="icon icon-users" style={{ marginRight: "5px" }} />
                             {groupName}
