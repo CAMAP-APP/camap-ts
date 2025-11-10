@@ -1,5 +1,5 @@
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
-import { Group, Place, useVendorCatalogsQuery, useVendorImagesQuery, VendorCatalogsQuery, VendorImagesQuery } from '@gql';
+import { Group, Place, useVendorActiveCatalogsQuery, useVendorImagesQuery, VendorActiveCatalogsQuery, VendorImagesQuery } from '@gql';
 import { Box, Button, Dialog, styled, Typography } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import { createContext, useContext, useMemo, useState } from 'react';
@@ -132,7 +132,7 @@ const SubscriptionPanel = ({vendor}: {
 
   const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
   
-  const { data: { vendor : { catalogs } = {} } = {} } = useVendorCatalogsQuery({
+  const { data: { vendor : { activeCatalogs: catalogs } = {} } = {} } = useVendorActiveCatalogsQuery({
     variables: {
       vendorId: vendor.id
     }
@@ -140,7 +140,7 @@ const SubscriptionPanel = ({vendor}: {
 
   const groups = useMemo(() => {
       return Array.from(
-        catalogs?.reduce((groups, cat: VendorCatalogsQuery["vendor"]["catalogs"][number]) => {
+        catalogs?.reduce((groups, cat: VendorActiveCatalogsQuery["vendor"]["activeCatalogs"][number]) => {
           groups.add(cat.group);
           return groups;
         }, new Set<GroupLike>()) ?? []

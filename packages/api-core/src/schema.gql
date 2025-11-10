@@ -176,7 +176,8 @@ type Vendor {
   production2: Int
   production3: Int
   disabled: VendorDisabledReason
-  catalogs: [Catalog!]!
+  activeCatalogs: [Catalog!]!
+  allCatalogs: [Catalog!]!
   documents: [EntityFile!]!
   image: String
   imageFile: File

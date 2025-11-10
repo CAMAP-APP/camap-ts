@@ -1166,9 +1166,10 @@ export type UserOrder = {
 
 export type Vendor = {
   __typename?: 'Vendor';
+  activeCatalogs: Array<Catalog>;
   address1?: Maybe<Scalars['String']>;
   address2?: Maybe<Scalars['String']>;
-  catalogs: Array<Catalog>;
+  allCatalogs: Array<Catalog>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
   companyNumber?: Maybe<Scalars['String']>;
@@ -1319,19 +1320,19 @@ export type IsGroupAdminQueryVariables = Exact<{
 
 export type IsGroupAdminQuery = { __typename?: 'Query', isGroupAdmin: boolean };
 
-export type VendorCatalogsQueryVariables = Exact<{
+export type VendorActiveCatalogsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
 }>;
 
 
-export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
+export type VendorActiveCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
 
 export type VendorDocumentsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
 }>;
 
 
-export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }>, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }> }> } };
+export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }>, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }> }> } };
 
 export type VendorImagesQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1717,21 +1718,21 @@ export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroup
 export type GetClaimableVendorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
 
 export type GetVendorsByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
 }>;
 
 
-export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
 
 export type GetDefaultVendorByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
 }>;
 
 
-export type GetDefaultVendorByUserIdQuery = { __typename?: 'Query', getDefaultVendorByUserId: { __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> } };
+export type GetDefaultVendorByUserIdQuery = { __typename?: 'Query', getDefaultVendorByUserId: { __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> } };
 
 export type HasVendorsByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
@@ -2243,11 +2244,11 @@ export function useIsGroupAdminLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type IsGroupAdminQueryHookResult = ReturnType<typeof useIsGroupAdminQuery>;
 export type IsGroupAdminLazyQueryHookResult = ReturnType<typeof useIsGroupAdminLazyQuery>;
 export type IsGroupAdminQueryResult = Apollo.QueryResult<IsGroupAdminQuery, IsGroupAdminQueryVariables>;
-export const VendorCatalogsDocument = gql`
-    query vendorCatalogs($vendorId: Int!) {
+export const VendorActiveCatalogsDocument = gql`
+    query vendorActiveCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
     id
-    catalogs {
+    activeCatalogs {
       id
       name
       type
@@ -2268,32 +2269,32 @@ export const VendorCatalogsDocument = gql`
     `;
 
 /**
- * __useVendorCatalogsQuery__
+ * __useVendorActiveCatalogsQuery__
  *
- * To run a query within a React component, call `useVendorCatalogsQuery` and pass it any options that fit your needs.
- * When your component renders, `useVendorCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useVendorActiveCatalogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorActiveCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useVendorCatalogsQuery({
+ * const { data, loading, error } = useVendorActiveCatalogsQuery({
  *   variables: {
  *      vendorId: // value for 'vendorId'
  *   },
  * });
  */
-export function useVendorCatalogsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+export function useVendorActiveCatalogsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+        return ApolloReactHooks.useQuery<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>(VendorActiveCatalogsDocument, options);
       }
-export function useVendorCatalogsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+export function useVendorActiveCatalogsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>) {
           const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+          return ApolloReactHooks.useLazyQuery<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>(VendorActiveCatalogsDocument, options);
         }
-export type VendorCatalogsQueryHookResult = ReturnType<typeof useVendorCatalogsQuery>;
-export type VendorCatalogsLazyQueryHookResult = ReturnType<typeof useVendorCatalogsLazyQuery>;
-export type VendorCatalogsQueryResult = Apollo.QueryResult<VendorCatalogsQuery, VendorCatalogsQueryVariables>;
+export type VendorActiveCatalogsQueryHookResult = ReturnType<typeof useVendorActiveCatalogsQuery>;
+export type VendorActiveCatalogsLazyQueryHookResult = ReturnType<typeof useVendorActiveCatalogsLazyQuery>;
+export type VendorActiveCatalogsQueryResult = Apollo.QueryResult<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>;
 export const VendorDocumentsDocument = gql`
     query vendorDocuments($vendorId: Int!) {
   vendor(id: $vendorId) {
@@ -2305,7 +2306,7 @@ export const VendorDocumentsDocument = gql`
       name
       url
     }
-    catalogs {
+    activeCatalogs {
       id
       name
       group {
@@ -4456,7 +4457,7 @@ export const GetClaimableVendorsDocument = gql`
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate
@@ -4509,7 +4510,7 @@ export const GetVendorsByUserIdDocument = gql`
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate
@@ -4563,7 +4564,7 @@ export const GetDefaultVendorByUserIdDocument = gql`
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate

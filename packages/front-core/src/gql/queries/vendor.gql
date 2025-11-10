@@ -1,7 +1,7 @@
-query vendorCatalogs($vendorId: Int!) {
+query vendorActiveCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
     id
-    catalogs {
+    activeCatalogs {
       id
       name
       type
@@ -30,7 +30,7 @@ query vendorDocuments($vendorId: Int!) {
       name
       url
     }
-    catalogs {
+    activeCatalogs {
       id
       name
       group {

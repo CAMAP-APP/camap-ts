@@ -1,4 +1,5 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { useDeleteDocumentMutation, useVendorImagesQuery } from "@gql";
 import { Alert, Box, Button, Card, CardHeader, CardMedia, CircularProgress, Grid, IconButton } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
@@ -21,11 +22,7 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
     const [open, setOpen] = useState(false)
 
     if (loading) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                <CircularProgress />
-            </Box>
-        );
+        return <CircularProgressBox />;
     }
 
     if (error)

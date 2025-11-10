@@ -18,6 +18,7 @@ import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import { useGetVendorProfessionsQuery, useUpdateVendorMutation, useVendorQuery, Vendor } from '@gql';
+import CircularProgressBox from '@components/utils/CircularProgressBox';
 
 interface VendorFormProps {
   vendorId: Vendor["id"];
@@ -127,9 +128,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
     return (
       <Card>
         <CardContent>
-          <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-            <CircularProgress />
-          </Box>
+          <CircularProgressBox />
         </CardContent>
       </Card>
     );

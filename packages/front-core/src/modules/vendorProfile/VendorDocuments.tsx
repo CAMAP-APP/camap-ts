@@ -1,4 +1,5 @@
 import DocumentList from "@components/DocumentList";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { Catalog, EntityFile, Group, useVendorDocumentsQuery } from "@gql";
 import { Alert, Box, Card, CardContent, CircularProgress, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
@@ -19,7 +20,7 @@ function VendorDocuments({ vendorId }: { vendorId: number }) {
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                <CircularProgress />
+                <CircularProgressBox />
             </Box>
         );
     }
@@ -30,7 +31,7 @@ function VendorDocuments({ vendorId }: { vendorId: number }) {
         );
     }
 
-    const groups = vendor?.catalogs.reduce((groups, cat) => {
+    const groups = vendor?.activeCatalogs.reduce((groups, cat) => {
         if(cat.documents.length > 0){
             if(!groups.has(cat.group.id))
                 groups.set(cat.group.id, { group: cat.group, catalogs: [cat] });

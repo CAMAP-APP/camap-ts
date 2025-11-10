@@ -9,7 +9,7 @@ query GetClaimableVendors {
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate
@@ -34,7 +34,7 @@ query GetVendorsByUserId($userId: Int!) {
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate
@@ -59,7 +59,7 @@ query GetDefaultVendorByUserId($userId: Int!) {
     companyNumber
     image
     disabled
-    catalogs {
+    activeCatalogs {
       id
       name
       startDate

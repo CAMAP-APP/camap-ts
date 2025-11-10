@@ -91,7 +91,7 @@ export const VendorClaims = (
                 </TableHead>
                 <TableBody>
                     {claimableVendors?.map((vendor) => {
-                        const groups = [...new Set(vendor.catalogs?.map(catalog => catalog.group.name))];
+                        const groups = [...new Set(vendor.activeCatalogs?.map(catalog => catalog.group.name))];
                         return <TableRow key={vendor.id}>
                             <TableCell style={{ height: "100%", padding: 0, width: "50px", overflow: "hidden" }}>
                                 <VendorImage vendor={vendor} width={"50px"} height={"50px"}/>
@@ -107,9 +107,9 @@ export const VendorClaims = (
                                 }
                             </TableCell>
                             <TableCell>
-                                {   vendor.catalogs.length > 0
+                                {   vendor.activeCatalogs.length > 0
                                     ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
-                                        {vendor.catalogs?.map(
+                                        {vendor.activeCatalogs?.map(
                                             catalog => <ListItem key={catalog.id}>
                                                 {tVendorDash('vendorCatalogListItem', {
                                                     catalogName: catalog.name,

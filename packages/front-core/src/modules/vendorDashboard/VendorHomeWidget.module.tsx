@@ -1,7 +1,7 @@
 import { useHasVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { CircularProgress } from "@mui/material";
 import { VendorClaims } from "./VendorClaims";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
 
 const VendorHomeWidget = () => {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
@@ -24,7 +24,7 @@ const VendorHomeWidget = () => {
     });
 
     if (userLoading || claimedVendorsLoading) {
-        return <CircularProgress />;
+        return <CircularProgressBox />;
     }
 
     if (userError || claimedVendorsError) {

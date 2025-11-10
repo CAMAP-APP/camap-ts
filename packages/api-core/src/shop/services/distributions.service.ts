@@ -49,7 +49,7 @@ export class DistributionsService {
     });
   }
 
-  async findNextDistributionsOfCatalogs(catalogIds: number[], limit?: number) {
+  async findNextDistributionsOfCatalogs(catalogIds: number[]) {
     const now = utcToZonedTime(new Date(), TZ_PARIS);
 
     return this.distributionRepo.find({
@@ -59,8 +59,7 @@ export class DistributionsService {
       },
       order: {
         raw_date: 'ASC'
-      },
-      take: limit
+      }
     });
   }
 

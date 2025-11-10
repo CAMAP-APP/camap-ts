@@ -1,6 +1,7 @@
 import DocumentList from "@components/DocumentList";
 import DocumentUploader from "@components/DocumentUploader";
-import { Catalog, EntityFile, Group, useVendorCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
+import { Catalog, EntityFile, Group, useVendorActiveCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
 import { Close as CloseIcon } from "@mui/icons-material";
 import { Alert, Box, Button, Card, CardActions, CardContent, CircularProgress, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Stub } from "@utils/gql";
@@ -19,7 +20,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
     const { data: { vendor: vendorDocuments } = {}, loading: loadingDocuments, error: errorDocuments, refetch: refetchDocuments } = useVendorDocumentsQuery({
         variables: { vendorId },
     });
-    const { data: { vendor: vendorCatalogs } = {}, loading: loadingCatalogs, error: errorCatalogs } = useVendorCatalogsQuery({
+    const { data: { vendor: vendorCatalogs } = {}, loading: loadingCatalogs, error: errorCatalogs } = useVendorActiveCatalogsQuery({
         variables: { vendorId },
     })
 
@@ -28,11 +29,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
     const [uploadError, setUploadError] = useState<Error | null>(null);
 
     if (loadingDocuments || loadingCatalogs) {
-        return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
-                <CircularProgress />
-            </Box>
-        );
+        return <CircularProgressBox />;
     }
 
     if (errorDocuments)
@@ -41,13 +38,13 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
         return <Alert severity="error">{errorCatalogs.message}</Alert>;
         
 
-    const groups = vendorCatalogs?.catalogs.reduce((groups, cat) => {
+    const groups = vendorCatalogs?.activeCatalogs.reduce((groups, cat) => {
         if(!groups.has(cat.group.id))
             groups.set(cat.group.id, { group: cat.group, catalogs: [{...cat, documents: []}] });
         else groups.get(cat.group.id)?.catalogs.push({...cat, documents:[]});
         return groups;
     }, new Map<number, { group: GroupLike, catalogs:(CatalogLike & {documents: EntityFileLike[]})[] }> )!;
-    vendorDocuments?.catalogs.forEach(cat => {
+    vendorDocuments?.activeCatalogs.forEach(cat => {
         if(!groups.has(cat.group.id))
             groups.set(cat.group.id, { group: cat.group, catalogs: [cat] });
         else {

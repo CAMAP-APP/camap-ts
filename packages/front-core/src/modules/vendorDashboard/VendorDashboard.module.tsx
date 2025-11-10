@@ -66,7 +66,7 @@ const MultipleVendorDashContent = ({
                         <div style={{ marginBottom: "15px" }}>
                             <small>
                                 <i className="icon icon-users" style={{ marginRight: "5px" }} />
-                                {[...new Set(vendor.catalogs?.map(catalog => catalog.group.name))]
+                                {[...new Set(vendor.activeCatalogs?.map(catalog => catalog.group.name))]
                                     .filter(Boolean)
                                     .join(", ") || tVendorDash("none")}
                             </small>

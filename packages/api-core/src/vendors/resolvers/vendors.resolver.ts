@@ -157,12 +157,10 @@ export class VendorsResolver {
     const vendor = await this.vendorsService.findOne(vendorId);
     if (!vendor) throw new NotFoundException();
 
-    let catalogs = await this.catalogsService.findByVendor(vendorId);
+    let catalogs = await this.catalogsService.findByVendor(vendorId, true);
     // Filter ended catalogs
-    catalogs = catalogs.filter((c) => isAfter(c.endDate, new Date()));
     const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
-      catalogs.map((c) => c.id),
-      4
+      catalogs.map((c) => c.id)
     );
 
     const nextDistributionsByGroupId = new Map<number, {
@@ -185,9 +183,10 @@ export class VendorsResolver {
 
 
     const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
-    .map(([groupId, { distributions, group }]) => ({
+    .map(([, { distributions, group }]) => ({
       group,
       distributions: distributions
+        .slice(0,4)
         .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
     }));
 
@@ -467,8 +466,13 @@ export class VendorsResolver {
   }
 
   @ResolveField(() => [Catalog])
-  async catalogs(@Parent() parent: VendorEntity) {
-    return this.catalogsService.findByVendor(parent.id);
+  async activeCatalogs(@Parent() parent: VendorEntity) {
+    return this.catalogsService.findByVendor(parent.id, true);
+  }
+
+  @ResolveField(() => [Catalog])
+  async allCatalogs(@Parent() parent: VendorEntity) {
+    return this.catalogsService.findByVendor(parent.id, false);
   }
 
   @ResolveField(() => [EntityFileEntity])
