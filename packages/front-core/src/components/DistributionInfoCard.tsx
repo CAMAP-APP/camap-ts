@@ -101,20 +101,11 @@ const DistributionPlace = styled(Box)(({ theme }) => ({
 }));
 
 const DistributionInfoCard = ({
-  id,
-  date,
-  catalogId,
-  orderEndDate,
-  orderStartDate,
-  end,
   catalog,
   place,
   multiDistrib,
-  isFirst = false,
   onPlaceClick,
 }: DistributionInfoCardProps) => {
-
-    const {t} = useCamapTranslation({});
 
   const startDate = new Date(multiDistrib.distribStartDate);
   const endDate = new Date(multiDistrib.distribEndDate);
