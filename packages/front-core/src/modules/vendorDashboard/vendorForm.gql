@@ -15,6 +15,7 @@ query Vendor($id: Int!) {
     address2
     zipCode
     phone
+    showPhone
     linkText
     desc
     linkUrl
@@ -38,6 +39,7 @@ mutation UpdateVendor(
   $address1: String
   $address2: String
   $phone: String
+  $showPhone: Boolean
   $linkText: String
   $desc: String
   $linkUrl: String
@@ -59,6 +61,7 @@ mutation UpdateVendor(
     address1: $address1
     address2: $address2
     phone: $phone
+    showPhone: $showPhone
     linkText: $linkText
     desc: $desc
     linkUrl: $linkUrl

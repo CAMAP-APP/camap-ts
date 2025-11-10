@@ -53,6 +53,9 @@ export class VendorEntity extends BaseEntity {
   @Column('varchar', { name: 'phone', nullable: true, length: 19 })
   phone: string | null;
 
+  @Column('bool', { name: 'showPhone', default: true })
+  showPhone: boolean;
+
   @Column('varchar', { name: 'linkText', nullable: true, length: 256 })
   linkText: string | null;
 

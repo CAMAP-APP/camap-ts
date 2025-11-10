@@ -616,6 +616,7 @@ export type MutationUpdateVendorArgs = {
   production2?: InputMaybe<Scalars['Int']>;
   production3?: InputMaybe<Scalars['Int']>;
   profession?: InputMaybe<Scalars['Int']>;
+  showPhone?: Scalars['Boolean'];
   vendorId: Scalars['Int'];
   zipCode: Scalars['String'];
 };
@@ -1197,6 +1198,7 @@ export type Vendor = {
   production2?: Maybe<Scalars['Int']>;
   production3?: Maybe<Scalars['Int']>;
   profession?: Maybe<Scalars['Int']>;
+  showPhone: Scalars['Boolean'];
   zipCode?: Maybe<Scalars['String']>;
 };
 
@@ -1769,7 +1771,7 @@ export type VendorQueryVariables = Exact<{
 }>;
 
 
-export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
+export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
 
 export type UpdateVendorMutationVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1780,6 +1782,7 @@ export type UpdateVendorMutationVariables = Exact<{
   address1?: InputMaybe<Scalars['String']>;
   address2?: InputMaybe<Scalars['String']>;
   phone?: InputMaybe<Scalars['String']>;
+  showPhone?: InputMaybe<Scalars['Boolean']>;
   linkText?: InputMaybe<Scalars['String']>;
   desc?: InputMaybe<Scalars['String']>;
   linkUrl?: InputMaybe<Scalars['String']>;
@@ -4753,6 +4756,7 @@ export const VendorDocument = gql`
     address2
     zipCode
     phone
+    showPhone
     linkText
     desc
     linkUrl
@@ -4796,7 +4800,7 @@ export type VendorQueryHookResult = ReturnType<typeof useVendorQuery>;
 export type VendorLazyQueryHookResult = ReturnType<typeof useVendorLazyQuery>;
 export type VendorQueryResult = Apollo.QueryResult<VendorQuery, VendorQueryVariables>;
 export const UpdateVendorDocument = gql`
-    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
+    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $showPhone: Boolean, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
   updateVendor(
     vendorId: $vendorId
     name: $name
@@ -4806,6 +4810,7 @@ export const UpdateVendorDocument = gql`
     address1: $address1
     address2: $address2
     phone: $phone
+    showPhone: $showPhone
     linkText: $linkText
     desc: $desc
     linkUrl: $linkUrl
@@ -4863,6 +4868,7 @@ export type UpdateVendorMutationFn = Apollo.MutationFunction<UpdateVendorMutatio
  *      address1: // value for 'address1'
  *      address2: // value for 'address2'
  *      phone: // value for 'phone'
+ *      showPhone: // value for 'showPhone'
  *      linkText: // value for 'linkText'
  *      desc: // value for 'desc'
  *      linkUrl: // value for 'linkUrl'

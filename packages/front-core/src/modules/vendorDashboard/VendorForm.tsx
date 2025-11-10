@@ -5,6 +5,7 @@ import {
   Card,
   CardContent,
   FormControl,
+  FormControlLabel,
   Grid,
   InputLabel,
   MenuItem,
@@ -13,6 +14,7 @@ import {
   Typography,
   Alert,
   CircularProgress,
+  Checkbox,
 } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
 import * as yup from 'yup';
@@ -33,6 +35,7 @@ interface VendorFormData {
   address2?: string;
   zipCode: string;
   phone?: string;
+  showPhone: boolean;
   linkText?: string;
   desc?: string;
   linkUrl?: string;
@@ -54,6 +57,7 @@ const validationSchema = yup.object({
   address2: yup.string(),
   zipCode: yup.string().required('Zip code is required'),
   phone: yup.string(),
+  showPhone: yup.boolean(),
   linkText: yup.string(),
   desc: yup.string().max(1000, 'Description must be less than 1000 characters'),
   linkUrl: yup.string().url('Invalid URL'),
@@ -100,6 +104,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
     address2: vendor?.address2 || '',
     zipCode: vendor?.zipCode || '',
     phone: vendor?.phone || '',
+    showPhone: vendor?.showPhone ?? true,
     linkText: vendor?.linkText || '',
     desc: vendor?.desc || '',
     linkUrl: vendor?.linkUrl || '',
@@ -249,6 +254,20 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
                     fullWidth
                     error={meta.touched && !!meta.error}
                     helperText={meta.touched && meta.error ? meta.error : ''}
+                  />
+                )}
+              </Field>
+              <Field name="showPhone">
+                {({ field, meta }: any) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={field.value}
+                        onChange={field.onChange}
+                        name={field.name}
+                      />
+                    }
+                    label={tVendorDash('showPhone')}
                   />
                 )}
               </Field>

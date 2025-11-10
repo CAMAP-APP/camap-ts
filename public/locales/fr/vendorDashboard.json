@@ -47,6 +47,7 @@
     "mapPoint": "Point sur la carte",
     "lat": "Latitude",
     "lng": "Longitude",
+    "showPhone": "Afficher publiquement le numéro de téléphone",
     "professionalInformation": "Informations professionnelles",
     "profession": "Profession",
     "profession2": "Profession 2",

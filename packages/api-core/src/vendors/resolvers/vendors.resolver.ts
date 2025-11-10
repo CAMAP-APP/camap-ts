@@ -253,6 +253,8 @@ export class VendorsResolver {
     address2?: string,
     @Args({ name: 'phone', type: () => String, nullable: true })
     phone?: string,
+    @Args({ name: 'showPhone', type: () => Boolean, defaultValue: true })
+    showPhone?: boolean,
     @Args({ name: 'linkText', type: () => String, nullable: true })
     linkText?: string,
     @Args({ name: 'desc', type: () => String, nullable: true })
@@ -310,6 +312,7 @@ export class VendorsResolver {
       address2,
       zipCode,
       phone,
+      showPhone,
       linkText,
       desc,
       linkUrl: formattedLinkUrl,
@@ -493,6 +496,15 @@ export class VendorsResolver {
       return [];
     }
     return entityFiles;
+  }
+
+  @ResolveField(() => String)
+  phone(
+    @Parent() parent: VendorEntity,
+    @CurrentUser() currentUser: UserEntity
+  ): String | null {
+    const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
+    return (editor || parent.showPhone) ? parent.phone : null;
   }
 
   /**

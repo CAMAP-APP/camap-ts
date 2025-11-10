@@ -22,6 +22,8 @@ export class Vendor {
 
   @Field({ nullable: true })
   phone?: string;
+  @Field()
+  showPhone: boolean;
 
   @Field({ nullable: true })
   zipCode?: string;
