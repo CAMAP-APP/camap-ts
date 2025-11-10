@@ -156,6 +156,10 @@ const TitleAndContact = styled(Box)(({ theme }) => ({
     '& img': {
       width: '48px'
     },
+  },
+  [theme.breakpoints.down('sm')]: {
+    flexDirection: "column",
+    gap: 0
   }
 }));
 
@@ -166,7 +170,14 @@ const PublicContact = styled(Box)(({ theme }) => ({
   borderRadius: `${theme.spacing(1)} ${theme.spacing(1)} 0 0`,
   padding: theme.spacing(2),
   minHeight: '64px',
-  marginLeft: "auto"
+  marginLeft: "auto",
+  [theme.breakpoints.down('sm')]: {
+    // break out of Boostrap container-fluid
+    marginLeft: -15,
+    marginRight: -15,
+    width: 'calc(100% + 30px)',
+    maxWidth: "unset"
+  }
 }));
 
 const PublicContactItem = styled(Box)(({ theme }) => ({
@@ -195,6 +206,12 @@ const TabsContainer = styled(Box)(({ theme }) => ({
   flexWrap: 'wrap',
   [theme.breakpoints.down('md')]: {
     justifyContent: "space-evenly"
+  },
+  [theme.breakpoints.down('sm')]: {
+    // break out of Boostrap container-fluid
+    marginLeft: -15,
+    marginRight: -15,
+    width: 'calc(100% + 30px)'
   }
 }));
 
