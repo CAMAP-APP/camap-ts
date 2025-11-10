@@ -223,13 +223,14 @@ export class VendorService {
 
     // ensure user is in vendor's groups
     await Promise.all(
-      (await this.catalogService.findByVendor(vendorId))
-        .map(async(catalog) => 
-          this.userGroupsService.getOrCreate(
+      (await this.catalogService.getGroupsForActiveCatalogsFromVendor(vendorId))
+        .map(async(group) => {
+          console.log(group.name);
+          await this.userGroupsService.getOrCreate(
             userId,
-            catalog.groupId
+            group.id
           )
-      )
+        })
     )
 
     // if there's already a vendor linked to this user, squash

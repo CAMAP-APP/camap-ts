@@ -78,5 +78,6 @@
     "subscriptionBoxTitle": "Ce producteur est présent dans les AMAP",
     "welcome": "Bienvenue",
     "visitPublicProfile": "Voir votre page publique",
-    "uploadMedia": "Téléverser une image"
+    "uploadMedia": "Téléverser une image",
+    "unknownVAT": "SIRET Inconnu"
 }

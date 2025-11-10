@@ -92,6 +92,9 @@ export class VendorEntity extends BaseEntity {
   @Column('double', { nullable: true })
   lat: number | null;
 
+  @Column('varchar', { length: 64, nullable: true })
+  companyNumber: string | null;
+
   /**
    * =========
    * RELATIONS

@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { addYears } from 'date-fns';
-import { DeepPartial, LessThan, MoreThan, Repository } from 'typeorm';
+import { DeepPartial, IsNull, LessThan, MoreThan, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { hasFlag, setFlag } from '../../common/haxeCompat';
 import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
@@ -9,6 +9,7 @@ import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions
 import { DistributionEntity } from '../../shop/entities/distribution.entity';
 import { CatalogEntity } from '../entities/catalog.entity';
 import { VendorEntity } from '../entities/vendor.entity';
+import { GroupEntity } from 'src/groups/entities/group.entity';
 
 enum CatalogFlags {
   UsersCanOrder = 0, // Adhérents peuvent saisir eux meme la commande en ligne
@@ -37,8 +38,15 @@ export class CatalogsService {
     return this.catalogsRepo.find({ userId });
   }
 
-  async findByVendor(vendorId: number) {
-    return this.catalogsRepo.find({ vendorId });
+  async findByVendor(vendorId: number, active = true) {
+    const now = new Date();
+    return this.catalogsRepo.find({
+      vendorId,
+      ...(active ? {
+        endDate: MoreThan(now),
+        startDate: LessThan(now)
+      } : {})
+    });
   }
 
   async findActiveByForVendorInGroup(
@@ -68,7 +76,7 @@ export class CatalogsService {
       .getRawMany();
   }
 
-  async getActiveCatalogsFromActiveVendorsInGroup(groupId: number) {
+  async getActiveCatalogsFromActiveVendorsInGroup(groupId: number): Promise<CatalogEntity[]> {
     return this.catalogsRepo
       .createQueryBuilder('c')
       .select('c.*')
@@ -81,6 +89,21 @@ export class CatalogsService {
         AND v.disabled IS null`, //
       )
       .orderBy('c.vendorId')
+      .getRawMany();
+  }
+
+  async getGroupsForActiveCatalogsFromVendor(vendorId: number): Promise<GroupEntity[]> {
+    return this.catalogsRepo
+      .createQueryBuilder('c')
+      .select('g.*')
+      .addFrom(GroupEntity, 'g')
+      .where(
+        `c.vendorId = ${vendorId}
+        AND g.id = c.groupId
+        AND c.endDate > NOW()
+        AND c.startDate < NOW()`
+      )
+      .groupBy('g.id')
       .getRawMany();
   }
 

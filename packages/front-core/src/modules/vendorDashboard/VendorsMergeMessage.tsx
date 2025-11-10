@@ -74,7 +74,7 @@ const VendorsMergeMessage = (props:{
                         .reduce(
                             (groups: Set<string>, vendor: any) => vendor.catalogs?.reduce((groups: Set<string>, c: any) => groups.add(c.group.name), groups),
                             new Set<string>())
-                    ].map((groupName, i) => <span key={`group-${i}`}>
+                    ].map((groupName, i) => <span key={`group-${i}`} style={{ marginRight: '1em'}}>
                             <i className="icon icon-users" style={{ marginRight: "5px" }} />
                             {groupName}
                         </span>)

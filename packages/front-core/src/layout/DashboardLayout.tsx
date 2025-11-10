@@ -108,7 +108,15 @@ import {
           </Box>
   
           {/* Main Content */}
-          <Box sx={{ flexGrow: 1, pl: 2, pr: 2 }}>  
+          <Box sx={{
+            flexGrow: 1,
+            pl: 2,
+            pr: 2,
+            width: {
+              xs: "100%",
+              sm: 'calc(100vw - 160px)',
+            }
+          }}>  
             <Outlet />
           </Box>
         </Box>
