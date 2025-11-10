@@ -1,5 +1,5 @@
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
-import { Group, Place, useVendorCatalogsQuery, useVendorImagesQuery, VendorCatalogsQuery } from '@gql';
+import { Group, Place, useVendorCatalogsQuery, useVendorImagesQuery, VendorCatalogsQuery, VendorImagesQuery } from '@gql';
 import { Box, Button, Dialog, styled, Typography } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import { createContext, useContext, useMemo, useState } from 'react';
@@ -75,16 +75,10 @@ const VendorMap = ({vendor}: {
   </Box>
 }
 
-const ImageGallery = ({vendor}: {
-  vendor: VendorLike,
+const ImageGallery = ({images}: {
+  images: VendorImagesQuery['vendor']['media'],
 }) => {
   
-  const { data: { vendor: { media: vendorImages } = {}} = {}} = useVendorImagesQuery({
-    variables: { vendorId: vendor.id }
-  })
-
-  const images = (vendorImages ? vendorImages : []);
-
   const [selectedImage, setSelectedImage] = useState<(typeof images)[number]>();
 
   return <>
@@ -145,11 +139,16 @@ const SubscriptionPanel = ({vendor}: {
   });
 
   const groups = useMemo(() => {
-      return catalogs?.reduce((groups, cat: VendorCatalogsQuery["vendor"]["catalogs"][number]) => {
-        groups.add(cat.group);
-        return groups;
-      }, new Set<GroupLike>()) ?? []
-  }, [catalogs]);
+      return Array.from(
+        catalogs?.reduce((groups, cat: VendorCatalogsQuery["vendor"]["catalogs"][number]) => {
+          groups.add(cat.group);
+          return groups;
+        }, new Set<GroupLike>()) ?? []
+      )
+    }, [catalogs]);
+
+  if(groups.length === 0)
+    return <Typography>{tVendorDash("subscriptionBoxTitleEmpty")}</Typography>
 
   return <>
     <Typography>{tVendorDash("subscriptionBoxTitle")}</Typography>
@@ -157,10 +156,10 @@ const SubscriptionPanel = ({vendor}: {
       <Button
         key={g.id}
         variant="contained"
+        fullWidth
         sx={{
-          minWidth: '218px',
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           gap: 1,
         }}
@@ -181,6 +180,10 @@ const VendorLayout = ({
   tabs: PublicLayoutTabProps[]
 }) => {
 
+  const { data: { vendor: { media: vendorImages } = {}} = {}} = useVendorImagesQuery({
+    variables: { vendorId: vendor.id }
+  })
+
   return <PublicLayout
       title={vendor.name}
       logo={vendor.image}
@@ -192,7 +195,7 @@ const VendorLayout = ({
       }}
       tabs={tabs}
       mapComponent={<VendorMap vendor={vendor}/>}
-      imageGallery={<ImageGallery vendor={vendor}/>}
+      imageGallery={vendorImages && vendorImages.length > 0 && <ImageGallery images={vendorImages}/>}
       subscriptionPanel={<SubscriptionPanel vendor={vendor}/>}
     />
 };

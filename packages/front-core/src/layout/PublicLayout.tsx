@@ -55,6 +55,7 @@ const SideBox = styled(Box)(({ theme }) => ({
   minHeight: '1px',
   display: "grid",
   gridTemplateColumns: '1fr',
+  gridTemplateRows: 'max-content',
   gap: theme.spacing(2),
   marginBottom: theme.spacing(2),
   [theme.breakpoints.down('lg')]: {
@@ -95,7 +96,6 @@ const ImageList = styled(Box)(({ theme }) => ({
   flexWrap: 'wrap',
   flexDirection: 'row',
   gap: theme.spacing(2),
-  marginTop: theme.spacing(2),
   [theme.breakpoints.between('md', 'lg')]: {
     gridColumn: '2',
     gridRow: '2',
@@ -111,6 +111,7 @@ const SubscriptionPanel = styled(Paper)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'start',
+  alignSelf: 'flex-start',
   gap: theme.spacing(2),
   '& > *': {
     margin: 0,
@@ -275,7 +276,9 @@ const PublicLayout = ({
             )}
             {title}
           </Typography>
-          {contactInfo && (
+          {contactInfo && 
+            (contactInfo.name || contactInfo.website || contactInfo.phone || contactInfo. email)
+          && (
             <PublicContact>
               {contactInfo.name && (
                 <PublicContactItem>

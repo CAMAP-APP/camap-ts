@@ -1,5 +1,6 @@
 query vendorCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
+    id
     catalogs {
       id
       name

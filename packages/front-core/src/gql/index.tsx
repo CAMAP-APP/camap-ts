@@ -1324,7 +1324,7 @@ export type VendorCatalogsQueryVariables = Exact<{
 }>;
 
 
-export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
+export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, catalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
 
 export type VendorDocumentsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -2246,6 +2246,7 @@ export type IsGroupAdminQueryResult = Apollo.QueryResult<IsGroupAdminQuery, IsGr
 export const VendorCatalogsDocument = gql`
     query vendorCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
+    id
     catalogs {
       id
       name

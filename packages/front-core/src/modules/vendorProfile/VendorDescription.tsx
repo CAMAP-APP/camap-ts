@@ -1,8 +1,11 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
+import DOMPurify from 'dompurify';
 
 function VendorDescription({vendor}: {vendor: { longDesc?: string }}) {
     return <Box>
-      <Typography variant="body1" paragraph>{vendor.longDesc}</Typography>
+      <span dangerouslySetInnerHTML={{
+        __html: DOMPurify.sanitize(vendor.longDesc ?? '')
+      }} />
     </Box>
 }
 

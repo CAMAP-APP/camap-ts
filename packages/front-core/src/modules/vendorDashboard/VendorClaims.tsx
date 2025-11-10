@@ -74,13 +74,16 @@ export const VendorClaims = (
 
     return <Box sx={{ ...props.sx }}>
         <Typography variant="h5" gutterBottom>{tVendorDash("yourEmailAssociatedVendors")}</Typography>
-        <TableContainer component={Paper} sx={{ '& ul, & li': { m: 0, p:0 } }}>
+        <TableContainer component={Paper} sx={{
+                '& ul, & li': { m: 0, p:0 },
+                '& td:not(:last-child)': { pr: 1 }
+            }}>
             <Table sx={{ minWidth: 650 }} size="small" padding="none">
                 <TableHead>
                     <TableRow>
                         <TableCell />
                         <TableCell>{tVendorDash("name")}</TableCell>
-                        <TableCell sx={{ width: "100px" }} >{tVendorDash("vatNumber")}</TableCell>
+                        <TableCell sx={{ width: "115px" }} >{tVendorDash("vatNumber")}</TableCell>
                         <TableCell>{tVendorDash("groups")}</TableCell>
                         <TableCell>{tVendorDash("contracts")}</TableCell>
                         <TableCell sx={{ width: "200px" }} />

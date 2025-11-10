@@ -76,6 +76,7 @@
     "publicTabProducts": "Produits",
     "productSamplePageDesc": "Extrait non exhaustif des produits proposés",
     "subscriptionBoxTitle": "Ce producteur est présent dans les AMAP",
+    "subscriptionBoxTitleEmpty": "Ce producteur n'est présent dans aucune AMAP à ce jour",
     "welcome": "Bienvenue",
     "visitPublicProfile": "Voir votre page publique",
     "uploadMedia": "Téléverser une image",
