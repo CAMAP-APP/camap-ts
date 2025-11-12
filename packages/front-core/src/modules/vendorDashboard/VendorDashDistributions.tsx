@@ -1,6 +1,7 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { GetNextVendorDistributionsQuery, useGetNextVendorDistributionsQuery } from "@gql";
-import { Collapse, IconButton, Paper, Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
+import { Alert, Collapse, IconButton, Paper, Table, TableBody, TableCell, TableRow, Typography } from "@mui/material";
 import { formatDate, formatTime } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatSmartQt } from "camap-common";
@@ -48,7 +49,7 @@ const MultiDistribRow = ({ distributions }: { distributions: VendorDistributions
         </TableRow>
         {Array.from(products.values()).map(p => 
             <TableRow key={p.id}>
-                <TableCell>{formatSmartQt(p, {quantity: p.ordered})}</TableCell>
+                <TableCell>{formatSmartQt(p, {quantity: p.ordered}, { forceShowSingleUnit: true })}</TableCell>
             </TableRow>
         )}
     </>
@@ -119,7 +120,9 @@ function VendorDashDistributions({ vendorId }:{ vendorId: number }) {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
 
     const {
-        data: { vendor: { nextDistributions = [] } = {} } = {}
+        data: { vendor: { nextDistributions = [] } = {} } = {},
+        loading,
+        error
     } = useGetNextVendorDistributionsQuery({ variables: { vendorId }});
     
 
@@ -128,31 +131,35 @@ function VendorDashDistributions({ vendorId }:{ vendorId: number }) {
 
             c.distributions.forEach(d => {
                 const date = startOfDay(d.date);
-                const groupsForDate = byDate.get(date) ?? new Map<number, VendorDistributions>;
+                const groupsForDate = byDate.get(date.getTime()) ?? new Map<number, VendorDistributions>();
                 const dists = groupsForDate.get(d.catalog.group.id) ?? { group: c.group, distributions: [] };
                 dists?.distributions.push(d);
                 groupsForDate.set(c.group.id, dists);
-                byDate.set(date, groupsForDate);
+                byDate.set(date.getTime(), groupsForDate);
             })
 
             return byDate;
         },
-        new Map<Date, Map<number, VendorDistributions>>
+        new Map<number, Map<number, VendorDistributions>>
     );
 
     return <Paper sx={{ padding: 1 }}>
         <Typography variant="h5">{tVendorDash("dashDistributionsTitle")}</Typography>
-        <Table>
+        {!loading && !error && <Table>
             <TableBody>
             {Array.from(distributionsByDateAndGroup.entries())
+                .sort(([d1], [d2]) => d1 - d2)
                 .map(([date, groups], i) => <DistributionByDateRow
-                    key={date.getTime()}
-                    date={date} groups={groups}
+                    key={date}
+                    date={new Date(date)}
+                    groups={groups}
                     forceOpen={i === 0}
                 />)
             }
             </TableBody>
-        </Table>
+        </Table>}
+        {loading && <CircularProgressBox />}
+        {error && <Alert severity="error">{error.message}</Alert>}
     </Paper>
 
 }
