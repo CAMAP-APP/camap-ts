@@ -4,7 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { VendorMapContext } from "layout/VendorLayout";
 import { useContext } from "react";
 
-function VendorDistributions({ nextDistributions }: {nextDistributions?: InitVendorPageQuery["initVendorPage"]["nextDistributions"]}) {
+function VendorDistributions({ nextDistributions }: {nextDistributions?: InitVendorPageQuery["vendor"]["nextDistributions"]}) {
 
     const { setSelectedDistributionPlace } = useContext(VendorMapContext);
 

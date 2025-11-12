@@ -75,11 +75,9 @@ query vendorProductsSample($vendorId: Int!) {
 }
 
 query InitVendorPage($vendorId: Int!) {
-  initVendorPage(vendorId: $vendorId) {
-    vendor {
-      id
-      name
-    }
+  vendor(id: $vendorId) {
+    id
+    name
     nextDistributions {
       group {
         id

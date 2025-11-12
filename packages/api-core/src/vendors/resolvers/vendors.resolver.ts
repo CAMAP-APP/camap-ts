@@ -14,13 +14,10 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { isAfter } from 'date-fns';
 import { GroupEntity } from 'src/groups/entities/group.entity';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
-import { IsAdmin } from '../../common/decorators/is-admin.decorator';
-import { BlackListGuard } from '../../common/guards/black-list.guard';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
 import { compressImage } from '../../common/image';
 import { FilesService } from '../../files/file.service';
@@ -36,8 +33,7 @@ import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
 import { CatalogsService } from '../services/catalogs.service';
 import { VendorService } from '../services/vendor.service';
 import { Catalog } from '../types/catalog.type';
-import { InitVendorPage } from '../types/initVendorPage.type';
-import { Vendor } from '../types/vendor.type';
+import { Vendor, VendorDistributions } from '../types/vendor.type';
 import { VendorImage } from '../types/vendorImages.type';
 import { VendorProfession } from '../types/vendorProfession.type';
 import DataLoader = require('dataloader');
@@ -57,17 +53,12 @@ export class VendorsResolver {
   @UseGuards(GqlAuthGuard)
   @Query(() => Vendor)
   async vendor(
-    @Args({ name: 'id', type: () => Int }) vendorId: number,
-    @CurrentUser() user: UserEntity,
-    @IsAdmin() isAdmin: boolean,
+    @Args({ name: 'id', type: () => Int }) vendorId: number
   ) {
     const vendor = await this.vendorsService.findOne(vendorId);
     if (!vendor) {
       throw new NotFoundException();
     }
-    // if (!isAdmin && vendor.userId && vendor.userId !== user.id) {
-    //   throw new UnauthorizedException();
-    // }
     return vendor;
   }
 
@@ -148,53 +139,6 @@ export class VendorsResolver {
     }
     const count = await this.vendorsService.find({ where: { userId }, take: 1 });
     return count.length > 0;
-  }
-
-  @UseGuards(BlackListGuard)
-  @Query(() => InitVendorPage)
-  async initVendorPage(
-    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
-  ) {
-    const vendor = await this.vendorsService.findOne(vendorId);
-    if (!vendor) throw new NotFoundException();
-
-    let catalogs = await this.catalogsService.findByVendor(vendorId, true);
-    // Filter ended catalogs
-    const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
-      catalogs.map((c) => c.id)
-    );
-
-    const nextDistributionsByGroupId = new Map<number, {
-      distributions: DistributionEntity[]
-      group: GroupEntity
-    }>();
-    await Promise.all(distribs.map(async (distribution) => {
-      const catalog = await distribution.catalog;
-      const group = await catalog.group;
-
-      // console.log(distribution, catalog, group);
-
-      const dists = nextDistributionsByGroupId.get(group.id);
-      if (!dists) {
-        nextDistributionsByGroupId.set(group.id, { distributions: [distribution], group });
-      } else {
-        dists.distributions.push(distribution);
-      }
-    }));
-
-
-    const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
-    .map(([, { distributions, group }]) => ({
-      group,
-      distributions: distributions
-        .slice(0,4)
-        .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
-    }));
-
-    return {
-      vendor,
-      nextDistributions
-    };
   }
 
   @Query(() => [Vendor])
@@ -505,6 +449,44 @@ export class VendorsResolver {
   ): String | null {
     const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
     return (editor || parent.showPhone) ? parent.phone : null;
+  }
+
+  @ResolveField(() => [VendorDistributions])
+  async nextDistributions(
+    @Parent() parent: VendorEntity
+  ) {
+    let catalogs = await this.catalogsService.findByVendor(parent.id, true);
+    // Filter ended catalogs
+    const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
+      catalogs.map((c) => c.id)
+    );
+
+    const nextDistributionsByGroupId = new Map<number, {
+      distributions: DistributionEntity[]
+      group: GroupEntity
+    }>();
+    await Promise.all(distribs.map(async (distribution) => {
+      const catalog = await distribution.catalog;
+      const group = await catalog.group;
+
+      const dists = nextDistributionsByGroupId.get(group.id);
+      if (!dists) {
+        nextDistributionsByGroupId.set(group.id, { distributions: [distribution], group });
+      } else {
+        dists.distributions.push(distribution);
+      }
+    }));
+
+
+    const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
+    .map(([, { distributions, group }]) => ({
+      group,
+      distributions: distributions
+        .slice(0,4)
+        .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
+    }));
+
+    return nextDistributions;
   }
 
   /**

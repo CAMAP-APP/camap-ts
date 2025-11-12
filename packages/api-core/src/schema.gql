@@ -153,6 +153,50 @@ type VendorImage {
   url: String!
 }
 
+type MultiDistrib {
+  id: Int!
+  placeId: Int!
+  groupId: Int!
+  distribStartDate: DateTime!
+  distribEndDate: DateTime!
+  orderEndDate: DateTime!
+  distributionCycleId: Int
+  orderStartDate: DateTime!
+  volunteers: [Volunteer!]!
+  volunteerRoles: [VolunteerRole!]!
+}
+
+type UserOrder {
+  id: Int!
+  quantity: Float!
+  productPrice: Float!
+  productId: Int!
+  userId: Int!
+  distributionId: Int!
+  subscriptionId: Int
+  product: Product!
+  smartQt: String!
+}
+
+type Distribution {
+  id: Int!
+  date: DateTime!
+  catalogId: Int!
+  catalog: Catalog!
+  orderEndDate: DateTime!
+  orderStartDate: DateTime!
+  placeId: Int!
+  place: Place!
+  userOrders: [UserOrder!]!
+  multiDistrib: MultiDistrib!
+  end: DateTime!
+}
+
+type VendorDistributions {
+  group: Group!
+  distributions: [Distribution!]!
+}
+
 type Vendor {
   id: Int!
   name: String!
@@ -182,6 +226,7 @@ type Vendor {
   documents: [EntityFile!]!
   lat: Float
   lng: Float
+  nextDistributions: [VendorDistributions!]!
   image: String
   imageFile: File
   portrait: String!
@@ -226,45 +271,6 @@ type CsaSubscriptionType {
   user2: User
   absentDistribIds: String
   balance: Float!
-}
-
-type MultiDistrib {
-  id: Int!
-  placeId: Int!
-  groupId: Int!
-  distribStartDate: DateTime!
-  distribEndDate: DateTime!
-  orderEndDate: DateTime!
-  distributionCycleId: Int
-  orderStartDate: DateTime!
-  volunteers: [Volunteer!]!
-  volunteerRoles: [VolunteerRole!]!
-}
-
-type UserOrder {
-  id: Int!
-  quantity: Float!
-  productPrice: Float!
-  productId: Int!
-  userId: Int!
-  distributionId: Int!
-  subscriptionId: Int
-  product: Product!
-  smartQt: String!
-}
-
-type Distribution {
-  id: Int!
-  date: DateTime!
-  catalogId: Int!
-  catalog: Catalog!
-  orderEndDate: DateTime!
-  orderStartDate: DateTime!
-  placeId: Int!
-  place: Place!
-  userOrders: [UserOrder!]!
-  multiDistrib: MultiDistrib!
-  end: DateTime!
 }
 
 type AttendanceClassicContract {
@@ -359,16 +365,6 @@ type File {
   name: String
   data: String!
   cDate: DateTime
-}
-
-type InitVendorPageDistribution {
-  group: Group!
-  distributions: [Distribution!]!
-}
-
-type InitVendorPage {
-  vendor: Vendor!
-  nextDistributions: [InitVendorPageDistribution!]!
 }
 
 type VendorProfession {
@@ -548,7 +544,6 @@ type Query {
   getVendorsByUserId(userId: Int!): [Vendor!]!
   getDefaultVendorByUserId(userId: Int!): Vendor!
   hasVendorsByUserId(userId: Int!): Boolean!
-  initVendorPage(vendorId: Int!): InitVendorPage!
   getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
   getVendorProfessions: [VendorProfession!]!
   catalog(id: Int!): Catalog!

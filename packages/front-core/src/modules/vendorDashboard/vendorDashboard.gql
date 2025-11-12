@@ -77,6 +77,62 @@ query HasVendorsByUserId($userId: Int!) {
   hasVendorsByUserId(userId: $userId)
 }
 
+query GetNextVendorDistributions($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalog {
+          id
+          name
+          group {
+            id
+          }
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+          lng
+          lat
+        }
+        userOrders {
+          id
+          quantity
+          productPrice
+          product {
+            id
+            name
+            qt
+            unitType
+            bulk
+            variablePrice
+          }
+          userId
+          distributionId
+          subscriptionId
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}
+
 mutation ClaimVendor($vendorId: Int!) {
   claimVendor(vendorId: $vendorId)
 }

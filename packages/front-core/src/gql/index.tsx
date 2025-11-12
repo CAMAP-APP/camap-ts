@@ -259,18 +259,6 @@ export type GroupPreviewMembers = {
   name: Scalars['String'];
 };
 
-export type InitVendorPage = {
-  __typename?: 'InitVendorPage';
-  nextDistributions: Array<InitVendorPageDistribution>;
-  vendor: Vendor;
-};
-
-export type InitVendorPageDistribution = {
-  __typename?: 'InitVendorPageDistribution';
-  distributions: Array<Distribution>;
-  group: Group;
-};
-
 export type InvitedUser = {
   __typename?: 'InvitedUser';
   address1?: Maybe<Scalars['String']>;
@@ -755,7 +743,6 @@ export type Query = {
   groupPreviews: Array<GroupPreview>;
   groupPreviews2: Array<GroupPreview>;
   hasVendorsByUserId: Scalars['Boolean'];
-  initVendorPage: InitVendorPage;
   isEmailRegistered: Scalars['Boolean'];
   isGroupAdmin: Scalars['Boolean'];
   me: User;
@@ -943,11 +930,6 @@ export type QueryGroupPreviewMembersArgs = {
 
 export type QueryHasVendorsByUserIdArgs = {
   userId: Scalars['Int'];
-};
-
-
-export type QueryInitVendorPageArgs = {
-  vendorId: Scalars['Int'];
 };
 
 
@@ -1192,6 +1174,7 @@ export type Vendor = {
   longDesc?: Maybe<Scalars['String']>;
   media: Array<VendorImage>;
   name: Scalars['String'];
+  nextDistributions: Array<VendorDistributions>;
   peopleName?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   portrait: Scalars['String'];
@@ -1207,6 +1190,12 @@ export enum VendorDisabledReason {
   IncompleteLegalInfos = 'IncompleteLegalInfos',
   NotCompliantWithPolicy = 'NotCompliantWithPolicy'
 }
+
+export type VendorDistributions = {
+  __typename?: 'VendorDistributions';
+  distributions: Array<Distribution>;
+  group: Group;
+};
 
 export type VendorImage = {
   __typename?: 'VendorImage';
@@ -1359,7 +1348,7 @@ export type InitVendorPageQueryVariables = Exact<{
 }>;
 
 
-export type InitVendorPageQuery = { __typename?: 'Query', initVendorPage: { __typename?: 'InitVendorPage', vendor: { __typename?: 'Vendor', id: number, name: string }, nextDistributions: Array<{ __typename?: 'InitVendorPageDistribution', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
+export type InitVendorPageQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, nextDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
 
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -1746,6 +1735,13 @@ export type HasVendorsByUserIdQueryVariables = Exact<{
 
 
 export type HasVendorsByUserIdQuery = { __typename?: 'Query', hasVendorsByUserId: boolean };
+
+export type GetNextVendorDistributionsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type GetNextVendorDistributionsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, nextDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number } }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, userOrders: Array<{ __typename?: 'UserOrder', id: number, quantity: number, productPrice: number, userId: number, distributionId: number, subscriptionId?: number | null, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, bulk: boolean, variablePrice: boolean } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
 
 export type ClaimVendorMutationVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -2447,11 +2443,9 @@ export type VendorProductsSampleLazyQueryHookResult = ReturnType<typeof useVendo
 export type VendorProductsSampleQueryResult = Apollo.QueryResult<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>;
 export const InitVendorPageDocument = gql`
     query InitVendorPage($vendorId: Int!) {
-  initVendorPage(vendorId: $vendorId) {
-    vendor {
-      id
-      name
-    }
+  vendor(id: $vendorId) {
+    id
+    name
     nextDistributions {
       group {
         id
@@ -4648,6 +4642,91 @@ export function useHasVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.La
 export type HasVendorsByUserIdQueryHookResult = ReturnType<typeof useHasVendorsByUserIdQuery>;
 export type HasVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useHasVendorsByUserIdLazyQuery>;
 export type HasVendorsByUserIdQueryResult = Apollo.QueryResult<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>;
+export const GetNextVendorDistributionsDocument = gql`
+    query GetNextVendorDistributions($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalog {
+          id
+          name
+          group {
+            id
+          }
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+          lng
+          lat
+        }
+        userOrders {
+          id
+          quantity
+          productPrice
+          product {
+            id
+            name
+            qt
+            unitType
+            bulk
+            variablePrice
+          }
+          userId
+          distributionId
+          subscriptionId
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetNextVendorDistributionsQuery__
+ *
+ * To run a query within a React component, call `useGetNextVendorDistributionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNextVendorDistributionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNextVendorDistributionsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useGetNextVendorDistributionsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>(GetNextVendorDistributionsDocument, options);
+      }
+export function useGetNextVendorDistributionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>(GetNextVendorDistributionsDocument, options);
+        }
+export type GetNextVendorDistributionsQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsQuery>;
+export type GetNextVendorDistributionsLazyQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsLazyQuery>;
+export type GetNextVendorDistributionsQueryResult = Apollo.QueryResult<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>;
 export const ClaimVendorDocument = gql`
     mutation ClaimVendor($vendorId: Int!) {
   claimVendor(vendorId: $vendorId)

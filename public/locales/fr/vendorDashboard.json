@@ -12,7 +12,7 @@
     "profileToKeep": "Ce profil sera conservé :",
     "profilesToBeRemoved": "Ces profils seront supprimés :",
     "contracts": "Contrats",
-    "contractsToBeReattached": "{{nbCatalogsMoved}} catalogues avec {{nbSubsMoved}} souscriptions seront rattachés à {{vendor}}",
+    "contractsToBeReattached": "{{nbCatalogsMoved}} contrats avec {{nbSubsMoved}} souscriptions seront rattachés à {{vendor}}",
     "contractsToBeReattachedGroups": "Dans les AMAP :",
     "allContractsMoved": "Tous les contrats seront préservés et déplacés vers le profil sélectionné",
     "cancel": "Annuler",
@@ -28,7 +28,7 @@
     "contactGroups": "Contacter les AMAP",
     "confirmClaim": "Êtes-vous sûr de vouloir revendiquer cette fiche producteur ?",
     "claimConfirmationMessage": "Celà vous donnera accès à cette fiche producteur et empêchera tout autre utilisateur de la modifier.",
-    "claimConfirmationInfoRights": "Les utilisateurs qui le peuvent continueront de pouvoir modifier les Catalogues associés à cette fiche producteur.",
+    "claimConfirmationInfoRights": "Les utilisateurs qui le peuvent continueront de pouvoir modifier les contrats associés à cette fiche producteur.",
     "claimConfirmationMerge": "Cette fiche producteur va être consolidée avec votre fiche existante",
     "yesClaim": "Oui, revendiquer",
     "noCancel": "Non, annuler",
@@ -74,6 +74,7 @@
     "vendorDashboardProfile": "Profil",
     "vendorDashboardDocuments": "Documents",
     "vendorDashboardImages": "Images",
+    "vendorDashboardDistributions": "Distributions",
     "publicTabDescription": "Description",
     "publicTabDeliveries": "Prochaines Distributions",
     "publicTabDocuments": "Documents",
@@ -84,5 +85,6 @@
     "welcome": "Bienvenue",
     "visitPublicProfile": "Voir votre page publique",
     "uploadMedia": "Téléverser une image",
-    "unknownVAT": "SIRET Inconnu"
+    "unknownVAT": "SIRET Inconnu",
+    "dashDistributionsTitle": "Vos prochaines distributions"
 }

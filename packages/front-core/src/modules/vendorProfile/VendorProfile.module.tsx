@@ -68,7 +68,7 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
   ]);
 
   const {
-      data: { initVendorPage : { nextDistributions } = {} } = {},
+      data: { vendor : { nextDistributions } = {} } = {},
   } = useInitVendorPageQuery({
       variables: { vendorId: vendor.id }
   });

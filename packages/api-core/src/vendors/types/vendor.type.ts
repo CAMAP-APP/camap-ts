@@ -3,8 +3,19 @@ import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorDisabledReason } from '../entities/vendor.entity';
 import { Catalog } from './catalog.type';
 import { VendorImage } from './vendorImages.type';
+import { Group } from 'src/groups/types/group.type';
+import { Distribution } from 'src/shop/types/distribution.type';
 
 registerEnumType(VendorDisabledReason, { name: 'VendorDisabledReason' });
+
+@ObjectType()
+export class VendorDistributions {
+  @Field(() => Group)
+  group: Group;
+
+  @Field(() => [Distribution])
+  distributions: Distribution[]
+}
 
 @ObjectType()
 export class Vendor {
@@ -89,4 +100,7 @@ export class Vendor {
 
   @Field({ nullable: true })
   lng?: number;
+
+  @Field(() => [VendorDistributions])
+  nextDistributions: VendorDistributions[];
 }

@@ -1,7 +1,7 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { Button, Divider, Typography } from "@mui/material";
+import { Button, Divider, Paper, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
@@ -13,6 +13,7 @@ import VendorConsolidation from "./VendorConsolidation";
 import VendorEditDocuments from "./VendorEditDocuments";
 import VendorForm from "./VendorForm";
 import VendorEditImages from "./VendorEditImages";
+import VendorDashDistributions from "./VendorDashDistributions";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -140,7 +141,7 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
     }
 
     if(claimedVendors?.length !== 1)
-        return <div className="col-md-12">
+        return <Paper>
             <div className="row">
                 <div className="col-md-12">
                     {claimedVendors?.length < 1 && <h4>{tVendorDash("noVendorProfiles")}</h4>}
@@ -152,7 +153,7 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
             <div className="row">
                 <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
             </div>
-        </div>
+        </Paper>
 
     const vendor = claimedVendors[0];
 
@@ -174,6 +175,12 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
             icon: <CamapIcon id={CamapIconId.image} />,
             path: '/images',
             element: <VendorEditImages vendorId={vendor.id} />
+        },
+        {
+            label: tVendorDash('vendorDashboardDistributions'),
+            icon: <CamapIcon id={CamapIconId.delivery} />,
+            path: '/distributions',
+            element: <VendorDashDistributions vendorId={vendor.id} />
         }
     ]
 
