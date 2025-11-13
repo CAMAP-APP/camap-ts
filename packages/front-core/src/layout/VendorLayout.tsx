@@ -12,6 +12,8 @@ type VendorLike = {
   name: string,
   profession?: string,
   email?: string,
+  showEmail: boolean,
+  showPhone: boolean,
   phone?: string,
   peopleName?: string,
   image?: string,
@@ -58,7 +60,8 @@ const VendorMap = ({vendor}: {
   const bounds = [
     vendorPlace,
     ...distributionPlaces
-  ].filter(x => !!x).filter((x): x is {lat: number, lng: number} => !!x.lat && !!x.lng).map(x => [x.lat, x.lng] as LatLngTuple);
+  ].filter((x): x is { lat: number, lng: number } => !!x)
+    .filter((x): x is {lat: number, lng: number} => !!x.lat && !!x.lng).map(x => [x.lat, x.lng] as LatLngTuple);
   if(!selectedDistributionPlace && bounds.length > 1)
     center = undefined;
 
@@ -183,7 +186,7 @@ const SubscriptionPanel = ({vendor}: {
 
   const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
   
-  const { data: { vendor : { activeCatalogs: catalogs } = {} } = {} } = useVendorActiveCatalogsQuery({
+  const { data: { vendor : { activeCatalogs: catalogs = [] } = {} } = {} } = useVendorActiveCatalogsQuery({
     variables: {
       vendorId: vendor.id
     }
@@ -231,7 +234,7 @@ const VendorLayout = ({
   tabs: PublicLayoutTabProps[]
 }) => {
 
-  const { data: { vendor: { media: vendorImages } = {}} = {}} = useVendorImagesQuery({
+  const { data: { vendor: { media: vendorImages = [] } = {}} = {}} = useVendorImagesQuery({
     variables: { vendorId: vendor.id }
   })
 
@@ -240,8 +243,8 @@ const VendorLayout = ({
       logo={vendor.image}
       contactInfo={{
         name: vendor.peopleName,
-        email: vendor.email,
-        phone: vendor.phone,
+        email: vendor.showEmail ? vendor.email : undefined, // ensure view is consistent even when viewed by admin
+        phone: vendor.showPhone ? vendor.phone : undefined,
         website: vendor.linkUrl ? { url: vendor.linkUrl, text: vendor.linkText } : undefined
       }}
       tabs={tabs}

@@ -1,5 +1,5 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
-import { useInitVendorPageQuery } from "@gql";
+import { InitVendorPageQuery, useInitVendorPageQuery } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import VendorLayout, { PlaceLike, VendorMapContext } from "layout/VendorLayout";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -16,6 +16,8 @@ type VendorLike = {
     profession?: string,
     email?: string,
     phone?: string,
+    showPhone: boolean,
+    showEmail: boolean,
     peopleName?: string,
     image?: string,
     images: {
@@ -68,13 +70,15 @@ const VendorProfileRouter = ({ vendor, basePath }: { vendor: VendorLike, basePat
   ]);
 
   const {
-      data: { vendor : { nextDistributions } = {} } = {},
+      data: { vendor : { nextDistributions = [] } = {} } = {},
   } = useInitVendorPageQuery({
       variables: { vendorId: vendor.id }
   });
 
   useEffect(() => {
-      nextDistributions?.forEach(d => d.distributions.length > 0 && addDistributionPlace(d.distributions[0].place))
+      nextDistributions?.forEach((d: InitVendorPageQuery['vendor']['nextDistributions'][number] ) => {
+        return d.distributions.length > 0 && addDistributionPlace(d.distributions[0].place)
+      })
   }, [nextDistributions, addDistributionPlace]);
 
   const tabs = [

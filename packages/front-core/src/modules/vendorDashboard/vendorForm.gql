@@ -5,35 +5,11 @@ query GetVendorProfessions {
   }
 }
 
-query Vendor($id: Int!) {
-  vendor(id: $id) {
-    id
-    name
-    email
-    city
-    address1
-    address2
-    zipCode
-    phone
-    showPhone
-    linkText
-    desc
-    linkUrl
-    country
-    longDesc
-    profession
-    production2
-    production3
-    peopleName
-    lat
-    lng
-  }
-}
-
 mutation UpdateVendor(
   $vendorId: Int!
   $name: String!
   $email: String!
+  $showEmail: Boolean
   $city: String!
   $zipCode: String!
   $address1: String
@@ -45,6 +21,7 @@ mutation UpdateVendor(
   $linkUrl: String
   $country: String
   $longDesc: String
+  $companyNumber: String!
   $profession: Int
   $production2: Int
   $production3: Int
@@ -56,6 +33,7 @@ mutation UpdateVendor(
     vendorId: $vendorId
     name: $name
     email: $email
+    showEmail: $showEmail
     city: $city
     zipCode: $zipCode
     address1: $address1
@@ -67,6 +45,7 @@ mutation UpdateVendor(
     linkUrl: $linkUrl
     country: $country
     longDesc: $longDesc
+    companyNumber: $companyNumber
     profession: $profession
     production2: $production2
     production3: $production3

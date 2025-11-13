@@ -1,3 +1,31 @@
+query Vendor($id: Int!) {
+  vendor(id: $id) {
+    id
+    name
+    email
+    showEmail
+    city
+    address1
+    address2
+    zipCode
+    phone
+    showPhone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    companyNumber
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}
+
+
 query vendorActiveCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
     id

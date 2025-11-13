@@ -3,7 +3,7 @@ import DocumentUploader from "@components/DocumentUploader";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { Catalog, EntityFile, Group, useVendorActiveCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { Alert, Box, Button, Card, CardActions, CardContent, CircularProgress, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardActions, CardContent, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
 import { Stub } from "@utils/gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
@@ -73,14 +73,14 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                 }
             </Box>
             {Array.from(groups?.values() ?? []).map(({ group, catalogs }) => (
-                <Box key={group.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: "100%" }}>
+                <Box key={group.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: "100%", mb: 2 }}>
                     <Typography variant='h4'>{tVendor("inGroupGroupName", { groupName: group.name })}</Typography>
                     <Box sx={{ display: 'flex', flexFlow: 'row wrap', gap: 1 }}>
                         {catalogs.map((cat) => (
                             <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 280 }}>
                                 <CardContent sx={{ height: 'auto', flexGrow: 1 }}>
                                     <Typography variant='h5' gutterBottom>{cat.name}</Typography>
-                                    <DocumentList documents={cat.documents} editable onDelete={refetchDocuments} />
+                                    <DocumentList documents={cat.documents} editable showVisibility onDelete={refetchDocuments} />
                                     {cat.documents.length === 0 &&
                                         <Typography>{tVendor("noCatalogPublicFile")}</Typography>
                                     }

@@ -30,6 +30,8 @@ export class Vendor {
 
   @Field({ nullable: true })
   email?: string;
+  @Field()
+  showEmail: boolean;
 
   @Field({ nullable: true })
   phone?: string;

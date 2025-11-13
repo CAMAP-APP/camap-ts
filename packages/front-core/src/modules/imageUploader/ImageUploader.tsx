@@ -12,7 +12,7 @@ import {
   Typography,
 } from '@mui/material';
 import imageCompression from 'browser-image-compression';
-import React from 'react';
+import React, { useCallback } from 'react';
 import Cropper from 'react-easy-crop';
 import { Area, Point } from 'react-easy-crop/types';
 import DropzoneArea from '../../components/utils/DropzoneArea/DropzoneArea';
@@ -131,18 +131,34 @@ function ImageUploader({
   const [croppedArea, setCroppedArea] = React.useState<Area>();
   const [loading, setLoading] = React.useState(false);
 
-  const [setProductImageMutation, { data: productData, error: productError }] =
+  const [setProductImageMutation, { data: productData, error: productError, reset: resetProduct }] =
     useSetProductImageMutation();
-  const [setGroupImageMutation, { data: groupData, error: groupError }] =
+  const [setGroupImageMutation, { data: groupData, error: groupError, reset: resetGroup }] =
     useSetGroupImageMutation();
-  const [setVendorImageMutation, { data: vendorData, error: vendorError }] =
+  const [setVendorImageMutation, { data: vendorData, error: vendorError, reset: resetVendor }] =
     useSetVendorImageMutation();
-  const [createVendorImageMutation, { data: vendorMediaData, error: vendorMediaError }] =
+  const [createVendorImageMutation, { data: vendorMediaData, error: vendorMediaError, reset: resetVendorMedia }] =
     useCreateVendorImageMutation();
 
   const data = groupData || productData || vendorData || vendorMediaData;
   const error = groupError || productError || vendorError || vendorMediaError;
 
+  const doClose = useCallback(() => { // reset and close
+    resetProduct();
+    resetGroup();
+    resetVendor();
+    resetVendorMedia();
+    setImageFile(undefined);
+    setScale(1);
+    setPosition({ x: 0.5, y: 0.5 });
+    setRotate(0);
+    setBase64(undefined);
+    setCroppedArea(undefined);
+    setLoading(false);
+    onClose();
+  }, [resetProduct, resetGroup, resetVendor, resetVendorMedia, onClose])
+
+  // Reset and close once we have had a successful response
   React.useEffect(() => {
     if (!data && !error) return;
 
@@ -151,8 +167,8 @@ function ImageUploader({
     if (error) return;
 
     onSuccess();
-    onClose();
-  }, [data, error, onSuccess, onClose]);
+    doClose();
+  }, [data, error, onSuccess, doClose]);
 
   React.useEffect(() => {
     if (!imageFile) return;
@@ -268,7 +284,7 @@ function ImageUploader({
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={doClose}
       aria-labelledby="image-uploader-dialog-title"
       fullWidth
     >

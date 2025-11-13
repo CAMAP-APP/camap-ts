@@ -174,7 +174,7 @@ export class EntityFileResolver {
       documentType: 'document',
       fileId: fileEntity.id,
       data: visibility,
-    } as EntityFileEntity);
+    });
 
     return entityFile;
   }

@@ -18,6 +18,7 @@ mutation createDocument(
     entityType
     entityId
     documentType
+    fileId
     visibility
     url
     name

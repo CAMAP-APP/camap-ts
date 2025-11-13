@@ -1,7 +1,7 @@
 import DocumentList from "@components/DocumentList";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { Catalog, EntityFile, Group, useVendorDocumentsQuery } from "@gql";
-import { Alert, Box, Card, CardContent, CircularProgress, Typography } from "@mui/material";
+import { Alert, Box, Card, CardContent, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 
 

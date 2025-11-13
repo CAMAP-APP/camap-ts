@@ -1,12 +1,12 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { Button, Divider, Paper, Typography } from "@mui/material";
+import { Alert, Button, Divider, Paper, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
 import { reactRouterDefaultProps } from "react-router-config";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { VendorImage } from "../../components/vendor/VendorImage";
 import { VendorClaims } from "./VendorClaims";
 import VendorConsolidation from "./VendorConsolidation";
@@ -136,16 +136,18 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
         return <CircularProgressBox />;
     }
 
-    if (userError || claimedVendorsError || !claimedVendors) {
-        return <></>;
+    if (userError || claimedVendorsError) {
+        return <Alert severity="error">
+            {(userError || claimedVendorsError)?.message}
+        </Alert>;
     }
 
     if(claimedVendors?.length !== 1)
         return <Paper>
             <div className="row">
                 <div className="col-md-12">
-                    {claimedVendors?.length < 1 && <h4>{tVendorDash("noVendorProfiles")}</h4>}
-                    {claimedVendors?.length > 1 && <MultipleVendorDashContent
+                    {!claimedVendors || claimedVendors?.length < 1 && <h4>{tVendorDash("noVendorProfiles")}</h4>}
+                    {claimedVendors && claimedVendors?.length > 1 && <MultipleVendorDashContent
                             claimedVendors={claimedVendors}
                             refetchClaimedVendors={refetchClaimedVendors} />}
                 </div>

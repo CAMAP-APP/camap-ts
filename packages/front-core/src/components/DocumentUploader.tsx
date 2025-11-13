@@ -1,3 +1,4 @@
+import { Catalog, EntityFile, Group, useCreateDocumentMutation, Vendor } from '@gql';
 import { LoadingButton } from '@mui/lab';
 import {
   Alert,
@@ -9,44 +10,12 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import { useMutation } from '@apollo/client';
+import { Stub } from '@utils/gql';
+import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import React from 'react';
-import { Catalog, EntityFile, Group, Vendor } from '@gql';
-import gql from 'graphql-tag';
+import { encodeFileToBase64String } from '../utils/encoding';
 import DropzoneArea from './utils/DropzoneArea/DropzoneArea';
 import ApolloErrorAlert from './utils/errors/ApolloErrorAlert';
-import { encodeFileToBase64String } from '../utils/encoding';
-import { Stub } from '@utils/gql';
-
-const CREATE_DOCUMENT = gql`
-  mutation createDocument(
-    $entityType: String!
-    $entityId: Int!
-    $base64EncodedFile: String!
-    $fileName: String!
-    $name: String
-    $visibility: String!
-  ) {
-    createDocument(
-      entityType: $entityType
-      entityId: $entityId
-      base64EncodedFile: $base64EncodedFile
-      fileName: $fileName
-      name: $name
-      visibility: $visibility
-    ) {
-      id
-      entityType
-      entityId
-      documentType
-      data
-      file {
-        id
-        name
-      }
-    }
-  }
-`;
 
 export type DocumentVisibility = 'members' | 'public' | 'subscribers';
 
@@ -57,12 +26,15 @@ interface DocumentUploaderProps {
 }
 
 function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps) {
+
+  const { t, tt, tdu } = useCamapTranslation({ t: "translation", tt: "upload/common", tdu : "upload/document-uploader" })
+
   const [file, setFile] = React.useState<File | null>(null);
   const [documentName, setDocumentName] = React.useState<string>('');
   const [visibility, setVisibility] = React.useState<DocumentVisibility>('members');
   const [error, setError] = React.useState<string | null>(null);
 
-  const [createDocument, { loading, error: mutationError }] = useMutation(CREATE_DOCUMENT);
+  const [createDocument, { loading, error: mutationError }] = useCreateDocumentMutation();
 
   // Determine entity type and available visibility options
   const entityType = React.useMemo(() => {
@@ -76,18 +48,18 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
     const options: { value: DocumentVisibility; label: string }[] = [];
     
     if (entityType === 'vendor') {
-      options.push({ value: 'public', label: 'Public' });
+      options.push({ value: 'public', label: t('documentVisibility-public') });
     } else if (entityType === 'catalog') {
-      options.push({ value: 'subscribers', label: 'Souscripteurs du contrat' });
-      options.push({ value: 'members', label: 'Membres du groupe' });
-      options.push({ value: 'public', label: 'Public' });
+      options.push({ value: 'subscribers', label: t('documentVisibility-subscribers') });
+      options.push({ value: 'members', label: t('documentVisibility-members') });
+      options.push({ value: 'public', label: t('documentVisibility-public') });
     } else if (entityType === 'group') {
-      options.push({ value: 'members', label: 'Membres du groupe' });
-      options.push({ value: 'public', label: 'Public' });
+      options.push({ value: 'members', label: t('documentVisibility-members') });
+      options.push({ value: 'public', label: t('documentVisibility-public') });
     }
     
     return options;
-  }, [entityType]);
+  }, [entityType, t]);
 
   // Default visibility based on entity type
   React.useEffect(() => {
@@ -111,8 +83,7 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
       return;
     }
     
-    // Validate size (10MB max)
-    const maxSize = 10; // 10MB
+    const maxSize = 10 * 1024 * 1024; // 10MB
     if (droppedFile.size > maxSize) {
       setError('Le document importé est trop volumineux. Il ne doit pas dépasser 10 Mo.');
       return;
@@ -171,11 +142,7 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
   }, []);
 
   if (!entityType) {
-    return (
-      <Alert severity="error">
-        Type d'entité non reconnu: {entity.__typename}
-      </Alert>
-    );
+    throw new Error('unknown entity type, cannot upload file')
   }
 
   return (
@@ -189,31 +156,37 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
         <DropzoneArea
           filesLimit={1}
           acceptedFiles={['application/pdf']}
-          dropzoneText="Glissez-déposez un fichier PDF ici ou cliquez pour sélectionner"
+          dropzoneText={tdu("dropZoneTitle")}
           maxFileSize={10 * 1024 * 1024} // 10MB
-          getDropRejectMessage={(rejectedFile, _, maxFileSize) =>
-            `Le fichier ${rejectedFile.name} a été rejeté. ${rejectedFile.size > maxFileSize ? `Taille maximale: ${maxFileSize / 1000000} Mo` : 'Format accepté: PDF uniquement'}`
-          }
+          getDropRejectMessage={(rejectedFile, _, maxFileSize) => {
+            if(rejectedFile.size > maxFileSize)
+              return tdu("rejectionSize", { maxSize: tt("fileSize", {sizeMb: maxFileSize / (1024*1024)})});
+            return tdu("rejectionFormat");
+          }}
           onChange={handleFileDrop}
         />
       ) : (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, m: 2 }}>
           <Typography variant="body1">
-            Fichier sélectionné: <strong>{file.name}</strong> ({(file.size).toFixed(2)} Mo)
+            {tt("selectedFile")}
+            {tt("fileNameWithSize", {
+              fileName: file.name,
+              fileSize: tt("fileSize", { sizeMb: (file.size / (1024*1024)).toFixed(2) })
+            })}
           </Typography>
           
           <TextField
-            label="Nom du document"
+            label={tdu("documentNameTitle")}
             value={documentName}
             onChange={(e) => setDocumentName(e.target.value)}
             fullWidth
           />
           
           <FormControl fullWidth>
-            <InputLabel>Visibilité</InputLabel>
+            <InputLabel>{tdu("documentVisibility")}</InputLabel>
             <Select
               value={visibility}
-              label="Visibilité"
+              label={tdu("documentVisibility")}
               onChange={(e) => setVisibility(e.target.value as DocumentVisibility)}
             >
               {visibilityOptions.map((option) => (
@@ -230,7 +203,7 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
               onClick={handleReset}
               disabled={loading}
             >
-              Revenir à la sélection
+              {tt("backButton")}
             </LoadingButton>
             <LoadingButton
               variant="contained"
@@ -238,7 +211,7 @@ function DocumentUploader({ entity, onSuccess, onError }: DocumentUploaderProps)
               loading={loading}
               disabled={!file || !documentName.trim()}
             >
-              Téléverser
+              {tt("uploadButton")}
             </LoadingButton>
           </Box>
         </Box>

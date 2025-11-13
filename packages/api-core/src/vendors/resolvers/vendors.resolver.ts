@@ -191,6 +191,8 @@ export class VendorsResolver {
     city: string,
     @Args({ name: 'zipCode', type: () => String })
     zipCode: string,
+    @Args({ name: 'companyNumber', type: () => String })
+    companyNumber: string,
     @Args({ name: 'address1', type: () => String, nullable: true })
     address1?: string,
     @Args({ name: 'address2', type: () => String, nullable: true })
@@ -199,6 +201,8 @@ export class VendorsResolver {
     phone?: string,
     @Args({ name: 'showPhone', type: () => Boolean, defaultValue: true })
     showPhone?: boolean,
+    @Args({ name: 'showEmail', type: () => Boolean, defaultValue: true })
+    showEmail?: boolean,
     @Args({ name: 'linkText', type: () => String, nullable: true })
     linkText?: string,
     @Args({ name: 'desc', type: () => String, nullable: true })
@@ -251,6 +255,7 @@ export class VendorsResolver {
       id: vendor.id,
       name,
       email,
+      showEmail,
       city,
       address1,
       address2,
@@ -262,6 +267,7 @@ export class VendorsResolver {
       linkUrl: formattedLinkUrl,
       country,
       longDesc,
+      companyNumber,
       profession,
       production2,
       production3,
@@ -449,6 +455,16 @@ export class VendorsResolver {
   ): String | null {
     const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
     return (editor || parent.showPhone) ? parent.phone : null;
+  }
+
+  @ResolveField(() => String)
+  email(
+    @Parent() parent: VendorEntity,
+    @CurrentUser() currentUser: UserEntity
+  ): String | null {
+    const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
+    const email = parent.email;
+    return (editor || parent.showEmail) ? email : '';
   }
 
   @ResolveField(() => [VendorDistributions])

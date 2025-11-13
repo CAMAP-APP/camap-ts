@@ -11,7 +11,7 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
 
     const {
-        data: { vendor: { media: vendorImages } = {} } = {},
+        data: { vendor: { media: vendorImages = [] } = {} } = {},
         loading,
         error,
         refetch
@@ -31,9 +31,10 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
     return (<>
         <Grid container sx={{ gap: 1 }}>
         {vendorImages && vendorImages
-            .map(({ id, name, url }, i) => (<Card 
+            .map(({ id, name, url }) => (<Card 
                 key={id}
                 sx={{
+                    backgroundColor: "#e0e0e0",
                     width: 180,
                     flexGrow: 0
                 }}

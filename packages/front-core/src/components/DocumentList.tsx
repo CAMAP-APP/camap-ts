@@ -1,11 +1,21 @@
-import { CircularProgress, IconButton, List, ListItem, ListItemButton } from "@mui/material";
+import { Box, CircularProgress, IconButton, List, ListItem, ListItemButton } from "@mui/material";
 import CamapIcon, { CamapIconId } from "./utils/CamapIcon";
 import { EntityFile, useDeleteDocumentMutation } from "@gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
 
 type EntityFileLike = Pick<EntityFile, "id" | "visibility" | "url" | "name">;
-const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editable?:boolean, onDelete?: () => void }) => {
+const DocLine = ({
+    doc,
+    editable = false,
+    showVisibility = false,
+    onDelete
+}:{
+    doc: EntityFileLike,
+    editable?:boolean,
+    showVisibility?: boolean,
+    onDelete?: () => void
+}) => {
     
     const { t } = useCamapTranslation({});
 
@@ -48,16 +58,37 @@ const DocLine = ({doc, editable = false, onDelete}:{ doc: EntityFileLike, editab
     >
         <ListItemButton
             component="a"
-            sx={{ wordBreak: 'break-all', pl: 1, fontSize: '14px', lineHeight: '16px' }}
+            sx={{
+                wordBreak: 'break-all',
+                pl: 1,
+                pr: '24px',
+                fontSize: '14px',
+                lineHeight: '16px',
+                display: "flex",
+                flexFlow: "column",
+                alignItems: "flex-start",
+            }}
             onClick={onClick}
         >
-            <i className="icon icon-file-pdf" style={{ fontSize: '15px', marginRight: '0.2em' }}/>
-            {doc.name ?? t("noDocumentName")}
+            <Box>
+                <i className="icon icon-file-pdf" style={{ fontSize: '15px', marginRight: '0.2em' }}/>
+                {doc.name ?? t("noDocumentName")}
+            </Box>
+            {showVisibility &&
+                <Box sx={{ fontSize: '12px' }}>
+                    {t(`documentVisibility-${doc.visibility}`)}
+                </Box>
+            }
         </ListItemButton>
     </ListItem>
 }
 
-function DocumentList({ documents, ...props }:{ documents: EntityFileLike[], editable?:boolean, onDelete?:() => void }) {
+function DocumentList({ documents, ...props }:{
+    documents: EntityFileLike[],
+    editable?:boolean,
+    showVisibility?: boolean,
+    onDelete?:() => void
+}) {
 
     if(documents.length === 0) return <></>
 

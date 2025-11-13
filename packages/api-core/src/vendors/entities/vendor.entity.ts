@@ -38,6 +38,9 @@ export class VendorEntity extends BaseEntity {
   @Column('varchar', { nullable: true, length: 128 })
   email: string | null;
 
+  @Column('bool', { name: 'showEmail', default: true })
+  showEmail: boolean;
+
   @Column('varchar', { name: 'city', length: 25 })
   city: string;
 

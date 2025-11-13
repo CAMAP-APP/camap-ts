@@ -590,6 +590,7 @@ export type MutationUpdateVendorArgs = {
   address1?: InputMaybe<Scalars['String']>;
   address2?: InputMaybe<Scalars['String']>;
   city: Scalars['String'];
+  companyNumber: Scalars['String'];
   country?: InputMaybe<Scalars['String']>;
   desc?: InputMaybe<Scalars['String']>;
   email: Scalars['String'];
@@ -604,6 +605,7 @@ export type MutationUpdateVendorArgs = {
   production2?: InputMaybe<Scalars['Int']>;
   production3?: InputMaybe<Scalars['Int']>;
   profession?: InputMaybe<Scalars['Int']>;
+  showEmail?: Scalars['Boolean'];
   showPhone?: Scalars['Boolean'];
   vendorId: Scalars['Int'];
   zipCode: Scalars['String'];
@@ -1181,6 +1183,7 @@ export type Vendor = {
   production2?: Maybe<Scalars['Int']>;
   production3?: Maybe<Scalars['Int']>;
   profession?: Maybe<Scalars['Int']>;
+  showEmail: Scalars['Boolean'];
   showPhone: Scalars['Boolean'];
   zipCode?: Maybe<Scalars['String']>;
 };
@@ -1270,11 +1273,6 @@ export type LoginAsMutationVariables = Exact<{
 
 export type LoginAsMutation = { __typename?: 'Mutation', loginAs: { __typename?: 'User', id: number } };
 
-export type MeQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null } };
-
 export type CreateDocumentMutationVariables = Exact<{
   entityType: Scalars['String'];
   entityId: Scalars['Int'];
@@ -1285,7 +1283,7 @@ export type CreateDocumentMutationVariables = Exact<{
 }>;
 
 
-export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, visibility: string, url: string, name?: string | null } };
+export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, fileId: number, visibility: string, url: string, name?: string | null } };
 
 export type DeleteDocumentMutationVariables = Exact<{
   id: Scalars['Int'];
@@ -1293,6 +1291,11 @@ export type DeleteDocumentMutationVariables = Exact<{
 
 
 export type DeleteDocumentMutation = { __typename?: 'Mutation', deleteDocument: number };
+
+export type MeQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type MeQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null } };
 
 export type GroupPreviewQueryVariables = Exact<{
   id: Scalars['Int'];
@@ -1314,6 +1317,13 @@ export type IsGroupAdminQueryVariables = Exact<{
 
 
 export type IsGroupAdminQuery = { __typename?: 'Query', isGroupAdmin: boolean };
+
+export type VendorQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, showEmail: boolean, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, companyNumber?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
 
 export type VendorActiveCatalogsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1762,17 +1772,11 @@ export type GetVendorProfessionsQueryVariables = Exact<{ [key: string]: never; }
 
 export type GetVendorProfessionsQuery = { __typename?: 'Query', getVendorProfessions: Array<{ __typename?: 'VendorProfession', id: number, name: string }> };
 
-export type VendorQueryVariables = Exact<{
-  id: Scalars['Int'];
-}>;
-
-
-export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
-
 export type UpdateVendorMutationVariables = Exact<{
   vendorId: Scalars['Int'];
   name: Scalars['String'];
   email: Scalars['String'];
+  showEmail?: InputMaybe<Scalars['Boolean']>;
   city: Scalars['String'];
   zipCode: Scalars['String'];
   address1?: InputMaybe<Scalars['String']>;
@@ -1784,6 +1788,7 @@ export type UpdateVendorMutationVariables = Exact<{
   linkUrl?: InputMaybe<Scalars['String']>;
   country?: InputMaybe<Scalars['String']>;
   longDesc?: InputMaybe<Scalars['String']>;
+  companyNumber: Scalars['String'];
   profession?: InputMaybe<Scalars['Int']>;
   production2?: InputMaybe<Scalars['Int']>;
   production3?: InputMaybe<Scalars['Int']>;
@@ -2022,40 +2027,6 @@ export function useLoginAsMutation(baseOptions?: ApolloReactHooks.MutationHookOp
 export type LoginAsMutationHookResult = ReturnType<typeof useLoginAsMutation>;
 export type LoginAsMutationResult = Apollo.MutationResult<LoginAsMutation>;
 export type LoginAsMutationOptions = Apollo.BaseMutationOptions<LoginAsMutation, LoginAsMutationVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    ...User
-  }
-}
-    ${UserFragmentDoc}`;
-
-/**
- * __useMeQuery__
- *
- * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-      }
-export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
-        }
-export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
-export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
-export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const CreateDocumentDocument = gql`
     mutation createDocument($entityType: String!, $entityId: Int!, $base64EncodedFile: String!, $fileName: String!, $name: String, $visibility: String!) {
   createDocument(
@@ -2070,6 +2041,7 @@ export const CreateDocumentDocument = gql`
     entityType
     entityId
     documentType
+    fileId
     visibility
     url
     name
@@ -2138,6 +2110,40 @@ export function useDeleteDocumentMutation(baseOptions?: ApolloReactHooks.Mutatio
 export type DeleteDocumentMutationHookResult = ReturnType<typeof useDeleteDocumentMutation>;
 export type DeleteDocumentMutationResult = Apollo.MutationResult<DeleteDocumentMutation>;
 export type DeleteDocumentMutationOptions = Apollo.BaseMutationOptions<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+export const MeDocument = gql`
+    query Me {
+  me {
+    ...User
+  }
+}
+    ${UserFragmentDoc}`;
+
+/**
+ * __useMeQuery__
+ *
+ * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
+ * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useMeQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+      }
+export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, options);
+        }
+export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
+export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
+export type MeQueryResult = Apollo.QueryResult<MeQuery, MeQueryVariables>;
 export const GroupPreviewDocument = gql`
     query GroupPreview($id: Int!) {
   groupPreview(id: $id) {
@@ -2249,6 +2255,62 @@ export function useIsGroupAdminLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type IsGroupAdminQueryHookResult = ReturnType<typeof useIsGroupAdminQuery>;
 export type IsGroupAdminLazyQueryHookResult = ReturnType<typeof useIsGroupAdminLazyQuery>;
 export type IsGroupAdminQueryResult = Apollo.QueryResult<IsGroupAdminQuery, IsGroupAdminQueryVariables>;
+export const VendorDocument = gql`
+    query Vendor($id: Int!) {
+  vendor(id: $id) {
+    id
+    name
+    email
+    showEmail
+    city
+    address1
+    address2
+    zipCode
+    phone
+    showPhone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    companyNumber
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}
+    `;
+
+/**
+ * __useVendorQuery__
+ *
+ * To run a query within a React component, call `useVendorQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useVendorQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorQuery, VendorQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
+      }
+export function useVendorLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorQuery, VendorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
+        }
+export type VendorQueryHookResult = ReturnType<typeof useVendorQuery>;
+export type VendorLazyQueryHookResult = ReturnType<typeof useVendorLazyQuery>;
+export type VendorQueryResult = Apollo.QueryResult<VendorQuery, VendorQueryVariables>;
 export const VendorActiveCatalogsDocument = gql`
     query vendorActiveCatalogs($vendorId: Int!) {
   vendor(id: $vendorId) {
@@ -4824,66 +4886,13 @@ export function useGetVendorProfessionsLazyQuery(baseOptions?: ApolloReactHooks.
 export type GetVendorProfessionsQueryHookResult = ReturnType<typeof useGetVendorProfessionsQuery>;
 export type GetVendorProfessionsLazyQueryHookResult = ReturnType<typeof useGetVendorProfessionsLazyQuery>;
 export type GetVendorProfessionsQueryResult = Apollo.QueryResult<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>;
-export const VendorDocument = gql`
-    query Vendor($id: Int!) {
-  vendor(id: $id) {
-    id
-    name
-    email
-    city
-    address1
-    address2
-    zipCode
-    phone
-    showPhone
-    linkText
-    desc
-    linkUrl
-    country
-    longDesc
-    profession
-    production2
-    production3
-    peopleName
-    lat
-    lng
-  }
-}
-    `;
-
-/**
- * __useVendorQuery__
- *
- * To run a query within a React component, call `useVendorQuery` and pass it any options that fit your needs.
- * When your component renders, `useVendorQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useVendorQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useVendorQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorQuery, VendorQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return ApolloReactHooks.useQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
-      }
-export function useVendorLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorQuery, VendorQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return ApolloReactHooks.useLazyQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
-        }
-export type VendorQueryHookResult = ReturnType<typeof useVendorQuery>;
-export type VendorLazyQueryHookResult = ReturnType<typeof useVendorLazyQuery>;
-export type VendorQueryResult = Apollo.QueryResult<VendorQuery, VendorQueryVariables>;
 export const UpdateVendorDocument = gql`
-    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $showPhone: Boolean, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
+    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $showEmail: Boolean, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $showPhone: Boolean, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $companyNumber: String!, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
   updateVendor(
     vendorId: $vendorId
     name: $name
     email: $email
+    showEmail: $showEmail
     city: $city
     zipCode: $zipCode
     address1: $address1
@@ -4895,6 +4904,7 @@ export const UpdateVendorDocument = gql`
     linkUrl: $linkUrl
     country: $country
     longDesc: $longDesc
+    companyNumber: $companyNumber
     profession: $profession
     production2: $production2
     production3: $production3
@@ -4942,6 +4952,7 @@ export type UpdateVendorMutationFn = Apollo.MutationFunction<UpdateVendorMutatio
  *      vendorId: // value for 'vendorId'
  *      name: // value for 'name'
  *      email: // value for 'email'
+ *      showEmail: // value for 'showEmail'
  *      city: // value for 'city'
  *      zipCode: // value for 'zipCode'
  *      address1: // value for 'address1'
@@ -4953,6 +4964,7 @@ export type UpdateVendorMutationFn = Apollo.MutationFunction<UpdateVendorMutatio
  *      linkUrl: // value for 'linkUrl'
  *      country: // value for 'country'
  *      longDesc: // value for 'longDesc'
+ *      companyNumber: // value for 'companyNumber'
  *      profession: // value for 'profession'
  *      production2: // value for 'production2'
  *      production3: // value for 'production3'
