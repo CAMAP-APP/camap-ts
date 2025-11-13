@@ -3,7 +3,7 @@ import DocumentUploader from "@components/DocumentUploader";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { Catalog, EntityFile, Group, useVendorActiveCatalogsQuery, useVendorDocumentsQuery, Vendor } from "@gql";
 import { Close as CloseIcon } from "@mui/icons-material";
-import { Alert, Box, Button, Card, CardActions, CardContent, Dialog, DialogTitle, IconButton, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, CardActions, CardContent, Dialog, DialogTitle, IconButton, Paper, Typography } from "@mui/material";
 import { Stub } from "@utils/gql";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useState } from "react";
@@ -63,7 +63,8 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
 
     return (
         <>
-            <Box sx={{ paddingBottom: 3 }}>
+            <Typography variant='h4'>{tVendor("vendorPublicFiles")}</Typography>
+            <Paper elevation={1} sx={{ p: 2, maxWidth: 500, mb: 3 }}>
                 {vendorDocuments && <DocumentList documents={vendorDocuments?.documents} editable onDelete={refetchDocuments} />}
                 {vendorDocuments?.documents.length === 0 &&
                     <Typography>{tVendor("noVendorPublicFile")}</Typography>
@@ -71,7 +72,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                 {!!vendorDocuments &&
                     <Button variant="contained" onClick={() => setUploadToEntity(vendorDocuments)}>{tVendor("uploadFile")}</Button>
                 }
-            </Box>
+            </Paper>
             {Array.from(groups?.values() ?? []).map(({ group, catalogs }) => (
                 <Box key={group.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: "100%", mb: 2 }}>
                     <Typography variant='h4'>{tVendor("inGroupGroupName", { groupName: group.name })}</Typography>

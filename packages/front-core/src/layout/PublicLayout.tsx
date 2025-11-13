@@ -25,10 +25,11 @@ interface PublicLayoutProps {
   title: string;
   logo?: string;
   contactInfo?: {
-    name?: string;
+    name?: React.ReactNode;
     website?: { url:string, text?:string };
-    phone?: string;
-    email?: string;
+    phone?: React.ReactNode;
+    email?: React.ReactNode;
+    other?: React.ReactNode;
   };
   
   // Tabs
@@ -294,7 +295,7 @@ const PublicLayout = ({
             {title}
           </Typography>
           {contactInfo && 
-            (contactInfo.name || contactInfo.website || contactInfo.phone || contactInfo. email)
+            (contactInfo.name || contactInfo.website || contactInfo.phone || contactInfo.email || contactInfo.other)
           && (
             <PublicContact>
               {contactInfo.name && (
@@ -325,6 +326,11 @@ const PublicLayout = ({
                   <a href={`mailto:${contactInfo.email}`}>
                     {contactInfo.email}
                   </a>
+                </PublicContactItem>
+              )}
+              {contactInfo.other && (
+                <PublicContactItem>
+                  {contactInfo.other}
                 </PublicContactItem>
               )}
             </PublicContact>

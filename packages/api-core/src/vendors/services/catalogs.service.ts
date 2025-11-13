@@ -220,6 +220,8 @@ export class CatalogsService {
 
     setFlag(catalog.flags, CatalogFlags.UsersCanOrder);
 
+    // TODO add rights, invide vendor into group, ...
+
     return catalog;
   }
 

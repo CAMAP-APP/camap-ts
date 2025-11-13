@@ -67,6 +67,7 @@
     "vendorNotFound": "Producteur non trouvé",
     "noDocumentName": "Fichier sans nom",
     "uploadFile": "Téléverser un fichier",
+    "vendorPublicFiles": "Documents publiques sur votre fiche",
     "inGroupGroupName": "Dans le groupe {{groupName}}",
     "noVendorPublicFile": "Aucun document publique sur votre fiche Producteur",
     "noCatalogPublicFile": "Pas de document",
@@ -88,5 +89,6 @@
     "visitPublicProfile": "Voir votre page publique",
     "uploadMedia": "Téléverser une image",
     "unknownVAT": "SIRET Inconnu",
-    "dashDistributionsTitle": "Vos prochaines distributions"
+    "dashDistributionsTitle": "Vos prochaines distributions",
+    "companyNumberContactItem": "SIRET {{num}}"
 }

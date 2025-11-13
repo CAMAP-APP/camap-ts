@@ -498,7 +498,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
             </Typography>
           </Grid>
 
-          <Grid item xs={12}>
+          {/* <Grid item xs={12}>
             <Field name="desc">
               {({ field, meta }: any) => (
                 <TextField
@@ -512,7 +512,7 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
                 />
               )}
             </Field>
-          </Grid>
+          </Grid> */}
 
           <Grid item xs={12}>
             <Field name="longDesc">

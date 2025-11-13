@@ -27,6 +27,7 @@ type VendorLike = {
   longDesc?: string,
   lat?: number,
   lng?: number,
+  companyNumber?: string
 };
 
 export type PlaceLike = Pick<Place, "id"|"lat"|"lng"|"name">;
@@ -234,6 +235,8 @@ const VendorLayout = ({
   tabs: PublicLayoutTabProps[]
 }) => {
 
+  const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+
   const { data: { vendor: { media: vendorImages = [] } = {}} = {}} = useVendorImagesQuery({
     variables: { vendorId: vendor.id }
   })
@@ -245,6 +248,7 @@ const VendorLayout = ({
         name: vendor.peopleName,
         email: vendor.showEmail ? vendor.email : undefined, // ensure view is consistent even when viewed by admin
         phone: vendor.showPhone ? vendor.phone : undefined,
+        other: <span style={{fontSize: '14px', flexGrow:1, textAlign: 'start'}}>{tVendorDash("companyNumberContactItem", { num: vendor.companyNumber })}</span>,
         website: vendor.linkUrl ? { url: vendor.linkUrl, text: vendor.linkText } : undefined
       }}
       tabs={tabs}
