@@ -1,3 +1,4 @@
+// packages/api-core/src/main.ts
 import { ClassSerializerInterceptor } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -6,7 +7,7 @@ import * as cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { graphqlUploadExpress } from 'graphql-upload';
 import * as helmet from 'helmet';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import {
   initializeTransactionalContext,
   patchTypeORMRepositoryWithBaseRepository,
@@ -53,20 +54,35 @@ async function bootstrap() {
     }),
   );
 
-  // app.useGlobalPipes(
-  //   new ValidationPipe({
-  //     disableErrorMessages: process.env.NODE_ENV === 'production',
-  //     transform: true,
-  //     whitelist: true,
-  //     forbidNonWhitelisted: true,
-  //   }),
-  // );
-  app.useStaticAssets(resolve(__dirname, '../../../public'));
+  // Expose uniquement les bundles front sous /neostatic
+  // WORKDIR = /srv  =>  process.cwd() === "/srv"
+  // Les assets sont en /srv/public/neostatic (cf. Dockerfile camap-ts)
+  app.useStaticAssets(join(process.cwd(), 'public', 'neostatic'), {
+    prefix: '/neostatic/',
+    maxAge: 31536000000, // 365 jours en ms
+    // Certaines versions de @types/serve-static n'ont pas 'cacheControl'/'immutable'.
+    // On force donc l'en-tête via setHeaders pour rester compatible.
+    setHeaders: (res /*, path, stat*/) => {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    },
+  });
+
+  // Servir les traductions i18n
+  app.useStaticAssets(join(process.cwd(), 'public', 'locales'), {
+    prefix: '/locales/',
+    maxAge: 86400000, // 1 jour
+    setHeaders: (res) => {
+      res.setHeader('Cache-Control', 'public, max-age=86400, must-revalidate');
+    },
+  });
+
+  // (Optionnel) si besoin d’autres fichiers statiques :
+  // app.useStaticAssets(resolve(__dirname, '../../../public'));
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   const hostname = process.env.API_HOSTNAME;
-  const port = process.env.API_PORT || process.env.PORT || 3001; // process.env.PORT is defined by Scalingo
+  const port = process.env.API_PORT || process.env.PORT || 3001;
 
   await app.listen(port, hostname);
   const url = await app.getUrl();

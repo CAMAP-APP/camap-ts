@@ -1,0 +1,88 @@
+name: Publish staging image to GHCR (camap-hx)
+
+on:
+  push:
+    tags:
+      - 'staging-v[0-9]*'       # ex: staging-v2.0.8    (glob, pas regex)
+      - 'staging-v[0-9]*-rc*'   # ex: staging-v2.0.8-rc1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  verify-staging:
+    name: Verify tag & branch
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/staging-v')
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Validate tag format (staging-vX.Y.Z[-rcN])
+        id: tag
+        shell: bash
+        run: |
+          ref="${GITHUB_REF##*/}"        # ex: staging-v2.0.8-rc1
+          short="${ref#staging-}"        #      v2.0.8-rc1
+          # v obligatoire, semver strict X.Y.Z, rc optionnel
+          if [[ ! "$short" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?$ ]]; then
+            echo "❌ Tag non conforme: $ref (attendu: staging-vX.Y.Z ou staging-vX.Y.Z-rcN)"
+            exit 1
+          fi
+          echo "tag=$ref"     >> $GITHUB_OUTPUT
+          echo "short=$short" >> $GITHUB_OUTPUT
+          echo "✅ Tag conforme: $ref"
+
+      - name: Ensure tag commit is contained in origin/staging
+        shell: bash
+        run: |
+          git fetch origin +refs/heads/staging:refs/remotes/origin/staging
+          if ! git branch --remotes --contains HEAD | grep -q 'origin/staging'; then
+            echo "❌ Ce tag n'est pas créé depuis la branche staging."
+            exit 1
+          fi
+          echo "✅ Tag créé depuis un commit présent dans origin/staging"
+
+  build-and-push:
+    name: Build & push camap-hx
+    needs: verify-staging
+    if: startsWith(github.ref, 'refs/tags/staging-v')
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: ghcr.io/camap-app/camap-hx
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set versions
+        id: ver
+        run: |
+          ref="${GITHUB_REF##*/}"      # staging-v2.0.8[-rcN]
+          short="${ref#staging-}"      # v2.0.8[-rcN]
+          echo "tag=$ref"     >> $GITHUB_OUTPUT
+          echo "short=$short" >> $GITHUB_OUTPUT
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        env: { BUILDKIT_PROGRESS: plain }
+        with:
+          context: .
+          file: ./camap-hx.Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}    # staging-vX.Y.Z[-rcN]
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}  # vX.Y.Z[-rcN]
+            ${{ env.IMAGE_NAME }}:staging
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
