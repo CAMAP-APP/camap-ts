@@ -80,11 +80,11 @@ jobs:
           file: ./camap-hx.Dockerfile
           push: true
           platforms: linux/amd64
-          tags:
-			# staging-vX.Y.Z[-rcN]
-            - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
-			# vX.Y.Z[-rcN]
-            - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
-            - ${{ env.IMAGE_NAME }}:staging
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        tags:
+		# staging-vX.Y.Z[-rcN]
+          - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
+		# vX.Y.Z[-rcN]
+          - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
+          - ${{ env.IMAGE_NAME }}:staging
+    	cache-from: type=gha
+        cache-to: type=gha,mode=max
