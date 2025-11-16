@@ -3,8 +3,8 @@ name: Publish staging image to GHCR (camap-hx)
 on:
   push:
     tags:
-      - 'staging-v[0-9]*'       # ex: staging-v2.0.8    (glob, pas regex)
-      - 'staging-v[0-9]*-rc*'   # ex: staging-v2.0.8-rc1
+      - 'staging-v[0-9]*'
+      - 'staging-v[0-9]*-rc*'
   workflow_dispatch:
 
 permissions:
@@ -80,11 +80,9 @@ jobs:
           file: ./camap-hx.Dockerfile
           push: true
           platforms: linux/amd64
-        tags:
-		# staging-vX.Y.Z[-rcN]
-          - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
-		# vX.Y.Z[-rcN]
-          - ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
-          - ${{ env.IMAGE_NAME }}:staging
+        tags: |
+          ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
+          ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
+          ${{ env.IMAGE_NAME }}:staging
     	cache-from: type=gha
         cache-to: type=gha,mode=max
