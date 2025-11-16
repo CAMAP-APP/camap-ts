@@ -84,5 +84,5 @@ jobs:
           ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
           ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
           ${{ env.IMAGE_NAME }}:staging
-    	cache-from: type=gha
+        cache-from: type=gha
         cache-to: type=gha,mode=max
