@@ -8,6 +8,7 @@ import parse from 'autosuggest-highlight/parse';
 import throttle from 'lodash/throttle';
 import React from 'react';
 import { GeoAutocompleteOptionType } from './GeoAutocomplete.interface';
+import mapboxApi from '../../utils/mapbox-geocoding';
 
 interface Props {
   initialValue?: string;
@@ -24,25 +25,6 @@ function adaptInput(value: string) {
   }
   return adapted;
 }
-
-// France, Belgium and overseas departments and regions of France
-const GEOCODING_COUNTRIES =
-  'fr%2Cbe%2Cre%2Cnc%2Cgp%2Cgy%2Cmq%2Cyt%2Cbl%2Cmf%2Cpf%2Cpm%2Cwf';
-
-const mapboxApiUrlBuilder = (
-  service: string,
-  request: string,
-  options?: Map<string, any>,
-) => {
-  let url = `https://api.mapbox.com/geocoding/v5/${service}/${request}.json?access_token=${process.env.MAPBOX_KEY}&language=fr&country=${GEOCODING_COUNTRIES}&types=postcode%2Cplace&autocomplete=true`;
-  if (options) {
-    url += '&';
-    url += Object.keys(options)
-      .map((key) => `${key}=${options.get(key)}`)
-      .join('&');
-  }
-  return url;
-};
 
 const getOptionLabel = (option: GeoAutocompleteOptionType) => option.place_name;
 
@@ -61,23 +43,35 @@ const GeoAutocomplete = ({
     setAdaptedInputValue(adaptInput(initialValue));
   }, [initialValue]);
 
+  // Client Mapbox unique pour ce composant
+  const mapboxClientRef = React.useRef<ReturnType<typeof mapboxApi> | null>(
+    null,
+  );
+  if (mapboxClientRef.current === null) {
+    // Peut throw si MAPBOX_KEY n'est pas définie en runtime
+    mapboxClientRef.current = mapboxApi();
+  }
+
   /** */
   const fetchAddress = React.useMemo(
     () =>
       throttle((request: string, callback: (results: any) => void) => {
-        fetch(mapboxApiUrlBuilder('mapbox.places', request))
+        mapboxClientRef.current!
+          .places(request)
           .then((res) => {
-            if (!res.ok) throw new Error(res.statusText);
-            return res.json();
+            callback(res);
           })
-          .then(callback);
+          .catch((err) => {
+            // eslint-disable-next-line no-console
+            console.error('[GeoAutocomplete] Mapbox places error', err);
+          });
       }, 200),
     [],
   );
 
   /** */
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    let value = e.target.value;
+    const value = e.target.value;
     setInputValue(value);
     setAdaptedInputValue(adaptInput(value));
   };
@@ -141,7 +135,7 @@ const GeoAutocomplete = ({
     const optionValue = option.place_name;
     const parts = parse(optionValue, match(optionValue, inputValue));
     return (
-      <Grid component={'li'} container {...props}>
+      <Grid component="li" container {...props}>
         <Grid item>
           <LocationOnIcon sx={{ marginRight: 3, color: 'text.secondary' }} />
         </Grid>
