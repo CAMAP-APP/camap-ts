@@ -77,7 +77,7 @@ jobs:
         env: { BUILDKIT_PROGRESS: plain }
         with:
           context: .
-          file: ./camap-hx.Dockerfile
+          file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
