@@ -45,9 +45,8 @@ export interface ISO31661SelectorProps {
  * Construit l’URL du fichier iso-3166-1.json à partir de la config runtime.
  *
  * Priorités :
- *  1) FRONT_URL (ex: https://camapdev.amap44.org)
- *  2) CAMAP_HOST (si tu décides de l’utiliser ici via __APP_CONFIG__)
- *  3) window.location.origin (fallback générique)
+ *  1) CAMAP_HOST  (ex: https://camapdev.amap44.org)
+ *  2) window.location.origin (fallback générique)
  *
  * Le backend doit exposer /data/<locale>/iso-3166-1.json sur ce host.
  */
@@ -57,12 +56,12 @@ function buildIsoUrl(locale: string): string {
   const origin =
     typeof window !== 'undefined' ? window.location.origin : '';
 
+  // Priorité absolue : CAMAP_HOST
   const base =
-    cfg.FRONT_URL ||
-    (cfg as any).CAMAP_HOST ||
-    origin;
+    (cfg as any).CAMAP_HOST && (cfg as any).CAMAP_HOST.trim() !== ''
+      ? (cfg as any).CAMAP_HOST
+      : origin;
 
-  // On part du principe que le backend sert /data/<locale>/iso-3166-1.json
   return `${base}/data/${locale}/iso-3166-1.json`;
 }
 
