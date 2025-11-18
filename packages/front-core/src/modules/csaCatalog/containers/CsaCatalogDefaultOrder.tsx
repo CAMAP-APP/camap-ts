@@ -146,11 +146,11 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
         {catalog.products.map((p) => {
           let lowestStock:number | null = null;
           const hasStockTracking = p.stockTracking != null
-            && p.stockTracking as unknown as number !== StockTracking.Disabled
+            && p.stockTracking !== StockTracking.Disabled
             && stocksPerProductDistribution != null
             && stocksPerProductDistribution.hasOwnProperty(p.id)
 
-          const isGlobalStockTracking = hasStockTracking && p.stockTracking as unknown as number === StockTracking.Global
+          const isGlobalStockTracking = hasStockTracking && p.stockTracking === StockTracking.Global
           let distribCount = 1;
           if (hasStockTracking) {
             const stocksPerDistrib = stocksPerProductDistribution[p.id];
