@@ -43,10 +43,7 @@ export function getCamapHost(): string {
   return cfg.CAMAP_HOST || '';
 }
 
-// 🔹 Nouveau : URL de l’API “bridge” (fallback sur CAMAP_HOST + /api)
 export function getBridgeApiUrl(): string {
   const cfg = getRuntimeCfg();
-  if (cfg.CAMAP_BRIDGE_API) return cfg.CAMAP_BRIDGE_API;
-  const base = cfg.CAMAP_HOST || '';
-  return `${base}/api`;
+  return cfg.CAMAP_BRIDGE_API || '';
 }
