@@ -21,8 +21,10 @@ export interface MessagesProps {
 const Messages = ({ groupId, whichUser }: MessagesProps) => {
   if (typeof groupId !== 'number')
     throw new Error('MessagesModule requires a groupId');
+
   if (typeof whichUser !== 'boolean')
     throw new Error('MessagesModule requires whichUser');
+
   const { t, tCommon, tErrors } = useCamapTranslation({
     t: 'messages/default',
     tCommon: 'translation',
@@ -70,7 +72,10 @@ const Messages = ({ groupId, whichUser }: MessagesProps) => {
 
   /** */
   return (
-    <MessagesContextProvider groupId={groupId} whichUser={Boolean(whichUser)}>
+    <MessagesContextProvider
+      groupId={groupId}
+      whichUser={Boolean(whichUser)}
+    >
       <Box mb={2}>
         <Grid container spacing={4}>
           <Grid

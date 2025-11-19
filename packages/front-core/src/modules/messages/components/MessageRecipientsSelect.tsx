@@ -2,6 +2,8 @@ import withHelperTextTranslation from '@components/forms/shared/withHelperTextTr
 import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import {
   Catalog,
+  ContractsUserListsQuery,
+  DistributionsUserListsQuery,
   useContractsUserListsLazyQuery,
   useDistributionsUserListsLazyQuery,
   useGetActiveVendorsFromGroupLazyQuery,
@@ -29,13 +31,14 @@ import {
 import {
   formatUserList,
 } from '@utils/fomat';
-import { formatCoupleName, formatUserName, isEmail, UserLists, UserListsType } from 'camap-common';
+import { formatCoupleName, isEmail, UserLists, UserListsType } from 'camap-common';
 import { FieldInputProps, FieldMetaProps, FormikProps } from 'formik';
 import { fieldToTextField, TextFieldProps } from 'formik-mui';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MessagesContext, Recipient } from '../MessagesContext';
 import { MessagesFormValues } from './MessagesFormFormikTypes';
+import { ApolloError } from '@apollo/client';
 
 interface MessageRecipientsSelectProps {
   field: FieldInputProps<string | string[]>;
@@ -59,6 +62,7 @@ export enum RecipientOptionGroup {
 }
 
 export interface RecipientOption {
+  key: string;
   label: string;
   value: string;
   group: RecipientOptionGroup;
@@ -78,12 +82,14 @@ const mapVendorToUser = (
 
 const FREE_VALUES_EMPTY_OPTIONS: Recipient[] = [];
 const DEFAULT_CONTRACT_OPTION = {
+  key: 'default-contract',
   value: '',
   label: '',
   disabled: false,
   group: RecipientOptionGroup.CONTRACTS,
 };
 const DEFAULT_DISTRIBUTION_OPTION = {
+  key: 'default-distribution',
   value: '',
   label: '',
   disabled: false,
@@ -93,6 +99,129 @@ const EMPTY_GROUP_OPTION = { value: 'empty', disabled: true };
 
 const CustomTextField: React.ComponentType<TextFieldProps> =
   withHelperTextTranslation(TextField, fieldToTextField);
+
+const RecipientGroup = ({
+  children,
+  groupKey,
+  group,
+  groupId,
+  groupOpenByKey,
+  setGroupOpenByKey,
+  distributionsListData,
+  distributionsListError,
+  distributionsListLoading,
+  getDistributionsUserLists,
+  contractsListData,
+  contractsListError,
+  contractsListLoading,
+  getContractsUserLists,
+}: AutocompleteRenderGroupParams & {
+  groupKey: AutocompleteRenderGroupParams['key'],
+  groupId: number,
+  groupOpenByKey: Record<string, boolean>
+  setGroupOpenByKey: (grp: Record<string, boolean>) => void,
+  distributionsListData?: DistributionsUserListsQuery,
+  distributionsListError?: ApolloError,
+  distributionsListLoading: boolean,
+  getDistributionsUserLists: (args: { variables: { groupId: number } }) => void,
+  contractsListData?: ContractsUserListsQuery,
+  contractsListError?: ApolloError,
+  contractsListLoading: boolean,
+  getContractsUserLists: (args: { variables: { groupId: number } }) => void,
+}) => {
+  const { t } = useTranslation(['messages/default']);
+
+  useEffect(() => {
+    if (!!group && groupOpenByKey[groupKey] === undefined) {
+      setGroupOpenByKey({
+        ...groupOpenByKey,
+        [groupKey]: false
+      });
+    }
+  }, [group, groupOpenByKey, groupKey, setGroupOpenByKey]);
+
+  const isDefault = group === RecipientOptionGroup.DEFAULT;
+  const isContracts = group === RecipientOptionGroup.CONTRACTS;
+
+  const toggleList = useCallback(() => {
+    if (isContracts) {
+      if (!contractsListData?.getContractsUserLists) {
+        getContractsUserLists({
+          variables: {
+            groupId,
+          },
+        });
+      }
+    } else if (!distributionsListData?.getDistributionsUserLists) {
+      getDistributionsUserLists({
+        variables: {
+          groupId,
+        },
+      });
+    }
+
+    setGroupOpenByKey({
+      ...groupOpenByKey,
+      [groupKey]: !groupOpenByKey[groupKey]
+    });
+  }, [
+    groupId,
+    groupOpenByKey,
+    contractsListData,
+    distributionsListData,
+    isContracts,
+    groupKey,
+    getContractsUserLists,
+    getDistributionsUserLists,
+    setGroupOpenByKey
+  ]);
+
+  const renderNestedList = () => {
+    const error = isContracts ? contractsListError : distributionsListError;
+    const loading = isContracts
+      ? contractsListLoading
+      : distributionsListLoading;
+    if (error) return <ApolloErrorAlert error={error} />;
+    if (loading)
+      return (
+        <Box display="flex" justifyContent="center">
+          <CircularProgress />
+        </Box>
+      );
+    return children;
+  };
+
+  const isOpen = groupOpenByKey[groupKey];
+
+  return (
+    <List key={groupKey}>
+      {isDefault ? (
+        <List component="div" disablePadding>
+          {children}
+        </List>
+      ) : (
+        <>
+          <ListItem
+            button
+            onClick={toggleList}
+            sx={{
+              paddingTop: 0.25,
+              paddingBottom: 0.25,
+            }}
+          >
+            <ListItemText primary={`${t(group)}`} />
+            {isOpen ? <ExpandLess /> : <ExpandMore />}
+          </ListItem>
+          <Collapse in={isOpen} timeout="auto">
+            <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
+              {renderNestedList()}
+            </List>
+          </Collapse>
+        </>
+      )}
+    </List>
+  );
+};
 
 const MessageRecipientsSelect = ({
   defaultRecipientsOptions,
@@ -222,7 +351,16 @@ const MessageRecipientsSelect = ({
       });
     }
     previousSelectedList.current = selectedUserList;
-  }, [getActiveVendorsFromGroup, getUserListInGroupByListType, groupId, me, selectedUserList, setRecipients, showFreeList, userListInGroupByListTypeData]);
+  }, [
+    getActiveVendorsFromGroup,
+    getUserListInGroupByListType,
+    groupId,
+    me,
+    selectedUserList,
+    setRecipients,
+    showFreeList,
+    userListInGroupByListTypeData
+  ]);
 
   React.useEffect(() => {
     if (!userListInGroupByListTypeData) return;
@@ -279,6 +417,7 @@ const MessageRecipientsSelect = ({
       setContractsRecipientsOptions([
         {
           ...EMPTY_GROUP_OPTION,
+          key: 'empty-contracts-option',
           label: tLists(EMPTY_GROUP_OPTION.value),
           group: RecipientOptionGroup.CONTRACTS,
         },
@@ -297,6 +436,7 @@ const MessageRecipientsSelect = ({
         }
         return {
           value,
+          key: value,
           label: formatUserList(ul, tLists),
           group: RecipientOptionGroup.CONTRACTS,
           disabled: ul.count === 0,
@@ -312,6 +452,7 @@ const MessageRecipientsSelect = ({
       setDistributionsRecipientsOptions([
         {
           ...EMPTY_GROUP_OPTION,
+          key: 'empty-distribution-option',
           label: tLists(EMPTY_GROUP_OPTION.value),
           group: RecipientOptionGroup.DISTRIBUTION,
         },
@@ -331,6 +472,7 @@ const MessageRecipientsSelect = ({
         }
         return {
           value,
+          key: value,
           label: formatUserList(ul, tLists),
           group: RecipientOptionGroup.DISTRIBUTION,
           disabled: ul.count === 0,
@@ -398,6 +540,9 @@ const MessageRecipientsSelect = ({
         if (option.email2) {
           email += ` & ${option.email2}`;
         }
+
+        const { key, ...tagProps } = getTagProps({ index });
+
         return (
           <Tooltip
             key={option.email}
@@ -407,8 +552,9 @@ const MessageRecipientsSelect = ({
             arrow
           >
             <Chip
+              key={key}
               label={email}
-              {...getTagProps({ index })}
+              {...tagProps}
               size="small"
               sx={
                 isError
@@ -429,7 +575,7 @@ const MessageRecipientsSelect = ({
         );
       });
     },
-    [],
+    [t],
   );
 
   const renderFreeValueInput = React.useCallback(
@@ -525,88 +671,6 @@ const MessageRecipientsSelect = ({
     onKeyDown(event, true);
   };
 
-  const renderGroup = (params: AutocompleteRenderGroupParams) => {
-    const { key } = params;
-    if (!!params.group && groupOpenByKey[key] === undefined) {
-      setGroupOpenByKey({
-        ...groupOpenByKey,
-        key: false
-      });
-    }
-
-    const isDefault = params.group === RecipientOptionGroup.DEFAULT;
-    const isContracts = params.group === RecipientOptionGroup.CONTRACTS;
-
-    const toggleList = () => {
-      if (isContracts) {
-        if (!contractsListData?.getContractsUserLists) {
-          getContractsUserLists({
-            variables: {
-              groupId,
-            },
-          });
-        }
-      } else if (!distributionsListData?.getDistributionsUserLists) {
-        getDistributionsUserLists({
-          variables: {
-            groupId,
-          },
-        });
-      }
-
-      setGroupOpenByKey({
-        ...groupOpenByKey,
-        key: !groupOpenByKey[key]
-      });
-    };
-
-    const renderNestedList = () => {
-      const error = isContracts ? contractsListError : distributionsListError;
-      const loading = isContracts
-        ? contractsListLoading
-        : distributionsListLoading;
-      if (error) return <ApolloErrorAlert error={error} />;
-      if (loading)
-        return (
-          <Box display="flex" justifyContent="center">
-            <CircularProgress />
-          </Box>
-        );
-      return params.children;
-    };
-
-    const isOpen = groupOpenByKey[key];
-
-    return (
-      <List key={key}>
-        {isDefault ? (
-          <List component="div" disablePadding>
-            {params.children}
-          </List>
-        ) : (
-          <>
-            <ListItem
-              button
-              onClick={toggleList}
-              sx={{
-                paddingTop: 0.25,
-                paddingBottom: 0.25,
-              }}
-            >
-              <ListItemText primary={`${t(params.group)}`} />
-              {isOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse in={isOpen} timeout="auto">
-              <List component="div" disablePadding sx={{ paddingLeft: 4 }}>
-                {renderNestedList()}
-              </List>
-            </Collapse>
-          </>
-        )}
-      </List>
-    );
-  };
-
   const onBlur = () => {
     if (selectedUserList !== undefined && selectedUserList.type !== 'freeList')
       return;
@@ -653,16 +717,34 @@ const MessageRecipientsSelect = ({
         getOptionDisabled={(option) => option.disabled}
         fullWidth
         getOptionLabel={(option) => (typeof option == 'string') ? option : option.label}
-        renderTags={(value: RecipientOption[], getTagProps) => (
-          <Chip
+        getOptionKey={(option) => (typeof option == 'string') ? option : option.key}
+        renderTags={(value: RecipientOption[], getTagProps) => {
+          const { key, ...tagProps } = getTagProps({ index: 0 });
+          return <Chip
+            key={key}
             variant="outlined"
             label={value[0].label}
-            {...getTagProps({ index: 0 })}
+            {...tagProps}
             deleteIcon={<Edit />}
             onDelete={handleEditList}
           />
-        )}
-        renderGroup={renderGroup}
+        }}
+        renderGroup={(params) => <RecipientGroup
+          key={params.key}
+          groupKey={params.key}
+          group={params.group}
+          groupId={groupId}
+          groupOpenByKey={groupOpenByKey}
+          setGroupOpenByKey={setGroupOpenByKey}
+          distributionsListData={distributionsListData}
+          distributionsListError={distributionsListError}
+          distributionsListLoading={distributionsListLoading}
+          getDistributionsUserLists={getDistributionsUserLists}
+          contractsListData={contractsListData}
+          contractsListError={contractsListError}
+          contractsListLoading={contractsListLoading}
+          getContractsUserLists={getContractsUserLists}
+        >{params.children}</RecipientGroup>}
         renderInput={(params) => {
           return (
             <CustomTextField

@@ -74,7 +74,7 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
 const MessagesContextProvider = ({
   children,
   groupId,
-  whichUser,
+  whichUser
 }: { children: React.ReactNode } & MessagesContextProviderProps) => {
   const [attachments, setAttachments] = React.useState<File[]>([]);
   const [error, setError] = React.useState<ApolloError | undefined>();

@@ -96,6 +96,14 @@ export class UsersResolver {
 
   @UseGuards(GqlAuthGuard)
   @Query(() => [User])
+  async getEmailRecipientsByUserIds(
+    @Args({ name: 'ids', type: () => [Int] }) ids: number[],
+  ) {
+    return this.usersService.findByIds(ids);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [User])
   async getUsersFromEmails(
     @Args({ name: 'emails', type: () => [String] }) emails: string[],
   ) {

@@ -48,6 +48,7 @@ const MessagesForm = ({
   const defaultRecipientsOptions: RecipientOption[] = defaultUserLists.map(
     (ul) => ({
       value: ul.type,
+      key: ul.type,
       label: formatUserList(ul, tLists),
       group: RecipientOptionGroup.DEFAULT,
       disabled: ul.count === 0,
@@ -56,6 +57,7 @@ const MessagesForm = ({
 
   const testLists = UserLists.TEST;
   defaultRecipientsOptions.push({
+    key: testLists.type,
     value: testLists.type,
     label: tLists(testLists.type),
     group: RecipientOptionGroup.DEFAULT,
@@ -63,6 +65,7 @@ const MessagesForm = ({
   });
   const vendorsLists = UserLists.VENDORS;
   defaultRecipientsOptions.push({
+    key: vendorsLists.type,   
     value: vendorsLists.type,
     label: tLists(vendorsLists.type),
     group: RecipientOptionGroup.DEFAULT,
