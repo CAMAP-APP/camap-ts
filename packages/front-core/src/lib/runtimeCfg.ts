@@ -23,20 +23,30 @@ export function getGraphqlUrl(): string {
 
 export function getLocalesLoadPath(): string {
   const cfg = getRuntimeCfg();
-  // Préfère CAMAP_HOST, sinon chemin relatif
   const base = cfg.CAMAP_HOST || '';
   return `${base}/locales/{{lng}}/{{ns}}.json`;
 }
 
-// MAPBOX: lu AU RUNTIME via __APP_CONFIG__
-// (plus de process.env.MAPBOX_KEY dans le front)
 export function getMapboxKey(): string | undefined {
   const cfg = getRuntimeCfg();
   return cfg.MAPBOX_KEY;
 }
 
-// Optionnel : helper générique pour FRONT_URL si besoin ailleurs
 export function getFrontUrl(): string | undefined {
   const cfg = getRuntimeCfg();
   return cfg.FRONT_URL;
+}
+
+// 🔹 Nouveau : CAMAP_HOST “nu”
+export function getCamapHost(): string {
+  const cfg = getRuntimeCfg();
+  return cfg.CAMAP_HOST || '';
+}
+
+// 🔹 Nouveau : URL de l’API “bridge” (fallback sur CAMAP_HOST + /api)
+export function getBridgeApiUrl(): string {
+  const cfg = getRuntimeCfg();
+  if (cfg.CAMAP_BRIDGE_API) return cfg.CAMAP_BRIDGE_API;
+  const base = cfg.CAMAP_HOST || '';
+  return `${base}/api`;
 }

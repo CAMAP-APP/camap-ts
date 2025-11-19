@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { getBridgeApiUrl } from 'lib/runtimeCfg';
 
-export const BASE_URL = `${process.env.CAMAP_HOST}/api`;
+export const BASE_URL = getBridgeApiUrl();;
 
 export type HaxeError = {
   error: {
