@@ -1,68 +1,56 @@
 import { Avatar, Tooltip } from '@mui/material';
-import { Colors } from '@theme/commonPalette';
-import { useTranslation } from 'react-i18next';
+import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import CamapIcon, { CamapIconId } from '../CamapIcon';
 import { ProductInfos } from './ProductModal';
 
-interface ProductLabelsProps {
-  product: ProductInfos;
-}
+const Label = ({iconId, name, organic = false}
+  : {
+    iconId: CamapIconId,
+    name: string,
+    organic?: boolean
+  }
+) => {
+  return (
+    <Tooltip key={iconId} title={name}>
+      <Avatar
+        sx={{
+          backgroundColor: 'white',
+          width: '2.2rem',
+          height: '2.2rem',
+          marginRight: 0.5,
+          boxShadow: 1,
 
-const ProductLabels = ({ product }: ProductLabelsProps) => {
-  const { t } = useTranslation(['shop/default']);
-
-  const label = (iconId: CamapIconId, name: string, organic = false) => {
-    return (
-      <Tooltip key={iconId} title={name}>
-        <Avatar
+          ...(organic && {
+            backgroundColor: '#109c25', // official color of the AB label, do not change
+            paddingRight: 0.25,
+            paddingBottom: 0.25,
+          }),
+        }}
+      >
+        <CamapIcon
+          id={iconId}
           sx={{
-            backgroundColor: Colors.white,
-            width: '2.2rem',
-            height: '2.2rem',
-            marginRight: 0.5,
-            boxShadow: 1,
-
-            ...(organic && {
-              backgroundColor: (theme) => theme.palette.success.main,
-              paddingRight: 0.25,
-              paddingBottom: 0.25,
-            }),
+            fontSize: '1rem',
+            color: organic ? 'white' : 'text.primary',
+            overflow: 'visible',
+            textAlign: 'center',
           }}
-        >
-          <CamapIcon
-            id={iconId}
-            sx={{
-              fontSize: '1rem',
-              color: organic ? 'white' : 'text.primary',
-              overflow: 'visible',
-              textAlign: 'center',
-            }}
-          />
-        </Avatar>
-      </Tooltip>
-    );
-  };
+        />
+      </Avatar>
+    </Tooltip>
+  );
+};
 
-  const labels = [];
+function ProductLabels({ product }: {product: ProductInfos}) {
+  const { t } = useCamapTranslation({ t: 'shop/default' });
 
-  // bio
-  if (product.organic) {
-    labels.push(label(CamapIconId.bio, t('organicAgriculture'), true));
-  }
-
-  // bulk
-  if (product.bulk) {
-    labels.push(label(CamapIconId.bulk, t('soldInBulk')));
-  }
-
-  /* Ignore Wholesale for the moment
-  // wholesale
-  if (product.wholesale) {
-    labels.push(label(CamapIconId.wholesale, t('thisProductIsWholesale')));
-  }
-  */
-
-  return <>{labels}</>;
+  // if (product.wholesale) {
+  //   labels.push(label(CamapIconId.wholesale, t('thisProductIsWholesale')));
+  // }
+  return <>
+    {product.organic && <Label iconId={CamapIconId.bio} name={t('organicAgriculture')} organic />}
+    {product.bulk && <Label iconId={CamapIconId.bulk} name={t('soldInBulk')} />}
+  </>
 };
 
 export default ProductLabels;

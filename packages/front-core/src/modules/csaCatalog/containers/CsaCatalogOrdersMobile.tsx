@@ -1,39 +1,30 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import {
-  Box,
-  Button,
-  ButtonBase,
-  Divider,
-  Modal,
-  TextField,
-  Tooltip,
-  Typography,
-  useMediaQuery,
+    Box,
+    Button,
+    Grid,
+    Modal,
+    Theme,
+    Typography
 } from '@mui/material';
-import { formatCurrency, StockTracking } from 'camap-common';
-import React from 'react';
+import { formatAbsoluteDate } from '@utils/fomat';
+import { formatCurrency } from 'camap-common';
+import React, { useCallback, useEffect } from 'react';
 import Block from '../../../components/utils/Block/Block';
-import { CamapIconId } from '../../../components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
-import Product from '../../../components/utils/Product/Product';
 import ProductModal, {
-  ProductInfos,
+    ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
-import {
-  getSlideContainerSx,
-  getSlideItemSx,
-  SlideDirection,
-} from '../../../components/utils/Transitions/slide';
 import { CatalogType } from '../../../gql';
-import theme from '../../../theme/default/theme';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from '../CsaCatalog.context';
-import CsaCatalogDistribution from '../components/CsaCatalogDistribution';
-import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
+import { colorForDistributionState } from '../components/CsaCatalogDistribution';
+import { restCsaCatalogTypeToType } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import CsaCatalogDefaultOrder from './CsaCatalogDefaultOrder';
-import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
+import CsaCatalogOrdersMobileProduct from './CsaCatalogOrdersMobileProduct';
 import MediumActionIcon from './MediumActionIcon';
 
 interface CsacatalogProps {
@@ -67,49 +58,16 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const isUpLg = useMediaQuery(theme.breakpoints.up('lg'));
-  const isUpMd = useMediaQuery(theme.breakpoints.up('md'));
-  const isUpSm = useMediaQuery(theme.breakpoints.up('sm'));
+  const [distributionIndex, setDistributionIndex] = React.useState(nextDistributionIndex);
 
-  // override this, because we don't want to display default order if thre is no minimum order
-  let displayDefaultOrder =
-    adminMode && (catalog?.distribMinOrdersTotal || 0) > 0;
-
-  let maxNbDistribToShow = 1;
-  if (isUpSm && !isUpMd) {
-    maxNbDistribToShow = 2;
-  } else if (isUpMd && !isUpLg) {
-    maxNbDistribToShow = 3;
-  } else if (isUpLg) {
-    maxNbDistribToShow = 4;
-  }
-  // hide 1 column distribution if displaying default order
-  if (displayDefaultOrder) {
-    // if we have only one distribution, we hide the default order
-    if (maxNbDistribToShow === 1) {
-      displayDefaultOrder = false;
-    }
-    // else we reduce the number of distribution to display to diplay the default order
-    else {
-      maxNbDistribToShow -= 1;
-    }
-  }
-
-  const [firstDistributionIndex, setFirstDistributionIndex] = React.useState(0);
+  useEffect(() => {
+    setDistributionIndex(nextDistributionIndex);
+  }, [nextDistributionIndex])
 
   const [
     updateSubscriptionDefaultOrder,
     { data: updatedSubscriptionData, error: updateError },
   ] = useRestUpdateSubscriptionDefaultOrderPost();
-
-  // recalculate firstDistributionIndex when distributions or screen size changes
-  React.useEffect(() => {
-    let idx = nextDistributionIndex;
-    if (nextDistributionIndex + maxNbDistribToShow > distributions.length) {
-      idx = Math.max(0, distributions.length - maxNbDistribToShow);
-    }
-    setFirstDistributionIndex(idx);
-  }, [distributions, maxNbDistribToShow, nextDistributionIndex]);
 
   React.useEffect(() => {
     setError(updateError);
@@ -119,8 +77,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     if (!updatedSubscriptionData) return;
     setSubscription(updatedSubscriptionData);
   }, [setSubscription, updatedSubscriptionData]);
-
-  const [isAnimating, setIsAnimating] = React.useState<SlideDirection>();
 
   const initialOrders = React.useMemo(() => {
     if (!catalog || !subscription) return {};
@@ -256,35 +212,17 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
   }
 
   const onPreviousDistribution = () => {
-    if (isAnimating) return;
-    setIsAnimating('right');
-    setTimeout(() => {
-      setFirstDistributionIndex(firstDistributionIndex - 1);
-      setIsAnimating(undefined);
-    }, theme.transitions.duration.short);
+    setDistributionIndex(Math.max(distributionIndex - 1, 0));
   };
   const onNextDistribution = () => {
-    if (isAnimating) return;
-    setIsAnimating('left');
-    setTimeout(() => {
-      setFirstDistributionIndex(firstDistributionIndex + 1);
-      setIsAnimating(undefined);
-    }, theme.transitions.duration.short);
+    setDistributionIndex(Math.min(distributionIndex + 1, distributions.length - 1));
   };
 
-  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.select();
-  };
-
-  const slicedDistributions = React.useMemo(() => {
-    const start = firstDistributionIndex > 0 ? firstDistributionIndex - 1 : 0;
-    const end =
-      firstDistributionIndex + maxNbDistribToShow !== distributions.length
-        ? firstDistributionIndex + maxNbDistribToShow + 1
-        : firstDistributionIndex + maxNbDistribToShow;
-
-    return distributions.slice(start, end);
-  }, [distributions, firstDistributionIndex, maxNbDistribToShow]);
+  const distribution = (distributionIndex < 0)
+    ? distributions[0]
+    : distributionIndex >= distributions.length
+        ? distributions[distributions.length-1]
+        : distributions[distributionIndex];
 
   const [defaultOrdersModalOpen, setDefaultOrdersModalOpen] =
     React.useState(false);
@@ -322,6 +260,18 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
       }, 2000);
     }
     setLoading(false);
+  };
+
+  const onCancelOrder = async () => {
+    const newOrders = { ...updatedOrders };
+    
+    newOrders[distribution.id] = catalog?.products
+      .reduce((o, p) => ({...o, [p.id]:0}), {}) ?? {};
+    
+    // TODO manage stocks
+
+    setUpdatedOrders(newOrders);
+    await onNext();
   };
 
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
@@ -364,7 +314,14 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
   }
 
   return (
-    <Box>
+    <Box
+        sx={{
+            mx: {
+                xs: 0,
+                sm: 1
+            }
+        }}
+    >
       <Block
         title={adminMode ? t('changeOrders') : t('changeMyOrders')}
         icon={<MediumActionIcon id={CamapIconId.basket} />}
@@ -390,8 +347,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
           {/* Distributions box & arrow buttons */}
           <Box
             display="flex"
-            flexDirection="row"
-            flex={1}
             overflow="hidden"
           >
             {/* Arrow Prev */}
@@ -399,8 +354,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
               variant="outlined"
               size="small"
               onClick={onPreviousDistribution}
-              sx={{ minWidth: 'auto', width: 150 }}
-              disabled={firstDistributionIndex === 0}
+              disabled={distributionIndex === 0}
             >
               <ArrowBack />
             </Button>
@@ -408,23 +362,25 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             {/* Distributions box */}
             <Box
               display="flex"
+              alignItems="center"
               justifyContent="space-evenly"
               flex={1}
               position="relative"
+              sx={{
+                ...colorForDistributionState(distribution)
+              }}
             >
-              {slicedDistributions.map((d) => (
-                <Box
-                  key={`distribution_${d.id}`}
-                  sx={getSlideItemSx(
-                    maxNbDistribToShow,
-                    150,
-                    firstDistributionIndex,
-                    distributions.length,
-                  )}
+                <Typography
+                    textAlign="center"
+                    fontWeight="bold"
                 >
-                  <CsaCatalogDistribution distribution={d} />
-                </Box>
-              ))}
+                    {formatAbsoluteDate(
+                        distribution.distributionStartDate,
+                        false,
+                        true,
+                        true,
+                    )}
+                </Typography>
             </Box>
 
             {/* Arrow Next */}
@@ -433,8 +389,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
                 size="small"
                 onClick={onNextDistribution}
                 disabled={
-                  firstDistributionIndex + maxNbDistribToShow >=
-                  distributions.length
+                  distributionIndex >= distributions.length
                 }
               >
                 <ArrowForward />
@@ -443,281 +398,106 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
         </Box>
 
         
-        <Box display="flex" flexDirection={'row'}>
-          {/* Sold box */}
-          <Box
-            width={{
-              xs: 'calc(100% - 150px)',
-              sm: 200,
-            }}
+        <Box
             display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <CsaCatalogSubscriptionSold />
-          </Box>
-          {/* Total row */}
-          <Box
-            sx={{
-              backgroundColor: (theme) => theme.palette.action.selected,
-            }}
-            width="100%"
-            display="flex"
-            flexDirection={'row'}
-            py={1}
-            mb={2}
-          >
-            <Box
-              width={{
-                xs: 'calc(100% - 150px)',
-                sm: 200,
-              }}
-              display="flex"
-              flexDirection={'row'}
-              alignItems="center"
-              justifyContent={'flex-end'}
+            gap={1}
+            fontSize={{ xs: 14, sm: 16 }}
+            justifyContent='space-between'
+            mx={1}
+            mb={1}
             >
-              <Typography>{t('total')} : </Typography>
-            </Box>
-            {displayDefaultOrder && (
-              <Typography
-                key="total_default"
-                sx={{
-                  width: 150,
-                  textAlign: 'center',
-                  color: (theme) => 'initial',
-                }}
-              >
-                <b>{getTotalFromDefaultOrder()}</b>
-              </Typography>
-            )}
-            <Box overflow="hidden" display="flex" flex={1}>
-              <Box
-                display="flex"
-                flexDirection={'row'}
-                justifyContent="space-evenly"
-                flex={1}
-                sx={getSlideContainerSx(maxNbDistribToShow, 150, isAnimating)}
-              >
-                {slicedDistributions.map((d) => (
-                  <Typography
-                    key={`total_${d.id}`}
+            {/* Sold box */}
+            <Box display="flex" alignItems="center" gap={1}>
+                <Box>
+                    <Typography
+                        fontSize="inherit"
+                        fontWeight="bold"
+                        lineHeight="1em"
+                    >{t('paymentSold')}</Typography>
+                </Box>
+                {subscription !== undefined && <Box
                     sx={{
-                      width: 150,
-                      textAlign: 'center',
-                      color: (theme) =>
-                        d.state === RestDistributionState.Open ||
-                        (adminMode && d.distributionStartDate > new Date())
-                          ? 'initial'
-                          : theme.palette.action.disabled,
-                      ...getSlideItemSx(
-                        maxNbDistribToShow,
-                        150,
-                        firstDistributionIndex,
-                        distributions.length,
-                      ),
+                        backgroundColor: (theme: Theme) =>
+                            subscription.balance >= 0
+                            ? theme.palette.success.main
+                            : theme.palette.error.main,
                     }}
-                  >
-                    {d.state !== RestDistributionState.Absent && (
-                      <b>{getTotalFromDistribution(d.id)}</b>
-                    )}
-                  </Typography>
-                ))}
-              </Box>
+                    p={1}
+                >
+                    <Typography
+                        fontSize="inherit"
+                        fontWeight="bold"
+                        sx={{
+                            color: (theme) =>
+                            subscription.balance >= 0
+                                ? theme.palette.success.contrastText
+                                : theme.palette.error.contrastText,
+                            textAlign: 'center',
+                        }}
+                    >
+                        {formatCurrency(subscription.balance)}
+                    </Typography>
+                </Box>}
             </Box>
-          </Box>
+            {/* Total */}
+            <Box
+                display="flex"
+                gap={1}
+                alignItems="center"
+            >
+                <Typography
+                    fontSize="inherit"
+                    fontWeight="bold"
+                    lineHeight="1em"
+                >{t('orderValue')}</Typography>
+                <CamapIcon id={CamapIconId.basket} sx={{
+                        color: 'primary.main'
+                    }}/>
+                <Typography
+                    fontSize="1.2em"
+                    fontWeight="bold"
+                    sx={{
+                        color: 'primary.main'
+                    }}
+                >{getTotalFromDistribution(distribution.id)}</Typography>
+            </Box>
         </Box>
 
-
-        <Box my={2}>
-          {/* Product line */}
-          {catalog.products.map((p) => {
-            const isGlobalStock =
-              catalog.hasStockManagement &&
-              (p.stockTracking as StockTracking) === StockTracking.Global &&
-              stocksPerProductDistribution != null;
-            var globalStock = 0;
-            if (
-              isGlobalStock &&
-              stocksPerProductDistribution[p.id] != null &&
-              addedOrders != null
-            ) {
-              globalStock = Object.values(
-                stocksPerProductDistribution[p.id],
-              ).reduce((acc, v) => Math.min(acc, v), Number.MAX_VALUE);
-              globalStock -= addedOrders.hasOwnProperty(p.id)
-                ? addedOrders[p.id]
-                : 0;
-            }
-
-            return (
-              <Box key={`product_${p.id}`}>
-                <Divider sx={{ my: 1 }} />
-                <Box display="flex" flexDirection={'row'} mb={1}>
-                  <ButtonBase
-                    sx={{
-                      width: {
-                        xs: 'calc(100% - 150px)',
-                        sm: 200,
-                      },
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      textAlign: 'left',
-                    }}
+        {/* Products */}
+        <Box display="flex" flexWrap='wrap' gap={1} justifyContent={'center'}>
+          {catalog.products.map(
+            (p) => 
+                <CsaCatalogOrdersMobileProduct
+                    product={p}
+                    orderedQuantity={orders[distribution.id][p.id]}
                     onClick={() => setModalProduct(p)}
-                  >
-                    <Product product={p} />
-                  </ButtonBase>
-
-                  {displayDefaultOrder && (
-                    <Box key="order_default" alignContent={'center'}>
-                      <TextField
-                        sx={{ width: 150 }}
-                        value={
-                          subscription?.defaultOrder.find(
-                            (d) => d.productId === p.id,
-                          )?.quantity || 0
-                        }
-                        disabled
-                        hiddenLabel
-                      />
-                    </Box>
-                  )}
-
-                  <Box display="flex" flex={1} overflow="hidden">
-                    {isGlobalStock && (
-                      <Typography
-                        align="center"
-                        color="grey"
-                        fontSize="0.8em"
-                        position="relative"
-                        whiteSpace="nowrap"
-                        maxWidth={0}
-                        margin={'auto'}
-                      >
-                        <Tooltip
-                          title={`${t('Available')} (global): ${globalStock}`}
-                        >
-                          <span>
-                            &nbsp;&nbsp;
-                            <i
-                              className="icon icon-wholesale"
-                              style={{ fontSize: '0.9em' }}
-                            />{' '}
-                            {globalStock}
-                          </span>
-                        </Tooltip>
-                      </Typography>
+                    onQuantityChange={(q) => onOrderChange(
+                        distribution.id,
+                        p.id,
+                        q
                     )}
-                    <Box
-                      display="flex"
-                      justifyContent="space-evenly"
-                      flex={1}
-                      alignItems="center"
-                      sx={getSlideContainerSx(
-                        maxNbDistribToShow,
-                        150,
-                        isAnimating,
-                      )}
-                    >
-                      {slicedDistributions.map((d) => {
-                        const distributionStock = getStockValue(
-                          isGlobalStock,
-                          p,
-                          d,
-                        );
-
-                        return (
-                          <Box
-                            position="relative"
-                            key={`order_${d.id}_${p.id}`}
-                            sx={getSlideItemSx(
-                              maxNbDistribToShow,
-                              150,
-                              firstDistributionIndex,
-                              distributions.length,
-                            )}
-                          >
-                            {d.state !== RestDistributionState.Absent ? (
-                              <>
-                                <TextField
-                                  disabled={
-                                    (d.state !== RestDistributionState.Open &&
-                                      !adminMode) ||
-                                    loading ||
-                                    d.distributionStartDate < new Date()
-                                  }
-                                  sx={{ width: 150 }}
-                                  inputProps={{
-                                    inputMode: 'numeric',
-                                    pattern: '[0-9]*',
-                                  }}
-                                  value={orders[d.id][p.id]}
-                                  onChange={(
-                                    event: React.ChangeEvent<HTMLInputElement>,
-                                  ) =>
-                                    onOrderChange(
-                                      d.id,
-                                      p.id,
-                                      parseInt(event.target.value, 10),
-                                    )
-                                  }
-                                  onFocus={onFocus}
-                                  hiddenLabel
-                                />
-                                {distributionStock != null && (
-                                  <Typography
-                                    align="center"
-                                    color="grey"
-                                    fontSize="0.8em"
-                                    position="absolute"
-                                    bottom={2}
-                                    right={5}
-                                    whiteSpace="nowrap"
-                                  >
-                                    <Tooltip
-                                      title={`${t(
-                                        'Available',
-                                      )}: ${distributionStock}`}
-                                    >
-                                      <span>
-                                        <i
-                                          className="icon icon-wholesale"
-                                          style={{ fontSize: '0.9em' }}
-                                        />
-                                        &nbsp;{distributionStock}
-                                      </span>
-                                    </Tooltip>
-                                  </Typography>
-                                )}
-                              </>
-                            ) : (
-                              <Box width={150} minHeight={56} />
-                            )}
-                          </Box>
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                </Box>
-              </Box>
-            );
-          })}
+                />
+          )}
           <ProductModal product={modalProduct} onClose={onProductModalClose} />
         </Box>
+
         {/* Buttons */}
         <Box
           width="100%"
           textAlign="end"
           display={{ xs: 'flex', sm: 'block' }}
           flexDirection="column"
-          mt={1}
+          mt={2}
         >
-          {(restCsaCatalogTypeToType(catalog.type) ===
-            CatalogType.TYPE_CONSTORDERS ||
-            catalog?.distribMinOrdersTotal > 0 ||
-            displayDefaultOrder) && (
+          {/* <Button
+            variant="outlined"
+            onClick={onCancelOrder}
+            sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
+          >
+            {t('cancelOrder')}
+          </Button> */}
+          {(restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
+            || catalog?.distribMinOrdersTotal > 0) && (
             <Button
               variant="outlined"
               onClick={onDefaultOrdersChangeClick}
@@ -740,7 +520,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
       <Modal
         open={defaultOrdersModalOpen}
         onClose={() => handleDefaultOrders(true)}
-        onBackdropClick={() => handleDefaultOrders(true)}
       >
         <Box
           sx={{
@@ -749,6 +528,10 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             left: '50%',
             transform: 'translate(-50%, -50%)',
             maxWidth: 600,
+            width: {
+                xs: '96%',
+                sm: '600px'
+            }
           }}
         >
           <CsaCatalogDefaultOrder onNext={handleDefaultOrders} />

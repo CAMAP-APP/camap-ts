@@ -1351,7 +1351,7 @@ export type VendorProductsSampleQueryVariables = Exact<{
 }>;
 
 
-export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
+export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, variablePrice: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
 
 export type InitVendorPageQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -2467,6 +2467,7 @@ export const VendorProductsSampleDocument = gql`
     desc
     organic
     bulk
+    variablePrice
     image
     price
     currency

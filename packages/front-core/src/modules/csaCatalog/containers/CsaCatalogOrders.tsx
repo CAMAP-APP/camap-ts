@@ -600,7 +600,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                                   }}
                                   InputProps={{
                                     endAdornment: p.bulk
-                                      ? <InputAdornment position="end">{formatUnit(p.unitType, 1, t)}</InputAdornment>
+                                      ? <InputAdornment position="end">{formatUnit(p.unitType, 1, tCommon)}</InputAdornment>
                                       : undefined
                                   }}
                                   defaultValue={p.bulk ? orders[d.id][p.id]*p.qt : orders[d.id][p.id]}

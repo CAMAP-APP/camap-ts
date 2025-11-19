@@ -5,7 +5,6 @@ import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
 import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
-import CsaCatalogOrders from './containers/CsaCatalogOrders';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
 import { restCsaCatalogTypeToType } from './interfaces';
@@ -18,6 +17,7 @@ import {
 import Block from '@components/utils/Block/Block';
 import MediumActionIcon from './containers/MediumActionIcon';
 import { CamapIconId } from '@components/utils/CamapIcon';
+import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 
 interface CsaCatalogRouterProps {
   userId: number;
@@ -249,7 +249,8 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           {isConstOrders ? (
             <CsaCatalogDefaultOrder onNext={onOrderNext} />
           ) : (
-            <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
+            // <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
+            <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
           )}
         </>
       )}
