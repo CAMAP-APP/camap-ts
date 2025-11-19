@@ -1,7 +1,7 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import ProductLabels from "@components/utils/Product/ProductLabels";
 import { Product } from "@gql";
-import { Box, Button, Card, CardActionArea, CardContent, CardMedia, Icon, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornment, TextField, Typography } from "@mui/material";
 import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";

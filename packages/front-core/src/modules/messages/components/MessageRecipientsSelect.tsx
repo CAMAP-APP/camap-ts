@@ -139,11 +139,7 @@ const MessageRecipientsSelect = ({
       loading: distributionsListLoading,
       error: distributionsListError,
     },
-  ] = useDistributionsUserListsLazyQuery({
-    variables: {
-      groupId,
-    },
-  });
+  ] = useDistributionsUserListsLazyQuery();
   const [
     getContractsUserLists,
     {
@@ -151,18 +147,12 @@ const MessageRecipientsSelect = ({
       loading: contractsListLoading,
       error: contractsListError,
     },
-  ] = useContractsUserListsLazyQuery({
-    variables: {
-      groupId,
-    },
-  });
+  ] = useContractsUserListsLazyQuery();
 
   const [
     getActiveVendorsFromGroup,
     { data: vendorsData, error: vendorsError },
-  ] = useGetActiveVendorsFromGroupLazyQuery({
-    variables: { groupId },
-  });
+  ] = useGetActiveVendorsFromGroupLazyQuery();
 
   let listOptions = defaultRecipientsOptions.concat(contractsRecipientsOptions);
   listOptions = listOptions.concat(distributionsRecipientsOptions);
@@ -212,7 +202,9 @@ const MessageRecipientsSelect = ({
     if (selectedUserListType === 'test') {
       setRecipients([me!]);
     } else if (selectedUserListType === 'vendors') {
-      getActiveVendorsFromGroup();
+      getActiveVendorsFromGroup({
+        variables: { groupId },
+      });
     } else if (
       previousSelectedList.current &&
       previousSelectedList.current.type === selectedUserList.type &&
@@ -548,10 +540,18 @@ const MessageRecipientsSelect = ({
     const toggleList = () => {
       if (isContracts) {
         if (!contractsListData?.getContractsUserLists) {
-          getContractsUserLists();
+          getContractsUserLists({
+            variables: {
+              groupId,
+            },
+          });
         }
       } else if (!distributionsListData?.getDistributionsUserLists) {
-        getDistributionsUserLists();
+        getDistributionsUserLists({
+          variables: {
+            groupId,
+          },
+        });
       }
 
       setGroupOpenByKey({

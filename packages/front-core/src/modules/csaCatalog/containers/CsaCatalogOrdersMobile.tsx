@@ -1,20 +1,19 @@
 import { ArrowBack, ArrowForward } from '@mui/icons-material';
 import {
-    Box,
-    Button,
-    Grid,
-    Modal,
-    Theme,
-    Typography
+  Box,
+  Button,
+  Modal,
+  Theme,
+  Typography
 } from '@mui/material';
 import { formatAbsoluteDate } from '@utils/fomat';
 import { formatCurrency } from 'camap-common';
-import React, { useCallback, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import Block from '../../../components/utils/Block/Block';
 import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import ProductModal, {
-    ProductInfos,
+  ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
 import { CatalogType } from '../../../gql';
