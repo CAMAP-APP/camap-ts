@@ -160,11 +160,11 @@ const MembersTableAndActions = () => {
         key: key as keyof Member,
         label: tCommon(key),
       }));
-    }, [filteredMembers]);
+    }, [filteredMembers, tCommon]);
 
   const csvFilename = React.useMemo(
     () => `${formatUserList(selectedUserList, tLists, false)}.csv`,
-    [selectedUserList],
+    [selectedUserList, tLists],
   );
 
   const [unexpectedUnauthorizedError, setUnexpectedUnauthorizedError] =

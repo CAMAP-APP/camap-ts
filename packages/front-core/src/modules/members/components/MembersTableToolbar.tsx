@@ -252,28 +252,22 @@ const MembersTableToolbar = ({
               theme.palette.action.activatedOpacity,
             ),
         }),
-        flexDirection: {
-          xs: 'column',
-          md: 'initial',
-        },
-        alignItems: {
-          xs: 'flex-end',
-          md: 'center',
-        },
+        flexWrap: 'wrap',
+        gap: {
+          xs: 0,
+          md: 1
+        }
       }}
     >
       {numSelected > 0 && (
         <Typography
           sx={{
-            flex: '1 1 100%',
+            flex: '1 0 auto',
+            mr: 'auto',
             marginBottom: {
               xs: 1,
               md: 0,
-            },
-            alignSelf: {
-              xs: 'flex-start',
-              md: 'initial',
-            },
+            }
           }}
           color="inherit"
           variant="subtitle1"
@@ -282,23 +276,37 @@ const MembersTableToolbar = ({
           {`${numSelected} ${t('selected', { count: numSelected })}`}
         </Typography>
       )}
-      {numSelected > 0 && (
-        <>
+      {numSelected > 0 && (  
+        <Box
+          display='flex'
+          gap={1}
+          justifyContent='flex-end'
+          flex='1 0 auto'
+          >
+          <Button
+            variant='outlined'
+            disableElevation
+            size="small"
+            sx={{
+              flex: '0 0 auto',
+              whiteSpace: 'nowrap',
+              marginBottom: {
+                xs: 1,
+                md: 0,
+              },
+            }}
+            href={`/messages?${selectedIds.map(id => `to_uid=${id}`).join('&')}`}
+          >{t('sendEmail')}</Button>
           {hasMembership && (
-            <Box pr={2}>
               <MembershipActionButton
                 title={t('enterMembership')}
                 onClick={() => doBatchAction('membership')}
               />
-            </Box>
           )}
-          <Box pr={1}>
             <WaitingListActionButton
               title={t('resetInWaitingList')}
               onClick={() => doBatchAction('waitingList')}
             />
-          </Box>
-          <Box>
             <Tooltip title={`${t('removeFromGroup')}`}>
               <ExcludeActionButtonForwadedRef
                 aria-label={t('removeFromGroup')}
@@ -307,7 +315,6 @@ const MembersTableToolbar = ({
                 <CamapIcon id={CamapIconId.delete} />
               </ExcludeActionButtonForwadedRef>
             </Tooltip>
-          </Box>
           {!hasMembershipFee && (
             <MembershipFeeDialog
               open={openMembershipFeeDialog}
@@ -315,7 +322,7 @@ const MembersTableToolbar = ({
               onConfirm={handleConfirmMembershipFeeDialog}
             />
           )}
-        </>
+        </Box>
       )}
     </Toolbar>
   );
