@@ -1,7 +1,3 @@
-query getEmailRecipientsByUserId($ids: [Int]) {
-  
-}
-
 query isGroupAdmin($groupId: Int!) {
   isGroupAdmin(groupId: $groupId)
 }

@@ -39,8 +39,9 @@ import { useTranslation } from 'react-i18next';
 import { MessagesContext, Recipient } from '../MessagesContext';
 import { MessagesFormValues } from './MessagesFormFormikTypes';
 import { ApolloError } from '@apollo/client';
+import { useTraceUpdate } from 'dev-tools/react-trace';
 
-interface MessageRecipientsSelectProps {
+export interface MessageRecipientsSelectProps {
   field: FieldInputProps<string | string[]>;
   meta: FieldMetaProps<string>;
   form: FormikProps<MessagesFormValues>;
@@ -233,6 +234,14 @@ const MessageRecipientsSelect = ({
   const { t } = useTranslation(['messages/default']);
   const { t: tLists } = useTranslation(['members/lists']);
 
+  useTraceUpdate({
+    defaultRecipientsOptions,
+    label,
+    // field,
+    meta,
+    // form,
+  }, "MessageRecipientsSelect", "Props");
+
   const {
     groupId,
     setError,
@@ -240,7 +249,18 @@ const MessageRecipientsSelect = ({
     selectedUserList,
     setSelectedUserList,
     recipients,
+    defaultRecipients
   } = React.useContext(MessagesContext);
+
+  useTraceUpdate({
+    groupId,
+    setError,
+    setRecipients,
+    selectedUserList,
+    setSelectedUserList,
+    recipients,
+    defaultRecipients
+  }, "MessageRecipientsSelect", "Context");
 
   const [freeValue, setFreeValue] = React.useState<Recipient[]>([]);
   const [freeValueInput, setFreeValueInput] = React.useState<string>('');
@@ -291,7 +311,7 @@ const MessageRecipientsSelect = ({
 
   const showFreeList = !!freeValue.length;
 
-  const isInFreeValue = (value: string) => {
+  const isInFreeValue = useCallback((value: string) => {
     let email = value;
     try {
       // value can be something like [{"email":"example@email.com"}]
@@ -303,7 +323,7 @@ const MessageRecipientsSelect = ({
       // Parse failed which means that the email is the value.
     }
     return freeValue.findIndex((v) => v.email === email) !== -1;
-  };
+  }, [freeValue]);
 
   React.useEffect(() => {
     setError(userListInGroupByListTypeError);
@@ -488,7 +508,9 @@ const MessageRecipientsSelect = ({
     setFreeValueInput(value);
   };
 
-  const onFreeValueChange = (_event: any, newValue: (Recipient | string)[]) => {
+  console.log("render");
+  const { name: fieldName, onChange: fieldOnChange } = field; // prevent formik rerender loop by extracting the stable props from the unstable object field
+  const onFreeValueChange = useCallback((_event: any, newValue: (Recipient | string)[]) => {
     const lastValue = newValue[newValue.length - 1];
     if (typeof lastValue === 'string') {
       if (isInFreeValue(lastValue)) return;
@@ -517,13 +539,36 @@ const MessageRecipientsSelect = ({
         return true;
       });
       setRecipients(correctEmails);
-      field.onChange(field.name)(JSON.stringify(correctEmails));
+      fieldOnChange(fieldName)(JSON.stringify(correctEmails));
       const userList = UserLists.getListByType('freeList');
       userList?.setData(correctEmails);
     }
     if (!selectedUserList || selectedUserList.type !== 'freeList')
       setSelectedUserList(UserLists.getListByType('freeList'));
-  };
+  }, [
+    fieldName,
+    fieldOnChange,
+    freeValue,
+    isInFreeValue,
+    selectedUserList,
+    setRecipients,
+    setSelectedUserList
+  ]);
+
+  useEffect(() => {
+    setFreeValue(defaultRecipients);
+    setRecipients(defaultRecipients);
+    fieldOnChange(fieldName)(JSON.stringify(defaultRecipients));
+    const userList = UserLists.getListByType('freeList');
+    userList?.setData(defaultRecipients);
+    setSelectedUserList(userList);
+  }, [
+    defaultRecipients,
+    fieldName,
+    fieldOnChange,
+    setSelectedUserList,
+    setRecipients
+  ]);
 
   const renderFreeValueTags = React.useCallback(
     (tagValue: Recipient[], getTagProps: AutocompleteRenderGetTagProps) => {

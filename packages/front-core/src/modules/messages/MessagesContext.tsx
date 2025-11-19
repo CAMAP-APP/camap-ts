@@ -46,6 +46,8 @@ interface MessagesContextProps extends MessagesContextProviderProps {
   setSlateContent: (value: string) => void;
   reuseMessage: LatestMessagesType | undefined;
   setReuseMessage: (value: LatestMessagesType | undefined) => void;
+  defaultRecipients: Recipient[];
+  setDefaultRecipients: (recipients: Recipient[]) => void;
 }
 
 export const MessagesContext = React.createContext<MessagesContextProps>({
@@ -69,6 +71,8 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
   setSlateContent: () => {},
   reuseMessage: undefined,
   setReuseMessage: () => {},
+  defaultRecipients: [],
+  setDefaultRecipients: () => {}
 });
 
 const MessagesContextProvider = ({
@@ -79,6 +83,7 @@ const MessagesContextProvider = ({
   const [attachments, setAttachments] = React.useState<File[]>([]);
   const [error, setError] = React.useState<ApolloError | undefined>();
   const [recipients, setRecipients] = React.useState<Recipient[]>([]);
+  const [defaultRecipients, setDefaultRecipients] = React.useState<Recipient[]>([]);
   const [selectedUserList, setSelectedUserList] = React.useState<
     UserLists | undefined
   >();
@@ -156,6 +161,8 @@ const MessagesContextProvider = ({
         setSlateContent,
         reuseMessage,
         setReuseMessage,
+        defaultRecipients,
+        setDefaultRecipients
       }}
     >
       {children}

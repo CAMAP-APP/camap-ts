@@ -38,6 +38,8 @@ import {
 } from './user.utils';
 import { UsersService } from './users.service';
 import { isControlKeyValid } from '../common/utils';
+import { In } from 'typeorm';
+import { UserGroupEntity } from 'src/groups/entities/user-group.entity';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -97,9 +99,23 @@ export class UsersResolver {
   @UseGuards(GqlAuthGuard)
   @Query(() => [User])
   async getEmailRecipientsByUserIds(
+    @Args({ name: 'inGroup', type: () => Int }) groupId: number,
     @Args({ name: 'ids', type: () => [Int] }) ids: number[],
+    @CurrentUser() currentUser: UserEntity,
   ) {
-    return this.usersService.findByIds(ids);
+    if(this.userGroupsService.canManageMessages(currentUser, groupId)) {
+      console.log("finding message recipients by id", ids, groupId);
+      const recipients = (await this.userGroupsService.find({
+          where: {
+            userId: In(ids),
+            groupId
+          },
+          relations: ['user']
+        })).map(ug => (ug as UserGroupEntity).user);
+      console.log(recipients);
+      return recipients;
+    }
+    return [];
   }
 
   @UseGuards(GqlAuthGuard)

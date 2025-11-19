@@ -19,6 +19,7 @@ import {
   MessagesFormValues,
 } from './MessagesFormFormikTypes';
 import MessageTextEditor from './MessageTextEditor';
+import { useTraceUpdate } from 'dev-tools/react-trace';
 
 interface Props {
   user: UserFragment;
@@ -33,6 +34,14 @@ const CustomTextField = withHelperTextTranslation(
   MuiTextField,
   fieldToTextField,
 );
+
+const LatestMessagesFieldComponent = (props: any) => {
+  return <MessageLatestMessagesSelect {...props} />;
+};
+
+const ObjectFieldComponent = (props: any) => {
+  return <MessageObject {...props} />;
+};
 
 const MessagesForm = ({
   user,
@@ -79,31 +88,6 @@ const MessagesForm = ({
     senderEmail = user.email;
   }
 
-  const RecipientsFieldComponent = (props: any) => {
-    return (
-      <MessageRecipientsSelect
-        defaultRecipientsOptions={defaultRecipientsOptions}
-        contractsRecipientsOptions={[]}
-        distributionRecipientsOptions={[
-          {
-            value: '',
-            label: '',
-            group: RecipientOptionGroup.DISTRIBUTION,
-          },
-        ]}
-        {...props}
-      />
-    );
-  };
-
-  const LatestMessagesFieldComponent = (props: any) => {
-    return <MessageLatestMessagesSelect {...props} />;
-  };
-
-  const ObjectFieldComponent = (props: any) => {
-    return <MessageObject {...props} />;
-  };
-
   const initialValues: MessagesFormValues = {
     senderName,
     senderEmail,
@@ -111,6 +95,15 @@ const MessagesForm = ({
     object: '',
     message: '',
   };
+
+  useTraceUpdate({
+    user,
+    isPartnerConnected,
+    defaultUserLists,
+    onSubmit,
+    isSuccessful,
+    groupName,
+  }, "MessageForm");
 
   return (
     <Formik initialValues={initialValues} onSubmit={onSubmit}>
@@ -151,8 +144,8 @@ const MessagesForm = ({
                 label={t('form.recipients')}
                 name={'recipientsList'}
                 required
-                component={RecipientsFieldComponent}
-                as={RecipientsFieldComponent}
+                component={MessageRecipientsSelect}
+                defaultRecipientsOptions={defaultRecipientsOptions}
               />
               <Field
                 fullWidth

@@ -4,18 +4,27 @@ import gql from 'graphql-tag';
  * QUERIES
  */
 export const initMessagingService = gql`
-  query initMessagingService($id: Int!) {
+  query initMessagingService($groupId: Int!, $recipientIds: [Int!]!) {
     me {
       ...User
     }
-    groupPreview(id: $id) {
+    groupPreview(id: $groupId) {
       id
       name
     }
-    getUserLists(groupId: $id) {
+    getUserLists(groupId: $groupId) {
       type
       count
       data
+    }
+    getEmailRecipientsByUserIds(ids: $recipientIds, inGroup: $groupId) {
+      id
+      firstName
+      lastName
+      firstName2
+      lastName2
+      email
+      email2
     }
   }
 `;
