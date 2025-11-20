@@ -41,7 +41,7 @@ const MultiDistribRow = ({ distributions }: { distributions: VendorDistributions
         <TableRow>
             <TableCell colSpan={2} sx={{
                 background: theme => theme.palette.grey[100],
-                textAlign: 'center',
+                fontWeight: 'bold',
                 p: 1
             }}>
                 {formatTime(distributions[0].date)}&nbsp;{distributions[0].place.name}
@@ -69,7 +69,7 @@ const DistributionByGroupDateRow = ({
     return <>
         <TableRow>
             <TableCell colSpan={3}>
-                <Typography variant="h6" align="right">{group.name}</Typography>
+                <Typography variant="h6">{group.name}</Typography>
             </TableCell>
         </TableRow>
         {Array.from(multiDistribs.entries()).map(([id, distributions]) => 
