@@ -1,3 +1,5 @@
+// packages/front-core/src/lib/REST/useRestLazyGetApi.tsx
+
 import { useCallback, useState } from 'react';
 import { BASE_URL, HaxeError } from './useRestGetApi';
 
@@ -15,13 +17,21 @@ const useRestLazyGet = <T extends {}>(
   const execute = useCallback(
     (urlParams?: string) => {
       setLoading(true);
-      const promise = fetch(`${BASE_URL}${defaultUrl}${urlParams || ''}`, {
+
+      const baseNorm = BASE_URL.replace(/\/$/, '');
+      const path = defaultUrl.startsWith('/')
+        ? defaultUrl
+        : `/${defaultUrl}`;
+      const finalUrl = `${baseNorm}${path}${urlParams || ''}`;
+
+      const promise = fetch(finalUrl, {
         ...options,
         method: 'GET',
         credentials: 'include',
-        headers:{
-          'Accept': 'application/json'
-        }
+        headers: {
+          Accept: 'application/json',
+          ...(options?.headers || {}),
+        },
       })
         .then(async (response) => {
           if (response.ok) {

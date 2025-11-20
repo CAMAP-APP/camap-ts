@@ -1,3 +1,5 @@
+// packages/front-core/src/lib/REST/useRestPostApi.tsx
+
 import { useCallback, useState } from 'react';
 import { BASE_URL, HaxeError } from './useRestGetApi';
 
@@ -14,14 +16,21 @@ const useRestPostApi = <TResult extends {}, TBody extends {}>(
   const execute = useCallback(
     (body: TBody, urlParams?: string) => {
       setError(undefined);
-      const promise = fetch(`${BASE_URL}${url}${urlParams || ''}`, {
+
+      const baseNorm = BASE_URL.replace(/\/$/, '');
+      const path = url.startsWith('/') ? url : `/${url}`;
+      const finalUrl = `${baseNorm}${path}${urlParams || ''}`;
+
+      const promise = fetch(finalUrl, {
         ...options,
         method: 'POST',
         body: JSON.stringify(body),
         credentials: 'include',
-        headers:{
-          'Accept': 'application/json'
-        }
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          ...(options?.headers || {}),
+        },
       })
         .then(async (response) => {
           if (response.ok) {

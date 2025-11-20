@@ -16,8 +16,6 @@ export function getRuntimeCfg(): Cfg {
 
 export function getGraphqlUrl(): string {
   const cfg = getRuntimeCfg();
-  // 1) privilégie FRONT_GRAPHQL_URL (ex: https://api.camapdev.amap44.org/graphql)
-  // 2) fallback relatif /graphql (proxifié par Apache/Nginx vers l’API Nest)
   return cfg.FRONT_GRAPHQL_URL || '/graphql';
 }
 
@@ -37,13 +35,21 @@ export function getFrontUrl(): string | undefined {
   return cfg.FRONT_URL;
 }
 
-// 🔹 Nouveau : CAMAP_HOST “nu”
+// Host du site Haxe (web)
 export function getCamapHost(): string {
   const cfg = getRuntimeCfg();
-  return cfg.CAMAP_HOST || '';
+  return (cfg.CAMAP_HOST || '').replace(/\/$/, '');
 }
 
+// 🔹 Base pour les appels REST "legacy" (catalog, subscription, etc.)
+export function getRestBaseUrl(): string {
+  const cfg = getRuntimeCfg();
+  const base = cfg.CAMAP_HOST || cfg.CAMAP_BRIDGE_API || '';
+  return base.replace(/\/$/, '');
+}
+
+// 🔹 Base pour l’API bridge Node si tu veux l’utiliser ailleurs
 export function getBridgeApiUrl(): string {
   const cfg = getRuntimeCfg();
-  return cfg.CAMAP_BRIDGE_API || '';
+  return (cfg.CAMAP_BRIDGE_API || '').replace(/\/$/, '');
 }

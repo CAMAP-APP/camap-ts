@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
-import { getBridgeApiUrl } from 'lib/runtimeCfg';
+// packages/front-core/src/lib/REST/useRestGetApi.tsx
 
-export const BASE_URL = getBridgeApiUrl();;
+import { useEffect, useState } from 'react';
+import { getRestBaseUrl } from 'lib/runtimeCfg';
+
+export const BASE_URL = getRestBaseUrl();
 
 export type HaxeError = {
   error: {
@@ -18,13 +20,19 @@ const useRestGetApi = <T extends {}>(
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    fetch(`${BASE_URL}${url}`, {
+    const base = getRestBaseUrl(); // on relit la cfg au cas où
+    const baseNorm = base.replace(/\/$/, '');
+    const path = url.startsWith('/') ? url : `/${url}`;
+    const finalUrl = `${baseNorm}${path}`;
+
+    fetch(finalUrl, {
       ...options,
       method: 'GET',
       credentials: 'include',
-      headers:{
-        'Accept': 'application/json'
-      }
+      headers: {
+        Accept: 'application/json',
+        ...(options?.headers || {}),
+      },
     })
       .then(async (response) => {
         if (response.ok) {
