@@ -5,7 +5,7 @@ import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornme
 import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
-import { Unit } from "camap-common";
+import { formatCurrency, Unit } from "camap-common";
 import { useEffect, useState } from "react";
 
 function smartRound(v: number, unit: Unit) {
@@ -27,11 +27,13 @@ function smartRound(v: number, unit: Unit) {
 const OrderControlsBulk = ({
     product,
     orderedQuantity,
-    onQuantityChange
+    onQuantityChange,
+    editable
 }:{
     product: Product,
     orderedQuantity: number,
-    onQuantityChange: (quantity: number) => void
+    onQuantityChange: (quantity: number) => void,
+    editable: boolean
 }) => {
 
     const { t } = useCamapTranslation({
@@ -45,8 +47,8 @@ const OrderControlsBulk = ({
 
     return <TextField
         size="small"
+        disabled={!editable}
         inputProps={{
-            type: 'number',
             style: {
                 textAlign: 'right'
             }
@@ -55,9 +57,9 @@ const OrderControlsBulk = ({
             endAdornment: product.bulk
                 ? <InputAdornment
                     position="end"
-                >
+                  >
                     {formatUnit(product.unitType, 1, t)}
-                    </InputAdornment>
+                  </InputAdornment>
                 : undefined,
             sx: {
                 fontSize: "0.8em",
@@ -68,31 +70,38 @@ const OrderControlsBulk = ({
         }}
         value={q}
         onChange={(
-            event: React.ChangeEvent<HTMLInputElement>,
+                event: React.ChangeEvent<HTMLInputElement>,
             ) => {
-                if(!isNaN(parseFloat(event.target.value)))
-                    onQuantityChange(
-                        parseFloat(event.target.value)/product.qt
-                    )
+                const v = parseFloat(event.target.value.replace(',', '.'));
+                console.log(event.target.value, v);
+                if(!isNaN(v) && v !== 0 && !event.target.value.endsWith(',') && !event.target.value.endsWith(','))
+                    setTimeout(() => onQuantityChange(
+                        v/product.qt
+                    ), 1);
                 else
-                    setQ(event.target.value)
-            }
-        }
+                    setQ(event.target.value.replace(/[^\d,.]/gm, ''))
+            }}
         onClick={e => e.stopPropagation()}
-        onBlur={(event: React.FocusEvent<HTMLInputElement>) =>
-            event.target.value = (orderedQuantity*product.qt).toString()
-        }
+        onBlur={(event: React.FocusEvent<HTMLInputElement>) => {
+            setTimeout(() => {
+                let v = parseFloat(q)/product.qt;
+                if(isNaN(v)) v = 0;
+                onQuantityChange(v);
+            });
+        }}
         hiddenLabel
     />
 }
 
 const OrderControlsUnit = ({
     orderedQuantity,
-    onQuantityChange
+    onQuantityChange,
+    editable
 }:{
     product: Product,
     orderedQuantity: number,
-    onQuantityChange: (quantity: number) => void
+    onQuantityChange: (quantity: number) => void,
+    editable: boolean
 }) => {
 
     const [q, setQ] = useState(orderedQuantity.toString());
@@ -104,6 +113,7 @@ const OrderControlsUnit = ({
         return <Button
             onClick={() => onQuantityChange(1)}
             sx={{
+                visibility: editable ? 'visible' : 'hidden',
                 fontSize: '20px',
                 height: '35.4px'
             }}
@@ -124,14 +134,15 @@ const OrderControlsUnit = ({
                 p: 0,
             }}
             onClick={() => onQuantityChange(orderedQuantity-1)}
+            disabled={!editable}
         >
             {"-"}
         </Button>
         <TextField
             sx={{ flexGrow: 1 }}
             size="small"
+            disabled={!editable}
             inputProps={{
-                type: 'number',
                 style: {
                     textAlign: 'center',
                     paddingLeft: 0,
@@ -150,14 +161,15 @@ const OrderControlsUnit = ({
                 event: React.ChangeEvent<HTMLInputElement>,
                 ) => {
                     const q = parseInt(event.target.value);
-                    if(!isNaN(q))
-                        onQuantityChange(q);
+                    if(!isNaN(q) && q !== 0)
+                        setTimeout(() => onQuantityChange(q), 1);
                     else
-                        setQ(event.target.value)
+                        setQ(event.target.value.replace(/[^\d]/gm, ''))
                 }
             }
             onBlur={() => {
-                onQuantityChange(parseInt(q))
+
+                onQuantityChange(parseInt(q));
             }}
             hiddenLabel
         />
@@ -169,6 +181,7 @@ const OrderControlsUnit = ({
                 m: 0,
                 p: 0
             }}
+            disabled={!editable}
             onClick={() => onQuantityChange(orderedQuantity+1)}
         >
             {"+"}
@@ -183,6 +196,7 @@ const OrderControls = ({
     product: Product,
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void
+    editable: boolean
 }) => {
     return product.bulk 
         ? <OrderControlsBulk product={product} {...props} />
@@ -193,12 +207,14 @@ function CsaCatalogOrdersMobileProduct({
     product,
     orderedQuantity,
     onClick,
-    onQuantityChange
+    onQuantityChange,
+    editable
 }:{
     product: Product,
     orderedQuantity: number,
     onClick: () => void,
-    onQuantityChange: (quantity: number) => void
+    onQuantityChange: (quantity: number) => void,
+    editable: boolean
 }
 ) {
 
@@ -232,7 +248,9 @@ function CsaCatalogOrdersMobileProduct({
             <CardContent
                 sx={{
                     background: t => Colors.background3,
-                    p: 1
+                    px: 1,
+                    pt: 1,
+                    pb: 0
                 }}
             >
                 <Box sx={{
@@ -240,6 +258,20 @@ function CsaCatalogOrdersMobileProduct({
                 }}>
                     <Typography fontSize="0.7em" noWrap width="100%" fontWeight="bold">
                         {product.name}
+                    </Typography>
+                </Box>
+                <Box display='flex' justifyContent='flex-end' width='100%'>
+                    <Typography fontSize="0.7em" noWrap fontWeight="bold" color='primary.main'>
+                        {product.bulk 
+                        ? formatPricePerUnit(
+                            product.price,
+                            product.qt,
+                            product.unitType,
+                            undefined,
+                            t
+                        )
+                        : formatCurrency(product.price)
+                        }
                     </Typography>
                 </Box>
             </CardContent>
@@ -263,23 +295,23 @@ function CsaCatalogOrdersMobileProduct({
                 <Box sx={{
                     fontWeight: "bold"
                 }}>
-                {!product.bulk && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
+                    {!product.bulk && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
                 </Box>
                 <Box>
-                {formatPricePerUnit(
-                    product.price,
-                    product.qt,
-                    product.unitType,
-                    undefined,
-                    t
-                )}
+                    {!product.bulk && formatPricePerUnit(
+                        product.price,
+                        product.qt,
+                        product.unitType,
+                        undefined,
+                        t
+                    )}
                 </Box>
             </Box>
             <Box sx={{
                 justifySelf: 'flex-end',
                 minWidth: 80
             }}>
-                <OrderControls product={product} orderedQuantity={orderedQuantity} onQuantityChange={onQuantityChange} />
+                <OrderControls editable={editable} product={product} orderedQuantity={orderedQuantity} onQuantityChange={onQuantityChange} />
             </Box>
         </Box>
     </Card>

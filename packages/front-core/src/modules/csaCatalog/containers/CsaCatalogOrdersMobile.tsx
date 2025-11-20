@@ -20,7 +20,7 @@ import { CatalogType } from '../../../gql';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import { colorForDistributionState } from '../components/CsaCatalogDistribution';
-import { restCsaCatalogTypeToType } from '../interfaces';
+import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import CsaCatalogDefaultOrder from './CsaCatalogDefaultOrder';
 import CsaCatalogOrdersMobileProduct from './CsaCatalogOrdersMobileProduct';
@@ -461,24 +461,35 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
                 >{getTotalFromDistribution(distribution.id)}</Typography>
             </Box>
         </Box>
-
-        {/* Products */}
-        <Box display="flex" flexWrap='wrap' gap={1} justifyContent={'center'}>
-          {catalog.products.map(
-            (p) => 
-                <CsaCatalogOrdersMobileProduct
-                    product={p}
-                    orderedQuantity={orders[distribution.id][p.id]}
-                    onClick={() => setModalProduct(p)}
-                    onQuantityChange={(q) => onOrderChange(
-                        distribution.id,
-                        p.id,
-                        q
-                    )}
-                />
-          )}
-          <ProductModal product={modalProduct} onClose={onProductModalClose} />
-        </Box>
+        
+        {distribution.state === RestDistributionState.Absent && <>
+          <Box display='flex' justifyContent='center'>
+            <Typography variant='h5'>{t("absent")}</Typography>
+            <CamapIcon id={CamapIconId.vacation} />
+          </Box>
+        </>}
+        {distribution.state !== RestDistributionState.Absent && <>
+            {/* Products */}
+            <Box display="grid" gridTemplateColumns='repeat(auto-fill, minmax(150px, 1fr))' gap={1} justifyContent={'center'}>
+              {catalog.products.map(
+                (p) => 
+                    <CsaCatalogOrdersMobileProduct
+                        key={p.id}
+                        product={p}
+                        orderedQuantity={orders[distribution.id][p.id]}
+                        onClick={() => setModalProduct(p)}
+                        onQuantityChange={(q) => onOrderChange(
+                            distribution.id,
+                            p.id,
+                            q
+                        )}
+                        editable={distribution.state === RestDistributionState.Open}
+                    />
+              )}
+              <ProductModal product={modalProduct} onClose={onProductModalClose} />
+            </Box>
+          </>
+        }
 
         {/* Buttons */}
         <Box
@@ -505,7 +516,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
               {t('defaultOrder')}
             </Button>
           )}
-          <SuccessButton
+          {distribution.state === RestDistributionState.Open && <SuccessButton
             loading={loading}
             toggleSuccess={toggleSuccess}
             variant="contained"
@@ -513,7 +524,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             onClick={onSaveClick}
           >
             {tCommon('save')}
-          </SuccessButton>
+          </SuccessButton>}
         </Box>
       </Block>
       <Modal
