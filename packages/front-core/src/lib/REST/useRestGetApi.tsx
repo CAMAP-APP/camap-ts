@@ -1,5 +1,3 @@
-// packages/front-core/src/lib/REST/useRestGetApi.tsx
-
 import { useEffect, useState } from 'react';
 import { getRestBaseUrl } from 'lib/runtimeCfg';
 
@@ -20,7 +18,7 @@ const useRestGetApi = <T extends {}>(
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const base = getRestBaseUrl(); // on relit la cfg au cas où
+    const base = getRestBaseUrl();
     const baseNorm = base.replace(/\/$/, '');
     const path = url.startsWith('/') ? url : `/${url}`;
     const finalUrl = `${baseNorm}${path}`;
@@ -35,12 +33,34 @@ const useRestGetApi = <T extends {}>(
       },
     })
       .then(async (response) => {
+        const rawText = await response.text();
+
         if (response.ok) {
-          setData(await response.json());
-          setError(undefined);
+          // Réponse OK : on tente du JSON
+          if (!rawText) {
+            setData(undefined);
+            setError(undefined);
+            return;
+          }
+
+          try {
+            const json = JSON.parse(rawText);
+            setData(json as T);
+            setError(undefined);
+          } catch {
+            setError('Réponse invalide du serveur (JSON attendu).');
+          }
         } else {
-          const haxeError: HaxeError = JSON.parse(await response.text());
-          setError(haxeError.error.message);
+          // Erreur HTTP : on tente un JSON Haxe, sinon texte brut
+          try {
+            const haxeError: HaxeError = JSON.parse(rawText);
+            setError(
+              haxeError?.error?.message || `Erreur HTTP ${response.status}`,
+            );
+          } catch {
+            const snippet = rawText?.slice(0, 500);
+            setError(snippet || `Erreur HTTP ${response.status}`);
+          }
         }
       })
       .catch((err) => {

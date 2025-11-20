@@ -44,8 +44,14 @@ export function getCamapHost(): string {
 // 🔹 Base pour les appels REST "legacy" (catalog, subscription, etc.)
 export function getRestBaseUrl(): string {
   const cfg = getRuntimeCfg();
-  const base = cfg.CAMAP_HOST || cfg.CAMAP_BRIDGE_API || '';
-  return base.replace(/\/$/, '');
+  if (cfg.CAMAP_HOST) {
+    return cfg.CAMAP_HOST.replace(/\/$/, '');
+  }
+  // fallback raisonnable : même origine que la page
+  if (typeof window !== 'undefined') {
+    return window.location.origin.replace(/\/$/, '');
+  }
+  return '';
 }
 
 // 🔹 Base pour l’API bridge Node si tu veux l’utiliser ailleurs

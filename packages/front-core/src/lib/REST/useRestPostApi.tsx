@@ -1,5 +1,3 @@
-// packages/front-core/src/lib/REST/useRestPostApi.tsx
-
 import { useCallback, useState } from 'react';
 import { BASE_URL, HaxeError } from './useRestGetApi';
 
@@ -33,12 +31,32 @@ const useRestPostApi = <TResult extends {}, TBody extends {}>(
         },
       })
         .then(async (response) => {
+          const rawText = await response.text();
+
           if (response.ok) {
-            setData(await response.json());
-            return true;
+            if (!rawText) {
+              setData(undefined);
+              return true;
+            }
+
+            try {
+              const json = JSON.parse(rawText);
+              setData(json as TResult);
+              return true;
+            } catch {
+              setError('Réponse invalide du serveur (JSON attendu).');
+              return false;
+            }
           } else {
-            const haxeError: HaxeError = JSON.parse(await response.text());
-            setError(haxeError.error.message);
+            try {
+              const haxeError: HaxeError = JSON.parse(rawText);
+              setError(
+                haxeError?.error?.message || `Erreur HTTP ${response.status}`,
+              );
+            } catch {
+              const snippet = rawText?.slice(0, 500);
+              setError(snippet || `Erreur HTTP ${response.status}`);
+            }
             return false;
           }
         })
