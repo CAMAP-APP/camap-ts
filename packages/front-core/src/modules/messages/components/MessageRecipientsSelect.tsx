@@ -39,7 +39,6 @@ import { useTranslation } from 'react-i18next';
 import { MessagesContext, Recipient } from '../MessagesContext';
 import { MessagesFormValues } from './MessagesFormFormikTypes';
 import { ApolloError } from '@apollo/client';
-import { useTraceUpdate } from 'dev-tools/react-trace';
 
 export interface MessageRecipientsSelectProps {
   field: FieldInputProps<string | string[]>;
@@ -234,14 +233,6 @@ const MessageRecipientsSelect = ({
   const { t } = useTranslation(['messages/default']);
   const { t: tLists } = useTranslation(['members/lists']);
 
-  useTraceUpdate({
-    defaultRecipientsOptions,
-    label,
-    // field,
-    meta,
-    // form,
-  }, "MessageRecipientsSelect", "Props");
-
   const {
     groupId,
     setError,
@@ -251,16 +242,6 @@ const MessageRecipientsSelect = ({
     recipients,
     defaultRecipients
   } = React.useContext(MessagesContext);
-
-  useTraceUpdate({
-    groupId,
-    setError,
-    setRecipients,
-    selectedUserList,
-    setSelectedUserList,
-    recipients,
-    defaultRecipients
-  }, "MessageRecipientsSelect", "Context");
 
   const [freeValue, setFreeValue] = React.useState<Recipient[]>([]);
   const [freeValueInput, setFreeValueInput] = React.useState<string>('');
@@ -508,7 +489,6 @@ const MessageRecipientsSelect = ({
     setFreeValueInput(value);
   };
 
-  console.log("render");
   const { name: fieldName, onChange: fieldOnChange } = field; // prevent formik rerender loop by extracting the stable props from the unstable object field
   const onFreeValueChange = useCallback((_event: any, newValue: (Recipient | string)[]) => {
     const lastValue = newValue[newValue.length - 1];
