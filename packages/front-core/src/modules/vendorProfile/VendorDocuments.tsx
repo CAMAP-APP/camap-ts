@@ -51,7 +51,7 @@ function VendorDocuments({ vendorId }: { vendorId: number }) {
                         <Typography variant='h4'>{tVendor("inGroupGroupName", { groupName: group.name })}</Typography>
                         <Box sx={{ display: 'flex', flexFlow: 'row wrap', gap: 1 }}>
                             {catalogs.map((cat) => (
-                                <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 290 }}>
+                                <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 290, mb: 2 }} elevation={3}>
                                     <CardContent sx={{ height: 'auto', flexGrow: 1 }}>
                                         <Typography>{cat.name}</Typography>
                                         <DocumentList documents={cat.documents} />

@@ -64,7 +64,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
     return (
         <>
             <Typography variant='h4'>{tVendor("vendorPublicFiles")}</Typography>
-            <Paper elevation={1} sx={{ p: 2, maxWidth: 500, mb: 3 }}>
+            <Paper elevation={3} sx={{ p: 2, maxWidth: 500, mb: 3 }}>
                 {vendorDocuments && <DocumentList documents={vendorDocuments?.documents} editable onDelete={refetchDocuments} />}
                 {vendorDocuments?.documents.length === 0 &&
                     <Typography>{tVendor("noVendorPublicFile")}</Typography>
@@ -78,7 +78,7 @@ function VendorEditDocuments({ vendorId }: { vendorId: number }) {
                     <Typography variant='h4'>{tVendor("inGroupGroupName", { groupName: group.name })}</Typography>
                     <Box sx={{ display: 'flex', flexFlow: 'row wrap', gap: 1 }}>
                         {catalogs.map((cat) => (
-                            <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 280 }}>
+                            <Card key={cat.id} sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: 280 }} elevation={3}>
                                 <CardContent sx={{ height: 'auto', flexGrow: 1 }}>
                                     <Typography variant='h5' gutterBottom>{cat.name}</Typography>
                                     <DocumentList documents={cat.documents} editable showVisibility onDelete={refetchDocuments} />

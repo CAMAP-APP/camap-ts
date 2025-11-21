@@ -19,7 +19,6 @@ import {
   MessagesFormValues,
 } from './MessagesFormFormikTypes';
 import MessageTextEditor from './MessageTextEditor';
-import { useTraceUpdate } from 'dev-tools/react-trace';
 
 interface Props {
   user: UserFragment;
@@ -95,15 +94,6 @@ const MessagesForm = ({
     object: '',
     message: '',
   };
-
-  useTraceUpdate({
-    user,
-    isPartnerConnected,
-    defaultUserLists,
-    onSubmit,
-    isSuccessful,
-    groupName,
-  }, "MessageForm");
 
   return (
     <Formik initialValues={initialValues} onSubmit={onSubmit}>
