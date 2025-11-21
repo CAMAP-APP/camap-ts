@@ -36,10 +36,10 @@ const Members = ({ groupId, token, basePath }: MembersProps) => {
               <Box mb={2}>
                 <MembersAlert />
                 <Grid container spacing={4}>
-                  <Grid item md={9} xs={12}>
+                  <Grid item xl={9} xs={12}>
                     <MembersTableAndActions />
                   </Grid>
-                  <Grid item md={3} xs={12}>
+                  <Grid item xl={3} xs={12}>
                     <Grid container spacing={2} direction="column">
                       <Grid item>
                         <Paper>
@@ -54,11 +54,11 @@ const Members = ({ groupId, token, basePath }: MembersProps) => {
                           </Box>
                         </Paper>
                       </Grid>
-                      <Grid item>
+                      <Grid item display={{ "xs": "none", "xl": "block" }}>
                         <Paper>
-                          <Box p={2}>
-                            <Typography variant="h6">{t('lists')}</Typography>
-                            <MemberLists />
+                          <Box py={2}>
+                            <Typography sx={{mx: 2}} variant="h6">{t('lists')}</Typography> 
+                            <MemberLists variant='block' />
                           </Box>
                         </Paper>
                       </Grid>

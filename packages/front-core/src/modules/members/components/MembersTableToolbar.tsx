@@ -243,6 +243,7 @@ const MembersTableToolbar = ({
   return (
     <Toolbar
       sx={{
+        display: numSelected > 0 ? undefined : 'none',
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
         ...(numSelected > 0 && {
@@ -259,7 +260,7 @@ const MembersTableToolbar = ({
         }
       }}
     >
-      {numSelected > 0 && (
+      {numSelected > 0 && (<>
         <Typography
           sx={{
             flex: '1 0 auto',
@@ -275,8 +276,6 @@ const MembersTableToolbar = ({
         >
           {`${numSelected} ${t('selected', { count: numSelected })}`}
         </Typography>
-      )}
-      {numSelected > 0 && (  
         <Box
           display='flex'
           gap={1}
@@ -323,6 +322,7 @@ const MembersTableToolbar = ({
             />
           )}
         </Box>
+        </>
       )}
     </Toolbar>
   );
