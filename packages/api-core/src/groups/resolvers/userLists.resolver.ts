@@ -18,6 +18,7 @@ import { UserGroupsService } from '../services/user-groups.service';
 import { WaitingListsService } from '../services/waitingLists.service';
 import { UserList } from '../types/user-list.type';
 import DataLoader = require('dataloader');
+import { VendorService } from 'src/vendors/services/vendor.service';
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => UserList)
@@ -31,6 +32,7 @@ export class UserListsResolver {
     private readonly membershipsService: MembershipsService,
     private readonly multiDistribsService: MultiDistribsService,
     private readonly distributionsService: DistributionsService,
+    private readonly vendorsService: VendorService,
   ) {}
 
   @Query(() => [UserList])
@@ -83,6 +85,13 @@ export class UserListsResolver {
       return acc;
     }, new Set<number>());
     numberOfActiveSubscriptions = activeSubscriptionsUserIds.size;
+
+    const numVendors = new Set(
+      (await this.vendorsService.findByIds(
+        activeCatalogs.map(c => c.vendorId)
+      )).map(v => v.userId)
+        .filter(Boolean)
+    ).size;
 
     const userListOfLists = UserLists.getLists();
     const userLists: UserList[] = [];
@@ -149,10 +158,19 @@ export class UserListsResolver {
           });
           break;
         }
+        case 'vendors': {
+          userLists.push({
+            type: l.type,
+            count: numVendors,
+          });
+          break;
+        }
         default:
           break;
       }
     });
+
+    console.log(userListOfLists, userLists);
 
     return userLists;
   }
@@ -330,6 +348,18 @@ export class UserListsResolver {
             groupId,
           );
         return this.usersService.findByIds(activeCatalogs.map((c) => c.userId));
+      }
+
+      case 'vendors': {
+        const activeCatalogs =
+          await this.catalogsService.getActiveCatalogsFromActiveVendorsInGroup(
+            groupId,
+          );
+        const activeCatalogsVendors = await this.vendorsService.findByIds(
+          activeCatalogs.map((c) => c.vendorId)
+        );
+        const users = this.usersService.findByIds(activeCatalogsVendors.map(v => v.userId).filter(Boolean));
+        return users;
       }
 
       default:

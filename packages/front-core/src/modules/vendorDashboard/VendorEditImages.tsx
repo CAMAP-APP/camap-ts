@@ -41,7 +41,11 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
             >
                 <CardHeader
                     titleTypographyProps={{
-                        variant: "body1"
+                        variant: "body1",
+                        fontSize: '14px',
+                        sx: {
+                            wordBreak: 'break-all'
+                        }
                     }}
                     title={name}
                     action={<IconButton aria-label="delete" size="small"

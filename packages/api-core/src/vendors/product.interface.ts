@@ -5,18 +5,18 @@ export enum StockTracking {
   /**
    * Always availabled.
    */
-  Disabled,
+  Disabled = 'Disabled',
 
   /**
    * A global initial stock that won't change for this Catalog
    */
-  Global,
+  Global = 'Global',
 
   /**
    * A per distribution stock.
    * @see StockTrackingPerDistribution
    */
-  PerDistribution,
+  PerDistribution = 'PerDistribution',
 }
 
 /**

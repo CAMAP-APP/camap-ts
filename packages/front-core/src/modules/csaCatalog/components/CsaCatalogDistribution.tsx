@@ -1,4 +1,4 @@
-import { alpha, Box, darken, Typography } from '@mui/material';
+import { alpha, Box, darken, Theme, Typography } from '@mui/material';
 import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import { Colors } from '../../../theme/commonPalette';
 import { formatAbsoluteDate } from '../../../utils/fomat';
@@ -7,6 +7,26 @@ import { RestDistributionEnriched, RestDistributionState } from '../interfaces';
 
 interface CsaCatalogDistributionProps {
   distribution: RestDistributionEnriched;
+}
+
+export function colorForDistributionState(distribution: RestDistributionEnriched) {
+  if(distribution.state === RestDistributionState.Open)
+    return {
+      bgcolor: (theme:Theme) => alpha(theme.palette.success.light, 0.15),
+      color: (theme:Theme) => darken(theme.palette.success.dark, 0.05),
+    }
+  if(distribution.state === RestDistributionState.NotYetOpen ||
+    distribution.state === RestDistributionState.Closed)
+    return {
+      bgcolor: (theme:Theme) => theme.palette.action.disabledBackground,
+      color: (theme:Theme) => alpha(theme.palette.text.primary, 0.75),
+    }
+  if(distribution.state === RestDistributionState.Absent)
+    return {
+      bgcolor: alpha(Colors.terreLight, 0.65),
+      color: darken(Colors.terreDark, 0.1),
+    }
+  return {}
 }
 
 const CsaCatalogDistribution = ({
@@ -38,19 +58,7 @@ const CsaCatalogDistribution = ({
       textAlign="center"
       justifyContent={'space-between'}
       sx={{
-        ...(distribution.state === RestDistributionState.Open && {
-          bgcolor: (theme) => alpha(theme.palette.success.light, 0.15),
-          color: (theme) => darken(theme.palette.success.dark, 0.05),
-        }),
-        ...((distribution.state === RestDistributionState.NotYetOpen ||
-          distribution.state === RestDistributionState.Closed) && {
-          bgcolor: (theme) => theme.palette.action.disabledBackground,
-          color: (theme) => alpha(theme.palette.text.primary, 0.75),
-        }),
-        ...(distribution.state === RestDistributionState.Absent && {
-          bgcolor: alpha(Colors.terreLight, 0.65),
-          color: darken(Colors.terreDark, 0.1),
-        }),
+        ...colorForDistributionState(distribution)
       }}
     >
       <Typography>

@@ -1,4 +1,5 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { useVendorProductsSampleQuery } from "@gql";
 import { Box, Card, CardActionArea, Dialog, Grid, Typography } from "@mui/material";
 import { formatPricePerUnit } from "@utils/fomat";
@@ -9,7 +10,9 @@ function VendorProducts({ vendorId }: { vendorId: number }) {
 
     const { tUnit, tVendorDash } = useCamapTranslation({ tUnit: 'unit', tVendorDash: "vendorDashboard" })
 
-    const { data: { vendorProductsSample } = {}} = useVendorProductsSampleQuery({
+    const { data: { vendorProductsSample } = {},
+        loading
+    } = useVendorProductsSampleQuery({
         variables: {
             vendorId
         }
@@ -19,9 +22,11 @@ function VendorProducts({ vendorId }: { vendorId: number }) {
 
     return <Box>
         <Typography sx={{ mb: 1 }}>{tVendorDash("productSamplePageDesc")}</Typography>
+        {loading && <CircularProgressBox />}
         <Grid container gap={1}>
             {vendorProductsSample?.map(p => (
                 <Card
+                    elevation={3}
                     key={p.id}
                     sx={{ 
                         background: "#f8f8f8",

@@ -44,6 +44,7 @@ const LayoutBox = styled(Box)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'row',
   gap: theme.spacing(2),
+  alignItems: 'flex-start',
   [theme.breakpoints.down('lg')]: {
     flexDirection: 'column',
   },

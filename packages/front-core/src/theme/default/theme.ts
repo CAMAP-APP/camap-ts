@@ -1,7 +1,17 @@
-import { createTheme, ThemeOptions } from '@mui/material';
+import { BreakpointsOptions, createTheme, ThemeOptions } from '@mui/material';
 import { frFR } from '@mui/material/locale';
 import { palette } from './palette';
-
+declare module '@mui/material/styles' {
+  interface BreakpointOverrides {
+    xs: true;
+    phone: true;
+    sm: true;
+    md: true;
+    lg: true;
+    xl: true;
+    xxl: true;
+  }
+}
 export const themeOptions: ThemeOptions = {
   palette,
   typography: {
@@ -113,6 +123,17 @@ export const themeOptions: ThemeOptions = {
       },
     },
   },
+  breakpoints: { // bootstrap breakpoints
+    values: {
+      xs: 0,
+      phone: 320,
+      sm: 576,
+      md: 768,
+      lg: 992,
+      xl: 1200,
+      xxl: 1400
+    }
+  } as any as BreakpointsOptions // I followed the doc about correct typing but it does not work
 };
 
 export default createTheme(themeOptions, frFR);

@@ -94,6 +94,7 @@ query vendorProductsSample($vendorId: Int!) {
     desc
     organic
     bulk
+    variablePrice
     image
     price
     currency

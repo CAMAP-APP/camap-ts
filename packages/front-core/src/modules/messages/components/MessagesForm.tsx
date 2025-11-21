@@ -34,6 +34,14 @@ const CustomTextField = withHelperTextTranslation(
   fieldToTextField,
 );
 
+const LatestMessagesFieldComponent = (props: any) => {
+  return <MessageLatestMessagesSelect {...props} />;
+};
+
+const ObjectFieldComponent = (props: any) => {
+  return <MessageObject {...props} />;
+};
+
 const MessagesForm = ({
   user,
   isPartnerConnected,
@@ -48,6 +56,7 @@ const MessagesForm = ({
   const defaultRecipientsOptions: RecipientOption[] = defaultUserLists.map(
     (ul) => ({
       value: ul.type,
+      key: ul.type,
       label: formatUserList(ul, tLists),
       group: RecipientOptionGroup.DEFAULT,
       disabled: ul.count === 0,
@@ -56,6 +65,7 @@ const MessagesForm = ({
 
   const testLists = UserLists.TEST;
   defaultRecipientsOptions.push({
+    key: testLists.type,
     value: testLists.type,
     label: tLists(testLists.type),
     group: RecipientOptionGroup.DEFAULT,
@@ -63,6 +73,7 @@ const MessagesForm = ({
   });
   const vendorsLists = UserLists.VENDORS;
   defaultRecipientsOptions.push({
+    key: vendorsLists.type,   
     value: vendorsLists.type,
     label: tLists(vendorsLists.type),
     group: RecipientOptionGroup.DEFAULT,
@@ -75,31 +86,6 @@ const MessagesForm = ({
   } else {
     senderEmail = user.email;
   }
-
-  const RecipientsFieldComponent = (props: any) => {
-    return (
-      <MessageRecipientsSelect
-        defaultRecipientsOptions={defaultRecipientsOptions}
-        contractsRecipientsOptions={[]}
-        distributionRecipientsOptions={[
-          {
-            value: '',
-            label: '',
-            group: RecipientOptionGroup.DISTRIBUTION,
-          },
-        ]}
-        {...props}
-      />
-    );
-  };
-
-  const LatestMessagesFieldComponent = (props: any) => {
-    return <MessageLatestMessagesSelect {...props} />;
-  };
-
-  const ObjectFieldComponent = (props: any) => {
-    return <MessageObject {...props} />;
-  };
 
   const initialValues: MessagesFormValues = {
     senderName,
@@ -148,8 +134,8 @@ const MessagesForm = ({
                 label={t('form.recipients')}
                 name={'recipientsList'}
                 required
-                component={RecipientsFieldComponent}
-                as={RecipientsFieldComponent}
+                component={MessageRecipientsSelect}
+                defaultRecipientsOptions={defaultRecipientsOptions}
               />
               <Field
                 fullWidth

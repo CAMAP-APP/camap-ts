@@ -72,6 +72,7 @@ export class UserLists {
       UserLists.NO_COMMAND_IN_NEXT_DISTRIBUTION,
       UserLists.WITH_RUNNING_CONTRACT,
       UserLists.WITH_PRODUCT_TO_GET_ON_DISTRIBUTION,
+      UserLists.VENDORS
     ];
   }
 

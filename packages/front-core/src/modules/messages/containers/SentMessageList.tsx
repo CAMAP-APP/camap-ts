@@ -42,33 +42,29 @@ const SentMessageList = ({
       loading: loadingMessages,
       refetch: refetchAllMessages,
     },
-  ] = useGetMessagesForGroupLazyQuery({
-    variables: { groupId },
-  });
+  ] = useGetMessagesForGroupLazyQuery();
   const [
     getUserMessages,
     { data: userMessages, refetch: refetchUserMessages },
-  ] = useGetUserMessagesForGroupLazyQuery({
-    variables: { groupId },
-  });
+  ] = useGetUserMessagesForGroupLazyQuery();
 
   const [currentPage, setCurrentPage] = React.useState(1);
 
   React.useEffect(() => {
     if (isGroupAdmin === undefined) return;
     if (isGroupAdmin) {
-      getAllMessages();
+      getAllMessages({ variables: { groupId }});
     } else {
-      getUserMessages();
+      getUserMessages({ variables: { groupId } });
     }
-  }, [isGroupAdmin]);
+  }, [getAllMessages, getUserMessages, groupId, isGroupAdmin]);
 
   React.useEffect(() => {
     if (toggleRefetch === undefined) return;
     if (isGroupAdmin) {
-      if (refetchAllMessages) refetchAllMessages();
-    } else if (refetchUserMessages) refetchUserMessages();
-  }, [toggleRefetch]);
+      if (refetchAllMessages) refetchAllMessages({ groupId });
+    } else if (refetchUserMessages) refetchUserMessages({ groupId });
+  }, [toggleRefetch, isGroupAdmin, groupId, refetchAllMessages, refetchUserMessages]);
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
