@@ -25,6 +25,11 @@ RUN npm rebuild sharp --prefix packages/api-core || true
 RUN npm run build
 RUN npm prune --production
 
+RUN set -eux; \
+    test -d /srv/packages/api-core/mails/dist; \
+    mkdir -p /srv/mails; \
+    cp -a /srv/packages/api-core/mails/dist /srv/mails/dist;
+
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
@@ -54,6 +59,4 @@ RUN install -d -o interamap -g interamap -m 0775 /srv/src
 
 USER interamap
 
-WORKDIR /srv/packages/api-core
-
-CMD ["node", "dist/main.js"]
+CMD ["node", "packages/api-core/dist/main.js"]
