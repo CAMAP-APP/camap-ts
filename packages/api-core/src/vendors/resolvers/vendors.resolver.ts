@@ -481,26 +481,29 @@ export class VendorsResolver {
       distributions: DistributionEntity[]
       group: GroupEntity
     }>();
-    await Promise.all(distribs.map(async (distribution) => {
+    (await Promise.all(distribs.map(async (distribution) => {
       const catalog = await distribution.catalog;
       const group = await catalog.group;
-
+      return {
+        distribution,
+        group
+      };
+    }))).map(({ distribution, group }) => {
       const dists = nextDistributionsByGroupId.get(group.id);
       if (!dists) {
         nextDistributionsByGroupId.set(group.id, { distributions: [distribution], group });
       } else {
         dists.distributions.push(distribution);
       }
-    }));
-
+    });
 
     const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
-    .map(([, { distributions, group }]) => ({
-      group,
-      distributions: distributions
-        .slice(0,4)
-        .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
-    }));
+      .map(([, { distributions, group }]) => ({
+        group,
+        distributions: distributions
+          .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
+          .slice(0,4)
+      }));
 
     return nextDistributions;
   }
