@@ -6,7 +6,7 @@ import { formatDate, formatTime } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatSmartQt } from "camap-common";
 import { startOfDay } from "date-fns";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 type VendorDistributions = GetNextVendorDistributionsQuery['vendor']['nextDistributions'][number];
 type ProductLike = {
@@ -35,7 +35,7 @@ const MultiDistribRow = ({ distributions }: { distributions: VendorDistributions
         return products;
     }, new Map<number, ProductLike & { ordered: number }>())
 
-    console.log(products);
+    // console.log(distributions, products);
 
     return <>
         <TableRow>
@@ -65,6 +65,8 @@ const DistributionByGroupDateRow = ({
         md.set(d.multiDistrib.id, dists);
         return md;
     }, new Map<number, typeof distributions>)
+
+    console.log(multiDistribs.entries());
 
     return <>
         <TableRow>
@@ -105,9 +107,9 @@ const DistributionByDateRow = ({ date, groups, forceOpen=false }: {
             <Collapse in={open}>
                 <Table>
                     <TableBody>
-                    {
-                        Array.from(groups.values()).map(g => <DistributionByGroupDateRow key={g.group.id} group={g.group} distributions={g.distributions} />)
-                    }
+                    {Array.from(groups.values()).map(g =>
+                        <DistributionByGroupDateRow key={g.group.id} group={g.group} distributions={g.distributions} />
+                    )}
                     </TableBody>
                 </Table>
             </Collapse>
@@ -126,7 +128,7 @@ function VendorDashDistributions({ vendorId }:{ vendorId: number }) {
     } = useGetNextVendorDistributionsQuery({ variables: { vendorId }});
     
 
-    const distributionsByDateAndGroup = nextDistributions.reduce(
+    const distributionsByDateAndGroup = useMemo(() => nextDistributions.reduce(
         (byDate, c) => {
 
             c.distributions.forEach(d => {
@@ -141,7 +143,9 @@ function VendorDashDistributions({ vendorId }:{ vendorId: number }) {
             return byDate;
         },
         new Map<number, Map<number, VendorDistributions>>
-    );
+    ), [nextDistributions]);
+
+    console.log(nextDistributions, distributionsByDateAndGroup);
 
     return <Paper sx={{ padding: 1 }}>
         <Typography variant="h5">{tVendorDash("dashDistributionsTitle")}</Typography>
