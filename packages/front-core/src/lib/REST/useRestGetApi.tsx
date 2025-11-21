@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { getRestBaseUrl } from 'lib/runtimeCfg';
 
-export const BASE_URL = getRestBaseUrl();
+// BASE_URL = CAMAP_HOST + "/api"
+export const BASE_URL = `${getRestBaseUrl().replace(/\/$/, '')}/api`;
 
 export type HaxeError = {
   error: {
@@ -18,8 +19,7 @@ const useRestGetApi = <T extends {}>(
   const [error, setError] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    const base = getRestBaseUrl();
-    const baseNorm = base.replace(/\/$/, '');
+    const baseNorm = BASE_URL.replace(/\/$/, '');
     const path = url.startsWith('/') ? url : `/${url}`;
     const finalUrl = `${baseNorm}${path}`;
 
