@@ -92,7 +92,7 @@ const ISO31661Selector = ({
       return;
     }
     // @ts-ignore
-    onChange(v[format], e);
+     onChange((value as any)[format], e as ChangeEvent<HTMLInputElement>);
   };
 
   /** */
