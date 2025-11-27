@@ -1,4 +1,8 @@
-# TypeScript Standard Rules
+---
+description: Global typescript rules
+globs: ["**/*.ts", "**/*.tsx"]
+alwaysApply: true
+---
 
 ## Language & Types
 - Enable and keep `strict` type-checking; avoid `any` and unsafe casts.

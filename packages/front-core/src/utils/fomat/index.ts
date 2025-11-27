@@ -11,6 +11,23 @@ export const formatDateFr = (date: Date, f: string = 'dd/MM/yyyy') =>
 export const firstLetterUppercase = (s: string) =>
   `${s.charAt(0).toUpperCase()}${s.slice(1).toLowerCase()}`;
 
+export const formatUserName = (user: { firstName: string; lastName: string }) =>
+  `${user.lastName.toUpperCase()} ${firstLetterUppercase(user.firstName)}`;
+
+export const formatUserAndPartnerNames = (user: Pick<User, 'firstName' | 'lastName' | 'firstName2' | 'lastName2'>) => {
+  const userName = formatUserName(user);
+
+  if (user.firstName2 && user.lastName2) {
+    const partnerName = formatUserName({
+      firstName: user.firstName2,
+      lastName: user.lastName2,
+    });
+    return `${userName} & ${partnerName}`;
+  }
+
+  return userName;
+};
+
 export const formatUserAddress = (user: User): string => {
   if (!user.city && !user.zipCode) return '';
 
@@ -23,7 +40,7 @@ export const formatAbsoluteDate = (
   uppercased = true,
   showYear = false,
   showDayOfWeek = true,
-) => {
+): string => {
   if (Number.isNaN(date.getTime())) return '';
   let pattern = 'd MMMM';
   if (showDayOfWeek) pattern = `EEEE ${pattern}`;
@@ -154,15 +171,15 @@ export const formatUnit = (
 ): string => {
   switch (u) {
     case ProductUnit.Kilogram:
-      return 'Kg.';
+      return 'Kg';
     case ProductUnit.Gram:
-      return 'g.';
+      return 'g';
     case ProductUnit.Litre:
-      return 'L.';
+      return 'L';
     case ProductUnit.Centilitre:
-      return 'cl.';
+      return 'cl';
     case ProductUnit.Millilitre:
-      return 'ml.';
+      return 'ml';
     case ProductUnit.Piece:
     default:
       if (!t) return '';
@@ -178,9 +195,14 @@ export const formatPricePerUnit = (
   price: number,
   qt?: number,
   unit?: ProductUnit,
+  currency?: string,
   t?: TFunction,
 ): string => {
-  if (!qt || !price) return '';
+  if (!price) return '';
+
+  if(!qt || !unit)
+    return formatCurrency(price, currency);
+
   let ppu = price / qt;
   let u = unit;
 
@@ -202,7 +224,7 @@ export const formatPricePerUnit = (
       default:
     }
   }
-  return `${formatCurrency(ppu)}/${formatUnit(u, qt, t)}`;
+  return `${formatCurrency(ppu, currency)}/${formatUnit(u, qt, t)}`;
 };
 
 export const round = (number: number): number => {

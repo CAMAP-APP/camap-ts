@@ -54,9 +54,9 @@ const MembersTableHeader = <T extends object>({
             key={headCell.toString()}
             sortDirection={orderBy === headCell ? order : false}
             sx={
-              headCells.length === 2 && {
+              (headCells.length === 2) ? {
                 width: '50%',
-              }
+              } : undefined
             }
           >
             <TableSortLabel

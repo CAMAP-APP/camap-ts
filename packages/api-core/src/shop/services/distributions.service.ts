@@ -57,6 +57,9 @@ export class DistributionsService {
         catalogId: In(catalogIds),
         raw_date: MoreThanOrEqual(now),
       },
+      order: {
+        raw_date: 'ASC'
+      }
     });
   }
 

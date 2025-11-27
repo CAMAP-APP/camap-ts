@@ -1,0 +1,76 @@
+query GetVendorProfessions {
+  getVendorProfessions {
+    id
+    name
+  }
+}
+
+mutation UpdateVendor(
+  $vendorId: Int!
+  $name: String!
+  $email: String!
+  $showEmail: Boolean
+  $city: String!
+  $zipCode: String!
+  $address1: String
+  $address2: String
+  $phone: String
+  $showPhone: Boolean
+  $linkText: String
+  $desc: String
+  $linkUrl: String
+  $country: String
+  $longDesc: String
+  $companyNumber: String!
+  $profession: Int
+  $production2: Int
+  $production3: Int
+  $peopleName: String
+  $lat: Float
+  $lng: Float
+) {
+  updateVendor(
+    vendorId: $vendorId
+    name: $name
+    email: $email
+    showEmail: $showEmail
+    city: $city
+    zipCode: $zipCode
+    address1: $address1
+    address2: $address2
+    phone: $phone
+    showPhone: $showPhone
+    linkText: $linkText
+    desc: $desc
+    linkUrl: $linkUrl
+    country: $country
+    longDesc: $longDesc
+    companyNumber: $companyNumber
+    profession: $profession
+    production2: $production2
+    production3: $production3
+    peopleName: $peopleName
+    lat: $lat
+    lng: $lng
+  ) {
+    id
+    name
+    email
+    city
+    address1
+    address2
+    zipCode
+    phone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}

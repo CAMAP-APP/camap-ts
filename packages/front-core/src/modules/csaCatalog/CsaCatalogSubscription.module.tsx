@@ -16,7 +16,7 @@ const CsaCatalogSubscriptionRouter = () => {
 
   return subscription 
   ? <CsaCatalogSubscription />
-  : ''
+  : <></>
 }
 
 const CsaCatalogSubscriptionModule = ({ catalogId, subscriptionId }: CsaCatalogProps) => {

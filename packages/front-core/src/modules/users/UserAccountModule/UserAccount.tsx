@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { TabPanel } from '../../../components/TabPanel';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import UserGroups from './components/UserGroups';
 import UserInfosForm, {

@@ -1,6 +1,6 @@
 import { Box } from '@mui/material';
 import React, { MouseEvent, PropsWithChildren } from 'react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 
 interface EditorButtonType {
   active: boolean;

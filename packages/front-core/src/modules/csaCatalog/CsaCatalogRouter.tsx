@@ -257,7 +257,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         <Box mt={3}>
             <Block
               title={t('mySubscription')}
-              icon={<MediumActionIcon id={CamapIconId.info} />}
+              icon={<MediumActionIcon id={CamapIconId.subscription} />}
               sx={{ height: '100%' }}
               contentSx={{ textAlign: 'center' }}
             >

@@ -1,5 +1,4 @@
 import { Catalog, useGetActiveCatalogsPicturesLazyQuery, Vendor } from '@gql';
-import { Image } from '@mui/icons-material';
 import {
   Autocomplete,
   Box,
@@ -14,11 +13,12 @@ import { encodeFileToBase64String } from '@utils/encoding';
 import { getBase64EncodedImage } from '@utils/image';
 import { logError } from '@utils/logger';
 import imageCompression from 'browser-image-compression';
-import React from 'react';
+import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSlateStatic } from 'slate-react';
 import { TextEditorComponents } from '../TextEditorComponents';
 import { insertImage } from './withImage';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
 
 type CatalogType = Pick<Catalog, 'id'> & {
@@ -57,7 +57,7 @@ const TextEditorImageButton = ({
     });
   }, [getActiveCatalogs, groupId]);
 
-  const openMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
     setIsActive(true);
     setAnchorEl(event.currentTarget);
   };
@@ -67,7 +67,7 @@ const TextEditorImageButton = ({
     setIsActive(false);
   };
 
-  const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     if (groupId) {
       openMenu(event);
@@ -120,8 +120,8 @@ const TextEditorImageButton = ({
   };
 
   const onCatalogSelected = (
-    _event: React.ChangeEvent,
-    newValue: CatalogType,
+    _event: SyntheticEvent,
+    newValue: CatalogType | null,
     reason: AutocompleteChangeReason,
   ) => {
     if (reason === 'blur' || reason === 'clear') {
@@ -131,12 +131,14 @@ const TextEditorImageButton = ({
     }
     if (!newValue) return;
     closeMenu();
-    const image = newValue.vendor.image as string;
+
+    const image = newValue.vendor?.image as string;
     insertImage(editor, `${getCamapHost()}${image}`);
+
   };
 
   const onCatalogInputChange = (
-    _: React.ChangeEvent,
+    _: React.SyntheticEvent,
     newInputValue: string,
   ) => {
     setCatalogInputValue(newInputValue);
@@ -144,7 +146,7 @@ const TextEditorImageButton = ({
 
   const catalogsWithImage =
     activeContractsData?.getActiveCatalogs &&
-    activeContractsData?.getActiveCatalogs.filter((c) => !!c.vendor.image);
+    activeContractsData?.getActiveCatalogs.filter((c) => !!c.vendor?.image);
 
   return (
     <TextEditorComponents
@@ -156,7 +158,7 @@ const TextEditorImageButton = ({
       {loading ? (
         <CircularProgress size={24 - 3.6} />
       ) : (
-        <Image sx={{ display: 'block' }} />
+        <CamapIcon id={CamapIconId.image} sx={{ display: 'block' }} />
       )}
       {groupId && (
         <Menu
@@ -184,7 +186,7 @@ const TextEditorImageButton = ({
             <ListItem>
               <Autocomplete
                 options={catalogsWithImage}
-                getOptionLabel={(option) => (option ? option.vendor.name : '')}
+                getOptionLabel={(option) => (option?.vendor?.name ?? '')}
                 renderInput={(params) => (
                   <TextField
                     {...params}

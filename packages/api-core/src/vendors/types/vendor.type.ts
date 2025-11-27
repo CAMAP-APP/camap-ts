@@ -1,8 +1,21 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { VendorDisabledReason } from '../entities/vendor.entity';
-import { VendorImages } from './vendorImages.type';
+import { Catalog } from './catalog.type';
+import { VendorImage } from './vendorImages.type';
+import { Group } from 'src/groups/types/group.type';
+import { Distribution } from 'src/shop/types/distribution.type';
 
 registerEnumType(VendorDisabledReason, { name: 'VendorDisabledReason' });
+
+@ObjectType()
+export class VendorDistributions {
+  @Field(() => Group)
+  group: Group;
+
+  @Field(() => [Distribution])
+  distributions: Distribution[]
+}
 
 @ObjectType()
 export class Vendor {
@@ -17,9 +30,13 @@ export class Vendor {
 
   @Field({ nullable: true })
   email?: string;
+  @Field()
+  showEmail: boolean;
 
   @Field({ nullable: true })
   phone?: string;
+  @Field()
+  showPhone: boolean;
 
   @Field({ nullable: true })
   zipCode?: string;
@@ -50,9 +67,8 @@ export class Vendor {
 
   @Field({ nullable: true })
   longDesc?: string;
-
-  @Field()
-  images: VendorImages;
+  @Field(() => [VendorImage])
+  media: VendorImage[];
 
   @Field({ nullable: true })
   companyNumber?: string;
@@ -60,6 +76,33 @@ export class Vendor {
   @Field({ nullable: true })
   country?: string;
 
+  @Field(() => Int, { nullable: true })
+  profession?: number;
+
+  @Field(() => Int, { nullable: true })
+  production2?: number;
+
+  @Field(() => Int, { nullable: true })
+  production3?: number;
+
   @Field(() => VendorDisabledReason, { nullable: true })
   disabled?: VendorDisabledReason;
+
+  @Field(() => [Catalog])
+  activeCatalogs: Catalog[];
+
+  @Field(() => [Catalog])
+  allCatalogs: Catalog[];
+
+  @Field(() => [EntityFile])
+  documents: EntityFile[];
+
+  @Field({ nullable: true })
+  lat?: number;
+
+  @Field({ nullable: true })
+  lng?: number;
+
+  @Field(() => [VendorDistributions])
+  nextDistributions: VendorDistributions[];
 }

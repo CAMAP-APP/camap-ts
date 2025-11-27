@@ -1,4 +1,3 @@
-import { RemoveCircleOutline, ShoppingBag } from '@mui/icons-material';
 import { Alert, Box, Button, Grid, Modal, Typography } from '@mui/material';
 import { formatCurrency } from 'camap-common';
 import React from 'react';
@@ -12,6 +11,7 @@ import { CsaCatalogContext } from '../CsaCatalog.context';
 import { useRestUpdateSubscriptionAbsencesPost } from '../requests';
 import CsaCatalogAbsences from './CsaCatalogAbsences';
 import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
+import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 const CsaCatalogSubscription = () => {
   const { t, tCommon } = useCamapTranslation(
@@ -184,14 +184,14 @@ const CsaCatalogSubscription = () => {
           <Button
             variant="outlined"
             sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-            startIcon={<ShoppingBag />}
+            startIcon={<CamapIcon id={CamapIconId.subscription} />}
             href={`/history/subscriptionOrders/${subscription.id}`}
           >
             {t('orders')}
           </Button>
           <Button
             variant="outlined"
-            startIcon={<RemoveCircleOutline />}
+            startIcon={<CamapIcon id={CamapIconId.delete} />}
             href={`/subscriptions/delete/${subscription.id}`}
           >
             {t('cancelSubscription')}

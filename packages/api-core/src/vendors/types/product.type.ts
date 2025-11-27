@@ -59,4 +59,7 @@ export class Product {
 
   @Field()
   active: boolean;
+
+  @Field()
+  currency: string;
 }

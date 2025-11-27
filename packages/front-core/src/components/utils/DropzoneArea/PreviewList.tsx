@@ -1,9 +1,7 @@
 import AttachFile from '@mui/icons-material/AttachFile';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { styled } from '@mui/material';
 import Fab from '@mui/material/Fab';
 import Grid from '@mui/material/Grid';
-import * as React from 'react';
 import { FileObjectType } from './DropzoneArea';
 
 interface PreviewListProps {
@@ -11,12 +9,12 @@ interface PreviewListProps {
   handleRemove: (index: number) => void;
 }
 
-function isImage(file: File) {
-  if (file.type.split('/')[0] === 'image') {
-    return true;
-  }
-  return false;
-}
+// function isImage(file: File) {
+//   if (file.type.split('/')[0] === 'image') {
+//     return true;
+//   }
+//   return false;
+// }
 
 const ImageSx = {
   height: 100,
@@ -31,14 +29,15 @@ const ImageSx = {
   opacity: 1,
 };
 
-const StyledImd = styled('img')(() => ImageSx);
+// code supprimé car pas de sens et n'est pas réellement utilisé
+// const StyledImd = styled('img')((() => ImageSx));
 
 const getPreviewIcon = (fileObject: FileObjectType) => {
-  if (isImage(fileObject.file)) {
-    return (
-      <StyledImd role="presentation" src={fileObject.data} alt="preview" />
-    );
-  }
+  // if (isImage(fileObject.file)) {
+  //   return (
+  //     <StyledImd role="presentation" src={fileObject.data} alt="preview" />
+  //   );
+  // }
 
   return <AttachFile sx={ImageSx} />;
 };

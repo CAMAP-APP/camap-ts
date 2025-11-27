@@ -44,6 +44,7 @@ export type AttendanceVariableContract = {
 
 export type Catalog = {
   __typename?: 'Catalog';
+  documents: Array<EntityFile>;
   endDate: Scalars['DateTime'];
   group: Group;
   groupId: Scalars['Int'];
@@ -52,10 +53,10 @@ export type Catalog = {
   products: Array<Product>;
   startDate: Scalars['DateTime'];
   subscriptions: Array<CsaSubscriptionType>;
+  subscriptionsCount: Scalars['Int'];
   type: CatalogType;
   user?: Maybe<User>;
   vendor: Vendor;
-  vendorId: Scalars['Int'];
 };
 
 export enum CatalogType {
@@ -133,6 +134,7 @@ export type Distribution = {
   orderEndDate: Scalars['DateTime'];
   orderStartDate: Scalars['DateTime'];
   place: Place;
+  placeId: Scalars['Int'];
   userOrders: Array<UserOrder>;
 };
 
@@ -165,12 +167,24 @@ export type EmbeddedImageAttachment = {
   content: Scalars['String'];
 };
 
+export type EntityFile = {
+  __typename?: 'EntityFile';
+  documentType: Scalars['String'];
+  entityId: Scalars['Int'];
+  entityType: Scalars['String'];
+  fileId: Scalars['Int'];
+  id: Scalars['Int'];
+  name?: Maybe<Scalars['String']>;
+  url: Scalars['String'];
+  visibility: Scalars['String'];
+};
+
 export type File = {
   __typename?: 'File';
   cDate?: Maybe<Scalars['DateTime']>;
   data: Scalars['String'];
   id: Scalars['Int'];
-  name: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
 };
 
 export type Group = {
@@ -199,7 +213,7 @@ export type Group = {
 export enum GroupDisabledReason {
   BLOCKED_BY_ADMIN = 'BLOCKED_BY_ADMIN',
   MOVED = 'MOVED',
-  SUSPENDED = 'SUSPENDED',
+  SUSPENDED = 'SUSPENDED'
 }
 
 export type GroupPreview = {
@@ -243,12 +257,6 @@ export type GroupPreviewMembers = {
   id: Scalars['Int'];
   membershipFee?: Maybe<Scalars['Float']>;
   name: Scalars['String'];
-};
-
-export type InitVendorPage = {
-  __typename?: 'InitVendorPage';
-  nextDistributions: Array<Distribution>;
-  vendor: Vendor;
 };
 
 export type InvitedUser = {
@@ -375,10 +383,15 @@ export type Mutation = {
   __typename?: 'Mutation';
   approveRequest: UserGroup;
   cancelRequest: WaitingList;
+  claimVendor: Scalars['Int'];
+  consolidateVendors: Scalars['Boolean'];
+  createDocument: EntityFile;
   createMembership: Membership;
   createMemberships: CreateMembershipsResponse;
   createMessage: Message;
+  createVendorImage: VendorImage;
   deleteAccount: Scalars['Int'];
+  deleteDocument: Scalars['Int'];
   deleteMembership: Scalars['String'];
   deleteOperation?: Maybe<Scalars['Int']>;
   importAndCreateMembers: SendInvitesToNewMembersResponse;
@@ -397,6 +410,7 @@ export type Mutation = {
   setVendorImage: Vendor;
   updateUser: UpdateUserResult;
   updateUserNotifications: User;
+  updateVendor: Vendor;
   validateOperation: Operation;
 };
 
@@ -410,6 +424,26 @@ export type MutationApproveRequestArgs = {
 export type MutationCancelRequestArgs = {
   groupId: Scalars['Int'];
   userId: Scalars['Int'];
+};
+
+
+export type MutationClaimVendorArgs = {
+  vendorId: Scalars['Int'];
+};
+
+
+export type MutationConsolidateVendorsArgs = {
+  vendorId: Scalars['Int'];
+};
+
+
+export type MutationCreateDocumentArgs = {
+  base64EncodedFile: Scalars['String'];
+  entityId: Scalars['Int'];
+  entityType: Scalars['String'];
+  fileName: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
+  visibility: Scalars['String'];
 };
 
 
@@ -428,9 +462,23 @@ export type MutationCreateMessageArgs = {
 };
 
 
+export type MutationCreateVendorImageArgs = {
+  base64EncodedImage: Scalars['String'];
+  fileName: Scalars['String'];
+  maxWidth: Scalars['Int'];
+  mimeType: Scalars['String'];
+  vendorId: Scalars['Int'];
+};
+
+
 export type MutationDeleteAccountArgs = {
   password: Scalars['String'];
   userId: Scalars['Int'];
+};
+
+
+export type MutationDeleteDocumentArgs = {
+  id: Scalars['Int'];
 };
 
 
@@ -538,6 +586,32 @@ export type MutationUpdateUserNotificationsArgs = {
 };
 
 
+export type MutationUpdateVendorArgs = {
+  address1?: InputMaybe<Scalars['String']>;
+  address2?: InputMaybe<Scalars['String']>;
+  city: Scalars['String'];
+  companyNumber: Scalars['String'];
+  country?: InputMaybe<Scalars['String']>;
+  desc?: InputMaybe<Scalars['String']>;
+  email: Scalars['String'];
+  lat?: InputMaybe<Scalars['Float']>;
+  linkText?: InputMaybe<Scalars['String']>;
+  linkUrl?: InputMaybe<Scalars['String']>;
+  lng?: InputMaybe<Scalars['Float']>;
+  longDesc?: InputMaybe<Scalars['String']>;
+  name: Scalars['String'];
+  peopleName?: InputMaybe<Scalars['String']>;
+  phone?: InputMaybe<Scalars['String']>;
+  production2?: InputMaybe<Scalars['Int']>;
+  production3?: InputMaybe<Scalars['Int']>;
+  profession?: InputMaybe<Scalars['Int']>;
+  showEmail?: Scalars['Boolean'];
+  showPhone?: Scalars['Boolean'];
+  vendorId: Scalars['Int'];
+  zipCode: Scalars['String'];
+};
+
+
 export type MutationValidateOperationArgs = {
   id: Scalars['Int'];
   type?: InputMaybe<PaymentTypeId>;
@@ -610,6 +684,7 @@ export type Product = {
   bulk: Scalars['Boolean'];
   catalogId: Scalars['Int'];
   catalogName: Scalars['String'];
+  currency: Scalars['String'];
   desc?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   image: Scalars['String'];
@@ -642,7 +717,9 @@ export type Query = {
   distributionCycles: Array<DistributionCycle>;
   getActiveCatalogs: Array<Catalog>;
   getActiveVendorsFromGroup: Array<Vendor>;
+  getClaimableVendors: Array<Vendor>;
   getContractsUserLists: Array<UserList>;
+  getDefaultVendorByUserId: Vendor;
   getDistributionsUserLists: Array<UserList>;
   getGroupsOnMap: Array<GroupPreviewMap>;
   getInvitedUserToRegister?: Maybe<InvitedUser>;
@@ -656,7 +733,9 @@ export type Query = {
   getUserMemberships: Array<Membership>;
   getUserMessagesForGroup: Array<Message>;
   getUsersFromEmails: Array<User>;
+  getVendorProfessions: Array<VendorProfession>;
   getVendorWithEmailCheck: Vendor;
+  getVendorsByUserId: Array<Vendor>;
   getVendorsFromCompanyNumber: Array<Vendor>;
   getWaitingListsOfGroup: Array<WaitingList>;
   group: Group;
@@ -665,7 +744,7 @@ export type Query = {
   groupPreviewMembers: GroupPreviewMembers;
   groupPreviews: Array<GroupPreview>;
   groupPreviews2: Array<GroupPreview>;
-  initVendorPage: InitVendorPage;
+  hasVendorsByUserId: Scalars['Boolean'];
   isEmailRegistered: Scalars['Boolean'];
   isGroupAdmin: Scalars['Boolean'];
   me: User;
@@ -677,6 +756,7 @@ export type Query = {
   user: User;
   userGroup?: Maybe<UserGroup>;
   vendor: Vendor;
+  vendorProductsSample: Array<Product>;
 };
 
 
@@ -730,6 +810,11 @@ export type QueryGetActiveVendorsFromGroupArgs = {
 
 export type QueryGetContractsUserListsArgs = {
   groupId: Scalars['Int'];
+};
+
+
+export type QueryGetDefaultVendorByUserIdArgs = {
+  userId: Scalars['Int'];
 };
 
 
@@ -790,7 +875,7 @@ export type QueryGetUserListsArgs = {
 
 export type QueryGetUserMembershipsArgs = {
   groupId: Scalars['Int'];
-  ignoreIfNotAllowed?: InputMaybe<Scalars['Boolean']>;
+  ignoreIfNotAllowed?: Scalars['Boolean'];
   userId: Scalars['Int'];
 };
 
@@ -807,6 +892,11 @@ export type QueryGetUsersFromEmailsArgs = {
 
 export type QueryGetVendorWithEmailCheckArgs = {
   vendorId: Scalars['Int'];
+};
+
+
+export type QueryGetVendorsByUserIdArgs = {
+  userId: Scalars['Int'];
 };
 
 
@@ -840,8 +930,8 @@ export type QueryGroupPreviewMembersArgs = {
 };
 
 
-export type QueryInitVendorPageArgs = {
-  vendorId: Scalars['Int'];
+export type QueryHasVendorsByUserIdArgs = {
+  userId: Scalars['Int'];
 };
 
 
@@ -891,6 +981,11 @@ export type QueryUserGroupArgs = {
 
 export type QueryVendorArgs = {
   id: Scalars['Int'];
+};
+
+
+export type QueryVendorProductsSampleArgs = {
+  vendorId: Scalars['Int'];
 };
 
 export type RegisterInput = {
@@ -1058,29 +1153,38 @@ export type UserOrder = {
 
 export type Vendor = {
   __typename?: 'Vendor';
+  activeCatalogs: Array<Catalog>;
   address1?: Maybe<Scalars['String']>;
   address2?: Maybe<Scalars['String']>;
+  allCatalogs: Array<Catalog>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
   companyNumber?: Maybe<Scalars['String']>;
   country?: Maybe<Scalars['String']>;
   desc?: Maybe<Scalars['String']>;
   disabled?: Maybe<VendorDisabledReason>;
+  documents: Array<EntityFile>;
   email?: Maybe<Scalars['String']>;
   id: Scalars['Int'];
   image?: Maybe<Scalars['String']>;
   imageFile?: Maybe<File>;
   imageId?: Maybe<Scalars['Int']>;
-  images: VendorImages;
+  lat?: Maybe<Scalars['Float']>;
   linkText?: Maybe<Scalars['String']>;
   linkUrl?: Maybe<Scalars['String']>;
+  lng?: Maybe<Scalars['Float']>;
   longDesc?: Maybe<Scalars['String']>;
+  media: Array<VendorImage>;
   name: Scalars['String'];
+  nextDistributions: Array<VendorDistributions>;
   peopleName?: Maybe<Scalars['String']>;
   phone?: Maybe<Scalars['String']>;
   portrait: Scalars['String'];
-  profession: Scalars['String'];
-  professionId?: Maybe<Scalars['Int']>;
+  production2?: Maybe<Scalars['Int']>;
+  production3?: Maybe<Scalars['Int']>;
+  profession?: Maybe<Scalars['Int']>;
+  showEmail: Scalars['Boolean'];
+  showPhone: Scalars['Boolean'];
   zipCode?: Maybe<Scalars['String']>;
 };
 
@@ -1090,15 +1194,23 @@ export enum VendorDisabledReason {
   NotCompliantWithPolicy = 'NotCompliantWithPolicy'
 }
 
-export type VendorImages = {
-  __typename?: 'VendorImages';
-  banner?: Maybe<Scalars['String']>;
-  farm1?: Maybe<Scalars['String']>;
-  farm2?: Maybe<Scalars['String']>;
-  farm3?: Maybe<Scalars['String']>;
-  farm4?: Maybe<Scalars['String']>;
-  logo?: Maybe<Scalars['String']>;
-  portrait?: Maybe<Scalars['String']>;
+export type VendorDistributions = {
+  __typename?: 'VendorDistributions';
+  distributions: Array<Distribution>;
+  group: Group;
+};
+
+export type VendorImage = {
+  __typename?: 'VendorImage';
+  id: Scalars['Float'];
+  name?: Maybe<Scalars['String']>;
+  url: Scalars['String'];
+};
+
+export type VendorProfession = {
+  __typename?: 'VendorProfession';
+  id: Scalars['Int'];
+  name: Scalars['String'];
 };
 
 export type Volunteer = {
@@ -1161,6 +1273,25 @@ export type LoginAsMutationVariables = Exact<{
 
 export type LoginAsMutation = { __typename?: 'Mutation', loginAs: { __typename?: 'User', id: number } };
 
+export type CreateDocumentMutationVariables = Exact<{
+  entityType: Scalars['String'];
+  entityId: Scalars['Int'];
+  base64EncodedFile: Scalars['String'];
+  fileName: Scalars['String'];
+  name?: InputMaybe<Scalars['String']>;
+  visibility: Scalars['String'];
+}>;
+
+
+export type CreateDocumentMutation = { __typename?: 'Mutation', createDocument: { __typename?: 'EntityFile', id: number, entityType: string, entityId: number, documentType: string, fileId: number, visibility: string, url: string, name?: string | null } };
+
+export type DeleteDocumentMutationVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type DeleteDocumentMutation = { __typename?: 'Mutation', deleteDocument: number };
+
 export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -1186,6 +1317,48 @@ export type IsGroupAdminQueryVariables = Exact<{
 
 
 export type IsGroupAdminQuery = { __typename?: 'Query', isGroupAdmin: boolean };
+
+export type VendorQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, showEmail: boolean, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, companyNumber?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
+
+export type VendorActiveCatalogsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorActiveCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
+
+export type VendorDocumentsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorDocumentsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }>, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, documents: Array<{ __typename?: 'EntityFile', id: number, documentType: string, visibility: string, name?: string | null, url: string }> }> } };
+
+export type VendorImagesQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorImagesQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, media: Array<{ __typename?: 'VendorImage', id: number, name?: string | null, url: string }> } };
+
+export type VendorProductsSampleQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
+
+export type InitVendorPageQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type InitVendorPageQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, nextDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalogId: number, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
 
 export type AttendanceClassicContractQueryVariables = Exact<{
   catalogId: Scalars['Int'];
@@ -1264,6 +1437,17 @@ export type SetVendorImageMutationVariables = Exact<{
 
 
 export type SetVendorImageMutation = { __typename?: 'Mutation', setVendorImage: { __typename?: 'Vendor', id: number } };
+
+export type CreateVendorImageMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+  base64EncodedImage: Scalars['String'];
+  mimeType: Scalars['String'];
+  fileName: Scalars['String'];
+  maxWidth: Scalars['Int'];
+}>;
+
+
+export type CreateVendorImageMutation = { __typename?: 'Mutation', createVendorImage: { __typename?: 'VendorImage', name?: string | null, url: string } };
 
 export type GetInvitedUserToRegisterQueryVariables = Exact<{
   email: Scalars['String'];
@@ -1536,6 +1720,86 @@ export type QuitGroupByControlKeyMutationVariables = Exact<{
 
 export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroupByControlKey: { __typename?: 'UserGroup', userId: number, groupId: number } };
 
+export type GetClaimableVendorsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+
+export type GetVendorsByUserIdQueryVariables = Exact<{
+  userId: Scalars['Int'];
+}>;
+
+
+export type GetVendorsByUserIdQuery = { __typename?: 'Query', getVendorsByUserId: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+
+export type GetDefaultVendorByUserIdQueryVariables = Exact<{
+  userId: Scalars['Int'];
+}>;
+
+
+export type GetDefaultVendorByUserIdQuery = { __typename?: 'Query', getDefaultVendorByUserId: { __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> } };
+
+export type HasVendorsByUserIdQueryVariables = Exact<{
+  userId: Scalars['Int'];
+}>;
+
+
+export type HasVendorsByUserIdQuery = { __typename?: 'Query', hasVendorsByUserId: boolean };
+
+export type GetNextVendorDistributionsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type GetNextVendorDistributionsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, nextDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number } }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, userOrders: Array<{ __typename?: 'UserOrder', id: number, quantity: number, productPrice: number, userId: number, distributionId: number, subscriptionId?: number | null, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, bulk: boolean, variablePrice: boolean } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
+
+export type ClaimVendorMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type ClaimVendorMutation = { __typename?: 'Mutation', claimVendor: number };
+
+export type ConsolidateVendorsMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type ConsolidateVendorsMutation = { __typename?: 'Mutation', consolidateVendors: boolean };
+
+export type GetVendorProfessionsQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type GetVendorProfessionsQuery = { __typename?: 'Query', getVendorProfessions: Array<{ __typename?: 'VendorProfession', id: number, name: string }> };
+
+export type UpdateVendorMutationVariables = Exact<{
+  vendorId: Scalars['Int'];
+  name: Scalars['String'];
+  email: Scalars['String'];
+  showEmail?: InputMaybe<Scalars['Boolean']>;
+  city: Scalars['String'];
+  zipCode: Scalars['String'];
+  address1?: InputMaybe<Scalars['String']>;
+  address2?: InputMaybe<Scalars['String']>;
+  phone?: InputMaybe<Scalars['String']>;
+  showPhone?: InputMaybe<Scalars['Boolean']>;
+  linkText?: InputMaybe<Scalars['String']>;
+  desc?: InputMaybe<Scalars['String']>;
+  linkUrl?: InputMaybe<Scalars['String']>;
+  country?: InputMaybe<Scalars['String']>;
+  longDesc?: InputMaybe<Scalars['String']>;
+  companyNumber: Scalars['String'];
+  profession?: InputMaybe<Scalars['Int']>;
+  production2?: InputMaybe<Scalars['Int']>;
+  production3?: InputMaybe<Scalars['Int']>;
+  peopleName?: InputMaybe<Scalars['String']>;
+  lat?: InputMaybe<Scalars['Float']>;
+  lng?: InputMaybe<Scalars['Float']>;
+}>;
+
+
+export type UpdateVendorMutation = { __typename?: 'Mutation', updateVendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
+
 export const UserFragmentDoc = gql`
     fragment User on User {
   id
@@ -1763,6 +2027,89 @@ export function useLoginAsMutation(baseOptions?: ApolloReactHooks.MutationHookOp
 export type LoginAsMutationHookResult = ReturnType<typeof useLoginAsMutation>;
 export type LoginAsMutationResult = Apollo.MutationResult<LoginAsMutation>;
 export type LoginAsMutationOptions = Apollo.BaseMutationOptions<LoginAsMutation, LoginAsMutationVariables>;
+export const CreateDocumentDocument = gql`
+    mutation createDocument($entityType: String!, $entityId: Int!, $base64EncodedFile: String!, $fileName: String!, $name: String, $visibility: String!) {
+  createDocument(
+    entityType: $entityType
+    entityId: $entityId
+    base64EncodedFile: $base64EncodedFile
+    fileName: $fileName
+    name: $name
+    visibility: $visibility
+  ) {
+    id
+    entityType
+    entityId
+    documentType
+    fileId
+    visibility
+    url
+    name
+  }
+}
+    `;
+export type CreateDocumentMutationFn = Apollo.MutationFunction<CreateDocumentMutation, CreateDocumentMutationVariables>;
+
+/**
+ * __useCreateDocumentMutation__
+ *
+ * To run a mutation, you first call `useCreateDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createDocumentMutation, { data, loading, error }] = useCreateDocumentMutation({
+ *   variables: {
+ *      entityType: // value for 'entityType'
+ *      entityId: // value for 'entityId'
+ *      base64EncodedFile: // value for 'base64EncodedFile'
+ *      fileName: // value for 'fileName'
+ *      name: // value for 'name'
+ *      visibility: // value for 'visibility'
+ *   },
+ * });
+ */
+export function useCreateDocumentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateDocumentMutation, CreateDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateDocumentMutation, CreateDocumentMutationVariables>(CreateDocumentDocument, options);
+      }
+export type CreateDocumentMutationHookResult = ReturnType<typeof useCreateDocumentMutation>;
+export type CreateDocumentMutationResult = Apollo.MutationResult<CreateDocumentMutation>;
+export type CreateDocumentMutationOptions = Apollo.BaseMutationOptions<CreateDocumentMutation, CreateDocumentMutationVariables>;
+export const DeleteDocumentDocument = gql`
+    mutation deleteDocument($id: Int!) {
+  deleteDocument(id: $id)
+}
+    `;
+export type DeleteDocumentMutationFn = Apollo.MutationFunction<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
+
+/**
+ * __useDeleteDocumentMutation__
+ *
+ * To run a mutation, you first call `useDeleteDocumentMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteDocumentMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteDocumentMutation, { data, loading, error }] = useDeleteDocumentMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteDocumentMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteDocumentMutation, DeleteDocumentMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<DeleteDocumentMutation, DeleteDocumentMutationVariables>(DeleteDocumentDocument, options);
+      }
+export type DeleteDocumentMutationHookResult = ReturnType<typeof useDeleteDocumentMutation>;
+export type DeleteDocumentMutationResult = Apollo.MutationResult<DeleteDocumentMutation>;
+export type DeleteDocumentMutationOptions = Apollo.BaseMutationOptions<DeleteDocumentMutation, DeleteDocumentMutationVariables>;
 export const MeDocument = gql`
     query Me {
   me {
@@ -1908,6 +2255,322 @@ export function useIsGroupAdminLazyQuery(baseOptions?: ApolloReactHooks.LazyQuer
 export type IsGroupAdminQueryHookResult = ReturnType<typeof useIsGroupAdminQuery>;
 export type IsGroupAdminLazyQueryHookResult = ReturnType<typeof useIsGroupAdminLazyQuery>;
 export type IsGroupAdminQueryResult = Apollo.QueryResult<IsGroupAdminQuery, IsGroupAdminQueryVariables>;
+export const VendorDocument = gql`
+    query Vendor($id: Int!) {
+  vendor(id: $id) {
+    id
+    name
+    email
+    showEmail
+    city
+    address1
+    address2
+    zipCode
+    phone
+    showPhone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    companyNumber
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}
+    `;
+
+/**
+ * __useVendorQuery__
+ *
+ * To run a query within a React component, call `useVendorQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useVendorQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorQuery, VendorQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
+      }
+export function useVendorLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorQuery, VendorQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorQuery, VendorQueryVariables>(VendorDocument, options);
+        }
+export type VendorQueryHookResult = ReturnType<typeof useVendorQuery>;
+export type VendorLazyQueryHookResult = ReturnType<typeof useVendorLazyQuery>;
+export type VendorQueryResult = Apollo.QueryResult<VendorQuery, VendorQueryVariables>;
+export const VendorActiveCatalogsDocument = gql`
+    query vendorActiveCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    activeCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      groupId
+      vendor {
+        id
+      }
+      subscriptionsCount
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorActiveCatalogsQuery__
+ *
+ * To run a query within a React component, call `useVendorActiveCatalogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorActiveCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorActiveCatalogsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorActiveCatalogsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>(VendorActiveCatalogsDocument, options);
+      }
+export function useVendorActiveCatalogsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>(VendorActiveCatalogsDocument, options);
+        }
+export type VendorActiveCatalogsQueryHookResult = ReturnType<typeof useVendorActiveCatalogsQuery>;
+export type VendorActiveCatalogsLazyQueryHookResult = ReturnType<typeof useVendorActiveCatalogsLazyQuery>;
+export type VendorActiveCatalogsQueryResult = Apollo.QueryResult<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>;
+export const VendorDocumentsDocument = gql`
+    query vendorDocuments($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    documents {
+      id
+      documentType
+      visibility
+      name
+      url
+    }
+    activeCatalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      documents {
+        id
+        documentType
+        visibility
+        name
+        url
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorDocumentsQuery__
+ *
+ * To run a query within a React component, call `useVendorDocumentsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorDocumentsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorDocumentsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorDocumentsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorDocumentsQuery, VendorDocumentsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorDocumentsQuery, VendorDocumentsQueryVariables>(VendorDocumentsDocument, options);
+      }
+export function useVendorDocumentsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorDocumentsQuery, VendorDocumentsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorDocumentsQuery, VendorDocumentsQueryVariables>(VendorDocumentsDocument, options);
+        }
+export type VendorDocumentsQueryHookResult = ReturnType<typeof useVendorDocumentsQuery>;
+export type VendorDocumentsLazyQueryHookResult = ReturnType<typeof useVendorDocumentsLazyQuery>;
+export type VendorDocumentsQueryResult = Apollo.QueryResult<VendorDocumentsQuery, VendorDocumentsQueryVariables>;
+export const VendorImagesDocument = gql`
+    query vendorImages($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    media {
+      id
+      name
+      url
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorImagesQuery__
+ *
+ * To run a query within a React component, call `useVendorImagesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorImagesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorImagesQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorImagesQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorImagesQuery, VendorImagesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorImagesQuery, VendorImagesQueryVariables>(VendorImagesDocument, options);
+      }
+export function useVendorImagesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorImagesQuery, VendorImagesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorImagesQuery, VendorImagesQueryVariables>(VendorImagesDocument, options);
+        }
+export type VendorImagesQueryHookResult = ReturnType<typeof useVendorImagesQuery>;
+export type VendorImagesLazyQueryHookResult = ReturnType<typeof useVendorImagesLazyQuery>;
+export type VendorImagesQueryResult = Apollo.QueryResult<VendorImagesQuery, VendorImagesQueryVariables>;
+export const VendorProductsSampleDocument = gql`
+    query vendorProductsSample($vendorId: Int!) {
+  vendorProductsSample(vendorId: $vendorId) {
+    id
+    name
+    desc
+    organic
+    bulk
+    image
+    price
+    currency
+    qt
+    unitType
+  }
+}
+    `;
+
+/**
+ * __useVendorProductsSampleQuery__
+ *
+ * To run a query within a React component, call `useVendorProductsSampleQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorProductsSampleQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorProductsSampleQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorProductsSampleQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>(VendorProductsSampleDocument, options);
+      }
+export function useVendorProductsSampleLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>(VendorProductsSampleDocument, options);
+        }
+export type VendorProductsSampleQueryHookResult = ReturnType<typeof useVendorProductsSampleQuery>;
+export type VendorProductsSampleLazyQueryHookResult = ReturnType<typeof useVendorProductsSampleLazyQuery>;
+export type VendorProductsSampleQueryResult = Apollo.QueryResult<VendorProductsSampleQuery, VendorProductsSampleQueryVariables>;
+export const InitVendorPageDocument = gql`
+    query InitVendorPage($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    name
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalogId
+        catalog {
+          id
+          name
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+          lng
+          lat
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useInitVendorPageQuery__
+ *
+ * To run a query within a React component, call `useInitVendorPageQuery` and pass it any options that fit your needs.
+ * When your component renders, `useInitVendorPageQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useInitVendorPageQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useInitVendorPageQuery(baseOptions: ApolloReactHooks.QueryHookOptions<InitVendorPageQuery, InitVendorPageQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<InitVendorPageQuery, InitVendorPageQueryVariables>(InitVendorPageDocument, options);
+      }
+export function useInitVendorPageLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<InitVendorPageQuery, InitVendorPageQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<InitVendorPageQuery, InitVendorPageQueryVariables>(InitVendorPageDocument, options);
+        }
+export type InitVendorPageQueryHookResult = ReturnType<typeof useInitVendorPageQuery>;
+export type InitVendorPageLazyQueryHookResult = ReturnType<typeof useInitVendorPageLazyQuery>;
+export type InitVendorPageQueryResult = Apollo.QueryResult<InitVendorPageQuery, InitVendorPageQueryVariables>;
 export const AttendanceClassicContractDocument = gql`
     query AttendanceClassicContract($catalogId: Int!, $startDate: DateTime, $endDate: DateTime) {
   attendanceClassicContract(
@@ -2386,6 +3049,50 @@ export function useSetVendorImageMutation(baseOptions?: ApolloReactHooks.Mutatio
 export type SetVendorImageMutationHookResult = ReturnType<typeof useSetVendorImageMutation>;
 export type SetVendorImageMutationResult = Apollo.MutationResult<SetVendorImageMutation>;
 export type SetVendorImageMutationOptions = Apollo.BaseMutationOptions<SetVendorImageMutation, SetVendorImageMutationVariables>;
+export const CreateVendorImageDocument = gql`
+    mutation createVendorImage($vendorId: Int!, $base64EncodedImage: String!, $mimeType: String!, $fileName: String!, $maxWidth: Int!) {
+  createVendorImage(
+    vendorId: $vendorId
+    base64EncodedImage: $base64EncodedImage
+    mimeType: $mimeType
+    fileName: $fileName
+    maxWidth: $maxWidth
+  ) {
+    name
+    url
+  }
+}
+    `;
+export type CreateVendorImageMutationFn = Apollo.MutationFunction<CreateVendorImageMutation, CreateVendorImageMutationVariables>;
+
+/**
+ * __useCreateVendorImageMutation__
+ *
+ * To run a mutation, you first call `useCreateVendorImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateVendorImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createVendorImageMutation, { data, loading, error }] = useCreateVendorImageMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *      base64EncodedImage: // value for 'base64EncodedImage'
+ *      mimeType: // value for 'mimeType'
+ *      fileName: // value for 'fileName'
+ *      maxWidth: // value for 'maxWidth'
+ *   },
+ * });
+ */
+export function useCreateVendorImageMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateVendorImageMutation, CreateVendorImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<CreateVendorImageMutation, CreateVendorImageMutationVariables>(CreateVendorImageDocument, options);
+      }
+export type CreateVendorImageMutationHookResult = ReturnType<typeof useCreateVendorImageMutation>;
+export type CreateVendorImageMutationResult = Apollo.MutationResult<CreateVendorImageMutation>;
+export type CreateVendorImageMutationOptions = Apollo.BaseMutationOptions<CreateVendorImageMutation, CreateVendorImageMutationVariables>;
 export const GetInvitedUserToRegisterDocument = gql`
     query getInvitedUserToRegister($email: String!) {
   getInvitedUserToRegister(email: $email) {
@@ -3803,3 +4510,474 @@ export function useQuitGroupByControlKeyMutation(baseOptions?: ApolloReactHooks.
 export type QuitGroupByControlKeyMutationHookResult = ReturnType<typeof useQuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationResult = Apollo.MutationResult<QuitGroupByControlKeyMutation>;
 export type QuitGroupByControlKeyMutationOptions = Apollo.BaseMutationOptions<QuitGroupByControlKeyMutation, QuitGroupByControlKeyMutationVariables>;
+export const GetClaimableVendorsDocument = gql`
+    query GetClaimableVendors {
+  getClaimableVendors {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    activeCatalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetClaimableVendorsQuery__
+ *
+ * To run a query within a React component, call `useGetClaimableVendorsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetClaimableVendorsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetClaimableVendorsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetClaimableVendorsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>(GetClaimableVendorsDocument, options);
+      }
+export function useGetClaimableVendorsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>(GetClaimableVendorsDocument, options);
+        }
+export type GetClaimableVendorsQueryHookResult = ReturnType<typeof useGetClaimableVendorsQuery>;
+export type GetClaimableVendorsLazyQueryHookResult = ReturnType<typeof useGetClaimableVendorsLazyQuery>;
+export type GetClaimableVendorsQueryResult = Apollo.QueryResult<GetClaimableVendorsQuery, GetClaimableVendorsQueryVariables>;
+export const GetVendorsByUserIdDocument = gql`
+    query GetVendorsByUserId($userId: Int!) {
+  getVendorsByUserId(userId: $userId) {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    activeCatalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetVendorsByUserIdQuery__
+ *
+ * To run a query within a React component, call `useGetVendorsByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVendorsByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVendorsByUserIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetVendorsByUserIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>(GetVendorsByUserIdDocument, options);
+      }
+export function useGetVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>(GetVendorsByUserIdDocument, options);
+        }
+export type GetVendorsByUserIdQueryHookResult = ReturnType<typeof useGetVendorsByUserIdQuery>;
+export type GetVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useGetVendorsByUserIdLazyQuery>;
+export type GetVendorsByUserIdQueryResult = Apollo.QueryResult<GetVendorsByUserIdQuery, GetVendorsByUserIdQueryVariables>;
+export const GetDefaultVendorByUserIdDocument = gql`
+    query GetDefaultVendorByUserId($userId: Int!) {
+  getDefaultVendorByUserId(userId: $userId) {
+    id
+    name
+    email
+    phone
+    city
+    zipCode
+    companyNumber
+    image
+    disabled
+    activeCatalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetDefaultVendorByUserIdQuery__
+ *
+ * To run a query within a React component, call `useGetDefaultVendorByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetDefaultVendorByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetDefaultVendorByUserIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useGetDefaultVendorByUserIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetDefaultVendorByUserIdQuery, GetDefaultVendorByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetDefaultVendorByUserIdQuery, GetDefaultVendorByUserIdQueryVariables>(GetDefaultVendorByUserIdDocument, options);
+      }
+export function useGetDefaultVendorByUserIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetDefaultVendorByUserIdQuery, GetDefaultVendorByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetDefaultVendorByUserIdQuery, GetDefaultVendorByUserIdQueryVariables>(GetDefaultVendorByUserIdDocument, options);
+        }
+export type GetDefaultVendorByUserIdQueryHookResult = ReturnType<typeof useGetDefaultVendorByUserIdQuery>;
+export type GetDefaultVendorByUserIdLazyQueryHookResult = ReturnType<typeof useGetDefaultVendorByUserIdLazyQuery>;
+export type GetDefaultVendorByUserIdQueryResult = Apollo.QueryResult<GetDefaultVendorByUserIdQuery, GetDefaultVendorByUserIdQueryVariables>;
+export const HasVendorsByUserIdDocument = gql`
+    query HasVendorsByUserId($userId: Int!) {
+  hasVendorsByUserId(userId: $userId)
+}
+    `;
+
+/**
+ * __useHasVendorsByUserIdQuery__
+ *
+ * To run a query within a React component, call `useHasVendorsByUserIdQuery` and pass it any options that fit your needs.
+ * When your component renders, `useHasVendorsByUserIdQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useHasVendorsByUserIdQuery({
+ *   variables: {
+ *      userId: // value for 'userId'
+ *   },
+ * });
+ */
+export function useHasVendorsByUserIdQuery(baseOptions: ApolloReactHooks.QueryHookOptions<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>(HasVendorsByUserIdDocument, options);
+      }
+export function useHasVendorsByUserIdLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>(HasVendorsByUserIdDocument, options);
+        }
+export type HasVendorsByUserIdQueryHookResult = ReturnType<typeof useHasVendorsByUserIdQuery>;
+export type HasVendorsByUserIdLazyQueryHookResult = ReturnType<typeof useHasVendorsByUserIdLazyQuery>;
+export type HasVendorsByUserIdQueryResult = Apollo.QueryResult<HasVendorsByUserIdQuery, HasVendorsByUserIdQueryVariables>;
+export const GetNextVendorDistributionsDocument = gql`
+    query GetNextVendorDistributions($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalog {
+          id
+          name
+          group {
+            id
+          }
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+          lng
+          lat
+        }
+        userOrders {
+          id
+          quantity
+          productPrice
+          product {
+            id
+            name
+            qt
+            unitType
+            bulk
+            variablePrice
+          }
+          userId
+          distributionId
+          subscriptionId
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useGetNextVendorDistributionsQuery__
+ *
+ * To run a query within a React component, call `useGetNextVendorDistributionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetNextVendorDistributionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetNextVendorDistributionsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useGetNextVendorDistributionsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>(GetNextVendorDistributionsDocument, options);
+      }
+export function useGetNextVendorDistributionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>(GetNextVendorDistributionsDocument, options);
+        }
+export type GetNextVendorDistributionsQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsQuery>;
+export type GetNextVendorDistributionsLazyQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsLazyQuery>;
+export type GetNextVendorDistributionsQueryResult = Apollo.QueryResult<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>;
+export const ClaimVendorDocument = gql`
+    mutation ClaimVendor($vendorId: Int!) {
+  claimVendor(vendorId: $vendorId)
+}
+    `;
+export type ClaimVendorMutationFn = Apollo.MutationFunction<ClaimVendorMutation, ClaimVendorMutationVariables>;
+
+/**
+ * __useClaimVendorMutation__
+ *
+ * To run a mutation, you first call `useClaimVendorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useClaimVendorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [claimVendorMutation, { data, loading, error }] = useClaimVendorMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useClaimVendorMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ClaimVendorMutation, ClaimVendorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ClaimVendorMutation, ClaimVendorMutationVariables>(ClaimVendorDocument, options);
+      }
+export type ClaimVendorMutationHookResult = ReturnType<typeof useClaimVendorMutation>;
+export type ClaimVendorMutationResult = Apollo.MutationResult<ClaimVendorMutation>;
+export type ClaimVendorMutationOptions = Apollo.BaseMutationOptions<ClaimVendorMutation, ClaimVendorMutationVariables>;
+export const ConsolidateVendorsDocument = gql`
+    mutation ConsolidateVendors($vendorId: Int!) {
+  consolidateVendors(vendorId: $vendorId)
+}
+    `;
+export type ConsolidateVendorsMutationFn = Apollo.MutationFunction<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>;
+
+/**
+ * __useConsolidateVendorsMutation__
+ *
+ * To run a mutation, you first call `useConsolidateVendorsMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useConsolidateVendorsMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [consolidateVendorsMutation, { data, loading, error }] = useConsolidateVendorsMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useConsolidateVendorsMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>(ConsolidateVendorsDocument, options);
+      }
+export type ConsolidateVendorsMutationHookResult = ReturnType<typeof useConsolidateVendorsMutation>;
+export type ConsolidateVendorsMutationResult = Apollo.MutationResult<ConsolidateVendorsMutation>;
+export type ConsolidateVendorsMutationOptions = Apollo.BaseMutationOptions<ConsolidateVendorsMutation, ConsolidateVendorsMutationVariables>;
+export const GetVendorProfessionsDocument = gql`
+    query GetVendorProfessions {
+  getVendorProfessions {
+    id
+    name
+  }
+}
+    `;
+
+/**
+ * __useGetVendorProfessionsQuery__
+ *
+ * To run a query within a React component, call `useGetVendorProfessionsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVendorProfessionsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVendorProfessionsQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useGetVendorProfessionsQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>(GetVendorProfessionsDocument, options);
+      }
+export function useGetVendorProfessionsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>(GetVendorProfessionsDocument, options);
+        }
+export type GetVendorProfessionsQueryHookResult = ReturnType<typeof useGetVendorProfessionsQuery>;
+export type GetVendorProfessionsLazyQueryHookResult = ReturnType<typeof useGetVendorProfessionsLazyQuery>;
+export type GetVendorProfessionsQueryResult = Apollo.QueryResult<GetVendorProfessionsQuery, GetVendorProfessionsQueryVariables>;
+export const UpdateVendorDocument = gql`
+    mutation UpdateVendor($vendorId: Int!, $name: String!, $email: String!, $showEmail: Boolean, $city: String!, $zipCode: String!, $address1: String, $address2: String, $phone: String, $showPhone: Boolean, $linkText: String, $desc: String, $linkUrl: String, $country: String, $longDesc: String, $companyNumber: String!, $profession: Int, $production2: Int, $production3: Int, $peopleName: String, $lat: Float, $lng: Float) {
+  updateVendor(
+    vendorId: $vendorId
+    name: $name
+    email: $email
+    showEmail: $showEmail
+    city: $city
+    zipCode: $zipCode
+    address1: $address1
+    address2: $address2
+    phone: $phone
+    showPhone: $showPhone
+    linkText: $linkText
+    desc: $desc
+    linkUrl: $linkUrl
+    country: $country
+    longDesc: $longDesc
+    companyNumber: $companyNumber
+    profession: $profession
+    production2: $production2
+    production3: $production3
+    peopleName: $peopleName
+    lat: $lat
+    lng: $lng
+  ) {
+    id
+    name
+    email
+    city
+    address1
+    address2
+    zipCode
+    phone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}
+    `;
+export type UpdateVendorMutationFn = Apollo.MutationFunction<UpdateVendorMutation, UpdateVendorMutationVariables>;
+
+/**
+ * __useUpdateVendorMutation__
+ *
+ * To run a mutation, you first call `useUpdateVendorMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateVendorMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateVendorMutation, { data, loading, error }] = useUpdateVendorMutation({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *      name: // value for 'name'
+ *      email: // value for 'email'
+ *      showEmail: // value for 'showEmail'
+ *      city: // value for 'city'
+ *      zipCode: // value for 'zipCode'
+ *      address1: // value for 'address1'
+ *      address2: // value for 'address2'
+ *      phone: // value for 'phone'
+ *      showPhone: // value for 'showPhone'
+ *      linkText: // value for 'linkText'
+ *      desc: // value for 'desc'
+ *      linkUrl: // value for 'linkUrl'
+ *      country: // value for 'country'
+ *      longDesc: // value for 'longDesc'
+ *      companyNumber: // value for 'companyNumber'
+ *      profession: // value for 'profession'
+ *      production2: // value for 'production2'
+ *      production3: // value for 'production3'
+ *      peopleName: // value for 'peopleName'
+ *      lat: // value for 'lat'
+ *      lng: // value for 'lng'
+ *   },
+ * });
+ */
+export function useUpdateVendorMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateVendorMutation, UpdateVendorMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useMutation<UpdateVendorMutation, UpdateVendorMutationVariables>(UpdateVendorDocument, options);
+      }
+export type UpdateVendorMutationHookResult = ReturnType<typeof useUpdateVendorMutation>;
+export type UpdateVendorMutationResult = Apollo.MutationResult<UpdateVendorMutation>;
+export type UpdateVendorMutationOptions = Apollo.BaseMutationOptions<UpdateVendorMutation, UpdateVendorMutationVariables>;

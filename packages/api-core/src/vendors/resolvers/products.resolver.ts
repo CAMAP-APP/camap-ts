@@ -1,5 +1,5 @@
 import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common';
-import { Args, Float, Int, Mutation, Parent, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Float, Int, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
@@ -18,6 +18,8 @@ import { ProductsService } from '../services/products.service';
 import { Product } from '../types/product.type';
 import { StockTracking } from '../product.interface';
 import DataLoader = require('dataloader');
+import { GroupsService } from 'src/groups/services/groups.service';
+const metriclcs = require("metric-lcs");
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => Product)
@@ -27,7 +29,7 @@ export class ProductsResolver {
     private readonly filesService: FilesService,
     private readonly catalogsService: CatalogsService,
     private readonly userGroupsService: UserGroupsService,
-    private readonly catalogService: CatalogsService,
+    private readonly groupsService: GroupsService,
   ) {}
 
   /**
@@ -109,6 +111,11 @@ export class ProductsResolver {
     return parent.price + catalogFees;
   }
 
+  @ResolveField(() => String)
+  async currency(@Parent() parent: ProductEntity): Promise<string> {
+    return (await (await this.catalogsService.findOneById(parent.catalogId)).group).currencyCode;
+  }
+
   @ResolveField(() => Int)
   async vendorId(
     @Parent() parent: Product,
@@ -169,6 +176,27 @@ export class ProductsResolver {
     return 0;
   }
 
+  @Query(() => [Product])
+  async vendorProductsSample(
+    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+  ) {
+    const catalogs = await this.catalogsService.findByVendor(vendorId);
+
+    // filter products accross catalogs by proximity of name and price
+    const products: ProductEntity[] = [];
+    for(const cat of catalogs){
+      (await cat.products).forEach(p => {
+        if(!products.some(existingP => this.proximateProducts(existingP, p)))
+          products.push(p);
+      })
+    }
+
+    return products;
+  }
+  private proximateProducts(p1:ProductEntity, p2: ProductEntity): boolean {
+    return metriclcs(p1.name, p2.name) > .75;
+  }
+
   /**
    * HELPERS
    */
@@ -177,7 +205,7 @@ export class ProductsResolver {
     catalogId: number,
     productId: number,
   ) {
-    const catalog = await this.catalogService.findOneById(catalogId);
+    const catalog = await this.catalogsService.findOneById(catalogId);
     if (!catalog)
       throw new NotFoundException(
         `Catalog ${catalogId} does not exist for product ${productId}`,

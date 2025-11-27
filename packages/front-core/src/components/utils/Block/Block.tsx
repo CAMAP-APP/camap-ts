@@ -1,5 +1,6 @@
 import {
   Card,
+  CardActionArea,
   CardContent,
   CardHeader,
   CardProps,
@@ -16,6 +17,7 @@ interface BlockProps {
   headerSx?: SxProps<Theme>;
   contentSx?: SxProps<Theme>;
   headerAction?: React.ReactNode;
+  onClick?: () => void;
 }
 
 function Block({
@@ -27,6 +29,7 @@ function Block({
   children,
   elevation,
   headerAction,
+  onClick
 }: PropsWithChildren<BlockProps> & Pick<CardProps, 'elevation'>) {
   return (
     <Card sx={sx} elevation={elevation}>
@@ -47,7 +50,10 @@ function Block({
           action={headerAction}
         />
       )}
-      <CardContent sx={contentSx}>{children}</CardContent>
+      {onClick && <CardActionArea onClick={onClick}>
+        <CardContent sx={contentSx}>{children}</CardContent>
+      </CardActionArea>}
+      {!onClick && <CardContent sx={contentSx}>{children}</CardContent>}
     </Card>
   );
 }

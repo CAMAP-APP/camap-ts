@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { formatUserList } from '../../../utils/fomat';
 import { MembersContext } from '../MembersContext';
 

@@ -51,7 +51,6 @@ export const themeOptions: ThemeOptions = {
     },
     MuiButton: {
       styleOverrides: {
-        // Overrides Bootstrap
         contained: {
           '&:hover': {
             color: '#FFF',
@@ -64,10 +63,10 @@ export const themeOptions: ThemeOptions = {
         },
         outlinedPrimary: {
           '&:hover': {
-            color: palette.primary!.main,
+            color: palette.primary.main,
           },
           '&:focus': {
-            color: palette.primary!.main,
+            color: palette.primary.main,
             outline: 0,
             textDecoration: 'none',
           },

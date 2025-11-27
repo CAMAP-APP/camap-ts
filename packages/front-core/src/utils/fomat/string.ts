@@ -15,7 +15,7 @@ const entitiesToCharMap = {
 
 export const entityToChar = (string: string): string => {
   let convertedString = string;
-  Object.keys(entitiesToCharMap).forEach((entity) => {
+  (Object.keys(entitiesToCharMap) as (keyof typeof entitiesToCharMap)[]).forEach((entity) => {
     if (convertedString.includes(entity)) {
       convertedString = convertedString.replace(new RegExp(entity, 'g'), entitiesToCharMap[entity]);
     }

@@ -47,7 +47,7 @@ import { BufferedJsonMailEntity } from './models/buffered-json-mail.entity';
       inject: [ConfigService],
     }),
     forwardRef(() => UsersModule),
-    ToolsModule,
+    forwardRef(() => ToolsModule),
   ],
   providers: [MailsService],
   controllers: [MailBridgeController, MailsController],

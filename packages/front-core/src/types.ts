@@ -11,6 +11,10 @@ declare global {
       addTmpBasketIdToSession: (tmpBasketId?: number) => void;
       resetGroupInSession: (deletedGroupId?: number) => void;
       theme: Theme;
+      userId?: number;
+      userName?: string;
+      userEmail?: string;
+      version: string;
     };
     // GTM data layer
     dataLayer: any[];

@@ -19,6 +19,7 @@ import { ProductsService } from '../../vendors/services/products.service';
 import { GroupEntity } from '../entities/group.entity';
 import { UserGroupEntity } from '../entities/user-group.entity';
 import { userSortCompare } from 'camap-common';
+import { CatalogsService } from 'src/vendors/services/catalogs.service';
 
 export enum UserRight {
   groupAdmin = 'GroupAdmin',
@@ -36,6 +37,8 @@ export class UserGroupsService {
     private readonly usersService: UsersService,
     private readonly productsService: ProductsService,
     private readonly ordersService: OrdersService,
+    @Inject(forwardRef(() => CatalogsService))
+    private readonly catalogsService: CatalogsService,
   ) { }
 
   get(
@@ -124,10 +127,17 @@ export class UserGroupsService {
 
   async canManageCatalog(
     user: UserEntity,
-    catalog: CatalogEntity,
+    catalogOrId: CatalogEntity | number,
   ): Promise<boolean> {
+
+    const catalog = typeof catalogOrId === 'number' ? await this.catalogsService.findOneById(catalogOrId) : catalogOrId;
+
     // super-admin
     if (user.rights === 1) return true;
+
+    // claimed vendor
+    if((await catalog.vendor).userId === user.id)
+      return true;
 
     const ug = await this.get(user, catalog.groupId);
     if (!ug || !ug.rights) return false;

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, FindConditions, Repository } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { checkDeleted } from '../common/utils';
 import { EntityFileEntity } from './models/entity-file.entity';
 
 @Injectable()
@@ -27,6 +28,19 @@ export class EntityFileService {
   }
 
   /**
+		Get all documents linked to an entity
+	* */
+  getAllByEntity(id: number, type: string, documentType?: string) {
+    const findConditions: FindConditions<EntityFileEntity> = {
+      entityId: id,
+      entityType: type,
+    };
+    if (documentType) findConditions.documentType = documentType;
+
+    return this.entityfileRepo.find({ where: findConditions, relations: ['file'] });
+  }
+
+  /**
 		Get vendors portrait
 	* */
   async findVendorsPortrait(
@@ -43,25 +57,42 @@ export class EntityFileService {
 
   async findVendorImages(
     vendorId: number,
-  ): Promise<Pick<EntityFileEntity, 'fileId' | 'entityId' | 'documentType'>[]> {
+  ): Promise<EntityFileEntity[]> {
     return this.entityfileRepo
-      .createQueryBuilder('e')
-      .select(['fileId', 'entityId, documentType'])
-      .where(
-        `e.entityId = ${vendorId} AND e.entityType = 'vendor' 
-        AND (e.documentType = 'portrait' 
-          OR e.documentType = 'banner' 
-          OR e.documentType = 'logo' 
-          OR e.documentType = 'farm1' 
-          OR e.documentType = 'farm2' 
-          OR e.documentType = 'farm3'
-          OR e.documentType = 'farm4')`,
-      )
-      .getRawMany<Pick<EntityFileEntity, 'fileId' | 'entityId' | 'documentType'>>();
+      .find({
+        where: {
+          entityId: vendorId,
+          entityType: 'vendor',
+          documentType: 'media'
+        },
+        relations: ['file']
+      });
   }
 
   @Transactional()
   async updateOrCreate(entityFile: DeepPartial<EntityFileEntity>) {
     return this.entityfileRepo.save(entityFile);
+  }
+
+  async findOne(id: number) {
+    return this.entityfileRepo.findOne(id);
+  }
+
+  @Transactional()
+  async delete(id: number) {
+    const result = await this.entityfileRepo.delete({ id });
+    return checkDeleted(result) ? id : null;
+  }
+
+  async findByFileId(fileId: number, excludeId?: number) {
+    const query = this.entityfileRepo
+      .createQueryBuilder('ef')
+      .where('ef.fileId = :fileId', { fileId });
+    
+    if (excludeId) {
+      query.andWhere('ef.id != :excludeId', { excludeId });
+    }
+    
+    return query.getMany();
   }
 }

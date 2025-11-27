@@ -7,7 +7,7 @@ import { isUrl } from '@utils/url';
 import { Transforms } from 'slate';
 import FormatTypes, {
   CustomEditor,
-  CustomSlateElement,
+  CustomElement,
   CustomSlateImageElement,
 } from '../TextEditorFormatType';
 import IMAGE_EXTENSIONS from './ImageExtensions';
@@ -45,7 +45,7 @@ export const withImages = (
   };
 
   e.insertFragment = (fragment) => {
-    fragment.forEach((node: Node) => {
+    fragment.forEach((node) => {
       if (
         (node as CustomElement).type === FormatTypes.image &&
         !isUrl((node as CustomSlateImageElement).imageSource)

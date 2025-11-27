@@ -14,7 +14,7 @@ import { DateRange } from 'camap-common';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import React from 'react';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import Month from '../../calendar/components/Month';
 import {

@@ -8,7 +8,7 @@ import { withScalars } from 'apollo-link-scalars';
 import { createUploadLink } from 'apollo-upload-client';
 import { URL_CUSTOM_HEADER } from 'camap-common';
 import { formatISO9075 } from 'date-fns';
-import { buildClientSchema, IntrospectionQuery } from 'graphql';
+import { buildClientSchema, GraphQLScalarSerializer, GraphQLScalarValueParser, IntrospectionQuery } from 'graphql';
 import 'isomorphic-unfetch';
 import { inMemoryCacheConfig } from '../config/apollo.config';
 import introspection from '../gql/introspection.json';
@@ -18,15 +18,15 @@ let globalApolloClient: ApolloClient<NormalizedCacheObject> | null = null;
 
 const typesMap = {
   DateTime: {
-    serialize: (parsed: Date | string) => {
+    serialize: ((parsed: Date | string) => {
       if (typeof parsed === 'string') {
         return parsed;
       }
       return formatISO9075(parsed);
-    },
-    parseValue: (raw: string | number | null): Date | null => {
+    }) as GraphQLScalarSerializer<any>,
+    parseValue: ((raw: string | number | null): Date | null => {
       return raw ? new Date(raw) : null;
-    },
+    }) as GraphQLScalarValueParser<any>,
   },
 };
 
@@ -47,11 +47,20 @@ function createApolloClient(
   initialState: NormalizedCacheObject = {},
   options: { fetchOptions?: RequestInit; uri?: string } = {},
 ) {
+  const headers = options.fetchOptions?.headers;
+  const fetchOptions = {
+    ...options.fetchOptions,
+    headers: Array.isArray(headers)
+      ? Object.fromEntries(headers)
+      : headers instanceof Headers
+      ? Object.fromEntries(headers.entries())
+      : headers
+  };
   const httpLink = createUploadLink({
     // ⚠ process.env.FRONT_GRAPHQL_URL est résolu au build. On veut du runtime:
     uri: options.uri || getGraphqlUrl(),
     credentials: 'include',
-    ...(options && options.fetchOptions ? options.fetchOptions : {}),
+    ...fetchOptions,
   });
 
   const schema = buildClientSchema(

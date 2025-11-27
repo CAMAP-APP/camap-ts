@@ -1,5 +1,5 @@
 import { styled } from '@mui/material';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 
 type WithIsanimatedProp = {
   isanimated?: boolean;

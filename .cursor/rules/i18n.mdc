@@ -1,0 +1,10 @@
+---
+alwaysApply: true
+---
+
+- do not hard code strings
+- supply meaningful id for translated string
+- look for an existing string in `public/locales/translation.json` or any file already loaded in the current module
+- if no existing string add it to the most specific file already loaded
+- if no file already loaded and a relevant translation file exists for the module, use this file
+- if no relevant translation file exists create it and load it

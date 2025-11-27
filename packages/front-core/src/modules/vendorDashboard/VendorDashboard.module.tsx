@@ -1,0 +1,208 @@
+import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
+import CircularProgressBox from "@components/utils/CircularProgressBox";
+import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
+import { Alert, Button, Divider, Paper, Typography } from "@mui/material";
+import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import DashboardLayout from "layout/DashboardLayout";
+import { useState } from "react";
+import { reactRouterDefaultProps } from "react-router-config";
+import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { VendorImage } from "../../components/vendor/VendorImage";
+import { VendorClaims } from "./VendorClaims";
+import VendorConsolidation from "./VendorConsolidation";
+import VendorEditDocuments from "./VendorEditDocuments";
+import VendorForm from "./VendorForm";
+import VendorEditImages from "./VendorEditImages";
+import VendorDashDistributions from "./VendorDashDistributions";
+
+const MultipleVendorDashContent = ({
+    claimedVendors,
+    refetchClaimedVendors
+}: {
+    claimedVendors: GetVendorsByUserIdQuery["getVendorsByUserId"]
+    refetchClaimedVendors: () => void
+}) => {
+
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+    const [selectedVendor, setSelectedVendor] = useState<any>(null);
+
+    const handleVendorSelection = (vendorId: number) => {
+        const vendor = claimedVendors?.find(v => v.id === vendorId);
+        setSelectedVendor(vendor);
+    };
+
+    const handleCancelConsolidation = () => {
+        setSelectedVendor(null);
+    };
+
+    const handleConsolidationComplete = () => {
+        // Refetch the vendors list to show the updated state
+        refetchClaimedVendors();
+        setSelectedVendor(null);
+    };
+
+    return <>
+        <h4>{tVendorDash("multipleVendorProfiles")}</h4>
+        <p>{tVendorDash("chooseUniqueProfile")}</p>
+        <div className="row" style={{ justifyContent: "center", display: "flex" }}>
+            {claimedVendors?.map(vendor => <div className="col-md-4"
+                key={`vendor-${vendor.id}`}>
+                <div className="panel panel-default" style={{ marginBottom: "15px" }}>
+                    <div className="panel-body text-center">
+                        <div style={{ marginBottom: "10px" }}>
+                            <VendorImage vendor={vendor} />
+                        </div>
+                        
+                        <h4 style={{ margin: "10px 0 5px 0", fontSize: "16px", fontWeight: "bold" }}>
+                            {vendor.name}
+                        </h4>
+                        
+                        <div style={{ marginBottom: "8px" }}>
+                            <small className="text-muted">
+                                <i className="icon icon-file-text" style={{ marginRight: "5px" }} />
+                                {vendor.companyNumber ?? tVendorDash("unknownVatNumber")}
+                            </small>
+                        </div>
+                        
+                        <div style={{ marginBottom: "15px" }}>
+                            <small>
+                                <i className="icon icon-users" style={{ marginRight: "5px" }} />
+                                {[...new Set(vendor.activeCatalogs?.map(catalog => catalog.group.name))]
+                                    .filter(Boolean)
+                                    .join(", ") || tVendorDash("none")}
+                            </small>
+                        </div>
+                        
+                        <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => handleVendorSelection(vendor.id)}
+                            style={{ width: "100%" }}
+                        >
+                            <i className="icon icon-check" style={{ marginRight: "5px" }} />
+                            {tVendorDash("chooseThisProfile")}
+                        </button>
+                    </div>
+                </div>
+            </div>)}
+        </div>
+
+        <VendorConsolidation
+                    open={selectedVendor != null}
+                    onClose={handleCancelConsolidation}
+                    selectedVendor={selectedVendor}
+                    vendorsToConsolidate={claimedVendors}
+                    onConsolidationComplete={handleConsolidationComplete}
+                />
+    </>
+}
+
+const VendorDashContent = ({
+    vendor,
+    refetchClaimedVendors
+}: {
+    vendor: GetVendorsByUserIdQuery["getVendorsByUserId"][number]
+    refetchClaimedVendors: () => void
+}) => {
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+    return <>
+        <Typography variant="h2" gutterBottom>{tVendorDash("welcome")}</Typography>
+        <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+        <Divider sx={{ mt:2, mb: 2 }} />
+        <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
+    </>
+}
+
+const VendorDashboardRouter = (props: {basePath: string}) => {
+
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+    const {
+        data: userData,
+        loading: userLoading,
+        error: userError,
+    } = useUserAccountQuery();
+
+    // Check if user has claimed vendors (using minimal query)
+    const {
+        data: { getVendorsByUserId: claimedVendors } = {},
+        loading: claimedVendorsLoading,
+        error: claimedVendorsError,
+        refetch: refetchClaimedVendors,
+    } = useGetVendorsByUserIdQuery({
+        variables: { userId: userData?.me?.id || -1 },
+        skip: !userData?.me?.id,
+    });
+
+    if (userLoading || claimedVendorsLoading) {
+        return <CircularProgressBox />;
+    }
+
+    if (userError || claimedVendorsError) {
+        return <Alert severity="error">
+            {(userError || claimedVendorsError)?.message}
+        </Alert>;
+    }
+
+    if(claimedVendors?.length !== 1)
+        return <Paper>
+            <div className="row">
+                <div className="col-md-12">
+                    {!claimedVendors || claimedVendors?.length < 1 && <h4>{tVendorDash("noVendorProfiles")}</h4>}
+                    {claimedVendors && claimedVendors?.length > 1 && <MultipleVendorDashContent
+                            claimedVendors={claimedVendors}
+                            refetchClaimedVendors={refetchClaimedVendors} />}
+                </div>
+            </div>
+            <div className="row">
+                <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
+            </div>
+        </Paper>
+
+    const vendor = claimedVendors[0];
+
+    const nav = [
+        {
+            label: tVendorDash('vendorDashboardProfile'),
+            icon: <CamapIcon id={CamapIconId.user} />,
+            path: '/edit',
+            element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
+        },
+        {
+            label: tVendorDash('vendorDashboardDocuments'),
+            icon: <CamapIcon id={CamapIconId.file} />,
+            path: '/documents',
+            element: <VendorEditDocuments vendorId={vendor.id} />
+        },
+        {
+            label: tVendorDash('vendorDashboardImages'),
+            icon: <CamapIcon id={CamapIconId.image} />,
+            path: '/images',
+            element: <VendorEditImages vendorId={vendor.id} />
+        },
+        {
+            label: tVendorDash('vendorDashboardDistributions'),
+            icon: <CamapIcon id={CamapIconId.delivery} />,
+            path: '/distributions',
+            element: <VendorDashDistributions vendorId={vendor.id} />
+        }
+    ]
+
+    return <BrowserRouter {...reactRouterDefaultProps} basename={props.basePath} >
+        <Routes>
+            <Route element={
+                <DashboardLayout
+                    navigation={nav}
+                    home={{
+                        label: tVendorDash('vendorDashboardHome', { vendorName: vendor.name }),
+                        icon: <CamapIcon id={CamapIconId.farmer} />,
+                        path: '/'
+                    }}
+                />
+            }>
+                <Route path="/" element={<VendorDashContent vendor={vendor} refetchClaimedVendors={refetchClaimedVendors} />} />
+                {nav.map(({ element, path }) => <Route key={path} element={element} path={path} />)}
+            </Route>
+        </Routes>
+    </BrowserRouter>
+}
+
+export default VendorDashboardRouter;

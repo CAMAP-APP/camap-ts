@@ -1,0 +1,11 @@
+# GraphQL Rules
+
+- never modify `api-core/src/schema.gql` directly
+
+## Code Generation
+- Frontend API and hooks are auto-generated with `npm run gen:gql`
+- **Always run codegen after GraphQL changes**
+
+## Module Organization
+- Module-specific queries go in separate `.gql` files named after the module
+- Keep queries organized by feature/domain

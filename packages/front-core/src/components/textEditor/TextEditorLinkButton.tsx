@@ -64,8 +64,8 @@ const TextEditorLinkButton = () => {
   const { t } = useTranslation(['messages/default']);
   const editor = useSlate();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const [textInput, setTextInput] = React.useState<string>();
-  const [urlInput, setUrlInput] = React.useState<string>();
+  const [textInput, setTextInput] = React.useState<string>('');
+  const [urlInput, setUrlInput] = React.useState<string>('');
   const [selection, setSelection] = React.useState<Range | null>(null);
   const [isActive, setIsActive] = React.useState(false);
 

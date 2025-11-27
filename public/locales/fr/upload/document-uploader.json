@@ -1,0 +1,7 @@
+{
+    "documentNameTitle": "Nom du document",
+    "documentVisibility": "Visibilité",
+    "dropZoneTitle": "Glissez-déposez un fichier PDF ici ou cliquez pour le sélectionner depuis votre disque",
+    "rejectionSize": "Le fichier dépasse la taille maximale: {{maxSize}}",
+    "rejectionFormat": "Format accepté: PDF uniquement"
+}

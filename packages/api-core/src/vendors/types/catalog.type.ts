@@ -1,9 +1,11 @@
 import { Field, Int, ObjectType, registerEnumType } from '@nestjs/graphql';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { CsaSubscriptionType } from '../../groups/types/csa-subscription.type';
 import { Group } from '../../groups/types/group.type';
 import { User } from '../../users/types/user.type';
 import { CatalogType } from '../catalog.interface';
 import { Product } from './product.type';
+import { Vendor } from './vendor.type';
 
 registerEnumType(CatalogType, { name: 'CatalogType' });
 
@@ -27,8 +29,8 @@ export class Catalog {
   @Field()
   endDate: Date;
 
-  @Field(() => Int)
-  vendorId: number;
+  @Field(() => Vendor)
+  vendor: Vendor;
 
   @Field(() => User, { nullable: true })
   user?: User;
@@ -41,4 +43,10 @@ export class Catalog {
 
   @Field(() => [CsaSubscriptionType])
   subscriptions: CsaSubscriptionType[];
+
+  @Field(() => Int)
+  subscriptionsCount: number;
+
+  @Field(() => [EntityFile])
+  documents: EntityFile[];
 }

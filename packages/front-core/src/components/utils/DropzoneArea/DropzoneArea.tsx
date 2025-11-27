@@ -2,7 +2,7 @@ import { CloudUpload } from '@mui/icons-material';
 import { Alert, Box, Typography } from '@mui/material';
 import * as React from 'react';
 import Dropzone, { DropEvent, FileRejection } from 'react-dropzone';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import PreviewList from './PreviewList';
 
 export type FileObjectType = {
@@ -88,7 +88,7 @@ const DropzoneArea = ({
 
   React.useEffect(() => {
     onChange(fileObjects.map((fileObject) => fileObject.file));
-  }, [fileObjects]);
+  }, [fileObjects, onChange]);
 
   const handleDropAccepted = async (acceptedFiles: File[], _: DropEvent) => {
     // Retrieve fileObjects data
@@ -132,7 +132,7 @@ const DropzoneArea = ({
   const previewsInDropzoneVisible = fileObjects.length > 0;
 
   return (
-    <>
+    <Box m={1}>
       {rejectedFiles &&
         rejectedFiles.length > 0 &&
         rejectedFiles.map((rejectedFile) => (
@@ -200,7 +200,7 @@ const DropzoneArea = ({
               <Typography
                 variant="h5"
                 component="p"
-                sx={{ mb: 3, mt: 3, fontSize: '1.5rem' }}
+                sx={{ m: 1, mb: 3, mt: 3, fontSize: '1.5rem' }}
               >
                 {dropzoneText}
               </Typography>
@@ -222,7 +222,7 @@ const DropzoneArea = ({
           </div>
         )}
       </Dropzone>
-    </>
+    </Box>
   );
 };
 

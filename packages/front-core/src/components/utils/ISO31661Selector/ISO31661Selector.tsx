@@ -5,7 +5,7 @@ import Autocomplete, {
   AutocompleteProps,
   AutocompleteRenderInputParams,
 } from '@mui/material/Autocomplete';
-import React from 'react';
+import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeCfg } from '../../../lib/runtimeCfg';
 
@@ -20,7 +20,7 @@ export interface ISO_3166_1 {
 
 export type ResultFormat = 'full-iso' | keyof ISO_3166_1;
 
-type P = AutocompleteProps<ISO_3166_1, undefined, undefined, undefined>;
+type P = AutocompleteProps<ISO_3166_1, false, false, false>;
 
 export interface ISO31661SelectorProps {
   defaultValue?: ISO_3166_1 | number | string;
@@ -80,19 +80,19 @@ const ISO31661Selector = ({
 
   /** */
   const onAutocompleteChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    v: ISO_3166_1 | null,
+    e: React.SyntheticEvent<Element, Event>,
+    value: ISO_3166_1 | null,
   ) => {
-    if (!v) {
-      onChange(null, e);
+    if (!value) {
+      onChange(null, e as ChangeEvent<HTMLInputElement>);
       return;
     }
     if (format === 'full-iso') {
-      onChange(v, e);
+      onChange(value, e as ChangeEvent<HTMLInputElement>);
       return;
     }
     // @ts-ignore
-    onChange(v[format], e);
+     onChange((value as any)[format], e as ChangeEvent<HTMLInputElement>);
   };
 
   /** */
@@ -113,7 +113,7 @@ const ISO31661Selector = ({
         setData(d);
       } catch (err: any) {
         if (!active) return;
-        setError(t('error', { message: err.message }));
+        setError(t('error', { message: (err instanceof Error) ? err.message : err }));
       } finally {
         if (active) {
           toggleLoading(false);
@@ -191,7 +191,7 @@ const ISO31661Selector = ({
       </Box>
     );
   return (
-    <Autocomplete
+    <Autocomplete<ISO_3166_1>
       {...autocompleteProps}
       value={getValue(value)}
       defaultValue={getValue(defaultValue)}

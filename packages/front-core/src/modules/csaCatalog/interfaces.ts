@@ -6,6 +6,7 @@ export const restCsaCatalogTypeToType = (type: 0 | 1): CatalogType => {
 };
 
 interface RestCsaCatalogDocument {
+  id: number;
   name: string;
   url: string;
 }

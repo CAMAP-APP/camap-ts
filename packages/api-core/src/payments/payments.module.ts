@@ -24,11 +24,11 @@ import { CsaSubscriptionEntity } from '../groups/entities/csa-subscription.entit
     TypeOrmModule.forFeature([OperationEntity, UserOrderEntity, BasketEntity, CsaSubscriptionEntity]),
     ConfigModule,
     HttpModule,
-    MailsModule,
-    ToolsModule,
+    forwardRef(() => MailsModule),
     forwardRef(() => GroupsModule),
     forwardRef(() => ShopModule),
     forwardRef(() => UsersModule),
+    forwardRef(() => ToolsModule),
   ],
   providers: [
     PaymentsService,

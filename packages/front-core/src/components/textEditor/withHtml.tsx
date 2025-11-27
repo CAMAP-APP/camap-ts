@@ -73,23 +73,23 @@ const deserialize = (
 
   if (children.length && children[0] !== null && (children[0] as Element).type === FormatTypes.image) return children;
 
-  if (ELEMENT_TAGS[nodeName]) {
-    let attrs = ELEMENT_TAGS[nodeName](el);
+  if (nodeName in ELEMENT_TAGS) {
+    let attrs = ELEMENT_TAGS[nodeName as keyof typeof ELEMENT_TAGS](el);
     const style = el.getAttribute('style');
     if (style?.includes('text-align: center') || style?.includes('text-align:center')) {
-      attrs = { ...attrs, types: [...attrs.types, FormatTypes.alignCenter] };
+      attrs = { ...attrs, types: [...(('types' in attrs) && attrs.types || []), FormatTypes.alignCenter] };
     } else if (style?.includes('text-align: right') || style?.includes('text-align:right')) {
-      attrs = { ...attrs, types: [...attrs.types, FormatTypes.alignRight] };
+      attrs = { ...attrs, types: [...(('types' in attrs) && attrs.types || []), FormatTypes.alignRight] };
     } else {
       // We might find an align attribute with Libre Office
       const alignAttribute = el.getAttribute('align');
       if (alignAttribute === 'center') {
-        attrs = { ...attrs, types: [...attrs.types, FormatTypes.alignCenter] };
+        attrs = { ...attrs, types: [...(('types' in attrs) && attrs.types || []), FormatTypes.alignCenter] };
       } else if (alignAttribute === 'right') {
-        attrs = { ...attrs, types: [...attrs.types, FormatTypes.alignRight] };
+        attrs = { ...attrs, types: [...(('types' in attrs) && attrs.types || []), FormatTypes.alignRight] };
       }
     }
-    if (attrs.types && attrs.types.length > 1 && attrs.types.includes(FormatTypes.paragraph)) {
+    if (('types' in attrs) && attrs.types && attrs.types.length > 1 && attrs.types.includes(FormatTypes.paragraph)) {
       attrs.types.splice(attrs.types.indexOf(FormatTypes.paragraph), 1);
     }
     if (sourceDocumentType === 'libre-office' && nodeName === 'LI') {
@@ -115,10 +115,10 @@ const deserialize = (
     return jsx('element', attrs, children);
   }
 
-  if (TEXT_TAGS[nodeName]) {
+  if (nodeName in TEXT_TAGS) {
     // B tag in Google Doc is omitted here because Google Docs uses `<b>` in weird ways.
     if (!(nodeName === 'B' && sourceDocumentType === 'google-doc')) {
-      const attrs = TEXT_TAGS[nodeName](el);
+      const attrs = TEXT_TAGS[nodeName as keyof typeof TEXT_TAGS]();
       return children.map((child) => {
         if (child && typeof child !== 'string' && 'type' in child && child.type !== 'text') {
           return child;

@@ -97,18 +97,15 @@ type Place {
   lng: Float
 }
 
-type CsaSubscriptionType {
+type EntityFile {
   id: Int!
-  startDate: DateTime!
-  endDate: DateTime!
-  userId: Int!
-  user: User!
-  catalogId: Int!
-  catalog: Catalog!
-  userId2: Int
-  user2: User
-  absentDistribIds: String
-  balance: Float!
+  entityType: String!
+  documentType: String!
+  entityId: Int!
+  fileId: Int!
+  visibility: String!
+  url: String!
+  name: String
 }
 
 type Product {
@@ -130,6 +127,7 @@ type Product {
   ref: String
   multiWeight: Boolean!
   active: Boolean!
+  currency: String!
   image: String!
   price: Float!
   vendorId: Int!
@@ -149,74 +147,10 @@ enum StockTrackingPerDistribution {
   PerPeriod
 }
 
-type Catalog {
-  id: Int!
-  name: String!
-  type: CatalogType!
-  groupId: Int!
-  startDate: DateTime!
-  endDate: DateTime!
-  vendorId: Int!
-  user: User
-  products: [Product!]!
-  group: Group!
-  subscriptions: [CsaSubscriptionType!]!
-  vendor: Vendor!
-}
-
-enum CatalogType {
-  TYPE_CONSTORDERS
-  TYPE_VARORDER
-}
-
-type VendorImages {
-  portrait: String
-  logo: String
-  banner: String
-  farm1: String
-  farm2: String
-  farm3: String
-  farm4: String
-}
-
-type Vendor {
-  id: Int!
-  name: String!
-  peopleName: String
-  email: String
-  phone: String
-  zipCode: String
-  city: String!
-  cdate: DateTime!
-  address1: String
-  address2: String
-  imageId: Int
-  linkUrl: String
-  linkText: String
-  desc: String
-  longDesc: String
-  images: VendorImages!
-  companyNumber: String
-  country: String
-  disabled: VendorDisabledReason
-  image: String
-  imageFile: File
-  portrait: String!
-  profession: String!
-  professionId: Int
-}
-
-enum VendorDisabledReason {
-  IncompleteLegalInfos
-  NotCompliantWithPolicy
-  Banned
-}
-
-type File {
-  id: Int!
-  name: String!
-  data: String!
-  cDate: DateTime
+type VendorImage {
+  id: Float!
+  name: String
+  url: String!
 }
 
 type MultiDistrib {
@@ -251,15 +185,93 @@ type Distribution {
   catalog: Catalog!
   orderEndDate: DateTime!
   orderStartDate: DateTime!
+  placeId: Int!
   place: Place!
   userOrders: [UserOrder!]!
   multiDistrib: MultiDistrib!
   end: DateTime!
 }
 
-type InitVendorPage {
+type VendorDistributions {
+  group: Group!
+  distributions: [Distribution!]!
+}
+
+type Vendor {
+  id: Int!
+  name: String!
+  peopleName: String
+  email: String
+  showEmail: Boolean!
+  phone: String
+  showPhone: Boolean!
+  zipCode: String
+  city: String!
+  cdate: DateTime!
+  address1: String
+  address2: String
+  imageId: Int
+  linkUrl: String
+  linkText: String
+  desc: String
+  longDesc: String
+  media: [VendorImage!]!
+  companyNumber: String
+  country: String
+  profession: Int
+  production2: Int
+  production3: Int
+  disabled: VendorDisabledReason
+  activeCatalogs: [Catalog!]!
+  allCatalogs: [Catalog!]!
+  documents: [EntityFile!]!
+  lat: Float
+  lng: Float
+  nextDistributions: [VendorDistributions!]!
+  image: String
+  imageFile: File
+  portrait: String!
+}
+
+enum VendorDisabledReason {
+  IncompleteLegalInfos
+  NotCompliantWithPolicy
+  Banned
+}
+
+type Catalog {
+  id: Int!
+  name: String!
+  type: CatalogType!
+  groupId: Int!
+  startDate: DateTime!
+  endDate: DateTime!
   vendor: Vendor!
-  nextDistributions: [Distribution!]!
+  user: User
+  products: [Product!]!
+  group: Group!
+  subscriptions: [CsaSubscriptionType!]!
+  subscriptionsCount: Int!
+  documents: [EntityFile!]!
+}
+
+enum CatalogType {
+  TYPE_CONSTORDERS
+  TYPE_VARORDER
+}
+
+type CsaSubscriptionType {
+  id: Int!
+  startDate: DateTime!
+  endDate: DateTime!
+  userId: Int!
+  user: User!
+  catalogId: Int!
+  catalog: Catalog!
+  userId2: Int
+  user2: User
+  absentDistribIds: String
+  balance: Float!
 }
 
 type AttendanceClassicContract {
@@ -347,6 +359,18 @@ type SubscriptionTotalOperationTypeData {
 
 type MembershipOperationTypeData {
   year: Int!
+}
+
+type File {
+  id: Int!
+  name: String
+  data: String!
+  cDate: DateTime
+}
+
+type VendorProfession {
+  id: Int!
+  name: String!
 }
 
 type InvitedUser {
@@ -506,6 +530,27 @@ type Query {
   canManageAllCatalogs(groupId: Int!): Boolean!
   getUsersFromEmails(emails: [String!]!): [User!]!
   getInvitedUserToRegister(email: String!): InvitedUser
+  distribution(id: Int!): Distribution!
+  multiDistribution(id: Int!): MultiDistrib!
+  multiDistribs(groupId: Int!, fromDate: DateTime!, toDate: DateTime!, nextMultiDistribIfEmpty: Boolean): [MultiDistrib!]!
+  distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
+  attendanceClassicContract(catalogId: Int!, startDate: DateTime, endDate: DateTime): AttendanceClassicContract!
+  attendanceVariableContract(catalogId: Int!, distributionId: Int!): AttendanceVariableContract!
+  distributionCycles(groupId: Int!): [DistributionCycle!]!
+  place(id: Int!): Place!
+  vendor(id: Int!): Vendor!
+  getVendorWithEmailCheck(vendorId: Int!): Vendor!
+  getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
+  getClaimableVendors: [Vendor!]!
+  getVendorsByUserId(userId: Int!): [Vendor!]!
+  getDefaultVendorByUserId(userId: Int!): Vendor!
+  hasVendorsByUserId(userId: Int!): Boolean!
+  getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
+  getVendorProfessions: [VendorProfession!]!
+  catalog(id: Int!): Catalog!
+  getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
+  getActiveCatalogs(groupId: Int!): [Catalog!]!
+  vendorProductsSample(vendorId: Int!): [Product!]!
   group(id: Int!): Group!
   groupPreview(id: Int!): GroupPreview!
   groupPreviews: [GroupPreview!]!
@@ -522,22 +567,6 @@ type Query {
   getDistributionsUserLists(groupId: Int!): [UserList!]!
   getUserListInGroupByListType(listType: String!, groupId: Int!, data: String): [User!]!
   userGroup(groupId: Int!, userId: Int!): UserGroup
-  place(id: Int!): Place!
-  vendor(id: Int!): Vendor!
-  getVendorWithEmailCheck(vendorId: Int!): Vendor!
-  getActiveVendorsFromGroup(groupId: Int!): [Vendor!]!
-  initVendorPage(vendorId: Int!): InitVendorPage!
-  getVendorsFromCompanyNumber(companyNumber: String!): [Vendor!]!
-  catalog(id: Int!): Catalog!
-  getOrderableCatalogsFromMultiDistrib(multiDistribId: Int!): [Catalog!]!
-  getActiveCatalogs(groupId: Int!): [Catalog!]!
-  distribution(id: Int!): Distribution!
-  multiDistribution(id: Int!): MultiDistrib!
-  multiDistribs(groupId: Int!, fromDate: DateTime!, toDate: DateTime!, nextMultiDistribIfEmpty: Boolean): [MultiDistrib!]!
-  distributedMultiDistribs(groupId: Int!): [MultiDistrib!]!
-  attendanceClassicContract(catalogId: Int!, startDate: DateTime, endDate: DateTime): AttendanceClassicContract!
-  attendanceVariableContract(catalogId: Int!, distributionId: Int!): AttendanceVariableContract!
-  distributionCycles(groupId: Int!): [DistributionCycle!]!
   isEmailRegistered(email: String!): Boolean!
   getMessagesForGroup(groupId: Int!): [Message!]!
   getUserMessagesForGroup(groupId: Int!): [Message!]!
@@ -549,8 +578,14 @@ type Mutation {
   updateUser(input: UpdateUserInput!): UpdateUserResult!
   updateUserNotifications(input: UpdateUserNotificationsInput!): User!
   deleteAccount(userId: Int!, password: String!): Int!
-  validateOperation(id: Int!, type: PaymentTypeId): Operation!
-  deleteOperation(id: Int!): Int
+  createDocument(entityType: String!, entityId: Int!, base64EncodedFile: String!, fileName: String!, name: String, visibility: String!): EntityFile!
+  deleteDocument(id: Int!): Int!
+  claimVendor(vendorId: Int!): Int!
+  consolidateVendors(vendorId: Int!): Boolean!
+  updateVendor(vendorId: Int!, name: String!, email: String!, city: String!, zipCode: String!, companyNumber: String!, address1: String, address2: String, phone: String, showPhone: Boolean! = true, showEmail: Boolean! = true, linkText: String, desc: String, linkUrl: String, country: String, longDesc: String, profession: Int, production2: Int, production3: Int, peopleName: String, lat: Float, lng: Float): Vendor!
+  setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
+  createVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): VendorImage!
+  setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
   quitGroup(groupId: Int!): UserGroup!
   quitGroupByControlKey(groupId: Int!, userId: Int!, controlKey: String!): UserGroup!
   setGroupImage(groupId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Group!
@@ -563,8 +598,8 @@ type Mutation {
   moveBackToWaitingList(userIds: [Int!]!, groupId: Int!, message: String!): MoveBackToWaitingListResponse!
   cancelRequest(userId: Int!, groupId: Int!): WaitingList!
   approveRequest(userId: Int!, groupId: Int!): UserGroup!
-  setVendorImage(vendorId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Vendor!
-  setProductImage(productId: Int!, base64EncodedImage: String!, mimeType: String!, fileName: String!, maxWidth: Int!): Product!
+  validateOperation(id: Int!, type: PaymentTypeId): Operation!
+  deleteOperation(id: Int!): Int
   login(input: LoginInput!): User!
   recordBadLogin: Int!
   register(input: RegisterInput!): User!

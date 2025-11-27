@@ -6,7 +6,7 @@ interface SubBlockProps {
   title?: string;
   sx?: SxProps;
   headerSx?: SxProps;
-  contentSx?: SxProps;
+  contentSx?: Partial<SxProps>;
 }
 
 function SubBlock({
@@ -38,7 +38,7 @@ function SubBlock({
           },
         },
         ...contentSx,
-      }}
+      } as SxProps<Theme>}
       sx={{
         border: 4,
         borderColor: (theme: Theme) => theme.palette.action.selected,

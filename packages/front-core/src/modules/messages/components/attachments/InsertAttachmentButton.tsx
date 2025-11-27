@@ -15,7 +15,7 @@ const InsertAttachmentButton = () => {
     attachmentInput.current.click();
   };
 
-  const onMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+  const onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     setIsActive(true);
     openUploadAttachmentInput();

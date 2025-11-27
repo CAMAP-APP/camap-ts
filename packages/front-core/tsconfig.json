@@ -30,6 +30,6 @@
       "@theme/*": ["theme/*"]
     }
   },
-  "exclude": ["node_modules"],
+  "exclude": ["node_modules", "src/**/*.spec.tsx", "src/**/*.stories.tsx"],
   "include": ["src/**/*.ts", "src/**/*.tsx", "jest.config.js"]
 }

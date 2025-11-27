@@ -14,7 +14,7 @@ const DateTimePicker = ({
   textFieldProps?: MuiTextFieldProps;
 }) => {
   const OpenablePicker = React.useMemo(
-    () => withOpenablePicker(MuiDateTimePicker),
+    () => withOpenablePicker(MuiDateTimePicker as any), //TODO update mui, this is old and already not well typed
     [],
   );
 

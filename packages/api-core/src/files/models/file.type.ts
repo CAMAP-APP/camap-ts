@@ -5,8 +5,8 @@ export class File {
   @Field(() => Int)
   id: number;
 
-  @Field()
-  name: string;
+  @Field({ nullable: true })
+  name?: string;
 
   @Field()
   data: string;

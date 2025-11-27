@@ -24,6 +24,9 @@ export class Distribution {
   @Field(() => Date)
   orderStartDate: Date;
 
+  @Field(() => Int)
+  placeId: number;
+
   @Field()
   place: Place;
 

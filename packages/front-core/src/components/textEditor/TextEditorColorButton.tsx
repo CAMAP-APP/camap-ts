@@ -5,7 +5,7 @@ import { useTheme } from '@mui/material/styles';
 import React from 'react';
 import { Editor } from 'slate';
 import { useSlate } from 'slate-react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { TextEditorComponents } from './TextEditorComponents';
 
 const TextEditorColorButton = () => {
@@ -37,7 +37,7 @@ const TextEditorColorButton = () => {
   const isMarkActive = (color: string) => {
     try {
       const marks = Editor.marks(editor);
-      return marks ? marks[color] === true : false;
+      return (marks && color in marks) ? marks[color as keyof typeof marks] === true : false;
     } catch {
       return false;
     }

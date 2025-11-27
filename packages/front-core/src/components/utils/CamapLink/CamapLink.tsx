@@ -1,5 +1,5 @@
 import { alpha, Link, LinkProps } from '@mui/material';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 
 /**
    A MUI link with Camap's dark green color

@@ -18,7 +18,7 @@ import {
   getSlideItemSx,
   SlideDirection,
 } from '../../components/utils/Transitions/slide';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { formatAbsoluteDate } from '../../utils/fomat';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { goTo } from '../../utils/url';
@@ -97,7 +97,7 @@ const VolunteersCalendar = ({
     });
     if (isSameArray) {
       const news = { ...shouldDisableButton };
-      news[`${lastClickedButton}`] = true;
+      if(lastClickedButton) news[`${lastClickedButton}`] = true;
       setShouldDisableButton(news);
       return;
     }

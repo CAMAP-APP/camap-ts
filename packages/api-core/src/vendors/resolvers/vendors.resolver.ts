@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import {
   Args,
+  Float,
   Int,
   Mutation,
   Parent,
@@ -13,32 +14,28 @@ import {
   ResolveField,
   Resolver,
 } from '@nestjs/graphql';
-import { isAfter } from 'date-fns';
+import { GroupEntity } from 'src/groups/entities/group.entity';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
-import { IsAdmin } from '../../common/decorators/is-admin.decorator';
-import { BlackListGuard } from '../../common/guards/black-list.guard';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
-import { hasFlag } from '../../common/haxeCompat';
 import { compressImage } from '../../common/image';
 import { FilesService } from '../../files/file.service';
 import { File } from '../../files/models/file.type';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
-import { GroupFlags } from '../../groups/types/interfaces';
 import { DistributionEntity } from '../../shop/entities/distribution.entity';
 import { DistributionsService } from '../../shop/services/distributions.service';
 import { EntityFileService } from '../../tools/entityFile.service';
 import { EntityFileEntity } from '../../tools/models/entity-file.entity';
-import { PermalinkEntity } from '../../tools/models/permalink.entity';
-import { VendorPagesLoader, VendorPortraitsLoader } from '../../tools/tools.loader';
+import { VendorPortraitsLoader } from '../../tools/tools.loader';
 import { UserEntity } from '../../users/models/user.entity';
 import { VendorDisabledReason, VendorEntity } from '../entities/vendor.entity';
 import { CatalogsService } from '../services/catalogs.service';
 import { VendorService } from '../services/vendor.service';
-import { InitVendorPage } from '../types/initVendorPage.type';
-import { Vendor } from '../types/vendor.type';
-import { VendorImages } from '../types/vendorImages.type';
+import { Catalog } from '../types/catalog.type';
+import { Vendor, VendorDistributions } from '../types/vendor.type';
+import { VendorImage } from '../types/vendorImages.type';
+import { VendorProfession } from '../types/vendorProfession.type';
 import DataLoader = require('dataloader');
 
 @Resolver(() => Vendor)
@@ -56,17 +53,12 @@ export class VendorsResolver {
   @UseGuards(GqlAuthGuard)
   @Query(() => Vendor)
   async vendor(
-    @Args({ name: 'id', type: () => Int }) vendorId: number,
-    @CurrentUser() user: UserEntity,
-    @IsAdmin() isAdmin: boolean,
+    @Args({ name: 'id', type: () => Int }) vendorId: number
   ) {
     const vendor = await this.vendorsService.findOne(vendorId);
     if (!vendor) {
       throw new NotFoundException();
     }
-    // if (!isAdmin && vendor.userId && vendor.userId !== user.id) {
-    //   throw new UnauthorizedException();
-    // }
     return vendor;
   }
 
@@ -98,43 +90,55 @@ export class VendorsResolver {
     return this.vendorsService.getFromCatalogs(activeCatalogs.map((c) => c.id));
   }
 
-  @UseGuards(BlackListGuard)
-  @Query(() => InitVendorPage)
-  async initVendorPage(
-    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Vendor])
+  async getClaimableVendors(
+    @CurrentUser() currentUser: UserEntity,
   ) {
-    const vendor = await this.vendorsService.findOne(vendorId);
-    if (!vendor) throw new NotFoundException();
+    return (await Promise.all([
+      this.vendorsService.getByEmail(currentUser.email),
+      this.vendorsService.getByEmail(currentUser.email2),
+    ])).flat().filter(v => v.userId == null);
+  }
 
-    let catalogs = await this.catalogsService.findByVendor(vendorId);
-    // Filter ended catalogs
-    catalogs = catalogs.filter((c) => isAfter(c.endDate, new Date()));
-    const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
-      catalogs.map((c) => c.id),
-    );
-    const groups = await Promise.all(catalogs.map((c) => c.group));
+  @UseGuards(GqlAuthGuard)
+  @Query(() => [Vendor])
+  async getVendorsByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    return this.vendorsService.find({ where: { userId } });
+  }
 
-    var nextDistributionsByGroupId = new Map<number, DistributionEntity>();
+  @UseGuards(GqlAuthGuard)
+  @Query(() => Vendor)
+  async getDefaultVendorByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    return (await this.vendorsService.find({ where: { userId }, take: 1 })).shift();
+  }
 
-    distribs.forEach((d) => {
-      const index = catalogs.findIndex((c) => c.id === d.catalogId);
-      if (index < 0) return;
-      const group = groups[index];
-
-      if (!hasFlag(GroupFlags.CamapNetwork, group.flags)) return;
-
-      const d2 = nextDistributionsByGroupId.get(group.id);
-      if (!d2) {
-        nextDistributionsByGroupId.set(group.id, d);
-      } else if (d2.date.getTime() > d.date.getTime()) {
-        nextDistributionsByGroupId.set(group.id, d);
-      }
-    });
-
-    return {
-      vendor,
-      nextDistributions: Array.from(nextDistributionsByGroupId.values()),
-    };
+  @UseGuards(GqlAuthGuard)
+  @Query(() => Boolean)
+  async hasVendorsByUserId(
+    @Args({ name: 'userId', type: () => Int }) userId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    // Only allow users to query their own vendors
+    if (currentUser.id !== userId) {
+      throw new UnauthorizedException();
+    }
+    const count = await this.vendorsService.find({ where: { userId }, take: 1 });
+    return count.length > 0;
   }
 
   @Query(() => [Vendor])
@@ -144,9 +148,135 @@ export class VendorsResolver {
     return this.vendorsService.getFromCompanyNumber(companyNumber);
   }
 
+  @Query(() => [VendorProfession])
+  async getVendorProfessions() {
+    return this.vendorsService.getVendorProfessions();
+  }
+
   /**
    * MUTATIONS
    */
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => Int)
+  async claimVendor(
+    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    return this.vendorsService.claim(currentUser.id, vendorId);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => Boolean)
+  async consolidateVendors(
+    @Args({ name: 'vendorId', type: () => Int }) vendorId: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    return this.vendorsService.consolidateVendors(vendorId, currentUser.id);
+  }
+
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => Vendor)
+  async updateVendor(
+    @CurrentUser() currentUser: UserEntity,
+    @Args({ name: 'vendorId', type: () => Int })
+    vendorId: number,
+    @Args({ name: 'name', type: () => String })
+    name: string,
+    @Args({ name: 'email', type: () => String })
+    email: string,
+    @Args({ name: 'city', type: () => String })
+    city: string,
+    @Args({ name: 'zipCode', type: () => String })
+    zipCode: string,
+    @Args({ name: 'companyNumber', type: () => String })
+    companyNumber: string,
+    @Args({ name: 'address1', type: () => String, nullable: true })
+    address1?: string,
+    @Args({ name: 'address2', type: () => String, nullable: true })
+    address2?: string,
+    @Args({ name: 'phone', type: () => String, nullable: true })
+    phone?: string,
+    @Args({ name: 'showPhone', type: () => Boolean, defaultValue: true })
+    showPhone?: boolean,
+    @Args({ name: 'showEmail', type: () => Boolean, defaultValue: true })
+    showEmail?: boolean,
+    @Args({ name: 'linkText', type: () => String, nullable: true })
+    linkText?: string,
+    @Args({ name: 'desc', type: () => String, nullable: true })
+    desc?: string,
+    @Args({ name: 'linkUrl', type: () => String, nullable: true })
+    linkUrl?: string,
+    @Args({ name: 'country', type: () => String, nullable: true })
+    country?: string,
+    @Args({ name: 'longDesc', type: () => String, nullable: true })
+    longDesc?: string,
+    @Args({ name: 'profession', type: () => Int, nullable: true })
+    profession?: number,
+    @Args({ name: 'production2', type: () => Int, nullable: true })
+    production2?: number,
+    @Args({ name: 'production3', type: () => Int, nullable: true })
+    production3?: number,
+    @Args({ name: 'peopleName', type: () => String, nullable: true })
+    peopleName?: string,
+    @Args({ name: 'lat', type: () => Float, nullable: true })
+    lat?: number,
+    @Args({ name: 'lng', type: () => Float, nullable: true })
+    lng?: number,
+  ) {
+    const vendor = await this.vendorsService.findOne(vendorId, true);
+    if (!vendor) throw new NotFoundException();
+
+    // Check if user can manage this vendor (either owns it or can manage its catalogs)
+    if (vendor.userId !== currentUser.id && !(await this.userIsAllowedToManageCatalogOfVendor(currentUser, vendor))) {
+      throw new ForbiddenException(`Current user cannot update vendor ${vendorId}.`);
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Validate description length
+    if (desc && desc.length > 1000) {
+      throw new Error('Description must be less than 1000 characters');
+    }
+
+    // Format link URL
+    let formattedLinkUrl = linkUrl;
+    if (linkUrl && !linkUrl.startsWith('http://') && !linkUrl.startsWith('https://')) {
+      formattedLinkUrl = 'http://' + linkUrl;
+    }
+
+    return this.vendorsService.update({
+      id: vendor.id,
+      name,
+      email,
+      showEmail,
+      city,
+      address1,
+      address2,
+      zipCode,
+      phone,
+      showPhone,
+      linkText,
+      desc,
+      linkUrl: formattedLinkUrl,
+      country,
+      longDesc,
+      companyNumber,
+      profession,
+      production2,
+      production3,
+      peopleName,
+      lat,
+      lng
+    });
+  }
+
   @UseGuards(GqlAuthGuard)
   @Transactional()
   @Mutation(() => Vendor)
@@ -194,6 +324,58 @@ export class VendorsResolver {
     });
   }
 
+  @UseGuards(GqlAuthGuard)
+  @Transactional()
+  @Mutation(() => VendorImage)
+  async createVendorImage(
+    @Args({ name: 'vendorId', type: () => Int })
+    vendorId: number,
+    @Args({ name: 'base64EncodedImage' })
+    base64EncodedImage: string,
+    @Args({ name: 'mimeType' })
+    mimeType: string,
+    @Args({ name: 'fileName' })
+    fileName: string,
+    @Args({ name: 'maxWidth', type: () => Int })
+    maxWidth: number,
+    @CurrentUser() currentUser: UserEntity,
+  ) {
+    const vendor = await this.vendorsService.findOne(vendorId, true);
+    if (!vendor) throw new NotFoundException();
+
+    if (!(await this.userIsAllowedToManageCatalogOfVendor(currentUser, vendor))) {
+      throw new ForbiddenException(`Current user cannot update vendor ${vendorId}.`);
+    }
+
+    const imageData = base64EncodedImage.substring(
+      `data:${mimeType};base64,`.length,
+    );
+    const compressedImage = await compressImage(
+      Buffer.from(imageData, 'base64'),
+      mimeType,
+      maxWidth,
+    );
+
+    const newImage = await this.filesService.createFromBytes(
+      compressedImage,
+      fileName,
+    );
+
+    const ef = await this.entityFilesService.updateOrCreate({
+      entityType: 'vendor',
+      entityId: vendorId,
+      documentType: "media",
+      data: "public",
+      file: newImage
+    });
+
+    return {
+      id: ef.id,
+      name: newImage.name,
+      url: this.filesService.getUrl(newImage.id)
+    };
+  }
+
   /**
    * RESOLVE FIELDS
    */
@@ -223,53 +405,104 @@ export class VendorsResolver {
     return this.filesService.getUrl(portrait.fileId);
   }
 
-  @ResolveField(() => VendorImages)
-  async images(@Parent() parent: Vendor): Promise<VendorImages> {
-    const entityFiles = await this.entityFilesService.findVendorImages(parent.id);
-    const images: VendorImages = {};
-    for (const image of entityFiles) {
-      switch (image.documentType) {
-        case 'portrait':
-          images.portrait = this.filesService.getUrl(image.fileId);
-          break;
-        case 'banner':
-          images.banner = this.filesService.getUrl(image.fileId);
-          break;
-        case 'logo':
-          images.logo = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm1':
-          images.farm1 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm2':
-          images.farm2 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm3':
-          images.farm3 = this.filesService.getUrl(image.fileId);
-          break;
-        case 'farm4':
-          images.farm4 = this.filesService.getUrl(image.fileId);
-          break;
-      }
-    }
-    return images;
-  }
-
-  @ResolveField(() => String)
-  async profession(@Parent() parent: VendorEntity): Promise<string> {
-    if (!parent.profession) return '';
-    const professions = this.vendorsService.getVendorProfessions();
-    return professions.find((p) => p.id === parent.profession).name;
+  @ResolveField(() => [VendorImage])
+  async media(@Parent() parent: Vendor): Promise<VendorImage[]> {
+    return (await this.entityFilesService.findVendorImages(parent.id))
+      .map(ef => ({
+        id: ef.id,
+        name: ef.file.name,
+        url: this.filesService.getUrl(ef.file.id)
+      }));
   }
 
   @ResolveField(() => Int, { nullable: true })
-  async professionId(@Parent() parent: VendorEntity): Promise<number | null> {
-    return parent.profession;
+  async profession(@Parent() parent: VendorEntity): Promise<number | null> {
+    return parent.profession
   }
 
   @ResolveField(() => VendorDisabledReason)
   disabled(@Parent() parent: VendorEntity) {
     return parent.raw_disabled;
+  }
+
+  @ResolveField(() => [Catalog])
+  async activeCatalogs(@Parent() parent: VendorEntity) {
+    return this.catalogsService.findByVendor(parent.id, true);
+  }
+
+  @ResolveField(() => [Catalog])
+  async allCatalogs(@Parent() parent: VendorEntity) {
+    return this.catalogsService.findByVendor(parent.id, false);
+  }
+
+  @ResolveField(() => [EntityFileEntity])
+  async documents(@Parent() parent: VendorEntity): Promise<EntityFileEntity[]> {
+    const entityFiles = await this.entityFilesService.getAllByEntity(
+      parent.id,
+      'vendor',
+      'document'
+    );
+    if (!entityFiles || entityFiles.length === 0) {
+      return [];
+    }
+    return entityFiles;
+  }
+
+  @ResolveField(() => String)
+  phone(
+    @Parent() parent: VendorEntity,
+    @CurrentUser() currentUser: UserEntity
+  ): String | null {
+    const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
+    return (editor || parent.showPhone) ? parent.phone : null;
+  }
+
+  @ResolveField(() => String)
+  email(
+    @Parent() parent: VendorEntity,
+    @CurrentUser() currentUser: UserEntity
+  ): String | null {
+    const editor = this.userIsAllowedToManageCatalogOfVendor(currentUser, parent);
+    const email = parent.email;
+    return (editor || parent.showEmail) ? email : '';
+  }
+
+  @ResolveField(() => [VendorDistributions])
+  async nextDistributions(
+    @Parent() parent: VendorEntity
+  ) {
+    let catalogs = await this.catalogsService.findByVendor(parent.id, true);
+    // Filter ended catalogs
+    const distribs = await this.distributionsService.findNextDistributionsOfCatalogs(
+      catalogs.map((c) => c.id)
+    );
+
+    const nextDistributionsByGroupId = new Map<number, {
+      distributions: DistributionEntity[]
+      group: GroupEntity
+    }>();
+    await Promise.all(distribs.map(async (distribution) => {
+      const catalog = await distribution.catalog;
+      const group = await catalog.group;
+
+      const dists = nextDistributionsByGroupId.get(group.id);
+      if (!dists) {
+        nextDistributionsByGroupId.set(group.id, { distributions: [distribution], group });
+      } else {
+        dists.distributions.push(distribution);
+      }
+    }));
+
+
+    const nextDistributions = Array.from(nextDistributionsByGroupId.entries())
+    .map(([, { distributions, group }]) => ({
+      group,
+      distributions: distributions
+        .slice(0,4)
+        .sort((d1, d2) => d1.date.getTime() - d2.date.getTime())
+    }));
+
+    return nextDistributions;
   }
 
   /**
@@ -279,6 +512,11 @@ export class VendorsResolver {
     currentUser: UserEntity,
     vendor: VendorEntity,
   ) {
+    if(vendor.userId !== null)
+      return vendor.userId === currentUser.id;
+
+    if(currentUser.rights === 1) return true;
+
     // Check if the user can manage one of the vendor's catalogs
     const catalogs = await this.catalogsService.findByVendor(vendor.id);
     const hasRights = await Promise.all(

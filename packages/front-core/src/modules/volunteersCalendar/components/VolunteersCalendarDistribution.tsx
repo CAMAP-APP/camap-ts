@@ -17,7 +17,7 @@ const VolunteersCalendarDistribution = ({
     t: 'volunteers-calendar',
   });
 
-  let sxColors: SxProps = {
+  let sxColors: SxProps<Theme> = {
     bgcolor: 'initial',
     color: 'initial',
   };
@@ -35,7 +35,7 @@ const VolunteersCalendarDistribution = ({
   }
 
   if (outline) {
-    sxColors.boxShadow = (theme: Theme) => theme.shadows[4];
+    sxColors = { ...sxColors, boxShadow: theme => theme.shadows[4] };
   }
 
   return (

@@ -9,7 +9,7 @@ import {
   useSelected,
   useSlate,
 } from 'slate-react';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import FormatTypes, { CustomSlateImageElement } from '../TextEditorFormatType';
 
 const MIN_DIAGONAL = 100;

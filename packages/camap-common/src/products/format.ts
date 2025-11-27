@@ -44,7 +44,7 @@ export const formatNumber = (n?: number): string => {
 };
 
 export const hasSmartQt = (product: {
-  wholesale: boolean;
+  wholesale?: boolean;
   variablePrice: boolean;
   bulk: boolean;
 }) => {
@@ -54,20 +54,25 @@ export const hasSmartQt = (product: {
 export const formatSmartQt = (
   product: {
     name: string;
-    wholesale: boolean;
+    wholesale?: boolean;
     variablePrice: boolean;
     bulk: boolean;
     qt: number | null;
     unitType: number;
   },
-  userOrder: { quantity: number }
+  userOrder: { quantity: number },
+  options: {
+    forceShowSingleUnit: boolean
+  } = {
+    forceShowSingleUnit: false
+  }
 ) => {
   let orderQt = userOrder.quantity || 1;
   let productQt = product.qt || 1;
   let unit = product.unitType || Unit.Piece;
 
   if (hasSmartQt(product)) {
-    if (unit == Unit.Piece && productQt == 1) {
+    if (unit == Unit.Piece && productQt == 1 && !options.forceShowSingleUnit) {
       return `${formatNumber(orderQt)} ${product.name}`;
     } else {
       return `${formatNumber(orderQt * productQt)}${formatUnit(unit)} ${
@@ -76,9 +81,11 @@ export const formatSmartQt = (
     }
   }
 
-  const quantityStr = userOrder.quantity > 1 ? `${userOrder.quantity} x ` : "";
+  const quantityStr = ( options.forceShowSingleUnit || userOrder.quantity > 1)
+    ? `${userOrder.quantity} x `
+    : "";
 
-  if (unit == Unit.Piece && productQt == 1) {
+  if (unit == Unit.Piece) {
     return `${quantityStr}${product.name}`;
   }
 

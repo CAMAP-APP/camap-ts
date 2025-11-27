@@ -1,0 +1,7 @@
+{
+    "selectedFile": "Fichier sélectionné:",
+    "fileNameWithSize": "{{fileName}} ({{fileSize}})",
+    "fileSize": "{{sizeMb}} Mo",
+    "backButton": "Revenir à la sélection",
+    "uploadButton": "Téléverser"
+}

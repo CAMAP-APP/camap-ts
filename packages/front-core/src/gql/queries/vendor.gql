@@ -1,0 +1,142 @@
+query Vendor($id: Int!) {
+  vendor(id: $id) {
+    id
+    name
+    email
+    showEmail
+    city
+    address1
+    address2
+    zipCode
+    phone
+    showPhone
+    linkText
+    desc
+    linkUrl
+    country
+    longDesc
+    companyNumber
+    profession
+    production2
+    production3
+    peopleName
+    lat
+    lng
+  }
+}
+
+
+query vendorActiveCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    activeCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      groupId
+      vendor {
+        id
+      }
+      subscriptionsCount
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+
+query vendorDocuments($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    documents {
+      id
+      documentType
+      visibility
+      name
+      url
+    }
+    activeCatalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      documents {
+        id
+        documentType
+        visibility
+        name
+        url
+      }
+    }
+  }
+}
+
+query vendorImages($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    media {
+      id
+      name
+      url
+    }
+  }
+}
+
+query vendorProductsSample($vendorId: Int!) {
+  vendorProductsSample(vendorId: $vendorId) {
+    id
+    name
+    desc
+    organic
+    bulk
+    image
+    price
+    currency
+    qt
+    unitType
+  }
+}
+
+query InitVendorPage($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    name
+    nextDistributions {
+      group {
+        id
+        name
+      }
+      distributions {
+        id
+        date
+        catalogId
+        catalog {
+          id
+          name
+        }
+        orderEndDate
+        orderStartDate
+        place {
+          id
+          name
+          address1
+          city
+          zipCode
+          lng
+          lat
+        }
+        multiDistrib {
+          id
+          distribStartDate
+          distribEndDate
+        }
+        end
+      }
+    }
+  }
+}

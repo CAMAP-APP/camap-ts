@@ -39,7 +39,7 @@ export const createCamapMockedClient = (
   });
 
   Object.keys(requests).forEach((key) => {
-    client.setRequestHandler(requests[key].query, async (...args) => {
+    client.setRequestHandler(requests[key].query, (async (...args) => {
       if (requestDelays && requestDelays[key]) await waait(requestDelays[key]);
       else await waait(defaultDelay);
 
@@ -51,7 +51,7 @@ export const createCamapMockedClient = (
         );
       }
       return requests[key].handler(args);
-    });
+    }) as RequestHandler);
   });
 
   return client;

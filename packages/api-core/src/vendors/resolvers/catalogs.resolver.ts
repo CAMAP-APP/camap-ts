@@ -11,6 +11,7 @@ import {
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { Loader } from '../../common/decorators/dataloder.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
+import { FilesService } from '../../files/file.service';
 import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
 import { GroupEntity } from '../../groups/entities/group.entity';
 import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions.service';
@@ -18,6 +19,9 @@ import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
 import { Group } from '../../groups/types/group.type';
 import { MultiDistribsService } from '../../shop/services/multi-distribs.service';
+import { EntityFileService } from '../../tools/entityFile.service';
+import { EntityFileEntity } from '../../tools/models/entity-file.entity';
+import { EntityFile } from '../../tools/models/entity-file.type';
 import { UserEntity } from '../../users/models/user.entity';
 import { User } from '../../users/types/user.type';
 import { UsersService } from '../../users/users.service';
@@ -29,6 +33,7 @@ import { Catalog } from '../types/catalog.type';
 import { Product } from '../types/product.type';
 import { Vendor } from '../types/vendor.type';
 import DataLoader = require('dataloader');
+import { VendorEntity } from '../entities/vendor.entity';
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => Catalog)
@@ -41,6 +46,7 @@ export class CatalogsResolver {
     private readonly groupsService: GroupsService,
     private readonly subscriptionsService: CsaSubscriptionsService,
     private readonly userGroupsService: UserGroupsService,
+    private readonly entityFilesService: EntityFileService,
   ) {}
 
   @Query(() => Catalog)
@@ -91,11 +97,14 @@ export class CatalogsResolver {
 
   @ResolveField(() => Vendor)
   async vendor(
-    @Parent() parent: Catalog,
+    @Parent() parent: Catalog & { vendorId?: number },
     @Loader(VendorsLoader)
     vendorsLoader: DataLoader<number, Vendor>,
   ) {
-    return vendorsLoader.load(parent.vendorId);
+    if (parent.vendorId) {
+      return vendorsLoader.load(parent.vendorId);
+    }
+    return null;
   }
 
   @ResolveField(() => User, { nullable: true })
@@ -137,5 +146,52 @@ export class CatalogsResolver {
       return parent.subscriptions;
     }
     return this.subscriptionsService.findByCatalogId(parent.id);
+  }
+
+  @ResolveField(() => Int)
+  async subscriptionsCount(@Parent() parent: Catalog) {
+    const subscriptions = await this.subscriptionsService.findByCatalogId(parent.id);
+    return subscriptions.length;
+  }
+
+  @ResolveField(() => [EntityFile])
+  async documents(
+    @Parent() parent: Catalog,
+    @CurrentUser() currentUser: UserEntity,
+  ): Promise<EntityFileEntity[]> {
+    const entityFiles = await this.entityFilesService.getAllByEntity(
+      parent.id,
+      'catalog',
+      'document',
+    );
+    if (!entityFiles || entityFiles.length === 0) {
+      return [];
+    }
+
+    let filteredFiles: EntityFileEntity[] = entityFiles.filter((file) => file.data === 'public');
+
+    if(this.userGroupsService.canManageCatalog(currentUser, parent.id))
+      filteredFiles = entityFiles;
+    else if (currentUser) {
+      // Check if user is subscribed to this catalog
+      // This matches the logic in Catalog.hx getVisibleDocuments()
+      const subscription = await this.subscriptionsService.findByUserIdAndCatalogId(
+        parent.id,
+        currentUser.id
+      )
+      if (subscription != null) {
+        filteredFiles = entityFiles;
+      } else {
+        const isGroupMember = await this.userGroupsService.isGroupMember(
+          currentUser,
+          parent.groupId,
+        );
+        if (isGroupMember) {
+          filteredFiles = entityFiles.filter((file) => file.data !== 'subscribers');
+        }
+      }
+    }
+
+    return filteredFiles;
   }
 }

@@ -72,8 +72,8 @@ const MembershipForm = ({
 
     return {
       date: new Date(),
-      year: initialYear || '',
-      fee: membershipFee || '',
+      year: initialYear || 1970,
+      fee: membershipFee || 0,
       distributionId: distributionId || -1,
     };
   }, [availableYears, membershipFee, distributionId]);
@@ -105,7 +105,7 @@ const MembershipForm = ({
       formikBag.setSubmitting(false);
       onSubmitComplete(true);
     } catch (e) {
-      setGqlError(e);
+      if(e instanceof ApolloError) setGqlError(e);
       formikBag.setSubmitting(false);
       onSubmitComplete(false);
     }

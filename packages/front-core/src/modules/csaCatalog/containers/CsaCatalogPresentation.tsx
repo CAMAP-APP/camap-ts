@@ -15,13 +15,13 @@ import { formatAddress } from 'camap-common';
 import { isBefore } from 'date-fns';
 import React from 'react';
 import Block from '../../../components/utils/Block/Block';
-import { CamapIconId } from '../../../components/utils/CamapIcon';
+import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import Product from '../../../components/utils/Product/Product';
 import ProductModal, {
   ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
-import theme from '../../../theme';
+import theme from '../../../theme/default/theme';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import CsaCatalogCoordinatorBlock from '../components/CsaCatalogCoordinatorBlock';
@@ -35,7 +35,7 @@ interface CsaCatalogPresentationProps {
 }
 
 const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
-  const { t, tCommon, tUnit } = useCamapTranslation(
+  const { t, tCommon } = useCamapTranslation(
     { t: 'csa-catalog', tUnit: 'unit' },
     true,
   );
@@ -153,11 +153,11 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}
+              onClick={() => { window.location.href = `/vendor/view/${catalog.vendor.id}` }}
             >
               <Box textAlign="center">
                 <Avatar
                   src={
-                    catalog.vendor.images.portrait ||
                     catalog.vendor.image ||
                     undefined
                   }
@@ -168,12 +168,11 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                     mb: 2,
                   }}
                 />
-                <>
-                  <Typography variant="h4">
-                    <b>{catalog.vendor.name}</b>
-                  </Typography>
-                  <Typography>{formatAddress(catalog.vendor)}</Typography>
-                </>
+                <CamapIcon id={CamapIconId.search} sx={{ position: 'absolute', right: 40, bottom: 40, fontSize: 24 }}/>
+                <Typography variant="h4">
+                  <b>{catalog.vendor.name}</b>
+                </Typography>
+                <Typography>{formatAddress(catalog.vendor)}</Typography>
               </Box>
             </Block>
           </Grid>

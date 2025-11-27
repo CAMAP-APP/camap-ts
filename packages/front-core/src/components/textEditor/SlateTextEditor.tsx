@@ -24,7 +24,7 @@ import {
 } from 'slate';
 import { withHistory } from 'slate-history';
 import { ReactEditor, Slate, useSlate, withReact } from 'slate-react';
-import theme from '../../theme';
+import theme from '../../theme/default/theme';
 import { removeAccents, removeSpaces } from '../../utils/fomat/string';
 import CustomEditable from './CustomEditable';
 import TextEditorImageButton from './Image/TextEditorImageButton';
@@ -37,6 +37,7 @@ import FormatTypes, {
   CustomSlateElement,
   CustomSlateHyperlinkElement,
   CustomSlateImageElement,
+  CustomSlateText,
   isFormatAlignment,
   isFormatHeading,
   isFormatList,
@@ -72,8 +73,8 @@ const getOtherListFormat = (format: string) => {
 const isBlockActive = (editor: Editor, format: string) => {
   if (format === FormatTypes.alignLeft) {
     const [alignNotLeftMatch] = Editor.nodes(editor, {
-      match: (n: CustomSlateElement) => {
-        if (!n.types) {
+      match: (n: CustomSlateElement | CustomSlateText) => {
+        if (!('types' in n) || !n.types) {
           if (n.type && n.type === FormatTypes.image) {
             const imageNode = n as CustomSlateImageElement;
             return !(!imageNode.align || imageNode.align === format);
@@ -90,8 +91,8 @@ const isBlockActive = (editor: Editor, format: string) => {
     return !alignNotLeftMatch;
   }
   const [match] = Editor.nodes(editor, {
-    match: (n: CustomSlateElement) => {
-      if (!n.types) {
+    match: (n: CustomSlateElement | CustomSlateText) => {
+      if (!('types' in n) || !n.types) {
         if (n.type && n.type === FormatTypes.image) {
           if (isFormatAlignment(format)) {
             const imageNode = n as CustomSlateImageElement;
@@ -108,12 +109,8 @@ const isBlockActive = (editor: Editor, format: string) => {
 };
 
 const isMarkActive = (editor: Editor, format: string) => {
-  try {
-    const marks = Editor.marks(editor);
-    return marks ? marks[format] === true : false;
-  } catch {
-    return false;
-  }
+  const marks = Editor.marks(editor);
+  return (marks && format in marks) ? marks[format as keyof typeof marks] === true : false;
 };
 
 const toggleBlock = (editor: Editor, format: FormatTypes) => {
@@ -127,9 +124,9 @@ const toggleBlock = (editor: Editor, format: FormatTypes) => {
 
     if (isActive || isOtherListFormatActive) {
       Transforms.unwrapNodes(editor, {
-        match: (n: CustomSlateElement) => {
+        match: (n: CustomSlateElement | CustomSlateText) => {
           let hasFormatList = false;
-          if (n.types) {
+          if ('types' in n && n.types) {
             (n.types as string[]).forEach((t) => {
               if (isFormatList(t)) {
                 hasFormatList = true;
@@ -465,7 +462,7 @@ const SlateTextEditor = ({
           onAddImagesCustomHandler,
         ),
       ),
-    [],
+    [onAddImagesCustomHandler],
   ) as CustomEditor;
 
   const editableRef = React.useRef<HTMLDivElement>(null);
@@ -557,7 +554,7 @@ const SlateTextEditor = ({
       mt={2}
       mb={1}
     >
-      <Slate editor={editor} value={value} onChange={onValueChange}>
+      <Slate editor={editor} initialValue={value} onChange={onValueChange}>
         <Box
           position="relative"
           bgcolor={theme.palette.divider}

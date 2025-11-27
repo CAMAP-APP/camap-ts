@@ -1,6 +1,6 @@
-import { GraphQLError } from 'graphql';
+import { GraphQLFormattedError } from 'graphql';
 
-export function isANestException({ extensions }: GraphQLError) {
+export function isANestException({ extensions }: GraphQLFormattedError) {
   if (extensions == null) return false;
   // search response
   if (extensions.response != null) return true;

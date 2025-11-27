@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { FileEntity } from '../../tools/models/file.entity';
 import { CatalogEntity } from './catalog.entity';
+import { UserEntity } from 'src/users/models/user.entity';
 
 export enum VendorDisabledReason {
   IncompleteLegalInfos, //0 : incomplete legal infos
@@ -24,12 +25,21 @@ export enum BetaFlags { }
 export class VendorEntity extends BaseEntity {
   @PrimaryGeneratedColumn({ type: 'int' })
   id: number;
+  
+  @Column('int', { nullable: true })
+  userId: number | null;
+  @ManyToOne(() => UserEntity, { onDelete: 'SET NULL', onUpdate: 'RESTRICT' })
+  @JoinColumn([{ name: 'userId', referencedColumnName: 'id' }])
+  user: Promise<UserEntity>;
 
   @Column('varchar', { length: 128 })
   name: string;
 
   @Column('varchar', { nullable: true, length: 128 })
   email: string | null;
+
+  @Column('bool', { name: 'showEmail', default: true })
+  showEmail: boolean;
 
   @Column('varchar', { name: 'city', length: 25 })
   city: string;
@@ -45,6 +55,9 @@ export class VendorEntity extends BaseEntity {
 
   @Column('varchar', { name: 'phone', nullable: true, length: 19 })
   phone: string | null;
+
+  @Column('bool', { name: 'showPhone', default: true })
+  showPhone: boolean;
 
   @Column('varchar', { name: 'linkText', nullable: true, length: 256 })
   linkText: string | null;
@@ -84,6 +97,9 @@ export class VendorEntity extends BaseEntity {
 
   @Column('double', { nullable: true })
   lat: number | null;
+
+  @Column('varchar', { length: 64, nullable: true })
+  companyNumber: string | null;
 
   /**
    * =========
