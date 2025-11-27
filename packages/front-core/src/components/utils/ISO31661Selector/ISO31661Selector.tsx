@@ -190,7 +190,7 @@ const ISO31661Selector = ({
         <CircularProgress />
       </Box>
     );
-  return <>
+  return (
     <Autocomplete<ISO_3166_1>
       {...autocompleteProps}
       value={getValue(value)}
