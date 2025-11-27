@@ -1,5 +1,5 @@
 import { LoadingButton } from '@mui/lab';
-import { Box, ButtonBase, TextField, Tooltip, Typography } from '@mui/material';
+import { Box, ButtonBase, InputAdornment, TextField, Tooltip, Typography } from '@mui/material';
 import { StockTracking } from 'camap-common';
 import React from 'react';
 import Block from '../../../components/utils/Block/Block';
@@ -15,6 +15,7 @@ import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation'
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import { restCsaCatalogTypeToType } from '../interfaces';
 import MediumActionIcon from './MediumActionIcon';
+import { formatUnit } from '@utils/fomat';
 
 interface CsaCatalogDefaultOrderProps {
   onNext: (canceled?: boolean) => Promise<boolean | void>;
@@ -123,7 +124,10 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
     <Block
       title={t(isConstOrders ? 'subscription' : 'enterYourDefaultOrder')}
       icon={<MediumActionIcon id={CamapIconId.basket} />}
-      sx={{ height: '100%' }}
+      sx={{
+        height: '100%',
+        width: '100%'
+      }}
       contentSx={{
         maxHeight: 'calc(100vh - 132px)',
         overflowY: 'auto',
@@ -146,11 +150,11 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
         {catalog.products.map((p) => {
           let lowestStock:number | null = null;
           const hasStockTracking = p.stockTracking != null
-            && p.stockTracking as unknown as number !== StockTracking.Disabled
+            && p.stockTracking !== StockTracking.Disabled
             && stocksPerProductDistribution != null
             && stocksPerProductDistribution.hasOwnProperty(p.id)
 
-          const isGlobalStockTracking = hasStockTracking && p.stockTracking as unknown as number === StockTracking.Global
+          const isGlobalStockTracking = hasStockTracking && p.stockTracking === StockTracking.Global
           let distribCount = 1;
           if (hasStockTracking) {
             const stocksPerDistrib = stocksPerProductDistribution[p.id];
@@ -165,15 +169,19 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
             }
           }
 
+          const q = defaultOrder[p.id] ?? 0;
+
           return (
             <Box
               key={`product_${p.id}`}
               width="100%"
               display="flex"
               flexDirection={'row'}
+              flexWrap={'wrap'}
               alignItems="center"
               justifyContent={'space-between'}
               mb={1}
+              gap={1}
             >
               <ButtonBase
                 onClick={() => setModalProduct(p)}
@@ -184,8 +192,8 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                   textAlign: 'left',
                   justifyContent: 'start',
                   flex: 1,
-                  mr: 1,
                   borderRadius: 1,
+                  minWidth: 250
                 }}
               >
                 <Product product={p} />
@@ -197,18 +205,49 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                   </Typography>
                 )}
               </ButtonBase>
-              <Box width={150} position="relative">
+              <Box
+                width={100}
+                position="relative"
+                justifySelf='flex-end'
+                justifyContent='flex-end'
+              >
                 <TextField
+                  size="small"
                   fullWidth
                   inputProps={{
-                    inputMode: 'numeric',
-                    pattern: '[0-9]*',
+                    type: 'number',
+                    style: {
+                        textAlign: 'right'
+                    }
                   }}
-                  value={defaultOrder[p.id] ?? ''}
-                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                    onOrderChange(p.id, parseInt(event.target.value, 10))
+                  InputProps={{
+                    endAdornment: p.bulk
+                        ? <InputAdornment
+                            position="end"
+                        >
+                            {formatUnit(p.unitType, 1, t)}
+                            </InputAdornment>
+                        : undefined
+                  }}
+                  defaultValue={
+                    p.bulk
+                    ? q*p.qt
+                    : q
                   }
-                  onFocus={onFocus}
+                  onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                    onOrderChange(p.id,
+                      p.bulk
+                      ? parseFloat(event.target.value)/p.qt
+                      : parseInt(event.target.value, 10)
+                    )
+                  }
+                  onBlur={(event: React.FocusEvent<HTMLInputElement>) =>
+                    event.target.value = (
+                      p.bulk
+                      ? q*p.qt
+                      : q
+                    ).toString()
+                  }
                   hiddenLabel
                   disabled={loading}
                 />

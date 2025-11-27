@@ -37,12 +37,25 @@ function Block({
         <CardHeader
           sx={{
             backgroundColor: (theme) => theme.palette.action.selected,
+            fontSize: {
+              xs: '0.7rem',
+              sm: '1rem'
+            },
+            padding: {
+              xs: 1,
+              sm: 2
+            },
             ...headerSx,
           }}
           avatar={icon}
           title={
             typeof title === 'string' ? (
-              <Typography variant="h4">{title}</Typography>
+              <Typography
+                variant="h4"
+                sx={{
+                  fontSize: '1.25em'
+                }}
+              >{title}</Typography>
             ) : (
               title
             )

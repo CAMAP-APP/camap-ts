@@ -2,6 +2,7 @@ import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import CloseIcon from '@mui/icons-material/Close';
 import SearchIcon from '@mui/icons-material/Search';
 import {
+  Alert,
   Box,
   Button,
   Grid,
@@ -11,7 +12,7 @@ import {
   styled,
   SxProps,
   Theme,
-  Typography,
+  Typography
 } from '@mui/material';
 import { debounce, deburr } from 'lodash';
 import React from 'react';
@@ -28,6 +29,7 @@ import { formatUserList } from '../../../utils/fomat';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
+import MemberLists from './MemberLists';
 import MembersTable from './MembersTable';
 import WaitingListTable from './WaitingListTable';
 
@@ -43,9 +45,11 @@ const IconButtonSx: SxProps<Theme> = (theme: Theme) => ({
 const SearchInput = ({
   onSearchChange,
   previousSelectedUserList,
+  sx = {}
 }: {
   onSearchChange: (value: string) => void;
   previousSelectedUserList: UserList | undefined;
+  sx?: SxProps<Theme>
 }) => {
   const { t } = useTranslation(['members/default']);
   const { toggleRefetch, selectedUserList } = React.useContext(MembersContext);
@@ -86,7 +90,9 @@ const SearchInput = ({
         display: 'flex',
         justifyContent: 'space-between',
         marginLeft: 'auto',
-        width: '200px',
+        minWidth: '200px',
+        flexBasis: '200px',
+        ...sx
       }}
     >
       <Input
@@ -142,9 +148,7 @@ const MembersTableAndActions = () => {
   const [
     getMembersGroupByListType,
     { data: membersData, error: membersError, refetch: membersRefetch },
-  ] = useGetMembersOfGroupByListTypeLazyQuery({
-    variables: { listType: selectedUserList.type, groupId },
-  });
+  ] = useGetMembersOfGroupByListTypeLazyQuery();
   const [filteredMembers, setFilteredMembers] = React.useState<Member[]>();
   const [loading, setLoading] = React.useState(false);
 
@@ -160,11 +164,11 @@ const MembersTableAndActions = () => {
         key: key as keyof Member,
         label: tCommon(key),
       }));
-    }, [filteredMembers]);
+    }, [filteredMembers, tCommon]);
 
   const csvFilename = React.useMemo(
     () => `${formatUserList(selectedUserList, tLists, false)}.csv`,
-    [selectedUserList],
+    [selectedUserList, tLists],
   );
 
   const [unexpectedUnauthorizedError, setUnexpectedUnauthorizedError] =
@@ -198,7 +202,9 @@ const MembersTableAndActions = () => {
           setLoading(false),
         );
     } else {
-      getMembersGroupByListType();
+      getMembersGroupByListType({
+        variables: { listType: selectedUserList.type, groupId },
+      });
     }
   }, [getMembersGroupByListType, groupId, membersRefetch, selectedUserList]);
 
@@ -259,14 +265,23 @@ const MembersTableAndActions = () => {
   return (
     <Paper>
       <Box p={2}>
-        <Grid container direction="row">
-          <Typography variant="h2">{t('title')}</Typography>
+        <Box display='flex' flexWrap='wrap'>
+          <Box  display='flex' flexDirection={{ xs:"column", md: "row" }} flexGrow={1} justifyContent='space-between'>
+            <Typography display={{ xs: "none", md: "inline" }} variant="h2">{t('title')}</Typography>
+            <Box display={{ xs: "block", xl: "none" }}>
+              <MemberLists variant='dropdown' />
+            </Box>
+          </Box>
           <SearchInput
             onSearchChange={onSearchChange}
             previousSelectedUserList={previousSelectedUserListRef.current}
           />
-        </Grid>
+        </Box>
       </Box>
+      {selectedUserList.type === 'vendors' && <Alert severity='info'>
+        Cette liste ne montre que les producteurs ayant revendiqué leur fiche.<br/>
+        <a href="https://wiki.amap44.org/fr/app/admin-producteur">En savoir plus sur les fiches producteur</a>
+      </Alert>}
       {selectedUserList.type !== 'waitingList' ? (
         <MembersTable
           members={filteredMembers || []}

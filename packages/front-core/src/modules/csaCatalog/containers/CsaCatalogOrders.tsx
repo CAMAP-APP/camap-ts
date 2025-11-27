@@ -4,6 +4,7 @@ import {
   Button,
   ButtonBase,
   Divider,
+  InputAdornment,
   Modal,
   TextField,
   Tooltip,
@@ -35,6 +36,7 @@ import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import CsaCatalogDefaultOrder from './CsaCatalogDefaultOrder';
 import CsaCatalogSubscriptionSold from './CsaCatalogSubscriptionSold';
 import MediumActionIcon from './MediumActionIcon';
+import { formatUnit } from '@utils/fomat';
 
 interface CsacatalogProps {
   adminMode?: boolean;
@@ -164,6 +166,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     ) {
       return;
     }
+
     let prevValue = updatedOrders[distributionId]
       ? updatedOrders[distributionId][productId]
       : null;
@@ -270,10 +273,6 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
       setFirstDistributionIndex(firstDistributionIndex + 1);
       setIsAnimating(undefined);
     }, theme.transitions.duration.short);
-  };
-
-  const onFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.currentTarget.select();
   };
 
   const slicedDistributions = React.useMemo(() => {
@@ -481,7 +480,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
           {catalog.products.map((p) => {
             const isGlobalStock =
               catalog.hasStockManagement &&
-              (p.stockTracking as StockTracking) == StockTracking.Global &&
+              (p.stockTracking as StockTracking) === StockTracking.Global &&
               stocksPerProductDistribution != null;
             var globalStock = 0;
             if (
@@ -597,20 +596,28 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                                   }
                                   sx={{ width: 150 }}
                                   inputProps={{
-                                    inputMode: 'numeric',
-                                    pattern: '[0-9]*',
+                                    type: 'number'
                                   }}
-                                  value={orders[d.id][p.id]}
+                                  InputProps={{
+                                    endAdornment: p.bulk
+                                      ? <InputAdornment position="end">{formatUnit(p.unitType, 1, tCommon)}</InputAdornment>
+                                      : undefined
+                                  }}
+                                  defaultValue={p.bulk ? orders[d.id][p.id]*p.qt : orders[d.id][p.id]}
                                   onChange={(
                                     event: React.ChangeEvent<HTMLInputElement>,
                                   ) =>
                                     onOrderChange(
                                       d.id,
                                       p.id,
-                                      parseInt(event.target.value, 10),
+                                      p.bulk 
+                                        ? parseFloat(event.target.value)/p.qt
+                                        : parseInt(event.target.value),
                                     )
                                   }
-                                  onFocus={onFocus}
+                                  onBlur={(event: React.FocusEvent<HTMLInputElement>) =>
+                                    event.target.value = (p.bulk ? orders[d.id][p.id]*p.qt : orders[d.id][p.id]).toString()
+                                  }
                                   hiddenLabel
                                 />
                                 {distributionStock != null && (

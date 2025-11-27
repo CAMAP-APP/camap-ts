@@ -1,7 +1,7 @@
 import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import { Box, CircularProgress } from '@mui/material';
 import { UserLists } from 'camap-common';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { EMPTY_EDITOR_HTML_REGEX } from '../../../components/textEditor/SlateTextEditor';
 import {
@@ -37,12 +37,16 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
     resetAttachments,
     error: contextError,
     recipients,
+    setDefaultRecipients,
     selectedUserList,
     setSelectedUserList,
     embeddedImages,
     slateContent,
     setReuseMessage,
   } = context;
+
+  const recipientIds = (new URLSearchParams(window.location.search).getAll("to_uid")).map(s => parseInt(s));
+
   const { t } = useTranslation([
     'messages/default',
     'translation',
@@ -53,7 +57,10 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
     loading,
     error: requestError,
   } = useInitMessagingServiceQuery({
-    variables: { id: groupId },
+    variables: {
+      recipientIds,
+      groupId
+    },
   });
 
   const recipientsRef = React.useRef<Recipient[]>();
@@ -68,6 +75,16 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
   const error = requestError || contextError;
 
   const defaultUserLists = requestData ? requestData.getUserLists : [];
+
+  useEffect(() => {
+    const recipients = requestData?.getEmailRecipientsByUserIds ?? [];
+    if(recipients.length > 0){
+      setDefaultRecipients(recipients);
+    }
+  }, [
+    requestData?.getEmailRecipientsByUserIds,
+    setDefaultRecipients
+  ])
 
   React.useEffect(() => {
     recipientsRef.current = recipients;

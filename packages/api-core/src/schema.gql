@@ -528,6 +528,7 @@ type Query {
   getUserFromControlKey(id: Int!, controlKey: String!, groupId: Int): User!
   isGroupAdmin(groupId: Int!): Boolean!
   canManageAllCatalogs(groupId: Int!): Boolean!
+  getEmailRecipientsByUserIds(inGroup: Int!, ids: [Int!]!): [User!]!
   getUsersFromEmails(emails: [String!]!): [User!]!
   getInvitedUserToRegister(email: String!): InvitedUser
   distribution(id: Int!): Distribution!

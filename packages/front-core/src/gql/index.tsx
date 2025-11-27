@@ -721,6 +721,7 @@ export type Query = {
   getContractsUserLists: Array<UserList>;
   getDefaultVendorByUserId: Vendor;
   getDistributionsUserLists: Array<UserList>;
+  getEmailRecipientsByUserIds: Array<User>;
   getGroupsOnMap: Array<GroupPreviewMap>;
   getInvitedUserToRegister?: Maybe<InvitedUser>;
   getLatestMessages: Array<Message>;
@@ -820,6 +821,12 @@ export type QueryGetDefaultVendorByUserIdArgs = {
 
 export type QueryGetDistributionsUserListsArgs = {
   groupId: Scalars['Int'];
+};
+
+
+export type QueryGetEmailRecipientsByUserIdsArgs = {
+  ids: Array<Scalars['Int']>;
+  inGroup: Scalars['Int'];
 };
 
 
@@ -1351,7 +1358,7 @@ export type VendorProductsSampleQueryVariables = Exact<{
 }>;
 
 
-export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
+export type VendorProductsSampleQuery = { __typename?: 'Query', vendorProductsSample: Array<{ __typename?: 'Product', id: number, name: string, desc?: string | null, organic: boolean, bulk: boolean, variablePrice: boolean, image: string, price: number, currency: string, qt: number, unitType: number }> };
 
 export type InitVendorPageQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -1584,11 +1591,12 @@ export type DeleteMembershipMutationVariables = Exact<{
 export type DeleteMembershipMutation = { __typename?: 'Mutation', deleteMembership: string };
 
 export type InitMessagingServiceQueryVariables = Exact<{
-  id: Scalars['Int'];
+  groupId: Scalars['Int'];
+  recipientIds: Array<Scalars['Int']> | Scalars['Int'];
 }>;
 
 
-export type InitMessagingServiceQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null }, groupPreview: { __typename?: 'GroupPreview', id: number, name: string }, getUserLists: Array<{ __typename?: 'UserList', type: string, count?: number | null, data?: string | null }> };
+export type InitMessagingServiceQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null }, groupPreview: { __typename?: 'GroupPreview', id: number, name: string }, getUserLists: Array<{ __typename?: 'UserList', type: string, count?: number | null, data?: string | null }>, getEmailRecipientsByUserIds: Array<{ __typename?: 'User', id: number, firstName: string, lastName: string, firstName2?: string | null, lastName2?: string | null, email: string, email2?: string | null }> };
 
 export type GetLatestMessagesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -2467,6 +2475,7 @@ export const VendorProductsSampleDocument = gql`
     desc
     organic
     bulk
+    variablePrice
     image
     price
     currency
@@ -3773,18 +3782,27 @@ export type DeleteMembershipMutationHookResult = ReturnType<typeof useDeleteMemb
 export type DeleteMembershipMutationResult = Apollo.MutationResult<DeleteMembershipMutation>;
 export type DeleteMembershipMutationOptions = Apollo.BaseMutationOptions<DeleteMembershipMutation, DeleteMembershipMutationVariables>;
 export const InitMessagingServiceDocument = gql`
-    query initMessagingService($id: Int!) {
+    query initMessagingService($groupId: Int!, $recipientIds: [Int!]!) {
   me {
     ...User
   }
-  groupPreview(id: $id) {
+  groupPreview(id: $groupId) {
     id
     name
   }
-  getUserLists(groupId: $id) {
+  getUserLists(groupId: $groupId) {
     type
     count
     data
+  }
+  getEmailRecipientsByUserIds(ids: $recipientIds, inGroup: $groupId) {
+    id
+    firstName
+    lastName
+    firstName2
+    lastName2
+    email
+    email2
   }
 }
     ${UserFragmentDoc}`;
@@ -3801,7 +3819,8 @@ export const InitMessagingServiceDocument = gql`
  * @example
  * const { data, loading, error } = useInitMessagingServiceQuery({
  *   variables: {
- *      id: // value for 'id'
+ *      groupId: // value for 'groupId'
+ *      recipientIds: // value for 'recipientIds'
  *   },
  * });
  */
