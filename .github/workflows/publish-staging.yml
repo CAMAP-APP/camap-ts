@@ -1,10 +1,10 @@
-name: Publish staging image to GHCR (camap-hx)
+name: Publish staging image to GHCR (camap-ts)
 
 on:
   push:
     tags:
-      - 'staging-v[0-9]*'       # ex: staging-v2.0.8    (glob, pas regex)
-      - 'staging-v[0-9]*-rc*'   # ex: staging-v2.0.8-rc1
+      - 'staging-v[0-9]*'
+      - 'staging-v[0-9]*-rc*'
   workflow_dispatch:
 
 permissions:
@@ -46,12 +46,12 @@ jobs:
           echo "✅ Tag créé depuis un commit présent dans origin/staging"
 
   build-and-push:
-    name: Build & push camap-hx
+    name: Build & push camap-ts
     needs: verify-staging
     if: startsWith(github.ref, 'refs/tags/staging-v')
     runs-on: ubuntu-latest
     env:
-      IMAGE_NAME: ghcr.io/camap-app/camap-hx
+      IMAGE_NAME: ghcr.io/camap-app/camap-ts
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +77,12 @@ jobs:
         env: { BUILDKIT_PROGRESS: plain }
         with:
           context: .
-          file: ./camap-hx.Dockerfile
+          file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
           tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}    # staging-vX.Y.Z[-rcN]
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}  # vX.Y.Z[-rcN]
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
+            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}
             ${{ env.IMAGE_NAME }}:staging
           cache-from: type=gha
           cache-to: type=gha,mode=max

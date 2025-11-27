@@ -13,8 +13,9 @@ import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation'
 import MediumActionIcon from '../containers/MediumActionIcon';
 import { RestCsaCatalog } from '../interfaces';
 import DOMPurify from 'dompurify';
+import { getCamapHost } from 'lib/runtimeCfg';
 
-const host = process.env.CAMAP_HOST;
+const host = getCamapHost();
 
 interface CsaCatalogInformationBlockProps {
   catalog: RestCsaCatalog;

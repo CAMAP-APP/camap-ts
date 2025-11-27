@@ -1,4 +1,4 @@
-name: Publish production image to GHCR (camap-hx)
+name: Publish production image to GHCR (camap-ts)
 
 on:
   push:
@@ -49,13 +49,13 @@ jobs:
           echo "✅ Le tag pointe bien sur origin/master"
 
   build-and-push:
-    name: Build & push camap-hx (prod)
+    name: Build & push camap-ts (prod)
     needs: verify-prod
     if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')
     runs-on: ubuntu-latest
 
     env:
-      IMAGE_NAME: ghcr.io/camap-app/camap-hx
+      IMAGE_NAME: ghcr.io/camap-app/camap-ts
 
     steps:
       - uses: actions/checkout@v4
@@ -95,7 +95,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./camap-hx.Dockerfile
+          file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
           provenance: false
@@ -104,8 +104,8 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha,scope=camap-hx
-          cache-to:   type=gha,scope=camap-hx,mode=max
+          cache-from: type=gha,scope=camap-ts
+          cache-to:   type=gha,scope=camap-ts,mode=max
 
       # --- En cas d’échec ARM64, fallback amd64-only ---
       - name: Build & push (fallback amd64-only)
@@ -113,7 +113,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: ./camap-hx.Dockerfile
+          file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
           provenance: false
@@ -122,5 +122,5 @@ jobs:
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
             ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha,scope=camap-hx
-          cache-to:   type=gha,scope=camap-hx,mode=max
+          cache-from: type=gha,scope=camap-ts
+          cache-to:   type=gha,scope=camap-ts,mode=max

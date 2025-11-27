@@ -4,6 +4,7 @@ import {
   GeoJsonProperties,
   Geometry,
 } from 'geojson';
+import { getMapboxKey } from '../lib/runtimeCfg';
 
 export type MapBoxFeature<
   G extends Geometry | null = Geometry,
@@ -34,7 +35,7 @@ export const places = async (
     autocomplete: 'true',
   };
 
-  let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${request}.json?${Object.entries(
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${request}.json?${Object.entries(
     params,
   )
     .map(([key, value]) => `${key}=${value}`)
@@ -42,7 +43,7 @@ export const places = async (
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(res.statusText);
-  return await res.json();
+  return (await res.json()) as MapBoxFeatureCollection;
 };
 
 export const reverse = async (
@@ -55,7 +56,7 @@ export const reverse = async (
     language: 'fr',
   };
 
-  let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?${Object.entries(
+  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?${Object.entries(
     params,
   )
     .map(([key, value]) => `${key}=${value}`)
@@ -63,13 +64,20 @@ export const reverse = async (
 
   const res = await fetch(url);
   if (!res.ok) throw new Error(res.statusText);
-  return await res.json();
+  return (await res.json()) as MapBoxFeatureCollection;
 };
 
+/**
+ * Fabrique un client Mapbox.
+ * - Si token explicite fourni, on l'utilise.
+ * - Sinon, on lit MAPBOX_KEY dans la config runtime (__APP_CONFIG__ via getMapboxKey()).
+ */
 const mapboxApi = (token?: string) => {
-  const accessToken = token || process.env.MAPBOX_KEY;
+  const accessToken = token || getMapboxKey();
   if (!accessToken) {
-    throw new Error(`mapboxApi require accessToken`);
+    throw new Error(
+      'mapboxApi requires an accessToken (MAPBOX_KEY is not set in runtime config)',
+    );
   }
 
   return {

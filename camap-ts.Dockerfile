@@ -1,4 +1,4 @@
-FROM node:20.12.1-slim AS builder
+FROM node:20.19-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     g++ libconfig-tiny-perl libtest-script-perl make python3 && \
@@ -26,14 +26,14 @@ RUN npm run build
 RUN npm prune --production
 
 RUN set -eux; \
-    test -d /srv/packages/api-core/dist/mails; \
+    test -d /srv/packages/api-core/mails/dist; \
     mkdir -p /srv/mails; \
-    cp -a /srv/packages/api-core/dist/mails /srv/mails/dist;
+    cp -a /srv/packages/api-core/mails/dist /srv/mails/dist;
 
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
-FROM node:20.12.1-slim
+FROM node:20.19-slim
 
 LABEL org.opencontainers.image.authors="InterAMAP44 inter@amap44.org"
 LABEL org.opencontainers.image.vendor="InterAMAP 44"
@@ -56,7 +56,7 @@ RUN echo "Europe/Paris" > /etc/timezone
 WORKDIR /srv
 COPY --from=builder /srv/ /srv/
 RUN install -d -o interamap -g interamap -m 0775 /srv/src
-# ⚠️ pas de COPY de .env ici : il sera monté par docker-compose
+
 USER interamap
 
 CMD ["node", "packages/api-core/dist/main.js"]
