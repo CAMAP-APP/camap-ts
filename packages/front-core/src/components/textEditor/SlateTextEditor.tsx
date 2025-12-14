@@ -1,19 +1,19 @@
-import {
-  FormatAlignCenter,
-  FormatAlignLeft,
-  FormatAlignRight,
-  FormatBold,
-  FormatItalic,
-  FormatListBulleted,
-  FormatListNumbered,
-  FormatUnderlined,
-  LooksOne,
-  LooksTwo,
-} from '@mui/icons-material';
-import { Box, styled } from '@mui/material';
-import { FormikHandlers } from 'formik';
-import React, { FocusEvent, useEffect, useMemo, useState } from 'react';
+import withHelperTextTranslation from '@components/forms/shared/withHelperTextTranslation';
+import { UserFragment, UserList } from '@gql';
+import { LoadingButton } from '@mui/lab';
+import { Alert, Box, TextField as MuiTextField } from '@mui/material';
+import { formatUserList } from '@utils/fomat';
+import { UserLists } from 'camap-common';
+import { Field, Form, Formik } from 'formik';
+import { fieldToTextField } from 'formik-mui';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
+import MessageLatestMessagesSelect from './MessageLatestMessagesSelect';
+import MessageObject from './MessageObject';
+import MessageRecipientsSelect, {
+  RecipientOption,
+  RecipientOptionGroup,
+} from './MessageRecipientsSelect';
 import {
   BaseElement,
   createEditor,
@@ -70,206 +70,159 @@ const getOtherListFormat = (format: string) => {
     return FormatTypes.bulletedList;
   }
 
-  return FormatTypes.numberedList;
+const CustomTextField = withHelperTextTranslation(
+  MuiTextField,
+  fieldToTextField,
+);
+
+const LatestMessagesFieldComponent = (props: any) => {
+  return <MessageLatestMessagesSelect {...props} />;
 };
 
-const isBlockActive = (editor: Editor, format: string) => {
-  if (format === FormatTypes.alignLeft) {
-    const [alignNotLeftMatch] = Editor.nodes(editor, {
-      match: (n: CustomSlateElement | CustomSlateText) => {
-        if (!('types' in n) || !n.types) {
-          if (n.type && n.type === FormatTypes.image) {
-            const imageNode = n as CustomSlateImageElement;
-            return !(!imageNode.align || imageNode.align === format);
-          }
-          return false;
-        }
-        const types = n.types as string[];
-        return (
-          types.includes(FormatTypes.alignCenter) ||
-          types.includes(FormatTypes.alignRight)
-        );
-      },
-    });
-    return !alignNotLeftMatch;
-  }
-  const [match] = Editor.nodes(editor, {
-    match: (n: CustomSlateElement | CustomSlateText) => {
-      if (!('types' in n) || !n.types) {
-        if (n.type && n.type === FormatTypes.image) {
-          if (isFormatAlignment(format)) {
-            const imageNode = n as CustomSlateImageElement;
-            return imageNode.align === format;
-          }
-        }
-        return false;
-      }
-      const types = n.types as string[];
-      return types.includes(format);
-    },
-  });
-  return !!match;
+const ObjectFieldComponent = (props: any) => {
+  return <MessageObject {...props} />;
 };
 
-const isMarkActive = (editor: Editor, format: string) => {
-  const marks = Editor.marks(editor);
-  return (marks && format in marks) ? marks[format as keyof typeof marks] === true : false;
-};
+const MessagesForm = ({
+  user,
+  isPartnerConnected,
+  defaultUserLists,
+  onSubmit,
+  isSuccessful,
+  groupName,
+}: Props) => {
+  const { t } = useTranslation(['messages/default']);
+  const { t: tLists } = useTranslation(['members/lists']);
 
-const toggleBlock = (editor: Editor, format: FormatTypes) => {
-  const isActive = isBlockActive(editor, format);
-  const isList = isFormatList(format);
-  if (isList) {
-    const isOtherListFormatActive = isBlockActive(
-      editor,
-      getOtherListFormat(format),
-    );
-
-    if (isActive || isOtherListFormatActive) {
-      Transforms.unwrapNodes(editor, {
-        match: (n: CustomSlateElement | CustomSlateText) => {
-          let hasFormatList = false;
-          if ('types' in n && n.types) {
-            (n.types as string[]).forEach((t) => {
-              if (isFormatList(t)) {
-                hasFormatList = true;
-              }
-            });
-          }
-          return hasFormatList;
-        },
-        split: true,
-      });
-    }
-  }
-
-  const newFormatType = isList ? FormatTypes.listItem : format;
-
-  const types: FormatTypes[] = [];
-
-  let selectedNode =
-    editor.selection &&
-    (editor.children[editor.selection.anchor.path[0]] as CustomSlateElement &
-      BaseElement);
-
-  if (
-    selectedNode &&
-    selectedNode.type &&
-    selectedNode.type === FormatTypes.image
-  ) {
-    if (isFormatAlignment(newFormatType)) {
-      const partialImageNode: Partial<CustomSlateImageElement> = {
-        align: newFormatType as AlignFormatType,
-      };
-      Transforms.setNodes(editor, partialImageNode);
-    }
-    return;
-  }
-
-  let selectedNodeTypes =
-    selectedNode && selectedNode.types ? selectedNode.types : [];
-  if (
-    selectedNode &&
-    (selectedNode.children as any[]).length > 0 &&
-    (selectedNode.children as any[])[0].types
-  ) {
-    selectedNodeTypes = (selectedNode.children as any[])[0].types;
-  }
-  if (
-    !(
-      selectedNodeTypes.length && selectedNodeTypes[0] === FormatTypes.paragraph
-    )
-  ) {
-    types.push(...selectedNodeTypes);
-  }
-  if (isActive) {
-    const currentIndex = selectedNodeTypes.findIndex(
-      (t) => t === newFormatType,
-    );
-    types.splice(currentIndex, 1);
-  } else if (isFormatAlignment(newFormatType)) {
-    const previousAlignmentIndex = selectedNodeTypes.findIndex((t) =>
-      isFormatAlignment(t),
-    );
-    if (previousAlignmentIndex !== -1) {
-      types.splice(previousAlignmentIndex, 1, newFormatType);
-    } else {
-      types.push(newFormatType);
-    }
-  } else if (isFormatHeading(newFormatType)) {
-    const previousHeadingIndex = selectedNodeTypes.findIndex((t) =>
-      isFormatHeading(t),
-    );
-    if (previousHeadingIndex !== -1) {
-      types.splice(previousHeadingIndex, 1, newFormatType);
-    } else {
-      types.push(newFormatType);
-    }
-  } else if (isList) {
-    const previousListIndex = selectedNodeTypes.findIndex((t) =>
-      isFormatListItem(t),
-    );
-    if (previousListIndex === -1) {
-      types.push(newFormatType);
-    }
-  } else {
-    types.push(newFormatType);
-  }
-
-  const partialNode: Partial<CustomSlateElement> = {
-    types,
-  };
-  Transforms.setNodes(editor, partialNode);
-
-  if (!isActive && isList) {
-    const block = { types: [format], children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
-};
-
-const toggleMark = (editor: Editor, format: string) => {
-  const isActive = isMarkActive(editor, format);
-
-  if (isActive) {
-    Editor.removeMark(editor, format);
-  } else {
-    Editor.addMark(editor, format, true);
-  }
-};
-
-interface MarkAndBlockButtonProps {
-  format: FormatTypes;
-  icon: JSX.Element;
-}
-
-const BlockButton = ({ format, icon }: MarkAndBlockButtonProps) => {
-  const editor = useSlate();
-  const isActive = isBlockActive(editor, format);
-  return (
-    <TextEditorComponents
-      active={isActive}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        toggleBlock(editor, format);
-      }}
-    >
-      {icon}
-    </TextEditorComponents>
+  const defaultRecipientsOptions: RecipientOption[] = defaultUserLists.map(
+    (ul) => ({
+      value: ul.type,
+      key: ul.type,
+      label: formatUserList(ul, tLists),
+      group: RecipientOptionGroup.DEFAULT,
+      disabled: ul.count === 0,
+    }),
   );
-};
 
-const MarkButton = ({ format, icon }: MarkAndBlockButtonProps) => {
-  const editor = useSlate();
+  const testLists = UserLists.TEST;
+  defaultRecipientsOptions.push({
+    key: testLists.type,
+    value: testLists.type,
+    label: tLists(testLists.type),
+    group: RecipientOptionGroup.DEFAULT,
+    disabled: false,
+  });
+  const vendorsLists = UserLists.VENDORS;
+  defaultRecipientsOptions.push({
+    key: vendorsLists.type,   
+    value: vendorsLists.type,
+    label: tLists(vendorsLists.type),
+    group: RecipientOptionGroup.DEFAULT,
+    disabled: false,
+  });
+  let senderEmail = '';
+  let senderName = groupName;
+  if (isPartnerConnected && !!user.email2) {
+    senderEmail = user.email2;
+  } else {
+    senderEmail = user.email;
+  }
+
+  const initialValues: MessagesFormValues = {
+    senderName,
+    senderEmail,
+    recipientsList: undefined,
+    object: '',
+    message: '', // Valeur initiale vide - SlateTextEditor gère la normalisation
+  };
+
   return (
-    <TextEditorComponents
-      active={isMarkActive(editor, format)}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        toggleMark(editor, format);
-      }}
-    >
-      {icon}
-    </TextEditorComponents>
+    <Formik initialValues={initialValues} onSubmit={onSubmit}>
+      {(formikProps) => (
+        <Form>
+          {formikProps.status && !isSuccessful && (
+            <Box my={2}>
+              <Alert severity="error">{formikProps.status}</Alert>
+            </Box>
+          )}
+          {isSuccessful && !formikProps.status && (
+            <Box my={2}>
+              <Alert severity="success">{t('form.success')}</Alert>
+            </Box>
+          )}
+
+          <Box>
+            <Box width="100%">
+              <Field
+                component={CustomTextField}
+                fullWidth
+                margin="normal"
+                label={t('form.name')}
+                name={'senderName'}
+                required
+              />
+              <Field
+                component={CustomTextField}
+                fullWidth
+                margin="normal"
+                label={t('form.email')}
+                name={'senderEmail'}
+                required
+              />
+              <Field
+                fullWidth
+                margin="normal"
+                label={t('form.recipients')}
+                name={'recipientsList'}
+                required
+                component={MessageRecipientsSelect}
+                defaultRecipientsOptions={defaultRecipientsOptions}
+              />
+              <Field
+                fullWidth
+                margin="normal"
+                label={t('form.object')}
+                name={'object'}
+                required
+                component={ObjectFieldComponent}
+              />
+              <Field
+                fullWidth
+                margin="normal"
+                label={t('form.message')}
+                name={'message'}
+                required
+                as={MessageTextEditor}
+              />
+              <Field
+                fullWidth
+                margin="normal"
+                label={t('form.latestMessages')}
+                name={'latestMessages'}
+                required
+                component={LatestMessagesFieldComponent}
+                as={LatestMessagesFieldComponent}
+              />
+            </Box>
+          </Box>
+          <Box
+            mb={3}
+            pb={{ xs: 1, sm: 0 }}
+            display="flex"
+            justifyContent="center"
+          >
+            <LoadingButton
+              loading={formikProps.isSubmitting}
+              variant="contained"
+              type="submit"
+              disabled={formikProps.isSubmitting}
+            >
+              {t('form.send')}
+            </LoadingButton>
+          </Box>
+        </Form>
+      )}
+    </Formik>
   );
 };
 
