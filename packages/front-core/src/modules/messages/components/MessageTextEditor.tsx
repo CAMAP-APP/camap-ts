@@ -108,6 +108,13 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
       // Silently ignore the issue
       return;
     }
+    
+    // 🔧 FIX: Valider que slateContentValue est une structure valide
+    if (!slateContentValue || !Array.isArray(slateContentValue) || slateContentValue.length === 0) {
+      console.warn('Invalid slate content value, using EMPTY_SLATE_VALUE');
+      slateContentValue = EMPTY_SLATE_VALUE as BaseNode[];
+    }
+    
     if (slateContentValue !== customValue) {
       setCustomValue(slateContentValue);
       checkEmbeddedImages(
