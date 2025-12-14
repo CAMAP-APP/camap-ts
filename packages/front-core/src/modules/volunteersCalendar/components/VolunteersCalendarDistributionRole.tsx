@@ -28,14 +28,16 @@ const VolunteersCalendarDistributionRole = ({
     t: 'volunteers-calendar',
   });
 
-  const from = new Date();
-  const to = new Date();
+const from = new Date();
+const to = new Date();
 
-	const roleKey = String(roleId);
-	const hasVolunteerRole = !!multiDistrib.hasVolunteerRole?.[roleKey];
-	const volunteerForRole = hasVolunteerRole
-		? multiDistrib.volunteerForRole?.[roleKey] ?? undefined
-		: undefined;
+const roleKey = String(roleId);
+const hasVolunteerRole = !!multiDistrib.hasVolunteerRole?.[roleKey];
+const volunteerForRole = hasVolunteerRole
+  ? (multiDistrib.volunteerForRole?.[roleKey] ?? null)
+  : null;
+
+const volunteer = volunteerForRole;
 
   let sxColors: SxProps<Theme> = {
     bgcolor: 'initial',
@@ -75,7 +77,7 @@ const VolunteersCalendarDistributionRole = ({
                 <Button
                   variant="contained"
                   color="error"
-                  href={`/distribution/unsubscribeFromRole/${multiDistrib.id}/${roleId}?returnUrl=${returnUrl}&from=${from}&to${to}`}
+                  href={`/distribution/unsubscribeFromRole/${multiDistrib.id}/${roleId}?returnUrl=${returnUrl}&from=${from}&to=${to}`}
                 >
                   {t('unsubscribe')}
                 </Button>
