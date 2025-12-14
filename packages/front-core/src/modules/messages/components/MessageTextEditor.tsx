@@ -106,8 +106,31 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
       );
     } catch (e) {
       // Silently ignore the issue
+      console.warn('Failed to parse slate content:', e);
       return;
     }
+    
+    // 🔧 FIX: Valider que slateContentValue est une structure valide
+    if (
+      !slateContentValue || 
+      !Array.isArray(slateContentValue) || 
+      slateContentValue.length === 0
+    ) {
+      console.warn('Invalid slate content value, using EMPTY_SLATE_VALUE');
+      slateContentValue = EMPTY_SLATE_VALUE as BaseNode[];
+    }
+    
+    // 🔧 FIX: Vérifier que chaque nœud a des enfants
+    slateContentValue = slateContentValue.map((node: any) => {
+      if (!node.children || node.children.length === 0) {
+        return {
+          ...node,
+          children: [{ text: '' }],
+        };
+      }
+      return node;
+    });
+    
     if (slateContentValue !== customValue) {
       setCustomValue(slateContentValue);
       checkEmbeddedImages(
