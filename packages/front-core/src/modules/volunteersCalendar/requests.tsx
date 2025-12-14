@@ -15,8 +15,8 @@ export type RestCsaMultiDistribWithVolunteerRoles = Pick<
   canVolunteersJoin: boolean;
   volunteersRequired: number;
   volunteersRegistered: number;
-  hasVolunteerRole: Map<number, boolean>;
-  volunteerForRole: Map<number, Volunteer | null>;
+	hasVolunteerRole: Record<string, boolean>;
+	volunteerForRole: Record<string, Volunteer | null>;
 };
 
 export type RestCsaVolunteerRoles = {
