@@ -47,23 +47,17 @@ import TextEditorLinkButton from './TextEditorLinkButton';
 import withHtml from './withHtml';
 import withLinks from './withLinks';
 
-// 🔧 FIX: Structure Slate valide pour une valeur vide (avec types custom CAMAP)
+// This is defined by Slate
 export const EMPTY_SLATE_VALUE: Node[] = [
-  {
-    types: [FormatTypes.paragraph],
-    children: [{ text: '' }],
-  } as any,
+  { types: [FormatTypes.paragraph], children: [{ text: '' }] },
 ];
 
 export const EMPTY_EDITOR_HTML_REGEX = /<div style=".*"><p><br><\/p><\/div>/;
 
-// 🔧 FIX: Utiliser EMPTY_SLATE_VALUE comme valeur initiale
-export const SLATE_INITIAL_VALUE = EMPTY_SLATE_VALUE;
-
 const EDITOR_PADDING = 8;
 
 const StyledEditable = styled(CustomEditable)(() => ({
-  minHeight: '350px !important',
+  minHeight: '350px !important', // Use !important because Slate put a min-height in the style attribute
   padding: EDITOR_PADDING,
   overflow: 'hidden',
 }));
@@ -276,6 +270,13 @@ const MarkButton = ({ format, icon }: MarkAndBlockButtonProps) => {
   );
 };
 
+export const SLATE_INITIAL_VALUE = [
+  {
+    types: [FormatTypes.paragraph],
+    children: [{ text: '' }],
+  },
+];
+
 const hasImageNode = (nodes: CustomSlateElement[]): boolean => {
   return nodes.find((n) => n.type && n.type === FormatTypes.image) !== null;
 };
@@ -309,7 +310,11 @@ const serialize = (
       if (mark.startsWith('#')) colorStyle = mark;
     });
 
+    // Empty text node
     if (node.text === '') {
+      // When inserting a Hyperlink node, Slate might add empty text nodes siblings before and after the hyperlink node.
+      // We don't want these empty text nodes to be serialized into a line jump '<br>'.
+      // Thus, we have to check whether this node is a non-desired Hyperlink's sibling in order to ignore it.
       let isLineJump = true;
       if (parent !== undefined && index !== undefined && 'children' in parent) {
         const previousSibling =
@@ -368,6 +373,7 @@ const serialize = (
   }
 
   if (Editor.isEditor(node)) {
+    // This node is the root node
     const width = editorWidth ? `${editorWidth}px` : 'auto';
     let style = `max-width:${width};margin: 0 auto;font-size:16px;font-family: Cabin, Arial, Helvetica, sans-serif;font-weight: 400;line-height: 1.43;`;
     if (hasImageNode(node.children as CustomSlateElement[]))
@@ -427,44 +433,9 @@ export interface SlateTextEditorProps {
   customToolbarButtons?: React.ReactNode[];
   customAdditionalComponents?: React.ReactNode[];
   customValue?: Node[];
+  // Used to load group's catalog images
   groupId?: number;
 }
-
-// 🔧 FIX: Fonction de normalisation pour garantir une structure Slate valide
-const normalizeSlateValue = (val: any): Node[] => {
-  if (!val || (Array.isArray(val) && val.length === 0) || val === '') {
-    return EMPTY_SLATE_VALUE;
-  }
-  
-  if (typeof val === 'string') {
-    return EMPTY_SLATE_VALUE;
-  }
-  
-  if (!Array.isArray(val)) {
-    console.warn('Slate value is not an array, using EMPTY_SLATE_VALUE');
-    return EMPTY_SLATE_VALUE;
-  }
-  
-  return val.map((node: any) => {
-    // Vérifier que le nœud a soit 'types' (custom CAMAP) soit 'type' (standard Slate)
-    if (!node.types && !node.type) {
-      return {
-        types: [FormatTypes.paragraph],
-        children: node.children && node.children.length > 0 ? node.children : [{ text: '' }],
-      };
-    }
-    
-    // Si le nœud n'a pas d'enfants, en ajouter
-    if (!node.children || node.children.length === 0) {
-      return {
-        ...node,
-        children: [{ text: '' }],
-      };
-    }
-    
-    return node;
-  });
-};
 
 const SlateTextEditor = ({
   name,
@@ -481,12 +452,7 @@ const SlateTextEditor = ({
 }: SlateTextEditorProps) => {
   const { t } = useTranslation(['messages/default']);
 
-  // 🔧 FIX: Normaliser la valeur initiale
-  const [value, setValue] = useState<Node[]>(() => {
-    const normalized = normalizeSlateValue(customValue || SLATE_INITIAL_VALUE);
-    // console.log('🔍 [SlateTextEditor] Initial value:', JSON.stringify(normalized, null, 2));
-    return normalized;
-  });
+  const [value, setValue] = useState<Node[]>(SLATE_INITIAL_VALUE);
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const editor = useMemo(
     () =>
@@ -504,16 +470,13 @@ const SlateTextEditor = ({
   useEffect(() => {
     if (!customValue) return;
 
-    // 🔧 FIX: Normaliser customValue avant de l'utiliser
-    const normalizedValue = normalizeSlateValue(customValue);
-    // console.log('🔍 [SlateTextEditor] Setting customValue:', JSON.stringify(normalizedValue, null, 2));
-    editor.children = normalizedValue;
-    setValue(normalizedValue);
+    editor.children = customValue;
     setFormikValue(editableRef.current || undefined);
   }, [customValue, editor]);
 
   useEffect(() => {
     if (formikValue === '') {
+      // Form has been reset
       editor.selection = null;
       setValue(SLATE_INITIAL_VALUE);
     }
@@ -529,6 +492,8 @@ const SlateTextEditor = ({
       undefined,
       undefined,
       editorWidth,
+      // Workaround to get image as CID for the Messaging Service
+      // (for now it is true that if we use onAddImagesCustomHandler we are in the messaging service)
       !!onAddImagesCustomHandler,
     );
     if (onSetValueCustomHandler) onSetValueCustomHandler(serializedHtml);
@@ -571,6 +536,7 @@ const SlateTextEditor = ({
           '&:hover': {
             borderColor: theme.palette.text.primary,
           },
+          // Reset on touch devices, it doesn't add specificity
           '@media (hover: none)': {
             '&:hover': {
               borderColor: 'rgba(0, 0, 0, 0.23)',
