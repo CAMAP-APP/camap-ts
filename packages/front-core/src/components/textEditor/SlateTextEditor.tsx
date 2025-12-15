@@ -137,96 +137,34 @@ const MessagesForm = ({
   };
 
   return (
-    <Formik initialValues={initialValues} onSubmit={onSubmit}>
-      {(formikProps) => (
-        <Form>
-          {formikProps.status && !isSuccessful && (
-            <Box my={2}>
-              <Alert severity="error">{formikProps.status}</Alert>
-            </Box>
-          )}
-          {isSuccessful && !formikProps.status && (
-            <Box my={2}>
-              <Alert severity="success">{t('form.success')}</Alert>
-            </Box>
-          )}
-
-          <Box>
-            <Box width="100%">
-              <Field
-                component={CustomTextField}
-                fullWidth
-                margin="normal"
-                label={t('form.name')}
-                name={'senderName'}
-                required
-              />
-              <Field
-                component={CustomTextField}
-                fullWidth
-                margin="normal"
-                label={t('form.email')}
-                name={'senderEmail'}
-                required
-              />
-              <Field
-                fullWidth
-                margin="normal"
-                label={t('form.recipients')}
-                name={'recipientsList'}
-                required
-                component={MessageRecipientsSelect}
-                defaultRecipientsOptions={defaultRecipientsOptions}
-              />
-              <Field
-                fullWidth
-                margin="normal"
-                label={t('form.object')}
-                name={'object'}
-                required
-                component={ObjectFieldComponent}
-              />
-              <Field
-                fullWidth
-                margin="normal"
-                label={t('form.message')}
-                name={'message'}
-                required
-                as={MessageTextEditor}
-              />
-              <Field
-                fullWidth
-                margin="normal"
-                label={t('form.latestMessages')}
-                name={'latestMessages'}
-                required
-                component={LatestMessagesFieldComponent}
-                as={LatestMessagesFieldComponent}
-              />
-            </Box>
-          </Box>
-          <Box
-            mb={3}
-            pb={{ xs: 1, sm: 0 }}
-            display="flex"
-            justifyContent="center"
-          >
-            <LoadingButton
-              loading={formikProps.isSubmitting}
-              variant="contained"
-              type="submit"
-              disabled={formikProps.isSubmitting}
-            >
-              {t('form.send')}
-            </LoadingButton>
-          </Box>
-        </Form>
-      )}
-    </Formik>
+    <TextEditorComponents
+      active={isActive}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        toggleBlock(editor, format);
+      }}
+    >
+      {icon}
+    </TextEditorComponents>
   );
 };
 
-// 🔧 FIX: Utiliser EMPTY_SLATE_VALUE au lieu de SLATE_INITIAL_VALUE
+const MarkButton = ({ format, icon }: MarkAndBlockButtonProps) => {
+  const editor = useSlate();
+  return (
+    <TextEditorComponents
+      active={isMarkActive(editor, format)}
+      onMouseDown={(event) => {
+        event.preventDefault();
+        toggleMark(editor, format);
+      }}
+    >
+      {icon}
+    </TextEditorComponents>
+  );
+};
+
+// 🔧 FIX: Utiliser EMPTY_SLATE_VALUE comme valeur initiale
 export const SLATE_INITIAL_VALUE = EMPTY_SLATE_VALUE;
 
 const hasImageNode = (nodes: CustomSlateElement[]): boolean => {
