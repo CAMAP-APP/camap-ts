@@ -484,7 +484,7 @@ const SlateTextEditor = ({
   // 🔧 FIX: Normaliser la valeur initiale
   const [value, setValue] = useState<Node[]>(() => {
     const normalized = normalizeSlateValue(customValue || SLATE_INITIAL_VALUE);
-    console.log('🔍 [SlateTextEditor] Initial value:', JSON.stringify(normalized, null, 2));
+    // console.log('🔍 [SlateTextEditor] Initial value:', JSON.stringify(normalized, null, 2));
     return normalized;
   });
   const [isFocused, setIsFocused] = useState<boolean>(false);
@@ -506,7 +506,7 @@ const SlateTextEditor = ({
 
     // 🔧 FIX: Normaliser customValue avant de l'utiliser
     const normalizedValue = normalizeSlateValue(customValue);
-    console.log('🔍 [SlateTextEditor] Setting customValue:', JSON.stringify(normalizedValue, null, 2));
+    // console.log('🔍 [SlateTextEditor] Setting customValue:', JSON.stringify(normalizedValue, null, 2));
     editor.children = normalizedValue;
     setValue(normalizedValue);
     setFormikValue(editableRef.current || undefined);
