@@ -92,7 +92,7 @@ const MessagesForm = ({
     senderEmail,
     recipientsList: undefined,
     object: '',
-    message: '', // Garde la chaîne vide - MessageTextEditor gère l'initialisation
+    message: '',
   };
 
   return (
