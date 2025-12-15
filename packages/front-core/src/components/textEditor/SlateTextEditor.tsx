@@ -47,12 +47,12 @@ import TextEditorLinkButton from './TextEditorLinkButton';
 import withHtml from './withHtml';
 import withLinks from './withLinks';
 
-// 🔧 FIX: Structure Slate valide pour une valeur vide
+// 🔧 FIX: Structure Slate valide pour une valeur vide (avec types custom CAMAP)
 export const EMPTY_SLATE_VALUE: Node[] = [
   {
     types: [FormatTypes.paragraph],
     children: [{ text: '' }],
-  },
+  } as any,
 ];
 
 export const EMPTY_EDITOR_HTML_REGEX = /<div style=".*"><p><br><\/p><\/div>/;
@@ -446,12 +446,22 @@ const normalizeSlateValue = (val: any): Node[] => {
   }
   
   return val.map((node: any) => {
+    // Vérifier que le nœud a soit 'types' (custom CAMAP) soit 'type' (standard Slate)
+    if (!node.types && !node.type) {
+      return {
+        types: [FormatTypes.paragraph],
+        children: node.children && node.children.length > 0 ? node.children : [{ text: '' }],
+      };
+    }
+    
+    // Si le nœud n'a pas d'enfants, en ajouter
     if (!node.children || node.children.length === 0) {
       return {
         ...node,
         children: [{ text: '' }],
       };
     }
+    
     return node;
   });
 };
@@ -472,9 +482,11 @@ const SlateTextEditor = ({
   const { t } = useTranslation(['messages/default']);
 
   // 🔧 FIX: Normaliser la valeur initiale
-  const [value, setValue] = useState<Node[]>(() => 
-    normalizeSlateValue(customValue || SLATE_INITIAL_VALUE)
-  );
+  const [value, setValue] = useState<Node[]>(() => {
+    const normalized = normalizeSlateValue(customValue || SLATE_INITIAL_VALUE);
+    console.log('🔍 [SlateTextEditor] Initial value:', JSON.stringify(normalized, null, 2));
+    return normalized;
+  });
   const [isFocused, setIsFocused] = useState<boolean>(false);
   const editor = useMemo(
     () =>
@@ -494,6 +506,7 @@ const SlateTextEditor = ({
 
     // 🔧 FIX: Normaliser customValue avant de l'utiliser
     const normalizedValue = normalizeSlateValue(customValue);
+    console.log('🔍 [SlateTextEditor] Setting customValue:', JSON.stringify(normalizedValue, null, 2));
     editor.children = normalizedValue;
     setValue(normalizedValue);
     setFormikValue(editableRef.current || undefined);
