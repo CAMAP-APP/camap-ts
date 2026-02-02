@@ -6,10 +6,14 @@ const tsconfigPaths = require('vite-tsconfig-paths').default;
 module.exports = {
   framework: {
     name: '@storybook/react-vite',
-    options: {}
+    options: {},
   },
 
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|ts|tsx)', '../stories/**/*.stories.@(js|jsx|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|ts|tsx)',
+    '../stories/**/*.stories.@(js|jsx|ts|tsx)',
+  ],
 
   addons: [
     '@storybook/addon-links',
@@ -45,6 +49,7 @@ module.exports = {
       'CAMAP_',
       'MAPBOX_KEY',
     ]);
+
     return mergeConfig(config, {
       plugins: [
         tsconfigPaths({
@@ -53,9 +58,12 @@ module.exports = {
       ],
       define: {
         'process.env.IS_STORY': true,
+        // On garde les FRONT_ / CAMAP_ pour la compat éventuelle,
+        // mais MAPBOX_KEY n'est plus consommée via process.env côté front.
         'process.env.FRONT_URL': JSON.stringify(env.FRONT_URL),
-        'process.env.MAPBOX_KEY': JSON.stringify(env.MAPBOX_KEY),
-        'process.env.FRONT_GRAPHQL_URL': JSON.stringify(env.FRONT_GRAPHQL_URL),
+        'process.env.FRONT_GRAPHQL_URL': JSON.stringify(
+          env.FRONT_GRAPHQL_URL,
+        ),
         'process.env.CAMAP_HOST': JSON.stringify(env.CAMAP_HOST),
       },
       optimizeDeps: {
@@ -78,6 +86,6 @@ module.exports = {
   staticDirs: ['../../../../camap-hx/www/'],
 
   docs: {
-    autodocs: true
-  }
+    autodocs: true,
+  },
 };

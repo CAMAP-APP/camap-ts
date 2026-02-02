@@ -12,6 +12,7 @@ import { buildClientSchema, GraphQLScalarSerializer, GraphQLScalarValueParser, I
 import 'isomorphic-unfetch';
 import { inMemoryCacheConfig } from '../config/apollo.config';
 import introspection from '../gql/introspection.json';
+import { getGraphqlUrl } from './runtimeCfg';
 
 let globalApolloClient: ApolloClient<NormalizedCacheObject> | null = null;
 
@@ -56,7 +57,8 @@ function createApolloClient(
       : headers
   };
   const httpLink = createUploadLink({
-    uri: options.uri || process.env.FRONT_GRAPHQL_URL,
+    // ⚠ process.env.FRONT_GRAPHQL_URL est résolu au build. On veut du runtime:
+    uri: options.uri || getGraphqlUrl(),
     credentials: 'include',
     ...fetchOptions,
   });

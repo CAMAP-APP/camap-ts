@@ -19,6 +19,7 @@ import { useSlateStatic } from 'slate-react';
 import { TextEditorComponents } from '../TextEditorComponents';
 import { insertImage } from './withImage';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
+import { getCamapHost } from 'lib/runtimeCfg';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -130,8 +131,10 @@ const TextEditorImageButton = ({
     }
     if (!newValue) return;
     closeMenu();
+
     const image = newValue.vendor?.image as string;
-    insertImage(editor, `${process.env.CAMAP_HOST}${image}`);
+    insertImage(editor, `${getCamapHost()}${image}`);
+
   };
 
   const onCatalogInputChange = (

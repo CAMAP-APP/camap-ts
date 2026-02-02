@@ -7,6 +7,7 @@ import Autocomplete, {
 } from '@mui/material/Autocomplete';
 import React, { ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { getRuntimeCfg } from '../../../lib/runtimeCfg';
 
 export const FRANCE_ISO_3166_1 = 250;
 
@@ -30,7 +31,7 @@ export interface ISO31661SelectorProps {
     | 'defaultValue'
     | 'options'
     | 'getOptionLabel'
-    | 'getOptionSelected'
+    | 'isOptionEqualToValue'
     | 'renderInput'
   >;
   textFieldProps?: TextFieldProps;
@@ -40,7 +41,29 @@ export interface ISO31661SelectorProps {
   ) => void;
 }
 
-const URL = `${process.env.FRONT_URL}/data/<LOCALE>/iso-3166-1.json`;
+/**
+ * Construit l’URL du fichier iso-3166-1.json à partir de la config runtime.
+ *
+ * Priorités :
+ *  1) CAMAP_HOST  (ex: https://camapdev.amap44.org)
+ *  2) window.location.origin (fallback générique)
+ *
+ * Le backend doit exposer /data/<locale>/iso-3166-1.json sur ce host.
+ */
+function buildIsoUrl(locale: string): string {
+  const cfg = getRuntimeCfg();
+
+  const origin =
+    typeof window !== 'undefined' ? window.location.origin : '';
+
+  // Priorité absolue : CAMAP_HOST
+  const base =
+    (cfg as any).CAMAP_HOST && (cfg as any).CAMAP_HOST.trim() !== ''
+      ? (cfg as any).CAMAP_HOST
+      : origin;
+
+  return `${base}/data/${locale}/iso-3166-1.json`;
+}
 
 const ISO31661Selector = ({
   defaultValue,
@@ -69,7 +92,7 @@ const ISO31661Selector = ({
       return;
     }
     // @ts-ignore
-    onChange(value[format], e);
+     onChange((value as any)[format], e as ChangeEvent<HTMLInputElement>);
   };
 
   /** */
@@ -81,15 +104,14 @@ const ISO31661Selector = ({
       setError(undefined);
 
       try {
-        let url = URL.replace('<LOCALE>', 'fr');
-        url = url.startsWith('http') ? url : `${window.location.origin}${url}`;
+        const url = buildIsoUrl('fr');
         const d = await fetch(url).then((res) => {
           if (!res.ok) throw new Error(res.statusText);
           return res.json();
         });
         if (!active) return;
         setData(d);
-      } catch (err) {
+      } catch (err: any) {
         if (!active) return;
         setError(t('error', { message: (err instanceof Error) ? err.message : err }));
       } finally {
@@ -108,20 +130,22 @@ const ISO31661Selector = ({
 
   /** */
   const getValue = React.useCallback(
-    (value?: string | number | ISO_3166_1) => {
-      if (!value) return null;
-      if (typeof value === 'number') {
-        return data?.find((d) => d.id === value);
+    (v?: string | number | ISO_3166_1) => {
+      if (!v) return null;
+      if (typeof v === 'number') {
+        return data?.find((d) => d.id === v) ?? null;
       }
-      if (typeof value === 'string') {
-        return data?.find(
-          (d) =>
-            d.name.toLowerCase() === value.toLowerCase() ||
-            d.alpha2.toLowerCase() === value.toLowerCase() ||
-            d.alpha3.toLowerCase() === value.toLowerCase(),
+      if (typeof v === 'string') {
+        return (
+          data?.find(
+            (d) =>
+              d.name.toLowerCase() === v.toLowerCase() ||
+              d.alpha2.toLowerCase() === v.toLowerCase() ||
+              d.alpha3.toLowerCase() === v.toLowerCase(),
+          ) ?? null
         );
       }
-      return value;
+      return v;
     },
     [data],
   );
@@ -131,9 +155,9 @@ const ISO31661Selector = ({
   }, []);
 
   const getOptionSelected = React.useCallback(
-    (option: ISO_3166_1, value: ISO_3166_1 | null) => {
-      if (!value) return false;
-      return option.id === value.id;
+    (option: ISO_3166_1, v: ISO_3166_1 | null) => {
+      if (!v) return false;
+      return option.id === v.id;
     },
     [],
   );
@@ -166,7 +190,7 @@ const ISO31661Selector = ({
         <CircularProgress />
       </Box>
     );
-  return <>
+  return (
     <Autocomplete<ISO_3166_1>
       {...autocompleteProps}
       value={getValue(value)}
@@ -175,9 +199,16 @@ const ISO31661Selector = ({
       getOptionLabel={getOptionLabel}
       isOptionEqualToValue={getOptionSelected}
       renderInput={renderInput}
-      onChange={onAutocompleteChange}
+      onChange={(_e, v, _reason, details) => {
+        // Material UI passe value via le 2ème paramètre, l’event réel
+        // est dans details, mais on garde la signature existante :
+        const event =
+          (details && (details as any).event) ||
+          ({ target: { value: '' } } as React.ChangeEvent<HTMLInputElement>);
+        onAutocompleteChange(event, v as ISO_3166_1 | null);
+      }}
     />
-  </>;
+  );
 };
 
 export default ISO31661Selector;

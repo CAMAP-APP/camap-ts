@@ -1,3 +1,4 @@
+import './set-public-path';
 import CircularProgressBox from '@components/utils/CircularProgressBox';
 import { ThemeProvider } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';

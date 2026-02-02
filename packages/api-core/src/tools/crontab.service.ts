@@ -57,6 +57,6 @@ export class CrontabService {
   getCamapHaxeUrl(): string {
     // To test it locally use your local IP address
     // return 'http://192.168.0.1';
-    return process.env.CAMAP_HOST;
+    return process.env.CAMAP_LOCAL_HOST;
   }
 }

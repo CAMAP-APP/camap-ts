@@ -53,12 +53,9 @@ module.exports = {
     new CleanWebpackPlugin(),
     new WebpackManifestPlugin(),
     new webpack.DefinePlugin({
-      'process.env.FRONT_URL': JSON.stringify(process.env.FRONT_URL),
-      'process.env.FRONT_GRAPHQL_URL': JSON.stringify(
-        process.env.FRONT_GRAPHQL_URL,
-      ),
-      'process.env.CAMAP_HOST': JSON.stringify(process.env.CAMAP_HOST),
-      'process.env.MAPBOX_KEY': JSON.stringify(process.env.MAPBOX_KEY),
+      // On ne fige plus FRONT_URL / FRONT_GRAPHQL_URL / CAMAP_HOST / MAPBOX_KEY ici :
+      // tout ce qui est URL / tokens front est désormais lu via __APP_CONFIG__ côté browser.
+      'process.env.NODE_ENV': JSON.stringify(MODE),
     }),
     new FileManagerPlugin({
       events: {
@@ -87,7 +84,10 @@ module.exports = {
     libraryTarget: 'var',
     library: '[name]',
     crossOriginLoading: 'anonymous',
-    publicPath: process.env.FRONT_URL + '/neostatic/',
+    // PUBLIC PATH RUNTIME :
+    // - valeur build-time neutre
+    // - surchargée au runtime par src/set-public-path.ts via __webpack_require__.p
+    publicPath: '/neostatic/',
   },
   optimization: {
     minimize: true,
@@ -98,13 +98,10 @@ module.exports = {
           test: /[\\/]node_modules[\\/](react|react-dom|@mui\/material)[\\/]/,
           name: 'reactlibs',
           chunks: 'all',
-          // enforce: true,
         },
         vendor: {
           test: /[\\/]node_modules[\\/]/,
           name: 'vendors',
-          // chunks: 'all',
-          // enforce: true,
         },
       },
     },
