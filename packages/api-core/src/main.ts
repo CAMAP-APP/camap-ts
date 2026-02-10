@@ -54,10 +54,13 @@ async function bootstrap() {
     }),
   );
 
+  // const srvRoot = process.cwd();
+  const srvRoot = "/srv";
+
   // Expose uniquement les bundles front sous /neostatic
   // WORKDIR = /srv  =>  process.cwd() === "/srv"
   // Les assets sont en /srv/public/neostatic (cf. Dockerfile camap-ts)
-  app.useStaticAssets(join(process.cwd(), 'public', 'neostatic'), {
+  app.useStaticAssets(join(srvRoot, 'public', 'neostatic'), {
     prefix: '/neostatic/',
     maxAge: 31536000000, // 365 jours en ms
     // Certaines versions de @types/serve-static n'ont pas 'cacheControl'/'immutable'.
@@ -68,7 +71,7 @@ async function bootstrap() {
   });
 
   // Servir les traductions i18n
-  app.useStaticAssets(join(process.cwd(), 'public', 'locales'), {
+  app.useStaticAssets(join(srvRoot, 'public', 'locales'), {
     prefix: '/locales/',
     maxAge: 86400000, // 1 jour
     setHeaders: (res) => {
