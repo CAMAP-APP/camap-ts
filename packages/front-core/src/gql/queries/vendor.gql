@@ -48,6 +48,42 @@ query vendorActiveCatalogs($vendorId: Int!) {
   }
 }
 
+query vendorCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    activeCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      subscriptionsCount
+      vendor {
+        id
+      }
+      group {
+        id
+        name
+      }
+    }
+    allCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      subscriptionsCount
+      vendor {
+        id
+      }
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+
 query vendorDocuments($vendorId: Int!) {
   vendor(id: $vendorId) {
     id

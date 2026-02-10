@@ -6,10 +6,11 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
 import { reactRouterDefaultProps } from "react-router-config";
-import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { VendorImage } from "../../components/vendor/VendorImage";
 import { VendorClaims } from "./VendorClaims";
 import VendorConsolidation from "./VendorConsolidation";
+import VendorContracts from "./VendorContracts";
 import VendorEditDocuments from "./VendorEditDocuments";
 import VendorForm from "./VendorForm";
 import VendorEditImages from "./VendorEditImages";
@@ -165,6 +166,12 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
             icon: <CamapIcon id={CamapIconId.user} />,
             path: '/edit',
             element: <VendorForm vendorId={vendor.id} onSuccess={refetchClaimedVendors} />
+        },
+        {
+            label: tVendorDash('contracts'),
+            icon: <CamapIcon id={CamapIconId.book} />,
+            path: '/contracts',
+            element: <VendorContracts vendorId={vendor.id}/>
         },
         {
             label: tVendorDash('vendorDashboardDocuments'),

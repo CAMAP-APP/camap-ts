@@ -1339,6 +1339,13 @@ export type VendorActiveCatalogsQueryVariables = Exact<{
 
 export type VendorActiveCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, groupId: number, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
 
+export type VendorCatalogsQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+}>;
+
+
+export type VendorCatalogsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }>, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, type: CatalogType, startDate: any, endDate: any, subscriptionsCount: number, vendor: { __typename?: 'Vendor', id: number }, group: { __typename?: 'Group', id: number, name: string } }> } };
+
 export type VendorDocumentsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
 }>;
@@ -2370,6 +2377,71 @@ export function useVendorActiveCatalogsLazyQuery(baseOptions?: ApolloReactHooks.
 export type VendorActiveCatalogsQueryHookResult = ReturnType<typeof useVendorActiveCatalogsQuery>;
 export type VendorActiveCatalogsLazyQueryHookResult = ReturnType<typeof useVendorActiveCatalogsLazyQuery>;
 export type VendorActiveCatalogsQueryResult = Apollo.QueryResult<VendorActiveCatalogsQuery, VendorActiveCatalogsQueryVariables>;
+export const VendorCatalogsDocument = gql`
+    query vendorCatalogs($vendorId: Int!) {
+  vendor(id: $vendorId) {
+    id
+    activeCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      subscriptionsCount
+      vendor {
+        id
+      }
+      group {
+        id
+        name
+      }
+    }
+    allCatalogs {
+      id
+      name
+      type
+      startDate
+      endDate
+      subscriptionsCount
+      vendor {
+        id
+      }
+      group {
+        id
+        name
+      }
+    }
+  }
+}
+    `;
+
+/**
+ * __useVendorCatalogsQuery__
+ *
+ * To run a query within a React component, call `useVendorCatalogsQuery` and pass it any options that fit your needs.
+ * When your component renders, `useVendorCatalogsQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useVendorCatalogsQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *   },
+ * });
+ */
+export function useVendorCatalogsQuery(baseOptions: ApolloReactHooks.QueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+      }
+export function useVendorCatalogsLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<VendorCatalogsQuery, VendorCatalogsQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<VendorCatalogsQuery, VendorCatalogsQueryVariables>(VendorCatalogsDocument, options);
+        }
+export type VendorCatalogsQueryHookResult = ReturnType<typeof useVendorCatalogsQuery>;
+export type VendorCatalogsLazyQueryHookResult = ReturnType<typeof useVendorCatalogsLazyQuery>;
+export type VendorCatalogsQueryResult = Apollo.QueryResult<VendorCatalogsQuery, VendorCatalogsQueryVariables>;
 export const VendorDocumentsDocument = gql`
     query vendorDocuments($vendorId: Int!) {
   vendor(id: $vendorId) {
