@@ -1731,7 +1731,7 @@ export type QuitGroupByControlKeyMutation = { __typename?: 'Mutation', quitGroup
 export type GetClaimableVendorsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
+export type GetClaimableVendorsQuery = { __typename?: 'Query', getClaimableVendors: Array<{ __typename?: 'Vendor', id: number, name: string, email?: string | null, phone?: string | null, city: string, zipCode?: string | null, companyNumber?: string | null, image?: string | null, disabled?: VendorDisabledReason | null, activeCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }>, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, startDate: any, endDate: any, subscriptionsCount: number, group: { __typename?: 'Group', id: number, name: string } }> }> };
 
 export type GetVendorsByUserIdQueryVariables = Exact<{
   userId: Scalars['Int'];
@@ -4542,6 +4542,17 @@ export const GetClaimableVendorsDocument = gql`
     image
     disabled
     activeCatalogs {
+      id
+      name
+      startDate
+      endDate
+      group {
+        id
+        name
+      }
+      subscriptionsCount
+    }
+    allCatalogs {
       id
       name
       startDate
