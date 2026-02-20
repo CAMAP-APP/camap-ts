@@ -7,7 +7,8 @@ import {
   Button,
   Grid,
   IconButton,
-  Input,
+  InputAdornment,
+  OutlinedInput,
   Paper,
   styled,
   SxProps,
@@ -70,7 +71,7 @@ const SearchInput = ({
     )
       return;
     setValue('');
-  }, [selectedUserList]);
+  }, [selectedUserList, previousSelectedUserList]);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = event.target.value;
@@ -85,6 +86,7 @@ const SearchInput = ({
 
   return (
     <Paper
+      elevation={0}
       sx={{
         height: 48,
         display: 'flex',
@@ -95,24 +97,23 @@ const SearchInput = ({
         ...sx
       }}
     >
-      <Input
+      <OutlinedInput
         startAdornment={
-          <Box p={1} display="flex">
+          <InputAdornment position="start">
             <SearchIcon sx={IconButtonSx} />
-          </Box>
+          </InputAdornment>
         }
         endAdornment={
           value && (
-            <Box p={1}>
+            <InputAdornment position="end">
               <IconButton size="small" onClick={resetSearch}>
                 <CloseIcon sx={IconButtonSx} />
               </IconButton>
-            </Box>
+            </InputAdornment>
           )
         }
         placeholder={t('search')}
         inputProps={{ 'aria-label': t('search') }}
-        disableUnderline
         value={value}
         onChange={onChange}
       />
@@ -265,8 +266,8 @@ const MembersTableAndActions = () => {
   return (
     <Paper>
       <Box p={2}>
-        <Box display='flex' flexWrap='wrap'>
-          <Box  display='flex' flexDirection={{ xs:"column", md: "row" }} flexGrow={1} justifyContent='space-between'>
+        <Box display='flex' flexWrap='wrap' gap={1}>
+          <Box display='flex' flexDirection={{ xs: "column", md: "row" }} flexGrow={1} justifyContent='space-between'>
             <Typography display={{ xs: "none", md: "inline" }} variant="h2">{t('title')}</Typography>
             <Box display={{ xs: "block", xl: "none" }}>
               <MemberLists variant='dropdown' />
@@ -278,8 +279,9 @@ const MembersTableAndActions = () => {
           />
         </Box>
       </Box>
+      {/* Temporary notice, should be removed once the database has been cleaned of non-user vendors */}
       {selectedUserList.type === 'vendors' && <Alert severity='info'>
-        Cette liste ne montre que les producteurs ayant revendiqué leur fiche.<br/>
+        Cette liste ne montre que les producteurs ayant revendiqué leur fiche.<br />
         <a href="https://wiki.amap44.org/fr/app/admin-producteur">En savoir plus sur les fiches producteur</a>
       </Alert>}
       {selectedUserList.type !== 'waitingList' ? (
@@ -292,9 +294,14 @@ const MembersTableAndActions = () => {
         <WaitingListTable />
       )}
       <Box p={2}>
-        <Grid container spacing={2}>
+        <Grid container spacing={2} sx={{
+          justifyContent: {
+            xs: 'center',
+            md: 'flex-start',
+          }
+        }}>
           <Grid item>
-            <Button variant="outlined" onClick={onNewMemberClick}>
+            <Button variant="contained" onClick={onNewMemberClick}>
               <CamapIcon id={CamapIconId.plus} sx={ButtonBottomIconSx} />
               {t('newMember')}
             </Button>

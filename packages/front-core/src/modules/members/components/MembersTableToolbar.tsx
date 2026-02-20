@@ -1,10 +1,8 @@
 import { FetchResult } from '@apollo/client';
 import { alpha, Box, Button } from '@mui/material';
-import IconButton from '@mui/material/IconButton';
 import Toolbar from '@mui/material/Toolbar';
-import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
-import React, { ReactChild } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import withConfirmDialog from '../../../components/utils/ConfirmDialog/withConfirmDialog';
 import {
@@ -23,7 +21,6 @@ import { MembersContext } from '../MembersContext';
 import Member from '../MemberType';
 import MembershipFeeDialog from './MembershipFeeDialog';
 import { formatUserName } from 'camap-common';
-import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 
 type BatchAction = 'membership' | 'exclude' | 'waitingList';
 
@@ -66,14 +63,17 @@ const MembersTableToolbar = ({
   const ToolbarButton = ({
     title,
     onClick,
+    danger = false,
   }: {
     title: string;
     onClick: React.MouseEventHandler;
+    danger?: boolean;
   }) => (
     <Button
       variant="contained"
       disableElevation
       size="small"
+      color={danger ? 'error' : 'primary'}
       sx={{
         whiteSpace: 'nowrap',
         marginBottom: {
@@ -110,7 +110,7 @@ const MembersTableToolbar = ({
     }),
   });
 
-  const ExcludeActionButton = withConfirmDialog(IconButton, {
+  const ExcludeActionButton = withConfirmDialog(ToolbarButton, {
     title: t(`excludeConfirmDialogTitle`, {
       nbOfMembers: numSelected,
       count: numSelected,
@@ -122,14 +122,6 @@ const MembersTableToolbar = ({
       count: numSelected,
     }),
   });
-  const ExcludeActionButtonForwadedRef = React.forwardRef<
-    HTMLDivElement,
-    { 'aria-label': string; onClick: () => void; children: ReactChild }
-  >((props, ref) => (
-    <div ref={ref}>
-      <ExcludeActionButton {...props} />
-    </div>
-  ));
 
   const getMembershipPromise = (fee?: number) => {
     const date = new Date();
@@ -148,9 +140,9 @@ const MembersTableToolbar = ({
 
   const awaitPromise = async <
     T extends
-      | FetchResult<MoveBackToWaitingListMutation>
-      | FetchResult<RemoveUsersFromGroupMutation>
-      | FetchResult<CreateMembershipsMutation>,
+    | FetchResult<MoveBackToWaitingListMutation>
+    | FetchResult<RemoveUsersFromGroupMutation>
+    | FetchResult<CreateMembershipsMutation>,
   >(
     promise: Promise<T>,
     action: BatchAction,
@@ -254,10 +246,18 @@ const MembersTableToolbar = ({
             ),
         }),
         flexWrap: 'wrap',
-        gap: {
+        gap: {
           xs: 0,
           md: 1
-        }
+        },
+        flexFlow: {
+          xs: 'column nowrap',
+          md: 'row nowrap',
+        },
+        alignItems: {
+          xs: 'stretch',
+          md: 'center',
+        },
       }}
     >
       {numSelected > 0 && (<>
@@ -277,11 +277,19 @@ const MembersTableToolbar = ({
           {`${numSelected} ${t('selected', { count: numSelected })}`}
         </Typography>
         <Box
-          display='flex'
-          gap={1}
-          justifyContent='flex-end'
           flex='1 0 auto'
-          >
+          display='grid'
+          sx={{
+            gridAutoColumns: 'auto',
+            gridAutoFlow: {
+              xs: 'row',
+              sm: 'column',
+            },
+            gridAutoRows: 'auto',
+            rowGap: 0,
+            columnGap: 1,
+          }}
+        >
           <Button
             variant='outlined'
             disableElevation
@@ -297,23 +305,20 @@ const MembersTableToolbar = ({
             href={`/messages?${selectedIds.map(id => `to_uid=${id}`).join('&')}`}
           >{t('sendEmail')}</Button>
           {hasMembership && (
-              <MembershipActionButton
-                title={t('enterMembership')}
-                onClick={() => doBatchAction('membership')}
-              />
-          )}
-            <WaitingListActionButton
-              title={t('resetInWaitingList')}
-              onClick={() => doBatchAction('waitingList')}
+            <MembershipActionButton
+              title={t('enterMembership')}
+              onClick={() => doBatchAction('membership')}
             />
-            <Tooltip title={`${t('removeFromGroup')}`}>
-              <ExcludeActionButtonForwadedRef
-                aria-label={t('removeFromGroup')}
-                onClick={() => doBatchAction('exclude')}
-              >
-                <CamapIcon id={CamapIconId.delete} />
-              </ExcludeActionButtonForwadedRef>
-            </Tooltip>
+          )}
+          <WaitingListActionButton
+            title={t('resetInWaitingList')}
+            onClick={() => doBatchAction('waitingList')}
+          />
+          <ExcludeActionButton
+            title={t('removeFromGroup')}
+            onClick={() => doBatchAction('exclude')}
+            danger
+          />
           {!hasMembershipFee && (
             <MembershipFeeDialog
               open={openMembershipFeeDialog}
@@ -322,7 +327,7 @@ const MembersTableToolbar = ({
             />
           )}
         </Box>
-        </>
+      </>
       )}
     </Toolbar>
   );

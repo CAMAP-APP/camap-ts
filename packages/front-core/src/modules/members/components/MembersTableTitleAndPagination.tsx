@@ -69,10 +69,11 @@ const MembersTableTitleAndPagination = ({
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={isDownSm ? '' : undefined}
           sx={{
+            overflow: 'hidden',
             '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows':
-              {
-                m: 'inherit',
-              },
+            {
+              m: 'inherit',
+            },
           }}
         />
       </Grid>
