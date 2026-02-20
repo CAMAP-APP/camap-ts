@@ -64,7 +64,7 @@ const MembersTableTitleAndPagination = ({
           component="div"
           count={count}
           rowsPerPage={rowsPerPage}
-          page={page * rowsPerPage > count ? 0 : page}
+          page={page * rowsPerPage >= count ? 0 : page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
           labelRowsPerPage={isDownSm ? '' : undefined}

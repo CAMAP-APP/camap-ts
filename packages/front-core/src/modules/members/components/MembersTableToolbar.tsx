@@ -64,10 +64,12 @@ const MembersTableToolbar = ({
     title,
     onClick,
     danger = false,
+    disabled = false,
   }: {
     title: string;
     onClick: React.MouseEventHandler;
     danger?: boolean;
+    disabled?: boolean;
   }) => (
     <Button
       variant="contained"
@@ -82,6 +84,7 @@ const MembersTableToolbar = ({
         },
       }}
       onClick={onClick}
+      disabled={disabled}
     >
       {title}
     </Button>
@@ -235,7 +238,6 @@ const MembersTableToolbar = ({
   return (
     <Toolbar
       sx={{
-        display: numSelected > 0 ? undefined : 'none',
         pl: { sm: 2 },
         pr: { xs: 1, sm: 1 },
         ...(numSelected > 0 && {
@@ -260,75 +262,77 @@ const MembersTableToolbar = ({
         },
       }}
     >
-      {numSelected > 0 && (<>
-        <Typography
+      <Typography
+        sx={{
+          visibility: numSelected > 0 ? 'visible' : 'hidden',
+          flex: '1 0 auto',
+          mr: 'auto',
+          marginBottom: {
+            xs: 1,
+            md: 0,
+          }
+        }}
+        color="inherit"
+        variant="subtitle1"
+        component="div"
+      >
+        {`${numSelected} ${t('selected', { count: numSelected })}`}
+      </Typography>
+      <Box
+        flex='1 0 auto'
+        display='grid'
+        sx={{
+          gridAutoColumns: 'auto',
+          gridAutoFlow: {
+            xs: 'row',
+            sm: 'column',
+          },
+          gridAutoRows: 'auto',
+          rowGap: 0,
+          columnGap: 1,
+        }}
+      >
+        <Button
+          variant='contained'
+          disableElevation
+          size="small"
           sx={{
-            flex: '1 0 auto',
-            mr: 'auto',
+            flex: '0 0 auto',
+            whiteSpace: 'nowrap',
             marginBottom: {
               xs: 1,
               md: 0,
-            }
-          }}
-          color="inherit"
-          variant="subtitle1"
-          component="div"
-        >
-          {`${numSelected} ${t('selected', { count: numSelected })}`}
-        </Typography>
-        <Box
-          flex='1 0 auto'
-          display='grid'
-          sx={{
-            gridAutoColumns: 'auto',
-            gridAutoFlow: {
-              xs: 'row',
-              sm: 'column',
             },
-            gridAutoRows: 'auto',
-            rowGap: 0,
-            columnGap: 1,
           }}
-        >
-          <Button
-            variant='outlined'
-            disableElevation
-            size="small"
-            sx={{
-              flex: '0 0 auto',
-              whiteSpace: 'nowrap',
-              marginBottom: {
-                xs: 1,
-                md: 0,
-              },
-            }}
-            href={`/messages?${selectedIds.map(id => `to_uid=${id}`).join('&')}`}
-          >{t('sendEmail')}</Button>
-          {hasMembership && (
-            <MembershipActionButton
-              title={t('enterMembership')}
-              onClick={() => doBatchAction('membership')}
-            />
-          )}
-          <WaitingListActionButton
-            title={t('resetInWaitingList')}
-            onClick={() => doBatchAction('waitingList')}
+          href={`/messages?${selectedIds.map(id => `to_uid=${id}`).join('&')}`}
+          disabled={numSelected === 0}
+        >{t('sendEmail')}</Button>
+        {hasMembership && (
+          <MembershipActionButton
+            title={t('enterMembership')}
+            onClick={() => doBatchAction('membership')}
+            disabled={numSelected === 0}
           />
-          <ExcludeActionButton
-            title={t('removeFromGroup')}
-            onClick={() => doBatchAction('exclude')}
-            danger
+        )}
+        <WaitingListActionButton
+          title={t('resetInWaitingList')}
+          onClick={() => doBatchAction('waitingList')}
+          disabled={numSelected === 0}
+        />
+        <ExcludeActionButton
+          title={t('removeFromGroup')}
+          onClick={() => doBatchAction('exclude')}
+          danger
+          disabled={numSelected === 0}
+        />
+        {!hasMembershipFee && (
+          <MembershipFeeDialog
+            open={openMembershipFeeDialog}
+            onCancel={handleCancelMembershipFeeDialog}
+            onConfirm={handleConfirmMembershipFeeDialog}
           />
-          {!hasMembershipFee && (
-            <MembershipFeeDialog
-              open={openMembershipFeeDialog}
-              onCancel={handleCancelMembershipFeeDialog}
-              onConfirm={handleConfirmMembershipFeeDialog}
-            />
-          )}
-        </Box>
-      </>
-      )}
+        )}
+      </Box>
     </Toolbar>
   );
 };
