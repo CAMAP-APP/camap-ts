@@ -53,15 +53,19 @@ const MessagesForm = ({
   const { t } = useTranslation(['messages/default']);
   const { t: tLists } = useTranslation(['members/lists']);
 
-  const defaultRecipientsOptions: RecipientOption[] = defaultUserLists.map(
-    (ul) => ({
-      value: ul.type,
-      key: ul.type,
-      label: formatUserList(ul, tLists),
-      group: RecipientOptionGroup.DEFAULT,
-      disabled: ul.count === 0,
-    }),
-  );
+  const defaultRecipientsOptions: RecipientOption[] = defaultUserLists
+    // the 'vendor' type in userlists only lists user-vendors (vendors claimed by a user)
+    // here we want to be able to reach all vendors, so we filter out this list and add it manually
+    .filter((ul: UserList) => ul.type !== UserLists.VENDORS.type)
+    .map(
+      (ul) => ({
+        value: ul.type,
+        key: ul.type,
+        label: formatUserList(ul, tLists),
+        group: RecipientOptionGroup.DEFAULT,
+        disabled: ul.count === 0,
+      }),
+    );
 
   const testLists = UserLists.TEST;
   defaultRecipientsOptions.push({
@@ -73,12 +77,13 @@ const MessagesForm = ({
   });
   const vendorsLists = UserLists.VENDORS;
   defaultRecipientsOptions.push({
-    key: vendorsLists.type,   
+    key: vendorsLists.type,
     value: vendorsLists.type,
     label: tLists(vendorsLists.type),
     group: RecipientOptionGroup.DEFAULT,
     disabled: false,
   });
+
   let senderEmail = '';
   let senderName = groupName;
   if (isPartnerConnected && !!user.email2) {

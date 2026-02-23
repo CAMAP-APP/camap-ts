@@ -21,7 +21,7 @@ const VendorClaimRow = ({ vendor, onClaim }: {
             {groups.map(g => <ListItem key={g}>{g}</ListItem>)}
             </List>
         : tVendorDash("none");
-    const contractsList = vendor.activeCatalogs.length > 0
+    const contractsList = vendor.allCatalogs.length > 0
         ?   <List dense sx={{ maxHeight: "68px", overflowY: 'auto' }}>
             {vendor.activeCatalogs?.map(
                 catalog => <ListItem key={catalog.id}>
@@ -31,6 +31,7 @@ const VendorClaimRow = ({ vendor, onClaim }: {
                     })}
                 </ListItem>
             )}
+            {`(${vendor.allCatalogs.length - vendor.activeCatalogs.length} inactif)`}
             </List>
         : tVendorDash("none")
 

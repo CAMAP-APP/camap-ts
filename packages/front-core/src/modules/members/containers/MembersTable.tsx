@@ -62,7 +62,6 @@ function MembersTable({ members, loading, allMembers }: MembersTableProps) {
     if (page * rowsPerPage > length) {
       setPage(0);
     }
-    setSelected([]);
   }, [members, page, rowsPerPage]);
 
   React.useEffect(() => {
