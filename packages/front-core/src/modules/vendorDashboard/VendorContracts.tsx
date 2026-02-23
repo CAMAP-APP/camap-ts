@@ -89,7 +89,7 @@ function VendorContracts({ vendorId }: { vendorId: number }) {
                                                 <Button
                                                     variant="outlined"
                                                     size="small"
-                                                    href={`/contractAdmin/view/${catalog.id}`}
+                                                    href={`/user/choose?group=${catalog.group.id}&redirect=/contractAdmin/view/${catalog.id}`}
                                                 >
                                                     {tVendorDash("goToContract")}
                                                 </Button>
