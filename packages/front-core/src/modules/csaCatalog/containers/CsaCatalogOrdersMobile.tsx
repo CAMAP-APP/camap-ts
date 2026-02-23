@@ -324,6 +324,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             backgroundColor: t => t.palette.background.paper,
             top: 0,
             zIndex: 1030,
+            boxShadow: t => t.shadows[3]
           }}>
           {/* Default order label */}
           {/* {displayDefaultOrder && (
@@ -383,71 +384,71 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
               <ArrowForward />
             </Button>
           </Box>
-        </Box>
 
 
-        <Box
-          display="flex"
-          gap={1}
-          fontSize={{ xs: 14, sm: 16 }}
-          justifyContent='space-between'
-          mx={1}
-          mb={1}
-        >
-          {/* Sold box */}
-          <Box display="flex" alignItems="center" gap={1}>
-            <Box>
-              <Typography
-                fontSize="inherit"
-                fontWeight="bold"
-                lineHeight="1em"
-              >{t('paymentSold')}</Typography>
+          <Box
+            display="flex"
+            gap={1}
+            fontSize={{ xs: 14, sm: 16 }}
+            justifyContent='space-between'
+            mx={1}
+            mb={1}
+          >
+            {/* Sold box */}
+            <Box display="flex" alignItems="center" gap={1}>
+              <Box>
+                <Typography
+                  fontSize="inherit"
+                  fontWeight="bold"
+                  lineHeight="1em"
+                >{t('paymentSold')}</Typography>
+              </Box>
+              {subscription !== undefined && <Box
+                sx={{
+                  backgroundColor: (theme: Theme) =>
+                    subscription.balance >= 0
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
+                }}
+                p={1}
+              >
+                <Typography
+                  fontSize="inherit"
+                  fontWeight="bold"
+                  sx={{
+                    color: (theme) =>
+                      subscription.balance >= 0
+                        ? theme.palette.success.contrastText
+                        : theme.palette.error.contrastText,
+                    textAlign: 'center',
+                  }}
+                >
+                  {formatCurrency(subscription.balance)}
+                </Typography>
+              </Box>}
             </Box>
-            {subscription !== undefined && <Box
-              sx={{
-                backgroundColor: (theme: Theme) =>
-                  subscription.balance >= 0
-                    ? theme.palette.success.main
-                    : theme.palette.error.main,
-              }}
-              p={1}
+            {/* Total */}
+            <Box
+              display="flex"
+              gap={1}
+              alignItems="center"
             >
               <Typography
                 fontSize="inherit"
                 fontWeight="bold"
-                sx={{
-                  color: (theme) =>
-                    subscription.balance >= 0
-                      ? theme.palette.success.contrastText
-                      : theme.palette.error.contrastText,
-                  textAlign: 'center',
-                }}
-              >
-                {formatCurrency(subscription.balance)}
-              </Typography>
-            </Box>}
-          </Box>
-          {/* Total */}
-          <Box
-            display="flex"
-            gap={1}
-            alignItems="center"
-          >
-            <Typography
-              fontSize="inherit"
-              fontWeight="bold"
-              lineHeight="1em"
-            >{t('orderValue')}</Typography>
-            <CamapIcon id={CamapIconId.basket} sx={{
-              color: 'primary.main'
-            }} />
-            <Typography
-              fontSize="1.2em"
-              fontWeight="bold"
-              sx={{
+                lineHeight="1em"
+              >{t('orderValue')}</Typography>
+              <CamapIcon id={CamapIconId.basket} sx={{
                 color: 'primary.main'
-              }}
-            >{getTotalFromDistribution(distribution.id)}</Typography>
+              }} />
+              <Typography
+                fontSize="1.2em"
+                fontWeight="bold"
+                sx={{
+                  color: 'primary.main'
+                }}
+              >{getTotalFromDistribution(distribution.id)}</Typography>
+            </Box>
           </Box>
         </Box>
 
