@@ -59,7 +59,13 @@ export type CustomSlateText = {
   bold?: boolean;
   underline?: boolean;
   italic?: boolean;
+  color?: string;
   type?: FormatTypes;
+  /**
+   * Legacy editor stores color marks using keys like `#ff00aa: true`.
+   * Plate-based editors may also attach additional mark keys.
+   */
+  [key: string]: unknown;
 };
 
 export type CustomSlateDescendant = {
@@ -71,8 +77,21 @@ export type CustomElement = CustomSlateElement | CustomSlateHyperlinkElement | C
 
 declare module 'slate' {
   export interface CustomTypes {
-    Editor: CustomEditor;
-    Element: CustomSlateElement | CustomSlateHyperlinkElement | CustomSlateImageElement;
+    /**
+     * This codebase uses both the legacy Slate editor (`CustomEditor`) and
+     * Plate-based editors (different editor types). Keep this union broad.
+     */
+    Editor: CustomEditor | BaseEditor;
+    /**
+     * This codebase hosts multiple Slate-based editors with different schemas
+     * (legacy `FormatTypes.*` and Plate-based schemas). Keep this union broad
+     * enough to avoid cross-editor type conflicts.
+     */
+    Element:
+      | CustomSlateElement
+      | CustomSlateHyperlinkElement
+      | CustomSlateImageElement
+      | (BaseElement & { type: string; [key: string]: unknown });
     Text: CustomSlateText;
     Descandant: CustomSlateDescendant;
   }

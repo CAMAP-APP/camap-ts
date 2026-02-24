@@ -14,10 +14,10 @@ import {
 import { formatUserName, UserLists, UserListsType } from 'camap-common';
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SlateViewer from '../../../components/textEditor/SlateViewer';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
-import DOMPurify from 'dompurify';
+import { PlateMessageViewer } from '../editor/PlateMessageViewer';
+import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
 
 export interface MessageTableProps {
   messageId: number;
@@ -71,16 +71,13 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
   const [parseError, setParseError] = useState<string | null>(null);
   const messageBody = React.useMemo(() => {
-    if (!message) return;
-    try {
-      return JSON.parse(decodeURIComponent(atob(message.slateContent)));
-    } catch (e) {
-      setParseError((e as Error).toString());
-      console.error(e);
-      console.error(message);
-      return [];
+    if (!message?.slateContent) return;
+    const parsed = getMessageEditorValueFromSlateContent(message.slateContent);
+    if (!parsed.ok) {
+      setParseError(parsed.error);
     }
-  }, [message, setParseError]);
+    return parsed.wrapper.value;
+  }, [message?.slateContent, setParseError]);
 
   if (messageError) return <ApolloErrorAlert error={messageError} />;
   if (messageLoading) return <CircularProgress />;
@@ -172,13 +169,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
             <TableRow>
               <TableCell colSpan={2}>
-                <SlateViewer value={messageBody} />
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell colSpan={2}>
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageBody) }} />
+                {messageBody && <PlateMessageViewer value={messageBody as any} />}
               </TableCell>
             </TableRow>
           </TableBody>

@@ -1,13 +1,7 @@
 import { isEqual } from 'lodash';
 import React from 'react';
-import { BaseNode, Node } from 'slate';
-import SlateTextEditor, {
-  EMPTY_SLATE_VALUE,
-  SlateTextEditorProps,
-} from '../../../components/textEditor/SlateTextEditor';
-import FormatTypes, {
-  CustomSlateImageElement,
-} from '../../../components/textEditor/TextEditorFormatType';
+import type { BaseNode } from 'slate';
+import type { Value } from 'platejs';
 import {
   AttachmentFileInput,
   AttachmentUnion,
@@ -20,8 +14,23 @@ import { isUrl } from '../../../utils/url';
 import { MessagesContext } from '../MessagesContext';
 import AttachmentList from './attachments/AttachmentList';
 import InsertAttachmentButton from './attachments/InsertAttachmentButton';
+import { PlateMessageEditor } from '../editor/PlateMessageEditor';
+import {
+  MESSAGE_EDITOR_EMPTY_VALUE,
+  type MessageImageElement,
+} from '../editor/messageEditorSchema';
+import { encodeMessageSlateContentV2 } from '../editor/messageSlateContentV2';
+import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
 
-const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
+// Formik passes (name, value, onBlur, onChange) props.
+type MessageTextEditorFormikProps = {
+  name: string;
+  value: string;
+  onBlur: any;
+  onChange: any;
+};
+
+const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
   const {
     addEmbeddedImage,
     addEmbeddedImages,
@@ -32,9 +41,9 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     groupId,
   } = React.useContext(MessagesContext);
 
-  const [customValue, setCustomValue] = React.useState<Node[] | undefined>();
+  const [externalValue, setExternalValue] = React.useState<Value | undefined>();
 
-  const checkEmbeddedImages = (
+  const checkEmbeddedImages = React.useCallback((
     newContentValue: BaseNode[],
     attachments: AttachmentUnion[] | undefined,
   ) => {
@@ -51,14 +60,14 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     const recursivelyCheckNode = (nodes: BaseNode[]) => {
       nodes.forEach((n) => {
         if ('type' in n) {
-          if (n.type !== FormatTypes.image) {
-            if ('children' in n) {
-              recursivelyCheckNode(n.children);
+          if (n.type !== 'img') {
+            if ('children' in n && Array.isArray(n.children)) {
+              recursivelyCheckNode(n.children.filter(x => x != null && typeof x === 'object'));
             }
           } else {
-            const imageNode = n as CustomSlateImageElement;
-            const [content, contentType] =
-              getContentAndTypeFromBase64EncodedImage(imageNode.imageSource);
+            const imageNode = n as unknown as MessageImageElement;
+            const imageSource = imageNode.dataUrl || '';
+            const [content, contentType] = getContentAndTypeFromBase64EncodedImage(imageSource);
 
             const embeddedImageAttachment = embeddedImageAttachments?.find(
               (a) => a && a.content === content,
@@ -68,18 +77,21 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
             if (embeddedImageAttachment) {
               cid = embeddedImageAttachment.cid;
             } else {
-              cid = removeSpaces(removeAccents(imageNode.imageName));
+              cid = imageNode.filename
+                ? removeSpaces(removeAccents(imageNode.filename))
+                : (imageNode.cid ?? '');
             }
 
             if (
-              !imageNode.imageSource.startsWith('data:image') &&
-              isUrl(imageNode.imageSource)
+              imageNode.url &&
+              !imageNode.dataUrl?.startsWith('data:image') &&
+              isUrl(imageNode.url)
             ) {
               return;
             }
 
             embeddedImagesToAdd.push({
-              filename: imageNode.imageName,
+              filename: imageNode.filename ?? 'image',
               contentType,
               encoding: 'base64',
               content,
@@ -93,45 +105,21 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
     recursivelyCheckNode(newContentValue);
 
     if (embeddedImagesToAdd.length) addEmbeddedImages(embeddedImagesToAdd);
-  };
+  }, [addEmbeddedImages]);
 
   React.useEffect(() => {
     if (!reuseMessage || !reuseMessage.slateContent) return;
     const reuseMessageSlateContent = reuseMessage.slateContent;
     setSlateContent(reuseMessageSlateContent);
-    let slateContentValue: BaseNode[];
-    try {
-      slateContentValue = JSON.parse(
-        decodeURIComponent(atob(reuseMessageSlateContent)),
-      );
-    } catch (e) {
-      // Silently ignore the issue
-      return;
-    }
-    if (slateContentValue !== customValue) {
-      setCustomValue(slateContentValue);
-      checkEmbeddedImages(
-        slateContentValue,
-        reuseMessage.attachments || undefined,
-      );
-    }
-  }, [reuseMessage]);
 
-  React.useEffect(() => {
-    if (!customValue) return;
+    const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
+    setExternalValue(parsed.wrapper.value);
 
-    setCustomValue(undefined);
-  }, [customValue]);
-
-  const onBlurEditor = (value: Node[]) => {
-    // Save the value to context, to later save it to the DB.
-    if (isEqual(value, EMPTY_SLATE_VALUE)) {
-      // Value is empty
-      setSlateContent('');
-    } else {
-      setSlateContent(btoa(encodeURIComponent(JSON.stringify(value))));
-    }
-  };
+    checkEmbeddedImages(
+      parsed.wrapper.value as unknown as BaseNode[],
+      reuseMessage.attachments || undefined,
+    );
+  }, [checkEmbeddedImages, reuseMessage, setSlateContent]);
 
   const onAddImages = async (files: File[]) => {
     const base64EncodedFiles = await Promise.all(
@@ -162,17 +150,22 @@ const MessageTextEditor = ({ ...props }: SlateTextEditorProps) => {
   };
 
   return (
-    <SlateTextEditor
+    <PlateMessageEditor
       {...props}
-      onBlurEditorCustomHandler={onBlurEditor}
-      onAddImagesCustomHandler={onAddImages}
-      onSetValueCustomHandler={onSetValue}
-      customToolbarButtons={[
-        <InsertAttachmentButton key="InsertAttachmentButton" />,
-      ]}
-      customAdditionalComponents={[<AttachmentList key="AttachmentList" />]}
       groupId={groupId}
-      customValue={customValue}
+      externalValue={externalValue}
+      onExternalValueApplied={() => setExternalValue(undefined)}
+      onAddImagesCustomHandle={onAddImages}
+      onHtmlSerialized={onSetValue}
+      onBlurSaveSlateValue={(value: Value) => {
+        if (isEqual(value, MESSAGE_EDITOR_EMPTY_VALUE)) {
+          setSlateContent('');
+        } else {
+          setSlateContent(encodeMessageSlateContentV2(value));
+        }
+      }}
+      toolbarEnd={<InsertAttachmentButton />}
+      belowEditor={<AttachmentList />}
     />
   );
 };

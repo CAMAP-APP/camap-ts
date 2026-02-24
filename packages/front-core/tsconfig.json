@@ -2,7 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "allowJs": false,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -19,17 +23,55 @@
     "downlevelIteration": true,
     "baseUrl": "./src",
     "paths": {
-      "@components/*": ["components/*"],
-      "@gql": ["gql"],
-      "@gql/*": ["gql/*"],
-      "@utils/*": ["utils/index", "utils/*"],
-      "@config/*": ["config/index", "config/*"],
-      "@lib/*": ["lib/index", "lib/*"],
-      "@mocks": ["mocks/index"],
-      "@mocks/*": ["mocks/*"],
-      "@theme/*": ["theme/*"]
+      "@components/*": [
+        "components/*"
+      ],
+      "@gql": [
+        "gql"
+      ],
+      "@gql/*": [
+        "gql/*"
+      ],
+      "@utils/*": [
+        "utils/index",
+        "utils/*"
+      ],
+      "@config/*": [
+        "config/index",
+        "config/*"
+      ],
+      "@lib/*": [
+        "lib/index",
+        "lib/*"
+      ],
+      "@mocks": [
+        "mocks/index"
+      ],
+      "@mocks/*": [
+        "mocks/*"
+      ],
+      "@theme/*": [
+        "theme/*"
+      ],
+      "platejs/*": [
+        "../node_modules/platejs/dist/*/index.d.ts"
+      ],
+      "@platejs/*/react": [
+        "../node_modules/@platejs/*/dist/react/index.d.ts"
+      ],
+      "@platejs/*/static": [
+        "../node_modules/@platejs/*/dist/static/index.d.ts"
+      ]
     }
   },
-  "exclude": ["node_modules", "src/**/*.spec.tsx", "src/**/*.stories.tsx"],
-  "include": ["src/**/*.ts", "src/**/*.tsx", "jest.config.js"]
+  "exclude": [
+    "node_modules",
+    "src/**/*.spec.tsx",
+    "src/**/*.stories.tsx"
+  ],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "jest.config.js"
+  ]
 }
