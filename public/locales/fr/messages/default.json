@@ -18,6 +18,7 @@
   "3DistributionGroup": "Utilisateurs ayant des produits à récupérer à une prochaine distribution :",
   "latestSentMessage": "{{title}} - envoyé {{date}} dans {{group}}",
   "noMessageWithSlateContent": "Pas de message enregistré. Envoyez un message pour le retrouver ici.",
+  "errorReusingMessage": "Erreur de chargement du message : {{error}}",
   "form": {
     "name": "Nom expéditeur·rice",
     "email": "Courriel expéditeur·rice",

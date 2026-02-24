@@ -1,5 +1,6 @@
 import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import {
+  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -11,7 +12,7 @@ import {
   useTheme,
 } from '@mui/material';
 import { formatUserName, UserLists, UserListsType } from 'camap-common';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import SlateViewer from '../../../components/textEditor/SlateViewer';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
@@ -68,10 +69,18 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
     </TableCell>
   );
 
+  const [parseError, setParseError] = useState<string | null>(null);
   const messageBody = React.useMemo(() => {
     if (!message) return;
-    return JSON.parse(decodeURIComponent(atob(message.slateContent)));
-  }, [message]);
+    try {
+      return JSON.parse(decodeURIComponent(atob(message.slateContent)));
+    } catch (e) {
+      setParseError((e as Error).toString());
+      console.error(e);
+      console.error(message);
+      return [];
+    }
+  }, [message, setParseError]);
 
   if (messageError) return <ApolloErrorAlert error={messageError} />;
   if (messageLoading) return <CircularProgress />;
@@ -84,6 +93,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
   return (
     <>
+      {parseError && <Alert severity="error">{t('errorReusingMessage', { error: parseError })}</Alert>}
       {message && (
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableBody>
