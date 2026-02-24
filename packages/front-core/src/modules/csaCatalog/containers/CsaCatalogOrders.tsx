@@ -185,7 +185,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
       let initialValue =
         initialOrders[distributionId] != null &&
-        initialOrders[distributionId][productId] != null
+          initialOrders[distributionId][productId] != null
           ? initialOrders[distributionId][productId]
           : 0;
       if (prevValue == null) {
@@ -453,7 +453,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                   Math.max(
                     0,
                     Math.min(maxNbDistribToShow, slicedDistributions.length) -
-                      2,
+                    2,
                   ),
                 ).keys(),
               ).map((i) => (
@@ -480,7 +480,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
           {catalog.products.map((p) => {
             const isGlobalStock =
               catalog.hasStockManagement &&
-              (p.stockTracking as StockTracking) === StockTracking.Global &&
+              p.stockTracking === StockTracking[StockTracking.Global] &&
               stocksPerProductDistribution != null;
             var globalStock = 0;
             if (
@@ -603,20 +603,20 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                                       ? <InputAdornment position="end">{formatUnit(p.unitType, 1, tCommon)}</InputAdornment>
                                       : undefined
                                   }}
-                                  defaultValue={p.bulk ? orders[d.id][p.id]*p.qt : orders[d.id][p.id]}
+                                  defaultValue={p.bulk ? orders[d.id][p.id] * p.qt : orders[d.id][p.id]}
                                   onChange={(
                                     event: React.ChangeEvent<HTMLInputElement>,
                                   ) =>
                                     onOrderChange(
                                       d.id,
                                       p.id,
-                                      p.bulk 
-                                        ? parseFloat(event.target.value)/p.qt
+                                      p.bulk
+                                        ? parseFloat(event.target.value) / p.qt
                                         : parseInt(event.target.value),
                                     )
                                   }
                                   onBlur={(event: React.FocusEvent<HTMLInputElement>) =>
-                                    event.target.value = (p.bulk ? orders[d.id][p.id]*p.qt : orders[d.id][p.id]).toString()
+                                    event.target.value = (p.bulk ? orders[d.id][p.id] * p.qt : orders[d.id][p.id]).toString()
                                   }
                                   hiddenLabel
                                 />
@@ -711,7 +711,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
                     textAlign: 'center',
                     color: (theme) =>
                       d.state === RestDistributionState.Open ||
-                      (adminMode && d.distributionStartDate > new Date())
+                        (adminMode && d.distributionStartDate > new Date())
                         ? 'initial'
                         : theme.palette.action.disabled,
                     ...getSlideItemSx(
@@ -742,14 +742,14 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
             CatalogType.TYPE_CONSTORDERS ||
             catalog?.distribMinOrdersTotal > 0 ||
             displayDefaultOrder) && (
-            <Button
-              variant="outlined"
-              onClick={onDefaultOrdersChangeClick}
-              sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-            >
-              {t('defaultOrder')}
-            </Button>
-          )}
+              <Button
+                variant="outlined"
+                onClick={onDefaultOrdersChangeClick}
+                sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
+              >
+                {t('defaultOrder')}
+              </Button>
+            )}
           <SuccessButton
             loading={loading}
             toggleSuccess={toggleSuccess}
