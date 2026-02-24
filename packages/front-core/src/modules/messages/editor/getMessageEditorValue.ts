@@ -5,7 +5,7 @@ import {
   type MessageSlateContentV2,
 } from './messageEditorSchema';
 import { decodeMessageSlateContentAny } from './messageSlateContentV2';
-import { migrateLegacyMessageValueToV2Value } from './migrateLegacyMessageValue';
+import { migrateLegacyMessageValueToV2Value } from './legacy/migrateLegacyMessageValue';
 
 export type GetMessageEditorValueResult =
   | { ok: true; source: 'empty' | 'v2' | 'legacy'; wrapper: MessageSlateContentV2 }

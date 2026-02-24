@@ -4,28 +4,28 @@ import Button from '@mui/material/Button';
 import Popover from '@mui/material/Popover';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Editor, Range, Transforms } from 'slate';
+import type { PlateEditor } from '@platejs/core/react';
 import { useEditorRef } from '@platejs/core/react';
-import { TextEditorComponents } from '../../../components/textEditor/TextEditorComponents';
+import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 
-const isLinkActive = (editor: Editor) => {
-  const [link] = Editor.nodes(editor, {
-    match: (n) => 'type' in n && (n as any).type === 'a',
+const isLinkActive = (editor: PlateEditor) => {
+  const linkEntry = editor.api.above({
+    match: (n) => !!n && typeof n === 'object' && (n as any).type === 'a',
   });
-  return !!link;
+  return !!linkEntry;
 };
 
-const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, {
-    match: (n) => 'type' in n && (n as any).type === 'a',
+const unwrapLink = (editor: PlateEditor) => {
+  editor.tf.unwrapNodes({
+    match: (n) => !!n && typeof n === 'object' && (n as any).type === 'a',
   });
 };
 
-const wrapLink = (editor: Editor, url: string, text?: string) => {
+const wrapLink = (editor: PlateEditor, url: string, text?: string) => {
   if (isLinkActive(editor)) unwrapLink(editor);
 
   const { selection } = editor;
-  const isCollapsed = selection && Range.isCollapsed(selection);
+  const isCollapsed = selection && editor.api.isCollapsed();
   const link = {
     type: 'a',
     url,
@@ -33,31 +33,31 @@ const wrapLink = (editor: Editor, url: string, text?: string) => {
   };
 
   if (isCollapsed) {
-    Transforms.insertNodes(editor, link);
+    editor.tf.insertNodes(link);
   } else {
-    Transforms.wrapNodes(editor, link, { split: true });
-    Transforms.collapse(editor, { edge: 'end' });
+    editor.tf.wrapNodes(link, { split: true });
+    editor.tf.collapse({ edge: 'end' });
   }
 };
 
-const insertLink = (editor: Editor, url: string, text?: string) => {
+const insertLink = (editor: PlateEditor, url: string, text?: string) => {
   if (!editor.selection) return;
   wrapLink(editor, url, text);
 };
 
-const DEFAULT_SELECTION: Range = {
-  anchor: { path: [0, 0], offset: 0 },
-  focus: { path: [0, 0], offset: 0 },
-};
+const DEFAULT_SELECTION =
+  ({
+    anchor: { path: [0, 0], offset: 0 },
+    focus: { path: [0, 0], offset: 0 },
+  } as unknown as NonNullable<PlateEditor['selection']>);
 
 const MessageLinkButton = () => {
   const { t } = useTranslation(['messages/default']);
-  const plateEditor = useEditorRef();
-  const editor = plateEditor as unknown as Editor;
+  const editor = useEditorRef();
   const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const [textInput, setTextInput] = React.useState<string>('');
   const [urlInput, setUrlInput] = React.useState<string>('');
-  const [selection, setSelection] = React.useState<Range | null>(null);
+  const [selection, setSelection] = React.useState<PlateEditor['selection']>(null);
   const [isActive, setIsActive] = React.useState(false);
 
   const reset = () => {
@@ -82,7 +82,7 @@ const MessageLinkButton = () => {
   const onAddLink = () => {
     if (!urlInput) return;
     const nextSelection = selection || DEFAULT_SELECTION;
-    Transforms.select(editor, nextSelection);
+    editor.tf.select(nextSelection);
     let url = urlInput;
     if (!urlInput.startsWith('http://') && !urlInput.startsWith('https://')) {
       url = `http://${urlInput}`;
@@ -96,13 +96,13 @@ const MessageLinkButton = () => {
 
   return (
     <>
-      <TextEditorComponents
+      <TextEditorToolbarButton
         aria-describedby={id}
         active={isActive || isLinkActive(editor)}
         onMouseDown={onMouseDown}
       >
         <InsertLink sx={{ display: 'block' }} />
-      </TextEditorComponents>
+      </TextEditorToolbarButton>
       <Popover
         id={id}
         open={open}

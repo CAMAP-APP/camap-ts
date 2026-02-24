@@ -1,11 +1,11 @@
 import type { Value } from 'platejs';
-import { removeAccents, removeSpaces } from '../../../utils/fomat/string';
-import FormatTypes from '../../../components/textEditor/TextEditorFormatType';
+import { removeAccents, removeSpaces } from '../../../../utils/fomat/string';
+import FormatTypes from './LegacyTextEditorFormatType';
 import type {
   MessageAlignment,
   MessageImageElement,
   MessageLinkElement,
-} from './messageEditorSchema';
+} from '../messageEditorSchema';
 
 type LegacyText = {
   text: string;

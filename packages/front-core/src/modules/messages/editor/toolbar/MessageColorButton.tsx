@@ -3,14 +3,12 @@ import { Box, ButtonBase } from '@mui/material';
 import Popover from '@mui/material/Popover';
 import { useTheme } from '@mui/material/styles';
 import React from 'react';
-import { Editor } from 'slate';
 import { useEditorRef } from '@platejs/core/react';
-import theme from '../../../theme/default/theme';
-import { TextEditorComponents } from '../../../components/textEditor/TextEditorComponents';
+import theme from '../../../../theme/default/theme';
+import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 
 const MessageColorButton = () => {
-  const plateEditor = useEditorRef();
-  const editor = plateEditor as unknown as Editor;
+  const editor = useEditorRef();
   const { palette } = useTheme();
   const colors = [
     palette.common.black,
@@ -31,7 +29,7 @@ const MessageColorButton = () => {
 
   const activeColor = (() => {
     try {
-      const marks = Editor.marks(editor);
+      const marks = editor.api.marks();
       const color = marks?.color;
       return typeof color === 'string' ? color : '';
     } catch {
@@ -42,9 +40,9 @@ const MessageColorButton = () => {
   const onColorClick = (color: string) => {
     // Reset to default black by removing the mark.
     if (color === colors[0]) {
-      Editor.removeMark(editor, 'color');
+      editor.tf.removeMark('color');
     } else {
-      Editor.addMark(editor, 'color', color);
+      editor.tf.addMark('color', color);
     }
     handleClose();
   };
@@ -54,7 +52,7 @@ const MessageColorButton = () => {
 
   return (
     <>
-      <TextEditorComponents
+      <TextEditorToolbarButton
         aria-describedby={id}
         active={isActive}
         onMouseDown={(event) => {
@@ -67,7 +65,7 @@ const MessageColorButton = () => {
           sx={{ display: 'block' }}
           htmlColor={activeColor || undefined}
         />
-      </TextEditorComponents>
+      </TextEditorToolbarButton>
       <Popover
         id={id}
         open={open}

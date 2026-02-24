@@ -10,7 +10,6 @@ import { ListPlugin } from '@platejs/list/react';
 import { ImagePlugin } from '@platejs/media/react';
 import { AutoformatPlugin } from '@platejs/autoformat';
 import type { MessageAlignment, MessageImageElement } from './messageEditorSchema';
-import FormatTypes from '../../../components/textEditor/TextEditorFormatType';
 
 const RenderLeaf = (props: any) => {
   const { attributes, children, leaf } = props;
@@ -60,9 +59,9 @@ const RenderElement = (props: any) => {
       overflow: 'auto',
     };
 
-    if (imageEl.align === FormatTypes.alignCenter) {
+    if (imageEl.align === 'center') {
       wrapperStyle = { ...wrapperStyle, display: 'block', margin: '0 auto' };
-    } else if (imageEl.align === FormatTypes.alignRight) {
+    } else if (imageEl.align === 'right') {
       wrapperStyle = { ...wrapperStyle, float: 'right', marginLeft: 16 };
     } else {
       wrapperStyle = { ...wrapperStyle, float: 'left', marginRight: 16 };

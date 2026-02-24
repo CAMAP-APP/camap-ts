@@ -15,12 +15,12 @@ import { logError } from '@utils/logger';
 import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Transforms, Editor } from 'slate';
+import type { PlateEditor } from '@platejs/core/react';
 import { useEditorRef } from '@platejs/core/react';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
 import { removeAccents, removeSpaces } from '@utils/fomat/string';
-import { TextEditorComponents } from '../../../components/textEditor/TextEditorComponents';
+import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -32,7 +32,7 @@ interface InsertImageButtonProps {
 }
 
 const insertMessageImage = (
-  editor: Editor,
+  editor: PlateEditor,
   {
     dataUrl,
     url,
@@ -51,15 +51,14 @@ const insertMessageImage = (
     children: [{ text: '' }],
   };
 
-  Transforms.insertNodes(editor, imageNode);
+  editor.tf.insertNodes(imageNode);
 };
 
 const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageButtonProps) => {
   const { t } = useTranslation(['messages/default']);
   const [getActiveCatalogs, { data: activeContractsData }] =
     useGetActiveCatalogsPicturesLazyQuery();
-  const plateEditor = useEditorRef();
-  const editor = plateEditor as unknown as Editor;
+  const editor = useEditorRef();
   const imageInput = React.useRef<HTMLInputElement>(null);
   const [loading, setLoading] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -147,7 +146,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     activeContractsData?.getActiveCatalogs?.filter((c) => !!c.vendor?.image);
 
   return (
-    <TextEditorComponents
+    <TextEditorToolbarButton
       active={isActive}
       onMouseDown={onMouseDown}
       aria-controls="message-image-upload-menu"
@@ -156,7 +155,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
       {loading ? (
         <CircularProgress size={24 - 3.6} />
       ) : (
-        <CamapIcon id={CamapIconId.image} sx={{ display: 'block' }} />
+        <CamapIcon id={CamapIconId.image} sx={{ display: 'block', fontSize: '1.71rem', alignSelf: 'center' }} />
       )}
       {groupId && (
         <Menu
@@ -197,7 +196,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
       <Box display="none">
         <input type="file" accept="image/*" ref={imageInput} onChange={uploadImage} />
       </Box>
-    </TextEditorComponents>
+    </TextEditorToolbarButton>
   );
 };
 

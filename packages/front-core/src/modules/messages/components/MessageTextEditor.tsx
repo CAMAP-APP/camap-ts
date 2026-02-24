@@ -13,7 +13,7 @@ import { getContentAndTypeFromBase64EncodedImage } from '../../../utils/image';
 import { isUrl } from '../../../utils/url';
 import { MessagesContext } from '../MessagesContext';
 import AttachmentList from './attachments/AttachmentList';
-import InsertAttachmentButton from './attachments/InsertAttachmentButton';
+import InsertAttachmentButton from '../editor/toolbar/InsertAttachmentButton';
 import { PlateMessageEditor } from '../editor/PlateMessageEditor';
 import {
   MESSAGE_EDITOR_EMPTY_VALUE,
@@ -62,7 +62,7 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
         if ('type' in n) {
           if (n.type !== 'img') {
             if ('children' in n && Array.isArray(n.children)) {
-              recursivelyCheckNode(n.children.filter(x => x != null && typeof x === 'object'));
+              recursivelyCheckNode(n.children.filter((x: unknown) => x != null && typeof x === 'object'));
             }
           } else {
             const imageNode = n as unknown as MessageImageElement;

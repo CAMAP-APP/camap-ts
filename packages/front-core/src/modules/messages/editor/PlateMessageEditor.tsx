@@ -11,12 +11,12 @@ import {
   LooksTwo,
 } from '@mui/icons-material';
 import { Box } from '@mui/material';
-import React, { FocusEvent, useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
 import type { Value } from 'platejs';
+import type { DOMHandler, PlateEditor } from '@platejs/core/react';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
-import { Editor, Element as SlateElement, Range, Transforms } from 'slate';
 import imageCompression from 'browser-image-compression';
 import { toggleList } from '@platejs/list';
 import { LinkPlugin } from '@platejs/link/react';
@@ -29,24 +29,18 @@ import {
 } from '@platejs/basic-nodes/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
-import { TextEditorComponents } from '../../../components/textEditor/TextEditorComponents';
 import { encodeFileToBase64String } from '../../../utils/encoding';
 import { getBase64EncodedImage } from '../../../utils/image';
-import { containsEmail, CONTAINS_EMAIL_REGEX } from 'camap-common';
-import { isFinishedUrl, isUrl, URL_PATTERN } from '../../../utils/url';
 import { removeAccents, removeSpaces } from '../../../utils/fomat/string';
-import FormatTypes, {
-  AlignFormatType,
-} from '../../../components/textEditor/TextEditorFormatType';
 import {
   MESSAGE_EDITOR_EMPTY_VALUE,
   type MessageImageElement,
 } from './messageEditorSchema';
-import MessageColorButton from './MessageColorButton';
-import MessageImageButton from './MessageImageButton';
-import MessageLinkButton from './MessageLinkButton';
-
-const EDITOR_PADDING = 8;
+import MessageColorButton from './toolbar/MessageColorButton';
+import MessageImageButton from './toolbar/MessageImageButton';
+import MessageLinkButton from './toolbar/MessageLinkButton';
+import { TextEditorToolbarButton } from './toolbar/TextEditorToolbarButton';
+import { autoformatRules } from './autoformat';
 
 type Props = {
   name: string;
@@ -70,104 +64,59 @@ type Props = {
   onAddImagesCustomHandle?: (files: File[]) => void;
 };
 
-const isMarkActive = (editor: Editor, mark: 'bold' | 'italic' | 'underline') => {
-  const marks = Editor.marks(editor);
+type Align = 'left' | 'center' | 'right';
+type Mark = 'bold' | 'italic' | 'underline';
+
+const isMarkActive = (
+  editor: PlateEditor,
+  mark: Mark,
+) => {
+  const marks = editor.api.marks();
   return !!marks?.[mark];
 };
 
-const toggleMark = (
-  editor: Editor,
-  mark: 'bold' | 'italic' | 'underline',
-) => {
-  const active = isMarkActive(editor, mark);
-  if (active) Editor.removeMark(editor, mark);
-  else Editor.addMark(editor, mark, true);
+const toggleMark = (editor: PlateEditor, mark: Mark) => {
+  editor.tf.toggleMark(mark);
 };
 
-const getActiveBlock = (editor: Editor) => {
-  const entry = Editor.above(editor, {
-    match: (n) => SlateElement.isElement(n) && Editor.isBlock(editor, n),
+const getActiveBlock = (editor: PlateEditor) => {
+  const entry = editor.api.above({
+    match: (n) => editor.api.isBlock(n as any),
   });
   return entry?.[0] as any | undefined;
 };
 
-const getActiveAlign = (editor: Editor): AlignFormatType | undefined => {
+const getActiveAlign = (editor: PlateEditor) => {
   const block = getActiveBlock(editor);
   const align = block?.align;
   if (
-    align === FormatTypes.alignLeft ||
-    align === FormatTypes.alignCenter ||
-    align === FormatTypes.alignRight
+    align === 'left' ||
+    align === 'center' ||
+    align === 'right'
   )
     return align;
   return undefined;
 };
 
-const setAlign = (editor: Editor, align: AlignFormatType) => {
-  Transforms.setNodes(
-    editor,
+const setAlign = (editor: PlateEditor, align: Align) => {
+  editor.tf.setNodes(
     { align },
-    {
-      match: (n) => SlateElement.isElement(n) && Editor.isBlock(editor, n),
-    },
+    { match: (n) => editor.api.isBlock(n as any) },
   );
 };
 
-const toggleHeading = (editor: Editor, type: 'h1' | 'h2') => {
+const toggleHeading = (editor: PlateEditor, type: 'h1' | 'h2') => {
   const block = getActiveBlock(editor);
   const isActive = block?.type === type;
   const nextType = isActive ? 'p' : type;
-  Transforms.setNodes(
-    editor,
+  editor.tf.setNodes(
     { type: nextType },
-    {
-      match: (n) => SlateElement.isElement(n) && Editor.isBlock(editor, n),
-    },
+    { match: (n) => editor.api.isBlock(n as any) },
   );
 };
 
-const isLinkElement = (n: any): boolean => !!n && typeof n === 'object' && n.type === 'a';
-
-const unwrapLink = (editor: Editor) => {
-  Transforms.unwrapNodes(editor, { match: isLinkElement, split: true });
-};
-
-const wrapLinkAtRange = (editor: Editor, url: string, range: any) => {
-  if (!range) return;
-  unwrapLink(editor);
-  Transforms.select(editor, range);
-  const link = { type: 'a', url, children: [] as any[] };
-  Transforms.wrapNodes(editor, link, { split: true });
-  Transforms.collapse(editor, { edge: 'end' });
-};
-
-const tryAutoLinkAtSelection = (editor: Editor) => {
-  const { selection } = editor;
-  if (!selection || !Range.isCollapsed(selection)) return;
-
-  const { anchor } = selection;
-  const wordStart = Editor.before(editor, anchor, { unit: 'word' });
-  if (!wordStart) return;
-  const wordRange = { anchor: wordStart, focus: anchor };
-  const word = Editor.string(editor, wordRange).trim();
-  if (!word) return;
-
-  if (isUrl(word)) {
-    const url = word.match(URL_PATTERN)?.[0] ?? word;
-    const href =
-      url.startsWith('http://') || url.startsWith('https://') ? url : `http://${url}`;
-    wrapLinkAtRange(editor, href, wordRange);
-    return;
-  }
-
-  if (word && !word.includes('"') && containsEmail(word)) {
-    const email = word.match(CONTAINS_EMAIL_REGEX)?.[0];
-    if (email) wrapLinkAtRange(editor, `mailto:${email}`, wordRange);
-  }
-};
-
 const insertImageFromFile = async (
-  editor: Editor,
+  editor: PlateEditor,
   file: File,
   onAddImagesCustomHandle?: (files: File[]) => void,
 ) => {
@@ -191,7 +140,7 @@ const insertImageFromFile = async (
     cid,
     children: [{ text: '' }],
   };
-  Transforms.insertNodes(editor, imageNode);
+  editor.tf.insertNodes(imageNode);
   onAddImagesCustomHandle?.([file]);
 };
 
@@ -216,7 +165,7 @@ const RenderLeaf = (props: any) => {
 
 const RenderElement = (props: any) => {
   const { attributes, children, element } = props;
-  const align: AlignFormatType | undefined = element.align;
+  const align = element.align;
 
   if (element.type === 'a') {
     return (
@@ -243,9 +192,9 @@ const RenderElement = (props: any) => {
       overflow: 'auto',
     };
 
-    if (imageEl.align === FormatTypes.alignCenter) {
+    if (imageEl.align === 'center') {
       wrapperStyle = { ...wrapperStyle, display: 'block', margin: '0 auto' };
-    } else if (imageEl.align === FormatTypes.alignRight) {
+    } else if (imageEl.align === 'right') {
       wrapperStyle = { ...wrapperStyle, float: 'right', marginLeft: 16 };
     } else {
       wrapperStyle = { ...wrapperStyle, float: 'left', marginRight: 16 };
@@ -264,11 +213,11 @@ const RenderElement = (props: any) => {
   }
 
   const textAlign: React.CSSProperties['textAlign'] =
-    align === FormatTypes.alignCenter
+    align === 'center'
       ? 'center'
-      : align === FormatTypes.alignRight
+      : align === 'right'
         ? 'right'
-        : align === FormatTypes.alignLeft
+        : align === 'left'
           ? 'left'
           : undefined;
 
@@ -323,7 +272,11 @@ export const PlateMessageEditor = ({
       LinkPlugin,
       ListPlugin,
       ImagePlugin,
-      AutoformatPlugin,
+      AutoformatPlugin.configure({
+        options: {
+          rules: [...autoformatRules],
+        },
+      }),
     ],
     [],
   );
@@ -331,8 +284,67 @@ export const PlateMessageEditor = ({
   const editor = usePlateEditor({
     plugins,
     value: MESSAGE_EDITOR_EMPTY_VALUE,
+    handlers: {
+      onFocus: ((_ctx) => {
+        setIsFocused(true);
+      }) as DOMHandler<any, React.FocusEvent>,
+      onBlur: (({ event, editor: plateEditor }) => {
+        setIsFocused(false);
+        onBlur(name)(event as any);
+
+        onBlurSaveSlateValue?.(plateEditor.children);
+        void serializeToFormikHtml();
+      }) as DOMHandler<any, React.FocusEvent>,
+      onPaste: (({ event, editor: plateEditor }) => {
+        const dt = event.clipboardData;
+        if (!dt) return;
+
+        if (dt.files && dt.files.length > 0) {
+          const files = Array.from(dt.files).filter((f) =>
+            f.type.startsWith('image/'),
+          );
+          if (files.length > 0) {
+            event.preventDefault();
+            void (async () => {
+              for (const f of files) {
+                await insertImageFromFile(plateEditor, f, onAddImagesCustomHandle);
+              }
+            })();
+            return;
+          }
+        }
+
+        const html = dt.getData('text/html');
+        const deserializeHtml = (plateEditor as any)?.api?.html?.deserialize as
+          | ((htmlString: string) => unknown)
+          | undefined;
+        if (html && deserializeHtml) {
+          try {
+            const fragment = deserializeHtml(html);
+            if (Array.isArray(fragment)) {
+              event.preventDefault();
+              plateEditor.tf.insertFragment(fragment as any);
+              return;
+            }
+          } catch {
+            // Ignore: fall back to the browser/Slate default paste behavior.
+          }
+        }
+      }) as DOMHandler<any, React.ClipboardEvent>,
+      onDrop: (({ event, editor: plateEditor }) => {
+        const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
+          f.type.startsWith('image/'),
+        );
+        if (files.length === 0) return;
+        event.preventDefault();
+        void (async () => {
+          for (const f of files) {
+            await insertImageFromFile(plateEditor, f, onAddImagesCustomHandle);
+          }
+        })();
+      }) as DOMHandler<any, React.DragEvent>,
+    },
   });
-  const slateEditor = editor as unknown as Editor;
 
   const [isFocused, setIsFocused] = useState(false);
   const pendingSerialize = useRef<number | null>(null);
@@ -361,18 +373,6 @@ export const PlateMessageEditor = ({
     scheduleSerialize();
   }, [scheduleSerialize]);
 
-  const onEditorBlur = useCallback(
-    async (event: FocusEvent<HTMLDivElement>) => {
-      onBlur(name)(event);
-      setIsFocused(false);
-      onBlurSaveSlateValue?.(editor.children as Value);
-      await serializeToFormikHtml();
-    },
-    [editor, name, onBlur, onBlurSaveSlateValue, serializeToFormikHtml],
-  );
-
-  const onEditorFocus = useCallback(() => setIsFocused(true), []);
-
   const renderElement = useCallback((p: any) => <RenderElement {...p} />, []);
   const renderLeaf = useCallback((p: any) => <RenderLeaf {...p} />, []);
 
@@ -385,9 +385,9 @@ export const PlateMessageEditor = ({
     onMouseDown: (e: React.MouseEvent<HTMLElement>) => void;
     children: React.ReactNode;
   }) => (
-    <TextEditorComponents active={active} onMouseDown={onMouseDown}>
+    <TextEditorToolbarButton active={active} onMouseDown={onMouseDown}>
       {children}
-    </TextEditorComponents>
+    </TextEditorToolbarButton>
   );
 
   return (
@@ -426,28 +426,28 @@ export const PlateMessageEditor = ({
         >
           <Box display="flex" flexWrap="wrap">
             <ToolbarButton
-              active={isMarkActive(slateEditor, 'bold')}
+              active={isMarkActive(editor, 'bold')}
               onMouseDown={(e) => {
                 e.preventDefault();
-                toggleMark(slateEditor, 'bold');
+                toggleMark(editor, 'bold');
               }}
             >
               <FormatBold sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={isMarkActive(slateEditor, 'italic')}
+              active={isMarkActive(editor, 'italic')}
               onMouseDown={(e) => {
                 e.preventDefault();
-                toggleMark(slateEditor, 'italic');
+                toggleMark(editor, 'italic');
               }}
             >
               <FormatItalic sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={isMarkActive(slateEditor, 'underline')}
+              active={isMarkActive(editor, 'underline')}
               onMouseDown={(e) => {
                 e.preventDefault();
-                toggleMark(slateEditor, 'underline');
+                toggleMark(editor, 'underline');
               }}
             >
               <FormatUnderlined sx={{ display: 'block' }} />
@@ -456,54 +456,54 @@ export const PlateMessageEditor = ({
             <MessageColorButton />
 
             <ToolbarButton
-              active={getActiveBlock(slateEditor as any)?.type === 'h1'}
+              active={getActiveBlock(editor as any)?.type === 'h1'}
               onMouseDown={(e) => {
                 e.preventDefault();
-                toggleHeading(slateEditor, 'h1');
+                toggleHeading(editor, 'h1');
               }}
             >
               <LooksOne sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={getActiveBlock(slateEditor as any)?.type === 'h2'}
+              active={getActiveBlock(editor as any)?.type === 'h2'}
               onMouseDown={(e) => {
                 e.preventDefault();
-                toggleHeading(slateEditor, 'h2');
+                toggleHeading(editor, 'h2');
               }}
             >
               <LooksTwo sx={{ display: 'block' }} />
             </ToolbarButton>
 
             <ToolbarButton
-              active={getActiveAlign(slateEditor) === FormatTypes.alignLeft}
+              active={getActiveAlign(editor) === 'left'}
               onMouseDown={(e) => {
                 e.preventDefault();
-                setAlign(slateEditor, FormatTypes.alignLeft);
+                setAlign(editor, 'left');
               }}
             >
               <FormatAlignLeft sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={getActiveAlign(slateEditor) === FormatTypes.alignCenter}
+              active={getActiveAlign(editor) === 'center'}
               onMouseDown={(e) => {
                 e.preventDefault();
-                setAlign(slateEditor, FormatTypes.alignCenter);
+                setAlign(editor, 'center');
               }}
             >
               <FormatAlignCenter sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={getActiveAlign(slateEditor) === FormatTypes.alignRight}
+              active={getActiveAlign(editor) === 'right'}
               onMouseDown={(e) => {
                 e.preventDefault();
-                setAlign(slateEditor, FormatTypes.alignRight);
+                setAlign(editor, 'right');
               }}
             >
               <FormatAlignRight sx={{ display: 'block' }} />
             </ToolbarButton>
 
             <ToolbarButton
-              active={getActiveBlock(slateEditor as any)?.listStyleType === 'decimal'}
+              active={getActiveBlock(editor as any)?.listStyleType === 'decimal'}
               onMouseDown={(e) => {
                 e.preventDefault();
                 toggleList(editor as any, { listStyleType: 'decimal' } as any);
@@ -512,7 +512,7 @@ export const PlateMessageEditor = ({
               <FormatListNumbered sx={{ display: 'block' }} />
             </ToolbarButton>
             <ToolbarButton
-              active={getActiveBlock(slateEditor as any)?.listStyleType === 'disc'}
+              active={getActiveBlock(editor as any)?.listStyleType === 'disc'}
               onMouseDown={(e) => {
                 e.preventDefault();
                 toggleList(editor as any, { listStyleType: 'disc' } as any);
@@ -534,75 +534,14 @@ export const PlateMessageEditor = ({
         {belowEditor}
 
         <PlateContent
-          style={{ minHeight: 350, padding: EDITOR_PADDING, boxSizing: 'border-box' }}
+          style={{
+            minHeight: 350,
+            padding: `${theme.spacing(2)} ${theme.spacing(1)}`,
+            boxSizing: 'border-box',
+            outline: 'none'
+          }}
           placeholder={t('form.placeholder')}
           spellCheck
-          onFocus={onEditorFocus}
-          onBlur={onEditorBlur}
-          onKeyDown={(event) => {
-            // Auto-link URLs/emails after the delimiter is inserted.
-            if (event.key === ' ' || event.key === 'Enter') {
-              window.setTimeout(() => {
-                tryAutoLinkAtSelection(slateEditor);
-              }, 0);
-            }
-          }}
-          onPaste={(event) => {
-            const dt = event.clipboardData;
-            if (!dt) return;
-
-            if (dt.files && dt.files.length > 0) {
-              const files = Array.from(dt.files).filter((f) =>
-                f.type.startsWith('image/'),
-              );
-              if (files.length > 0) {
-                event.preventDefault();
-                void (async () => {
-                  for (const f of files) {
-                    await insertImageFromFile(slateEditor, f, onAddImagesCustomHandle);
-                  }
-                })();
-                return;
-              }
-            }
-
-            const html = dt.getData('text/html');
-            const deserializeHtml = (editor as any)?.api?.html?.deserialize as
-              | ((htmlString: string) => unknown)
-              | undefined;
-            if (html && deserializeHtml) {
-              event.preventDefault();
-              try {
-                const fragment = deserializeHtml(html);
-                if (Array.isArray(fragment)) {
-                  Transforms.insertFragment(slateEditor, fragment as any);
-                  return;
-                }
-              } catch {
-                // If HTML parsing fails, let Slate paste plain text.
-              }
-            }
-
-            const text = dt.getData('text/plain')?.trim();
-            if (text && (isFinishedUrl(`${text} `) || containsEmail(text))) {
-              // Allow default paste, then auto-link the previous word.
-              window.setTimeout(() => {
-                tryAutoLinkAtSelection(slateEditor);
-              }, 0);
-            }
-          }}
-          onDrop={(event) => {
-            const files = Array.from(event.dataTransfer?.files ?? []).filter(
-              (f) => f.type.startsWith('image/'),
-            );
-            if (files.length === 0) return;
-            event.preventDefault();
-            void (async () => {
-              for (const f of files) {
-                await insertImageFromFile(slateEditor, f, onAddImagesCustomHandle);
-              }
-            })();
-          }}
           renderElement={renderElement}
           renderLeaf={renderLeaf}
         />

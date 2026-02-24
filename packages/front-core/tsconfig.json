@@ -53,8 +53,38 @@
       "@theme/*": [
         "theme/*"
       ],
+      "platejs": [
+        "../node_modules/platejs/dist/index.d.ts"
+      ],
       "platejs/*": [
         "../node_modules/platejs/dist/*/index.d.ts"
+      ],
+      "@platejs/*": [
+        "../node_modules/@platejs/*/dist/index.d.ts"
+      ],
+      "@platejs/core/react": [
+        "../node_modules/@platejs/core/dist/react/index.d.ts"
+      ],
+      "@platejs/core/static": [
+        "../node_modules/@platejs/core/dist/static/index.d.ts"
+      ],
+      "@platejs/basic-nodes/react": [
+        "../node_modules/@platejs/basic-nodes/dist/react/index.d.ts"
+      ],
+      "@platejs/link/react": [
+        "../node_modules/@platejs/link/dist/react/index.d.ts"
+      ],
+      "@platejs/list": [
+        "../node_modules/@platejs/list/dist/index.d.ts"
+      ],
+      "@platejs/list/react": [
+        "../node_modules/@platejs/list/dist/react/index.d.ts"
+      ],
+      "@platejs/media/react": [
+        "../node_modules/@platejs/media/dist/react/index.d.ts"
+      ],
+      "@platejs/autoformat": [
+        "../node_modules/@platejs/autoformat/dist/index.d.ts"
       ],
       "@platejs/*/react": [
         "../node_modules/@platejs/*/dist/react/index.d.ts"
