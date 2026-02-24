@@ -2,7 +2,7 @@ import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableContainer from '@mui/material/TableContainer';
-import React, { ReactChild } from 'react';
+import React, { ReactNode } from 'react';
 import { useGetWaitingListsOfGroupQuery, WaitingList } from '../../../gql';
 import { Order } from '../../../utils/table';
 import MembersEmptyTable from '../components/MembersEmptyTable';
@@ -23,7 +23,7 @@ interface FormattedWaitingListMember extends DefaultFormattedMember {
   details: string;
   registrationDate: Date;
   message: string;
-  ' ': ReactChild;
+  ' ': ReactNode;
 }
 
 function formatMember(
@@ -71,13 +71,13 @@ function WaitingListTable() {
   React.useEffect(() => {
     if (toggleRefetch === undefined) return;
     if (waitingListRefetch) waitingListRefetch();
-  }, [toggleRefetch]);
+  }, [toggleRefetch, waitingListRefetch]);
 
   const formattedMembers: FormattedWaitingListMember[] = React.useMemo(() => {
     return waitingListData
       ? waitingListData.getWaitingListsOfGroup.map((wl) =>
-          formatMember(wl as Pick<WaitingList, 'date' | 'message' | 'user'>),
-        )
+        formatMember(wl as Pick<WaitingList, 'date' | 'message' | 'user'>),
+      )
       : [];
   }, [waitingListData]);
 
