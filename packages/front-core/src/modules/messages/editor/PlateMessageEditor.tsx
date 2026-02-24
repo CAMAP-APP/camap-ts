@@ -27,6 +27,13 @@ import {
   BasicBlocksPlugin,
   BasicMarksPlugin,
 } from '@platejs/basic-nodes/react';
+import {
+  FontColorPlugin,
+  TextAlignPlugin,
+} from '@platejs/basic-styles/react';
+import {
+  IndentPlugin
+} from '@platejs/indent/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
 import { encodeFileToBase64String } from '../../../utils/encoding';
@@ -144,111 +151,6 @@ const insertImageFromFile = async (
   onAddImagesCustomHandle?.([file]);
 };
 
-const RenderLeaf = (props: any) => {
-  const { attributes, children, leaf } = props;
-  let out = children;
-  if (leaf.bold) out = <strong>{out}</strong>;
-  if (leaf.italic) out = <em>{out}</em>;
-  if (leaf.underline) out = <u>{out}</u>;
-
-  const color: unknown = leaf.color;
-  if (typeof color === 'string' && color.startsWith('#')) {
-    return (
-      <span {...attributes} style={{ color }}>
-        {out}
-      </span>
-    );
-  }
-
-  return <span {...attributes}>{out}</span>;
-};
-
-const RenderElement = (props: any) => {
-  const { attributes, children, element } = props;
-  const align = element.align;
-
-  if (element.type === 'a') {
-    return (
-      <a
-        {...attributes}
-        href={element.url}
-        target="_blank"
-        rel="noreferrer noopener"
-      >
-        {children}
-      </a>
-    );
-  }
-
-  if (element.type === 'img') {
-    const imageEl = element as MessageImageElement;
-    const src =
-      typeof imageEl.dataUrl === 'string' && imageEl.dataUrl
-        ? imageEl.dataUrl
-        : imageEl.url;
-
-    let wrapperStyle: React.CSSProperties = {
-      height: typeof imageEl.height === 'number' ? imageEl.height : undefined,
-      overflow: 'auto',
-    };
-
-    if (imageEl.align === 'center') {
-      wrapperStyle = { ...wrapperStyle, display: 'block', margin: '0 auto' };
-    } else if (imageEl.align === 'right') {
-      wrapperStyle = { ...wrapperStyle, float: 'right', marginLeft: 16 };
-    } else {
-      wrapperStyle = { ...wrapperStyle, float: 'left', marginRight: 16 };
-    }
-
-    return (
-      <div {...attributes} style={wrapperStyle}>
-        <img
-          src={src}
-          alt={imageEl.filename ?? imageEl.url}
-          style={{ maxWidth: '100%', maxHeight: '100%' }}
-        />
-        {children}
-      </div>
-    );
-  }
-
-  const textAlign: React.CSSProperties['textAlign'] =
-    align === 'center'
-      ? 'center'
-      : align === 'right'
-        ? 'right'
-        : align === 'left'
-          ? 'left'
-          : undefined;
-
-  const style: React.CSSProperties = {
-    ...(attributes.style ?? {}),
-    ...(textAlign ? { textAlign } : {}),
-  };
-
-  switch (element.type) {
-    case 'h1':
-      return (
-        <h1 {...attributes} style={style}>
-          {children}
-        </h1>
-      );
-    case 'h2':
-      return (
-        <h2 {...attributes} style={style}>
-          {children}
-        </h2>
-      );
-    case 'p':
-    default:
-      return (
-        <p {...attributes} style={style}>
-          {children}
-        </p>
-      );
-  }
-};
-
 export const PlateMessageEditor = ({
   name,
   onBlur,
@@ -269,8 +171,17 @@ export const PlateMessageEditor = ({
     () => [
       BasicBlocksPlugin,
       BasicMarksPlugin,
-      LinkPlugin,
-      ListPlugin,
+      FontColorPlugin,
+      TextAlignPlugin,
+      LinkPlugin.configure({
+        render: {
+          node: ({ children, href, rel, attributes }: { children: React.ReactNode; href: string; rel: string; attributes: React.HTMLAttributes<HTMLAnchorElement> }) => <a href={href} rel={rel} {...attributes}>{children}</a>,
+        },
+      }),
+      IndentPlugin,
+      ListPlugin.configure({
+
+      }),
       ImagePlugin,
       AutoformatPlugin.configure({
         options: {
@@ -369,26 +280,10 @@ export const PlateMessageEditor = ({
   }, [editor, externalValue, onExternalValueApplied]);
 
   const onPlateChange = useCallback(() => {
+    console.log('onPlateChange', editor.children);
     // Avoid serializing on every selection change? For now debounce and keep small docs.
     scheduleSerialize();
-  }, [scheduleSerialize]);
-
-  const renderElement = useCallback((p: any) => <RenderElement {...p} />, []);
-  const renderLeaf = useCallback((p: any) => <RenderLeaf {...p} />, []);
-
-  const ToolbarButton = ({
-    active,
-    onMouseDown,
-    children,
-  }: {
-    active: boolean;
-    onMouseDown: (e: React.MouseEvent<HTMLElement>) => void;
-    children: React.ReactNode;
-  }) => (
-    <TextEditorToolbarButton active={active} onMouseDown={onMouseDown}>
-      {children}
-    </TextEditorToolbarButton>
-  );
+  }, [scheduleSerialize, editor]);
 
   return (
     <Box
@@ -418,14 +313,16 @@ export const PlateMessageEditor = ({
       mt={2}
       mb={1}
     >
-      <Plate editor={editor} onChange={onPlateChange}>
+      <Plate editor={editor}
+        onChange={onPlateChange}
+      >
         <Box
           position="relative"
           bgcolor={theme.palette.divider}
           borderRadius={`${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`}
         >
           <Box display="flex" flexWrap="wrap">
-            <ToolbarButton
+            <TextEditorToolbarButton
               active={isMarkActive(editor, 'bold')}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -433,8 +330,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatBold sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={isMarkActive(editor, 'italic')}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -442,8 +339,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatItalic sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={isMarkActive(editor, 'underline')}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -451,11 +348,11 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatUnderlined sx={{ display: 'block' }} />
-            </ToolbarButton>
+            </TextEditorToolbarButton>
 
             <MessageColorButton />
 
-            <ToolbarButton
+            <TextEditorToolbarButton
               active={getActiveBlock(editor as any)?.type === 'h1'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -463,8 +360,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <LooksOne sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={getActiveBlock(editor as any)?.type === 'h2'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -472,9 +369,9 @@ export const PlateMessageEditor = ({
               }}
             >
               <LooksTwo sx={{ display: 'block' }} />
-            </ToolbarButton>
+            </TextEditorToolbarButton>
 
-            <ToolbarButton
+            <TextEditorToolbarButton
               active={getActiveAlign(editor) === 'left'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -482,8 +379,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatAlignLeft sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={getActiveAlign(editor) === 'center'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -491,8 +388,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatAlignCenter sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={getActiveAlign(editor) === 'right'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -500,9 +397,9 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatAlignRight sx={{ display: 'block' }} />
-            </ToolbarButton>
+            </TextEditorToolbarButton>
 
-            <ToolbarButton
+            <TextEditorToolbarButton
               active={getActiveBlock(editor as any)?.listStyleType === 'decimal'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -510,8 +407,8 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatListNumbered sx={{ display: 'block' }} />
-            </ToolbarButton>
-            <ToolbarButton
+            </TextEditorToolbarButton>
+            <TextEditorToolbarButton
               active={getActiveBlock(editor as any)?.listStyleType === 'disc'}
               onMouseDown={(e) => {
                 e.preventDefault();
@@ -519,7 +416,7 @@ export const PlateMessageEditor = ({
               }}
             >
               <FormatListBulleted sx={{ display: 'block' }} />
-            </ToolbarButton>
+            </TextEditorToolbarButton>
 
             <MessageLinkButton />
             <MessageImageButton
@@ -542,8 +439,6 @@ export const PlateMessageEditor = ({
           }}
           placeholder={t('form.placeholder')}
           spellCheck
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
         />
       </Plate>
     </Box>
