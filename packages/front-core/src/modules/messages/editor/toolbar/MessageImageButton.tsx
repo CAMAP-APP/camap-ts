@@ -9,18 +9,16 @@ import {
   TextField,
 } from '@mui/material';
 import { AutocompleteChangeReason } from '@mui/material/useAutocomplete';
-import { encodeFileToBase64String } from '@utils/encoding';
-import { getBase64EncodedImage } from '@utils/image';
 import { logError } from '@utils/logger';
 import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { TPlateEditor } from '@platejs/core/react';
 import { useEditorRef } from '@platejs/core/react';
+import { insertImage, insertImageFromFiles } from '@platejs/media';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';
-import { Value } from 'platejs';
+import type { MessageEditor } from '../platePlugins';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -35,7 +33,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
   const { t } = useTranslation(['messages/default']);
   const [getActiveCatalogs, { data: activeContractsData }] =
     useGetActiveCatalogsPicturesLazyQuery();
-  const editor = useEditorRef();
+  const editor = useEditorRef<MessageEditor>();
   const imageInput = React.useRef<HTMLInputElement>(null);
   const [loading, setLoading] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -80,15 +78,19 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
 
     const options = {
       maxSizeMB: 1,
-      maxWidthOrHeight: 600,
+      maxWidthOrHeight: 500,
       useWebWorker: true,
     };
 
     try {
-      const dt = new DataTransfer();
-      for (const file of Array.from(files)) dt.items.add(file);
-      editor.tf.insertData(dt)
-      onAddImagesCustomHandle?.([files[0]]);
+      insertImageFromFiles(editor, files);
+
+      const compressedFiles = await Promise.all(
+        Array.from(files).map(
+          (file) => imageCompression(file, options)
+        )
+      );
+      onAddImagesCustomHandle?.(compressedFiles);
     } catch (error) {
       logError(error);
     } finally {
@@ -111,7 +113,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     closeMenu();
 
     const image = newValue.vendor?.image as string;
-    const url = `${getCamapHost()}${image}`;
+    void `${getCamapHost()}${image}`;
     // insertMessageImage(editor, { url, filename: undefined });
   };
 

@@ -1,10 +1,10 @@
 
 import { Box } from '@mui/material';
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
 import type { Value } from 'platejs';
-import type { DOMHandler, PlateEditor } from '@platejs/core/react';
+import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
 import { encodeFileToBase64String } from '../../../utils/encoding';
@@ -14,12 +14,14 @@ import {
   MESSAGE_EDITOR_EMPTY_VALUE,
   type MessageImageElement,
 } from './messageEditorSchema';
-import { autoformatRules } from './autoformat';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
 import imageCompression from 'browser-image-compression';
-import { AutoformatPlugin } from '@platejs/autoformat';
-import { getPlatePlugins } from './platePlugins';
+import {
+  MESSAGE_EDITOR_PLUGINS,
+  type MessageEditor,
+  type MessageEditorPlugin,
+} from './platePlugins';
 
 type Props = {
   name: string;
@@ -44,13 +46,13 @@ type Props = {
 };
 
 const insertImageFromFile = async (
-  editor: PlateEditor,
+  editor: MessageEditor,
   file: File,
   onAddImagesCustomHandle?: (files: File[]) => void,
 ) => {
   const options = {
     maxSizeMB: 1,
-    maxWidthOrHeight: 600,
+    maxWidthOrHeight: 500,
     useWebWorker: true,
   };
 
@@ -88,32 +90,20 @@ export const PlateMessageEditor = ({
 }: Props) => {
   const { t } = useTranslation(['messages/default']);
 
-  const plugins = useMemo(
-    () => [
-      ...getPlatePlugins(),
-      AutoformatPlugin.configure({
-        options: {
-          rules: [...autoformatRules],
-        },
-      }),
-    ],
-    [],
-  );
-
-  const editor = usePlateEditor({
-    plugins,
+  const editor = usePlateEditor<Value, MessageEditorPlugin>({
+    plugins: [...MESSAGE_EDITOR_PLUGINS],
     value: MESSAGE_EDITOR_EMPTY_VALUE,
     handlers: {
       onFocus: ((_ctx) => {
         setIsFocused(true);
-      }) as DOMHandler<any, React.FocusEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
       onBlur: (({ event, editor: plateEditor }) => {
         setIsFocused(false);
         onBlur(name)(event as any);
 
         onBlurSaveSlateValue?.(plateEditor.children);
         void serializeToFormikHtml();
-      }) as DOMHandler<any, React.FocusEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
       onPaste: (({ event, editor: plateEditor }) => {
         const dt = event.clipboardData;
         if (!dt) return;
@@ -146,7 +136,7 @@ export const PlateMessageEditor = ({
             // Ignore: fall back to the browser/Slate default paste behavior.
           }
         }
-      }) as DOMHandler<any, React.ClipboardEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>,
       onDrop: (({ event, editor: plateEditor }) => {
         const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
           f.type.startsWith('image/'),
@@ -158,7 +148,7 @@ export const PlateMessageEditor = ({
             await insertImageFromFile(plateEditor, f, onAddImagesCustomHandle);
           }
         })();
-      }) as DOMHandler<any, React.DragEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.DragEvent>,
     },
   });
 

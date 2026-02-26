@@ -25,6 +25,7 @@ export function MediaImageNode(
             margin: 0,
             display: 'inline-block',
             width,
+            maxWidth: '100%',
           }}
         >
           <div
@@ -38,9 +39,11 @@ export function MediaImageNode(
             <img
               style={{
                 width: '100%',
-                maxWidth: '100%',
+                maxWidth: 500,
+                height: 'auto',
+                maxHeight: 300,
                 cursor: 'default',
-                objectFit: 'cover',
+                objectFit: 'contain',
                 padding: 0,
                 borderRadius: '4px',
               }}

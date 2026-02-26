@@ -13,12 +13,12 @@ import {
 import { Box } from "@mui/material";
 import theme from "@theme/default/theme";
 import { TextEditorToolbarButton } from "./TextEditorToolbarButton";
-import { PlateEditor, TPlateEditor } from "@platejs/core/react";
+import { PlateEditor } from "@platejs/core/react";
 import MessageColorButton from './MessageColorButton';
 import MessageImageButton from './MessageImageButton';
 import MessageLinkButton from './MessageLinkButton';
 import { someList } from '@platejs/list-classic';
-import { Value } from 'platejs';
+import type { MessageEditor } from '../platePlugins';
 
 const isMarkActive = (
     editor: PlateEditor,
@@ -77,7 +77,7 @@ export default function TextEditorToolbar({
     groupId,
     toolbarEnd
 }: {
-    editor: TPlateEditor<Value, any>,
+    editor: MessageEditor,
     onAddImagesCustomHandle?: (files: File[]) => void,
     groupId?: number,
     toolbarEnd?: React.ReactNode
@@ -119,7 +119,7 @@ export default function TextEditorToolbar({
             <MessageColorButton />
 
             <TextEditorToolbarButton
-                active={getActiveBlock(editor as any)?.type === 'h1'}
+                active={getActiveBlock(editor)?.type === 'h1'}
                 onMouseDown={(e) => {
                     e.preventDefault();
                     toggleHeading(editor, 'h1');
@@ -128,7 +128,7 @@ export default function TextEditorToolbar({
                 <LooksOne sx={{ display: 'block' }} />
             </TextEditorToolbarButton>
             <TextEditorToolbarButton
-                active={getActiveBlock(editor as any)?.type === 'h2'}
+                active={getActiveBlock(editor)?.type === 'h2'}
                 onMouseDown={(e) => {
                     e.preventDefault();
                     toggleHeading(editor, 'h2');
