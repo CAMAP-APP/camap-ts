@@ -31,6 +31,7 @@
     "errorMessageTooBig": "La taille totale du message doit être inférieure à 25 Mo. Veuillez retirer des pièces jointes ou des images du corps du message.",
     "send": "Envoyer",
     "placeholder": "Votre message...",
+    "removeImage": "Supprimer l'image",
     "fromDevice": "Depuis mon appareil",
     "fromCatalog": "Depuis un catalogue",
     "chooseCatalog": "Catalogues",
