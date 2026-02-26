@@ -53,7 +53,7 @@ const SentMessageList = ({
   React.useEffect(() => {
     if (isGroupAdmin === undefined) return;
     if (isGroupAdmin) {
-      getAllMessages({ variables: { groupId }});
+      getAllMessages({ variables: { groupId } });
     } else {
       getUserMessages({ variables: { groupId } });
     }
@@ -110,6 +110,7 @@ const SentMessageList = ({
               <List
                 sx={{
                   flex: 1,
+                  p: 0
                 }}
               >
                 {messages.slice(startIndex, endIndex).map((m) => (
@@ -119,6 +120,9 @@ const SentMessageList = ({
                     key={m.id}
                     selected={selectedMessageId === m.id}
                     onClick={() => onSelectMessage(m.id)}
+                    sx={{
+                      p: 0
+                    }}
                   >
                     <ListItemText
                       sx={{
@@ -140,7 +144,7 @@ const SentMessageList = ({
           </>
         )}
       </Box>
-      <Box p={{ xs: 1, sm: 0 }}>
+      <Box p={{ xs: 0, sm: 0 }}>
         <Pagination
           count={maxPage}
           page={currentPage}

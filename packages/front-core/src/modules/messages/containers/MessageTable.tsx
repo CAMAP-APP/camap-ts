@@ -17,7 +17,6 @@ import { useTranslation } from 'react-i18next';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { PlateMessageViewer } from '../editor/PlateMessageViewer';
-import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
 
 export interface MessageTableProps {
   messageId: number;
@@ -71,12 +70,13 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
   const [parseError, setParseError] = useState<string | null>(null);
   const messageBody = React.useMemo(() => {
-    if (!message?.slateContent) return;
-    const parsed = getMessageEditorValueFromSlateContent(message.slateContent);
-    if (!parsed.ok) {
-      setParseError(parsed.error);
-    }
-    return parsed.wrapper.value;
+    // if (!message?.slateContent) return;
+    // const parsed = getMessageEditorValueFromSlateContent(message.slateContent);
+    // if (!parsed.ok) {
+    //   setParseError(parsed.error);
+    // }
+    // return parsed.wrapper.value;
+    return []
   }, [message?.slateContent, setParseError]);
 
   if (messageError) return <ApolloErrorAlert error={messageError} />;

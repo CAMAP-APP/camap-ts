@@ -1,39 +1,10 @@
-import {
-  FormatAlignCenter,
-  FormatAlignLeft,
-  FormatAlignRight,
-  FormatBold,
-  FormatItalic,
-  FormatListBulleted,
-  FormatListNumbered,
-  FormatUnderlined,
-  LooksOne,
-  LooksTwo,
-} from '@mui/icons-material';
+
 import { Box } from '@mui/material';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
 import type { Value } from 'platejs';
 import type { DOMHandler, PlateEditor } from '@platejs/core/react';
-import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
-import imageCompression from 'browser-image-compression';
-import { toggleList } from '@platejs/list';
-import { LinkPlugin } from '@platejs/link/react';
-import { ListPlugin } from '@platejs/list/react';
-import { ImagePlugin } from '@platejs/media/react';
-import { AutoformatPlugin } from '@platejs/autoformat';
-import {
-  BasicBlocksPlugin,
-  BasicMarksPlugin,
-} from '@platejs/basic-nodes/react';
-import {
-  FontColorPlugin,
-  TextAlignPlugin,
-} from '@platejs/basic-styles/react';
-import {
-  IndentPlugin
-} from '@platejs/indent/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
 import { encodeFileToBase64String } from '../../../utils/encoding';
@@ -43,11 +14,12 @@ import {
   MESSAGE_EDITOR_EMPTY_VALUE,
   type MessageImageElement,
 } from './messageEditorSchema';
-import MessageColorButton from './toolbar/MessageColorButton';
-import MessageImageButton from './toolbar/MessageImageButton';
-import MessageLinkButton from './toolbar/MessageLinkButton';
-import { TextEditorToolbarButton } from './toolbar/TextEditorToolbarButton';
 import { autoformatRules } from './autoformat';
+import TextEditorToolbar from './toolbar/TextEditorToolbar';
+import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
+import imageCompression from 'browser-image-compression';
+import { AutoformatPlugin } from '@platejs/autoformat';
+import { getPlatePlugins } from './platePlugins';
 
 type Props = {
   name: string;
@@ -69,57 +41,6 @@ type Props = {
   belowEditor?: React.ReactNode;
 
   onAddImagesCustomHandle?: (files: File[]) => void;
-};
-
-type Align = 'left' | 'center' | 'right';
-type Mark = 'bold' | 'italic' | 'underline';
-
-const isMarkActive = (
-  editor: PlateEditor,
-  mark: Mark,
-) => {
-  const marks = editor.api.marks();
-  return !!marks?.[mark];
-};
-
-const toggleMark = (editor: PlateEditor, mark: Mark) => {
-  editor.tf.toggleMark(mark);
-};
-
-const getActiveBlock = (editor: PlateEditor) => {
-  const entry = editor.api.above({
-    match: (n) => editor.api.isBlock(n as any),
-  });
-  return entry?.[0] as any | undefined;
-};
-
-const getActiveAlign = (editor: PlateEditor) => {
-  const block = getActiveBlock(editor);
-  const align = block?.align;
-  if (
-    align === 'left' ||
-    align === 'center' ||
-    align === 'right'
-  )
-    return align;
-  return undefined;
-};
-
-const setAlign = (editor: PlateEditor, align: Align) => {
-  editor.tf.setNodes(
-    { align },
-    { match: (n) => editor.api.isBlock(n as any) },
-  );
-};
-
-const toggleHeading = (editor: PlateEditor, type: 'h1' | 'h2') => {
-  const block = getActiveBlock(editor);
-  const isActive = block?.type === type;
-  const nextType = isActive ? 'p' : type;
-  editor.tf.setNodes(
-    { type: nextType },
-    { match: (n) => editor.api.isBlock(n as any) },
-  );
 };
 
 const insertImageFromFile = async (
@@ -169,20 +90,7 @@ export const PlateMessageEditor = ({
 
   const plugins = useMemo(
     () => [
-      BasicBlocksPlugin,
-      BasicMarksPlugin,
-      FontColorPlugin,
-      TextAlignPlugin,
-      LinkPlugin.configure({
-        render: {
-          node: ({ children, href, rel, attributes }: { children: React.ReactNode; href: string; rel: string; attributes: React.HTMLAttributes<HTMLAnchorElement> }) => <a href={href} rel={rel} {...attributes}>{children}</a>,
-        },
-      }),
-      IndentPlugin,
-      ListPlugin.configure({
-
-      }),
-      ImagePlugin,
+      ...getPlatePlugins(),
       AutoformatPlugin.configure({
         options: {
           rules: [...autoformatRules],
@@ -226,12 +134,9 @@ export const PlateMessageEditor = ({
         }
 
         const html = dt.getData('text/html');
-        const deserializeHtml = (plateEditor as any)?.api?.html?.deserialize as
-          | ((htmlString: string) => unknown)
-          | undefined;
-        if (html && deserializeHtml) {
+        if (html) {
           try {
-            const fragment = deserializeHtml(html);
+            const fragment = plateEditor.api.html.deserialize({ element: html });
             if (Array.isArray(fragment)) {
               event.preventDefault();
               plateEditor.tf.insertFragment(fragment as any);
@@ -316,117 +221,10 @@ export const PlateMessageEditor = ({
       <Plate editor={editor}
         onChange={onPlateChange}
       >
-        <Box
-          position="relative"
-          bgcolor={theme.palette.divider}
-          borderRadius={`${theme.shape.borderRadius}px ${theme.shape.borderRadius}px 0 0`}
-        >
-          <Box display="flex" flexWrap="wrap">
-            <TextEditorToolbarButton
-              active={isMarkActive(editor, 'bold')}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleMark(editor, 'bold');
-              }}
-            >
-              <FormatBold sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={isMarkActive(editor, 'italic')}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleMark(editor, 'italic');
-              }}
-            >
-              <FormatItalic sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={isMarkActive(editor, 'underline')}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleMark(editor, 'underline');
-              }}
-            >
-              <FormatUnderlined sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-
-            <MessageColorButton />
-
-            <TextEditorToolbarButton
-              active={getActiveBlock(editor as any)?.type === 'h1'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleHeading(editor, 'h1');
-              }}
-            >
-              <LooksOne sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={getActiveBlock(editor as any)?.type === 'h2'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleHeading(editor, 'h2');
-              }}
-            >
-              <LooksTwo sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-
-            <TextEditorToolbarButton
-              active={getActiveAlign(editor) === 'left'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setAlign(editor, 'left');
-              }}
-            >
-              <FormatAlignLeft sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={getActiveAlign(editor) === 'center'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setAlign(editor, 'center');
-              }}
-            >
-              <FormatAlignCenter sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={getActiveAlign(editor) === 'right'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                setAlign(editor, 'right');
-              }}
-            >
-              <FormatAlignRight sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-
-            <TextEditorToolbarButton
-              active={getActiveBlock(editor as any)?.listStyleType === 'decimal'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleList(editor as any, { listStyleType: 'decimal' } as any);
-              }}
-            >
-              <FormatListNumbered sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-            <TextEditorToolbarButton
-              active={getActiveBlock(editor as any)?.listStyleType === 'disc'}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                toggleList(editor as any, { listStyleType: 'disc' } as any);
-              }}
-            >
-              <FormatListBulleted sx={{ display: 'block' }} />
-            </TextEditorToolbarButton>
-
-            <MessageLinkButton />
-            <MessageImageButton
-              onAddImagesCustomHandle={onAddImagesCustomHandle}
-              groupId={groupId}
-            />
-
-            {toolbarEnd}
-          </Box>
-        </Box>
+        <TextEditorToolbar
+          editor={editor}
+          onAddImagesCustomHandle={onAddImagesCustomHandle}
+          groupId={groupId} toolbarEnd={toolbarEnd} />
 
         {belowEditor}
 

@@ -15,12 +15,6 @@ import { MessagesContext } from '../MessagesContext';
 import AttachmentList from './attachments/AttachmentList';
 import InsertAttachmentButton from '../editor/toolbar/InsertAttachmentButton';
 import { PlateMessageEditor } from '../editor/PlateMessageEditor';
-import {
-  MESSAGE_EDITOR_EMPTY_VALUE,
-  type MessageImageElement,
-} from '../editor/messageEditorSchema';
-import { encodeMessageSlateContentV2 } from '../editor/messageSlateContentV2';
-import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
 
 // Formik passes (name, value, onBlur, onChange) props.
 type MessageTextEditorFormikProps = {
@@ -65,7 +59,7 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
               recursivelyCheckNode(n.children.filter((x: unknown) => x != null && typeof x === 'object'));
             }
           } else {
-            const imageNode = n as unknown as MessageImageElement;
+            const imageNode = n as any;
             const imageSource = imageNode.dataUrl || '';
             const [content, contentType] = getContentAndTypeFromBase64EncodedImage(imageSource);
 
@@ -112,13 +106,13 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
     const reuseMessageSlateContent = reuseMessage.slateContent;
     setSlateContent(reuseMessageSlateContent);
 
-    const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
-    setExternalValue(parsed.wrapper.value);
+    // const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
+    // setExternalValue(parsed.wrapper.value);
 
-    checkEmbeddedImages(
-      parsed.wrapper.value as unknown as BaseNode[],
-      reuseMessage.attachments || undefined,
-    );
+    // checkEmbeddedImages(
+    //   parsed.wrapper.value as unknown as BaseNode[],
+    //   reuseMessage.attachments || undefined,
+    // );
   }, [checkEmbeddedImages, reuseMessage, setSlateContent]);
 
   const onAddImages = async (files: File[]) => {
@@ -158,11 +152,11 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
       onAddImagesCustomHandle={onAddImages}
       onHtmlSerialized={onSetValue}
       onBlurSaveSlateValue={(value: Value) => {
-        if (isEqual(value, MESSAGE_EDITOR_EMPTY_VALUE)) {
-          setSlateContent('');
-        } else {
-          setSlateContent(encodeMessageSlateContentV2(value));
-        }
+        // if (isEqual(value, MESSAGE_EDITOR_EMPTY_VALUE)) {
+        //   setSlateContent('');
+        // } else {
+        //   setSlateContent(encodeMessageSlateContentV2(value));
+        // }
       }}
       toolbarEnd={<InsertAttachmentButton />}
       belowEditor={<AttachmentList />}

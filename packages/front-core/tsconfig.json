@@ -53,6 +53,9 @@
       "@theme/*": [
         "theme/*"
       ],
+      "@platejs/react": [
+        "../node_modules/platejs/dist/react"
+      ],
       "@platejs/core/react": [
         "../node_modules/@platejs/core/dist/react"
       ],
@@ -62,23 +65,20 @@
       "@platejs/basic-nodes/react": [
         "../node_modules/@platejs/basic-nodes/dist/react"
       ],
+      "@platejs/indent/react": [
+        "../node_modules/@platejs/indent/dist/react"
+      ],
       "@platejs/basic-styles/react": [
         "../node_modules/@platejs/basic-styles/dist/react"
       ],
       "@platejs/link/react": [
         "../node_modules/@platejs/link/dist/react"
       ],
-      "@platejs/list/react": [
-        "../node_modules/@platejs/list/dist/react"
+      "@platejs/list-classic/react": [
+        "../node_modules/@platejs/list-classic/dist/react"
       ],
       "@platejs/media/react": [
         "../node_modules/@platejs/media/dist/react"
-      ],
-      "@platejs/*/react": [
-        "../node_modules/@platejs/*/dist/react/index.d.ts"
-      ],
-      "@platejs/*/static": [
-        "../node_modules/@platejs/*/dist/static/index.d.ts"
       ]
     }
   },

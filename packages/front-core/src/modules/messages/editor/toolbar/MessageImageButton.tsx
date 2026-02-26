@@ -48,6 +48,9 @@ const insertMessageImage = (
     dataUrl: isEmbedded ? dataUrl : undefined,
     filename,
     cid: isEmbedded ? cid : undefined,
+    isElelement: true,
+    isVoid: true,
+    void: true,
     children: [{ text: '' }],
   };
 

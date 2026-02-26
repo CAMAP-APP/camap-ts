@@ -78,36 +78,7 @@ const Messages = ({ groupId, whichUser }: MessagesProps) => {
     >
       <Box mb={2}>
         <Grid container spacing={4}>
-          <Grid
-            item
-            sm={3}
-            xs={12}
-            sx={{
-              order: {
-                xs: 1,
-                sm: 'initial',
-              },
-            }}
-          >
-            <Paper>
-              <Box p={{ xs: 0, sm: 2 }}>
-                <Box pr={2} pl={2} pt={{ xs: 1, sm: 0 }}>
-                  <Typography variant="h6">
-                    {isGroupAdmin
-                      ? t('allSentMessages')
-                      : t('lastSentMessages')}
-                  </Typography>
-                </Box>
-                <SentMessageList
-                  isGroupAdmin={isGroupAdmin}
-                  selectedMessageId={selectedMessageId}
-                  onSelectMessage={onSelectMessage}
-                  toggleRefetch={toggleRefetch}
-                />
-              </Box>
-            </Paper>
-          </Grid>
-          <Grid item sm={9} xs={12}>
+          <Grid item lg={9} xs={12}>
             <Paper>
               <Box p={{ xs: 1, sm: 2 }}>
                 {selectedMessageId ? (
@@ -150,6 +121,30 @@ const Messages = ({ groupId, whichUser }: MessagesProps) => {
                     <MessagingService onMessageSent={onMessageSent} />
                   </>
                 )}
+              </Box>
+            </Paper>
+          </Grid>
+
+          <Grid
+            item
+            lg={3}
+            xs={12}
+          >
+            <Paper>
+              <Box p={{ xs: 0, sm: 2 }}>
+                <Box pt={{ xs: 1, sm: 0 }}>
+                  <Typography variant="h6">
+                    {isGroupAdmin
+                      ? t('allSentMessages')
+                      : t('lastSentMessages')}
+                  </Typography>
+                </Box>
+                <SentMessageList
+                  isGroupAdmin={isGroupAdmin}
+                  selectedMessageId={selectedMessageId}
+                  onSelectMessage={onSelectMessage}
+                  toggleRefetch={toggleRefetch}
+                />
               </Box>
             </Paper>
           </Grid>
