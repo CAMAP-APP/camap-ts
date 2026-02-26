@@ -19,6 +19,9 @@ export function MediaImageNode(
   const showOutline = isSelected && isFocused;
   const [isHovered, setIsHovered] = React.useState(false);
 
+  const justifyContent =
+    align === 'left' ? 'flex-start' : align === 'right' ? 'flex-end' : 'center';
+
   const removeImage = React.useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       // Keep the editor selection on the image node.
@@ -41,7 +44,14 @@ export function MediaImageNode(
         paddingBottom: 10,
       }}
     >
-      <div contentEditable={false}>
+      <div
+        contentEditable={false}
+        style={{
+          display: 'flex',
+          justifyContent,
+          width: '100%',
+        }}
+      >
         <figure
           style={{
             position: 'relative',

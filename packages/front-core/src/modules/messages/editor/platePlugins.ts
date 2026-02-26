@@ -17,6 +17,7 @@ import { AutoformatPlugin } from '@platejs/autoformat';
 import type { InferConfig, PlatePlugin, TPlateEditor } from '@platejs/core/react';
 import type { PluginConfig, Value } from 'platejs';
 import { autoformatRules } from './autoformat';
+import { LinkNode } from './nodes/LinkNode';
 
 // `@platejs/basic-nodes` currently exports these as `PluginConfig<any, ...>` which collapses
 // `InferTransforms<...>` to `any` when deriving the editor type. We keep runtime behavior
@@ -33,7 +34,7 @@ export const MESSAGE_BASE_PLUGINS = [
     TypedBasicMarksPlugin,
     FontColorPlugin,
     TextAlignPlugin,
-    LinkPlugin,
+    LinkPlugin.withComponent(LinkNode),
     IndentPlugin,
     ListPlugin,
     BulletedListPlugin,
