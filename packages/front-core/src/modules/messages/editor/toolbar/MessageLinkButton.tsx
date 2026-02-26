@@ -1,147 +1,129 @@
 import { InsertLink } from '@mui/icons-material';
-import { Box, Grid, TextField } from '@mui/material';
-import Button from '@mui/material/Button';
-import Popover from '@mui/material/Popover';
-import React from 'react';
-import { useTranslation } from 'react-i18next';
-import type { PlateEditor } from '@platejs/core/react';
-import { useEditorRef } from '@platejs/core/react';
+import React, { useCallback } from 'react';
+import { upsertLink } from '@platejs/link';
+import { NodeApi, type TRange, type TText } from 'platejs';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';
+import type { MessageEditor } from '../platePlugins';
 
-const isLinkActive = (editor: PlateEditor) => {
-  const linkEntry = editor.api.above({
-    match: (n) => !!n && typeof n === 'object' && (n as any).type === 'a',
-  });
-  return !!linkEntry;
+const isTextNode = (value: unknown): value is TText =>
+  !!value &&
+  typeof value === 'object' &&
+  'text' in (value as any) &&
+  typeof (value as any).text === 'string';
+
+const isWhitespace = (char: string) => /\s/.test(char);
+
+const getSelectionOrTokenRange = (editor: MessageEditor): TRange | null => {
+  const selection = editor.selection;
+  if (!selection) return null;
+
+  if (!editor.api.isCollapsed()) return selection;
+
+  const path = selection.anchor.path;
+  const node = NodeApi.get(editor as any, path);
+  if (!isTextNode(node)) return selection;
+
+  const offset = selection.anchor.offset;
+  const text = node.text ?? '';
+  if (!text) return selection;
+
+  const leftStart = Math.max(0, Math.min(offset, text.length));
+  let start = leftStart;
+  while (start > 0 && !isWhitespace(text[start - 1] ?? '')) start -= 1;
+
+  let end = leftStart;
+  while (end < text.length && !isWhitespace(text[end] ?? '')) end += 1;
+
+  if (start === end) return selection;
+
+  return {
+    anchor: { path, offset: start },
+    focus: { path, offset: end },
+  };
 };
 
-const unwrapLink = (editor: PlateEditor) => {
-  editor.tf.unwrapNodes({
-    match: (n) => !!n && typeof n === 'object' && (n as any).type === 'a',
-  });
-};
+const pathKey = (path: number[]) => path.join('.');
 
-const wrapLink = (editor: PlateEditor, url: string, text?: string) => {
-  if (isLinkActive(editor)) unwrapLink(editor);
+const focusLinkInputAtPath = (path: number[]) => {
+  const key = pathKey(path);
 
-  const { selection } = editor;
-  const isCollapsed = selection && editor.api.isCollapsed();
-  const link = {
-    type: 'a',
-    url,
-    children: isCollapsed ? [{ text: text || url }] : [],
+  const tryFocus = () => {
+    const input = document.querySelector<HTMLInputElement>(
+      `input[data-message-link-path="${key}"]`,
+    );
+    if (!input) return false;
+    input.focus();
+    input.select?.();
+    return true;
   };
 
-  if (isCollapsed) {
-    editor.tf.insertNodes(link);
-  } else {
-    editor.tf.wrapNodes(link, { split: true });
-    editor.tf.collapse({ edge: 'end' });
-  }
+  // Let React commit the LinkNode edit box first.
+  window.setTimeout(() => {
+    if (tryFocus()) return;
+    window.requestAnimationFrame(() => {
+      tryFocus();
+    });
+  }, 0);
 };
 
-const insertLink = (editor: PlateEditor, url: string, text?: string) => {
-  if (!editor.selection) return;
-  wrapLink(editor, url, text);
-};
+const MessageLinkButton = ({ editor }: { editor: MessageEditor }) => {
 
-const DEFAULT_SELECTION =
-  ({
-    anchor: { path: [0, 0], offset: 0 },
-    focus: { path: [0, 0], offset: 0 },
-  } as unknown as NonNullable<PlateEditor['selection']>);
+  const activeLinkEntry = editor.api.above({
+    at: editor.selection ?? undefined,
+    match: { type: 'a' },
+  });
 
-const MessageLinkButton = () => {
-  const { t } = useTranslation(['messages/default']);
-  const editor = useEditorRef();
-  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
-  const [textInput, setTextInput] = React.useState<string>('');
-  const [urlInput, setUrlInput] = React.useState<string>('');
-  const [selection, setSelection] = React.useState<PlateEditor['selection']>(null);
-  const [isActive, setIsActive] = React.useState(false);
-
-  const reset = () => {
-    setTextInput('');
-    setUrlInput('');
-    setSelection(null);
-  };
-
-  const onMouseDown = (event: React.MouseEvent<HTMLElement>) => {
+  const isActive = !!activeLinkEntry;
+  const onMouseDown = useCallback((event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
-    setIsActive(true);
-    setSelection(editor.selection);
-    setAnchorEl(event.currentTarget);
-  };
 
-  const handleClose = () => {
-    setAnchorEl(null);
-    reset();
-    setIsActive(false);
-  };
-
-  const onAddLink = () => {
-    if (!urlInput) return;
-    const nextSelection = selection || DEFAULT_SELECTION;
-    editor.tf.select(nextSelection);
-    let url = urlInput;
-    if (!urlInput.startsWith('http://') && !urlInput.startsWith('https://')) {
-      url = `http://${urlInput}`;
+    const activeLinkEntry = editor.api.above({
+      at: editor.selection ?? undefined,
+      match: { type: 'a' },
+    });
+    // If the cursor/selection is already inside a link, just focus its edit input.
+    if (activeLinkEntry) {
+      // Unwrap link if already inside a link node
+      const [, linkPath] = activeLinkEntry;
+      editor.tf.unwrapNodes({
+        at: linkPath,
+        match: { type: 'a' },
+      });
+      return;
     }
-    insertLink(editor, url, textInput);
-    handleClose();
-  };
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'message-link-popover' : undefined;
+    const range = getSelectionOrTokenRange(editor);
+    if (!range) return;
+
+    const selectedText = editor.api.string(range) || undefined;
+    editor.tf.select(range);
+
+    const url = selectedText.startsWith('http://') || selectedText.startsWith('https://') ? selectedText : `https://${selectedText}`;
+
+    upsertLink(editor, {
+      url,
+      text: selectedText,
+      skipValidation: true,
+    });
+
+    const createdLinkEntry = editor.api.above({
+      at: editor.selection ?? undefined,
+      match: { type: 'a' },
+    });
+    if (!createdLinkEntry) return;
+
+    const [, linkPath] = createdLinkEntry;
+    editor.tf.select(linkPath);
+    focusLinkInputAtPath(linkPath);
+  }, [editor]);
 
   return (
-    <>
-      <TextEditorToolbarButton
-        aria-describedby={id}
-        active={isActive || isLinkActive(editor)}
-        onMouseDown={onMouseDown}
-      >
-        <InsertLink sx={{ display: 'block' }} />
-      </TextEditorToolbarButton>
-      <Popover
-        id={id}
-        open={open}
-        anchorEl={anchorEl}
-        onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'center' }}
-      >
-        <Box flexGrow={1} p={2}>
-          <Grid container spacing={1}>
-            <Grid item xs={9}>
-              <TextField
-                label={t('text')}
-                variant="outlined"
-                fullWidth
-                value={textInput}
-                onChange={(e) => setTextInput(e.target.value)}
-              />
-            </Grid>
-            <Grid item container xs={12} direction="row" alignItems="center">
-              <Grid item xs={9}>
-                <TextField
-                  label={t('link')}
-                  variant="outlined"
-                  fullWidth
-                  value={urlInput}
-                  onChange={(e) => setUrlInput(e.target.value)}
-                />
-              </Grid>
-              <Grid item xs={3} container justifyContent="center">
-                <Button variant="contained" onClick={onAddLink}>
-                  {t('apply')}
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Box>
-      </Popover>
-    </>
+    <TextEditorToolbarButton
+      active={isActive}
+      onMouseDown={onMouseDown}
+    >
+      <InsertLink sx={{ display: 'block' }} />
+    </TextEditorToolbarButton>
   );
 };
 

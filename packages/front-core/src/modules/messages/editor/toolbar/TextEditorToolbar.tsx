@@ -184,7 +184,7 @@ export default function TextEditorToolbar({
                 <FormatListBulleted sx={{ display: 'block' }} />
             </TextEditorToolbarButton>
 
-            <MessageLinkButton />
+            <MessageLinkButton editor={editor} />
             <MessageImageButton
                 onAddImagesCustomHandle={onAddImagesCustomHandle}
                 groupId={groupId}

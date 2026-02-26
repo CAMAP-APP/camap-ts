@@ -14,7 +14,7 @@ import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorRef } from '@platejs/core/react';
-import { insertImage, insertImageFromFiles } from '@platejs/media';
+import { insertImageFromFiles } from '@platejs/media';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';

@@ -89,6 +89,8 @@ const autoformatAutoEmail: AutoformatRule = {
     insertTrigger: true,
     trigger: [
         ' ',
+        ',',
+        ';',
         '\n',
         '\t'
     ],
@@ -111,6 +113,22 @@ const autoformatAutoEmail: AutoformatRule = {
 
         editor.tf.select(info.range);
         upsertLink(editor, { text: info.token, url: info.href });
+
+        // move cursor out of the newly inserted node
+        const linkEntry = editor.api.above({
+            at: editor.selection ?? undefined,
+            match: { type: 'a' },
+        });
+        if (linkEntry) {
+            const [, linkPath] = linkEntry;
+            const after = editor.api.after(linkPath);
+            if (after) {
+                editor.tf.select(after);
+                editor.tf.collapse({ edge: 'end' });
+                return;
+            }
+        }
+
         editor.tf.collapse({ edge: 'end' });
     },
 };
