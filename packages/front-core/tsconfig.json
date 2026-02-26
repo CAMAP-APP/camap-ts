@@ -53,6 +53,9 @@
       "@theme/*": [
         "theme/*"
       ],
+      "platejs/static": [
+        "../node_modules/platejs/dist/static"
+      ],
       "@platejs/react": [
         "../node_modules/platejs/dist/react"
       ],

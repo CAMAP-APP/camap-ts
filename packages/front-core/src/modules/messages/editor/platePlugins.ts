@@ -12,7 +12,7 @@ import {
     IndentPlugin
 } from '@platejs/indent/react';
 import { ImagePlugin } from '@platejs/media/react';
-import { ImageNode } from './nodes/ImageNode';
+import { MediaImageNode } from './nodes/MediaImageNode';
 
 export const getPlatePlugins = () => {
     return [
@@ -23,10 +23,6 @@ export const getPlatePlugins = () => {
         LinkPlugin,
         IndentPlugin,
         ListPlugin, BulletedListPlugin, NumberedListPlugin, TaskListPlugin, ListItemPlugin,
-        ImagePlugin.configure({
-            render: {
-                node: ImageNode
-            }
-        })
+        ImagePlugin.withComponent(MediaImageNode)
     ]
 }

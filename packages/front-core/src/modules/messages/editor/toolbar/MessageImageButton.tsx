@@ -15,12 +15,12 @@ import { logError } from '@utils/logger';
 import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { PlateEditor } from '@platejs/core/react';
+import type { TPlateEditor } from '@platejs/core/react';
 import { useEditorRef } from '@platejs/core/react';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
-import { removeAccents, removeSpaces } from '@utils/fomat/string';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';
+import { Value } from 'platejs';
 
 type CatalogType = Pick<Catalog, 'id'> & {
   vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
@@ -30,32 +30,6 @@ interface InsertImageButtonProps {
   onAddImagesCustomHandle?: (image: File[]) => void;
   groupId?: number;
 }
-
-const insertMessageImage = (
-  editor: PlateEditor,
-  {
-    dataUrl,
-    url,
-    filename,
-  }: { dataUrl?: string; url: string; filename?: string },
-) => {
-  const cid = filename ? removeSpaces(removeAccents(filename)) : undefined;
-  const isEmbedded = !!dataUrl && dataUrl.startsWith('data:image');
-
-  const imageNode = {
-    type: 'img',
-    url: isEmbedded && cid ? `cid:${cid}` : url,
-    dataUrl: isEmbedded ? dataUrl : undefined,
-    filename,
-    cid: isEmbedded ? cid : undefined,
-    isElelement: true,
-    isVoid: true,
-    void: true,
-    children: [{ text: '' }],
-  };
-
-  editor.tf.insertNodes(imageNode);
-};
 
 const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageButtonProps) => {
   const { t } = useTranslation(['messages/default']);
@@ -102,7 +76,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     setLoading(true);
     const previousCursor = document.body.style.cursor;
     document.body.style.cursor = 'wait';
-    const file = event.target.files[0];
+    const files = event.target.files;
 
     const options = {
       maxSizeMB: 1,
@@ -111,14 +85,10 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     };
 
     try {
-      const compressedFile = await imageCompression(file, options);
-      const base64 = await encodeFileToBase64String(compressedFile as File);
-      if (base64) {
-        const fileName = file.name;
-        const dataUrl = getBase64EncodedImage(base64, file.type);
-        insertMessageImage(editor, { dataUrl, url: dataUrl, filename: fileName });
-        onAddImagesCustomHandle?.([file]);
-      }
+      const dt = new DataTransfer();
+      for (const file of Array.from(files)) dt.items.add(file);
+      editor.tf.insertData(dt)
+      onAddImagesCustomHandle?.([files[0]]);
     } catch (error) {
       logError(error);
     } finally {
@@ -142,7 +112,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
 
     const image = newValue.vendor?.image as string;
     const url = `${getCamapHost()}${image}`;
-    insertMessageImage(editor, { url, filename: undefined });
+    // insertMessageImage(editor, { url, filename: undefined });
   };
 
   const catalogsWithImage =
