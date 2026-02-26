@@ -7,19 +7,11 @@ import type { Value } from 'platejs';
 import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
-import { encodeFileToBase64String } from '../../../utils/encoding';
-import { getBase64EncodedImage } from '../../../utils/image';
-import { removeAccents, removeSpaces } from '../../../utils/fomat/string';
-import {
-  MESSAGE_EDITOR_EMPTY_VALUE,
-  type MessageImageElement,
-} from './messageEditorSchema';
+import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
-import imageCompression from 'browser-image-compression';
 import {
   MESSAGE_EDITOR_PLUGINS,
-  type MessageEditor,
   type MessageEditorPlugin,
 } from './platePlugins';
 
@@ -43,35 +35,6 @@ type Props = {
   belowEditor?: React.ReactNode;
 
   onAddImagesCustomHandle?: (files: File[]) => void;
-};
-
-const insertImageFromFile = async (
-  editor: MessageEditor,
-  file: File,
-  onAddImagesCustomHandle?: (files: File[]) => void,
-) => {
-  const options = {
-    maxSizeMB: 1,
-    maxWidthOrHeight: 500,
-    useWebWorker: true,
-  };
-
-  const compressedFile = await imageCompression(file, options);
-  const base64 = await encodeFileToBase64String(compressedFile as File);
-  if (!base64) return;
-
-  const dataUrl = getBase64EncodedImage(base64, file.type);
-  const cid = removeSpaces(removeAccents(file.name));
-  const imageNode: MessageImageElement = {
-    type: 'img',
-    url: `cid:${cid}`,
-    dataUrl,
-    filename: file.name,
-    cid,
-    children: [{ text: '' }],
-  };
-  editor.tf.insertNodes(imageNode);
-  onAddImagesCustomHandle?.([file]);
 };
 
 export const PlateMessageEditor = ({
@@ -104,51 +67,13 @@ export const PlateMessageEditor = ({
         onBlurSaveSlateValue?.(plateEditor.children);
         void serializeToFormikHtml();
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
-      onPaste: (({ event, editor: plateEditor }) => {
+      onPaste: (({ event, editor }) => {
+        if (event.defaultPrevented) return;
         const dt = event.clipboardData;
         if (!dt) return;
-
-        if (dt.files && dt.files.length > 0) {
-          const files = Array.from(dt.files).filter((f) =>
-            f.type.startsWith('image/'),
-          );
-          if (files.length > 0) {
-            event.preventDefault();
-            void (async () => {
-              for (const f of files) {
-                await insertImageFromFile(plateEditor, f, onAddImagesCustomHandle);
-              }
-            })();
-            return;
-          }
-        }
-
-        const html = dt.getData('text/html');
-        if (html) {
-          try {
-            const fragment = plateEditor.api.html.deserialize({ element: html });
-            if (Array.isArray(fragment)) {
-              event.preventDefault();
-              plateEditor.tf.insertFragment(fragment as any);
-              return;
-            }
-          } catch {
-            // Ignore: fall back to the browser/Slate default paste behavior.
-          }
-        }
-      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>,
-      onDrop: (({ event, editor: plateEditor }) => {
-        const files = Array.from(event.dataTransfer?.files ?? []).filter((f) =>
-          f.type.startsWith('image/'),
-        );
-        if (files.length === 0) return;
+        editor.tf.insertData(dt);
         event.preventDefault();
-        void (async () => {
-          for (const f of files) {
-            await insertImageFromFile(plateEditor, f, onAddImagesCustomHandle);
-          }
-        })();
-      }) as DOMHandler<MessageEditorPlugin, React.DragEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>,
     },
   });
 
