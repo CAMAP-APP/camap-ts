@@ -2,13 +2,17 @@ import * as React from 'react';
 import type { TCaptionProps, TImageElement, TResizableProps } from 'platejs';
 import { NodeApi } from 'platejs';
 import type { PlateElementProps } from '@platejs/core/react';
-import { PlateElement } from '@platejs/core/react';
+import { PlateElement, useFocused, useSelected } from '@platejs/core/react';
+import theme from '../../../../theme/default/theme';
 
 /* adapted from the ImageElementStatic component from plate ui */
 export function MediaImageNode(
   props: PlateElementProps<TImageElement & TCaptionProps & TResizableProps>,
 ) {
   const { align = 'center', caption, url, width } = props.element;
+  const isSelected = useSelected();
+  const isFocused = useFocused();
+  const showOutline = isSelected && isFocused;
 
   return (
     <PlateElement
@@ -46,6 +50,10 @@ export function MediaImageNode(
                 objectFit: 'contain',
                 padding: 0,
                 borderRadius: '4px',
+                transition: 'box-shadow 120ms ease',
+                boxShadow: showOutline
+                  ? `0 0 0 2px ${theme.palette.primary.main}`
+                  : undefined,
               }}
               alt=""
               src={url}
