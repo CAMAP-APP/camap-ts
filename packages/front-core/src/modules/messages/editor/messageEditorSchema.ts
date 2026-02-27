@@ -1,5 +1,4 @@
 import type { Value } from 'platejs';
-import type { AlignFormatType } from '../../../components/textEditor/TextEditorFormatType';
 
 export const MESSAGE_SLATE_CONTENT_VERSION = 2 as const;
 
@@ -8,7 +7,7 @@ export type MessageSlateContentV2 = {
   value: Value;
 };
 
-export type MessageAlignment = AlignFormatType;
+export type MessageAlignment = 'left' | 'center' | 'right';
 
 export type MessageImageElement = {
   type: 'img';

@@ -24,7 +24,7 @@ export type LatestMessagesType = Pick<
   Message,
   'title' | 'date' | 'slateContent' | 'recipientListId' | 'attachments'
 > & {
-  group: Pick<Group, 'name'>;
+  group?: Pick<Group, 'name'> | null | undefined;
 };
 
 interface MessagesContextProps extends MessagesContextProviderProps {
@@ -55,24 +55,24 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
   whichUser: true,
   attachments: [],
   error: undefined,
-  setError: () => {},
-  addAttachment: () => {},
-  removeAttachment: () => {},
-  resetAttachments: () => {},
+  setError: () => { },
+  addAttachment: () => { },
+  removeAttachment: () => { },
+  resetAttachments: () => { },
   recipients: [],
-  setRecipients: () => {},
+  setRecipients: () => { },
   selectedUserList: undefined,
-  setSelectedUserList: () => {},
+  setSelectedUserList: () => { },
   embeddedImages: [],
-  addEmbeddedImage: () => {},
-  addEmbeddedImages: () => {},
-  removeEmbeddedImage: () => {},
+  addEmbeddedImage: () => { },
+  addEmbeddedImages: () => { },
+  removeEmbeddedImage: () => { },
   slateContent: '',
-  setSlateContent: () => {},
+  setSlateContent: () => { },
   reuseMessage: undefined,
-  setReuseMessage: () => {},
+  setReuseMessage: () => { },
   defaultRecipients: [],
-  setDefaultRecipients: () => {}
+  setDefaultRecipients: () => { }
 });
 
 const MessagesContextProvider = ({

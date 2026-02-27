@@ -1,4 +1,3 @@
-import { isEqual } from 'lodash';
 import React from 'react';
 import type { BaseNode } from 'slate';
 import type { Value } from 'platejs';
@@ -15,6 +14,7 @@ import { MessagesContext } from '../MessagesContext';
 import AttachmentList from './attachments/AttachmentList';
 import InsertAttachmentButton from '../editor/toolbar/InsertAttachmentButton';
 import { PlateMessageEditor } from '../editor/PlateMessageEditor';
+import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
 
 // Formik passes (name, value, onBlur, onChange) props.
 type MessageTextEditorFormikProps = {
@@ -106,8 +106,12 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
     const reuseMessageSlateContent = reuseMessage.slateContent;
     setSlateContent(reuseMessageSlateContent);
 
-    // const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
-    // setExternalValue(parsed.wrapper.value);
+    try {
+      const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
+      setExternalValue(parsed);
+    } catch (error) {
+      console.error('Error getting message editor value from slate content:', error);
+    }
 
     // checkEmbeddedImages(
     //   parsed.wrapper.value as unknown as BaseNode[],

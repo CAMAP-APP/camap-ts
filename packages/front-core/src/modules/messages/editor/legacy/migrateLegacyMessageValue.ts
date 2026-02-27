@@ -31,9 +31,9 @@ type LegacyElement = {
 type LegacyNode = LegacyText | LegacyElement;
 
 const asAlignment = (align?: string): MessageAlignment | undefined => {
-  if (align === FormatTypes.alignCenter) return FormatTypes.alignCenter;
-  if (align === FormatTypes.alignRight) return FormatTypes.alignRight;
-  if (align === FormatTypes.alignLeft) return FormatTypes.alignLeft;
+  if (align === FormatTypes.alignCenter) return 'center';
+  if (align === FormatTypes.alignRight) return 'right';
+  if (align === FormatTypes.alignLeft) return 'left';
   return undefined;
 };
 
@@ -116,6 +116,8 @@ const migrateLegacyBlocks = (
   ctx: ListContext,
 ): any[] => {
   const out: any[] = [];
+
+  console.log('ctx', nodes);
 
   for (const node of nodes) {
     if (!node || typeof node !== 'object') continue;
@@ -225,9 +227,9 @@ const migrateLegacyBlocks = (
     // Normal block element.
     const blockTypes = Array.isArray(types) ? types : [];
     const align: MessageAlignment | undefined = (() => {
-      if (blockTypes.includes(FormatTypes.alignCenter)) return FormatTypes.alignCenter;
-      if (blockTypes.includes(FormatTypes.alignRight)) return FormatTypes.alignRight;
-      if (blockTypes.includes(FormatTypes.alignLeft)) return FormatTypes.alignLeft;
+      if (blockTypes.includes(FormatTypes.alignCenter)) return 'center';
+      if (blockTypes.includes(FormatTypes.alignRight)) return 'right';
+      if (blockTypes.includes(FormatTypes.alignLeft)) return 'left';
       return undefined;
     })();
 
