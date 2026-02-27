@@ -144,6 +144,21 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
                 options={Array.from(vendorsWithImage)}
                 getOptionKey={(option) => option.id}
                 getOptionLabel={(option) => option.name}
+                renderOption={({ key, ...optionProps }, option) =>
+                  <Box
+                    key={key}
+                    component="li"
+                    sx={{ '& > img': { mr: 2, flexShrink: 0 } }}
+                    {...optionProps}
+                  >
+                    <img
+                      loading="lazy"
+                      width="20"
+                      src={option.image!}
+                      alt=""
+                    />
+                    {option.name}
+                  </Box>}
                 renderInput={(params) => (
                   <TextField {...params} label={t('form.fromCatalog')} variant="outlined" />
                 )}
@@ -153,6 +168,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
                 style={{ width: 300 }}
                 clearOnEscape
                 clearOnBlur
+                value={null}
                 onChange={onCatalogSelected}
                 inputValue={catalogInputValue}
                 onInputChange={(_, v) => setCatalogInputValue(v)}
