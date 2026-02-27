@@ -14,6 +14,7 @@ import {
   MESSAGE_EDITOR_PLUGINS,
   type MessageEditorPlugin,
 } from './platePlugins';
+import { mediaImageNodePatchEnter } from './nodes/mediaImageNodePatchEnter';
 
 type Props = {
   name: string;
@@ -74,6 +75,9 @@ export const PlateMessageEditor = ({
         editor.tf.insertData(dt);
         event.preventDefault();
       }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>,
+      onKeyDown: (({ event, editor }) => {
+        mediaImageNodePatchEnter(editor as any, event);
+      }) as DOMHandler<MessageEditorPlugin, React.KeyboardEvent>,
     },
   });
 
