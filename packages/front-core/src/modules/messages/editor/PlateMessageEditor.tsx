@@ -15,6 +15,7 @@ import {
   type MessageEditorPlugin,
 } from './platePlugins';
 import { mediaImageNodePatchEnter } from './nodes/mediaImageNodePatchEnter';
+import { plateStyles } from './plateStyles';
 
 type Props = {
   name: string;
@@ -133,6 +134,7 @@ export const PlateMessageEditor = ({
             borderColor: theme.palette.primary.main,
           },
         })),
+        ...plateStyles
       ]}
       mt={2}
       mb={1}
@@ -152,7 +154,7 @@ export const PlateMessageEditor = ({
             minHeight: 350,
             padding: `${theme.spacing(2)} ${theme.spacing(1)}`,
             boxSizing: 'border-box',
-            outline: 'none'
+            outline: 'none',
           }}
           placeholder={t('form.placeholder')}
           spellCheck
