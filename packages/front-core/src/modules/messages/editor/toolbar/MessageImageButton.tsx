@@ -1,4 +1,4 @@
-import { Catalog, useGetActiveCatalogsPicturesLazyQuery, Vendor } from '@gql';
+import { useGetActiveCatalogsPicturesLazyQuery, Vendor } from '@gql';
 import {
   Autocomplete,
   Box,
@@ -14,15 +14,13 @@ import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorRef } from '@platejs/core/react';
-import { insertImageFromFiles } from '@platejs/media';
+import { insertImage, insertImageFromFiles } from '@platejs/media';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
 import { getCamapHost } from 'lib/runtimeCfg';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 import type { MessageEditor } from '../platePlugins';
 
-type CatalogType = Pick<Catalog, 'id'> & {
-  vendor: Pick<Vendor, 'name' | 'id' | 'image'>;
-};
+type VendorLike = Pick<Vendor, 'name' | 'id' | 'image'>;
 
 interface InsertImageButtonProps {
   onAddImagesCustomHandle?: (image: File[]) => void;
@@ -38,7 +36,6 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
   const [loading, setLoading] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [isActive, setIsActive] = React.useState(false);
-  const [catalogValue, setCatalogValue] = React.useState<CatalogType | undefined>(undefined);
   const [catalogInputValue, setCatalogInputValue] = React.useState('');
 
   React.useEffect(() => {
@@ -101,24 +98,20 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
 
   const onCatalogSelected = (
     _event: SyntheticEvent,
-    newValue: CatalogType | null,
-    reason: AutocompleteChangeReason,
+    newValue: VendorLike | null
   ) => {
-    if (reason === 'blur' || reason === 'clear') {
-      setCatalogValue(undefined);
-      setCatalogInputValue('');
-      return;
-    }
-    if (!newValue) return;
+    setCatalogInputValue('');
     closeMenu();
 
-    const image = newValue.vendor?.image as string;
-    void `${getCamapHost()}${image}`;
-    // insertMessageImage(editor, { url, filename: undefined });
+    const url = newValue?.image;
+    if (url)
+      insertImage(editor, url);
   };
 
-  const catalogsWithImage =
-    activeContractsData?.getActiveCatalogs?.filter((c) => !!c.vendor?.image);
+  const vendorsWithImage = new Set(
+    activeContractsData?.getActiveCatalogs?.filter((c) => !!c.vendor?.image)
+      .map((c) => c.vendor)
+  );
 
   return (
     <TextEditorToolbarButton
@@ -145,11 +138,12 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
           <MenuItem onClick={openUploadImageInput} sx={{ height: '56px', paddingLeft: '30px' }}>
             {t('form.fromDevice')}
           </MenuItem>
-          {catalogsWithImage && (
+          {vendorsWithImage && (
             <ListItem>
               <Autocomplete
-                options={catalogsWithImage as any}
-                getOptionLabel={(option: any) => option?.vendor?.name ?? ''}
+                options={Array.from(vendorsWithImage)}
+                getOptionKey={(option) => option.id}
+                getOptionLabel={(option) => option.name}
                 renderInput={(params) => (
                   <TextField {...params} label={t('form.fromCatalog')} variant="outlined" />
                 )}
@@ -159,7 +153,6 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
                 style={{ width: 300 }}
                 clearOnEscape
                 clearOnBlur
-                value={catalogValue as any}
                 onChange={onCatalogSelected}
                 inputValue={catalogInputValue}
                 onInputChange={(_, v) => setCatalogInputValue(v)}
