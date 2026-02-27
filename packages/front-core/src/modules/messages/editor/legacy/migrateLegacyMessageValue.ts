@@ -1,5 +1,4 @@
 import type { Value } from 'platejs';
-import { removeAccents, removeSpaces } from '../../../../utils/fomat/string';
 import FormatTypes from './LegacyTextEditorFormatType';
 import type {
   MessageAlignment,
@@ -86,34 +85,22 @@ const migrateInlineChildren = (children?: LegacyNode[]): any[] => {
   return ensureNonEmptyInlineChildren(out);
 };
 
-type ListContext =
-  | { kind: 'none' }
-  | { kind: 'list'; listStyleType: 'disc' | 'decimal'; indent: number };
-
 const migrateLegacyImage = (el: LegacyElement): MessageImageElement => {
   const imageName = typeof el.imageName === 'string' ? el.imageName : undefined;
   const imageSource = typeof el.imageSource === 'string' ? el.imageSource : '';
-  const isEmbedded = imageSource.startsWith('data:image');
-
-  const cid = imageName ? removeSpaces(removeAccents(imageName)) : undefined;
-  const url = isEmbedded && cid ? `cid:${cid}` : imageSource;
 
   return {
     type: 'img',
-    url,
-    dataUrl: isEmbedded ? imageSource : undefined,
+    url: imageSource,
     filename: imageName,
-    cid: isEmbedded ? cid : undefined,
     align: asAlignment(typeof el.align === 'string' ? el.align : undefined),
-    width: typeof el.width === 'number' ? el.width : undefined,
-    height: typeof el.height === 'number' ? el.height : undefined,
     children: [{ text: '' }],
   };
 };
 
 const migrateLegacyBlocks = (
   nodes: LegacyNode[],
-  ctx: ListContext,
+  inList: boolean,
 ): any[] => {
   const out: any[] = [];
 
@@ -122,15 +109,18 @@ const migrateLegacyBlocks = (
   for (const node of nodes) {
     if (!node || typeof node !== 'object') continue;
 
-    // Text nodes at block level are unexpected, but keep them.
     if ('text' in node && typeof (node as any).text === 'string') {
-      out.push({
-        type: 'p',
-        ...(ctx.kind === 'list'
-          ? { indent: ctx.indent, listStyleType: ctx.listStyleType }
-          : {}),
-        children: [migrateLegacyText(node as LegacyText)],
-      });
+      if (inList) {
+        out.push({
+          type: 'lic',
+          children: [migrateLegacyText(node as LegacyText)]
+        });
+      } else {
+        out.push({
+          type: 'p',
+          children: [migrateLegacyText(node as LegacyText)],
+        });
+      }
       continue;
     }
 
@@ -139,33 +129,42 @@ const migrateLegacyBlocks = (
 
     // Legacy list wrappers: recurse with list context.
     if (typesHas(types, FormatTypes.bulletedList)) {
-      out.push(
-        ...migrateLegacyBlocks(el.children ?? [], {
-          kind: 'list',
-          listStyleType: 'disc',
-          indent: ctx.kind === 'list' ? ctx.indent : 1,
-        }),
-      );
+      out.push({
+        type: 'ul',
+        children: migrateLegacyBlocks(el.children ?? [], true)
+      });
       continue;
     }
     if (typesHas(types, FormatTypes.numberedList)) {
-      out.push(
-        ...migrateLegacyBlocks(el.children ?? [], {
-          kind: 'list',
-          listStyleType: 'decimal',
-          indent: ctx.kind === 'list' ? ctx.indent : 1,
-        }),
-      );
+      out.push({
+        type: 'ol',
+        children: migrateLegacyBlocks(el.children ?? [], true)
+      });
       continue;
+    }
+    if (typesHas(types, FormatTypes.listItem)) {
+      const liNode = {
+        type: 'li',
+        children: migrateLegacyBlocks(el.children ?? [], true)
+      }
+      if (inList) {
+        out.push(liNode);
+        continue;
+      } else {
+        out.push({
+          type: 'ul',
+          children: [
+            liNode
+          ]
+        });
+        continue;
+      }
     }
 
     // Inline-only legacy nodes.
     if (el.type === FormatTypes.hyperlink && typeof el.url === 'string') {
       out.push({
         type: 'p',
-        ...(ctx.kind === 'list'
-          ? { indent: ctx.indent, listStyleType: ctx.listStyleType }
-          : {}),
         children: [
           {
             type: 'a',
@@ -179,48 +178,6 @@ const migrateLegacyBlocks = (
 
     if (el.type === FormatTypes.image) {
       out.push(migrateLegacyImage(el));
-      continue;
-    }
-
-    // Legacy list item: create a single list block + migrate nested lists (if any).
-    if (typesHas(types, FormatTypes.listItem)) {
-      const inlineChildren: LegacyNode[] = [];
-      const nestedNodes: LegacyNode[] = [];
-      for (const child of el.children ?? []) {
-        if (
-          child &&
-          typeof child === 'object' &&
-          'types' in (child as any) &&
-          (typesHas((child as any).types, FormatTypes.bulletedList) ||
-            typesHas((child as any).types, FormatTypes.numberedList))
-        ) {
-          nestedNodes.push(child);
-        } else {
-          inlineChildren.push(child);
-        }
-      }
-
-      const listStyleType =
-        ctx.kind === 'list' ? ctx.listStyleType : 'disc';
-      const indent = ctx.kind === 'list' ? ctx.indent : 1;
-
-      out.push({
-        type: 'p',
-        indent,
-        listStyleType,
-        children: migrateInlineChildren(inlineChildren),
-      });
-
-      if (nestedNodes.length) {
-        out.push(
-          ...migrateLegacyBlocks(nestedNodes, {
-            kind: 'list',
-            listStyleType,
-            indent: indent + 1,
-          }),
-        );
-      }
-
       continue;
     }
 
@@ -242,9 +199,6 @@ const migrateLegacyBlocks = (
     out.push({
       type,
       ...(align ? { align } : {}),
-      ...(ctx.kind === 'list'
-        ? { indent: ctx.indent, listStyleType: ctx.listStyleType }
-        : {}),
       children: migrateInlineChildren(el.children),
     });
   }
@@ -256,6 +210,6 @@ export const migrateLegacyMessageValueToV2Value = (legacyValue: unknown): Value 
   if (!Array.isArray(legacyValue)) {
     return [{ type: 'p', children: [{ text: '' }] }];
   }
-  return migrateLegacyBlocks(legacyValue as LegacyNode[], { kind: 'none' }) as Value;
+  return migrateLegacyBlocks(legacyValue as LegacyNode[], false) as Value;
 };
 

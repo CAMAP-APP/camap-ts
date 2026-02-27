@@ -101,8 +101,7 @@ export const PlateMessageEditor = ({
   React.useEffect(() => {
     if (!externalValue) return;
     editor.tf.setValue(externalValue);
-    onExternalValueApplied?.();
-  }, [editor, externalValue, onExternalValueApplied]);
+  }, [editor, externalValue]);
 
   const onPlateChange = useCallback(() => {
     console.log('onPlateChange', editor.children);
@@ -152,6 +151,8 @@ export const PlateMessageEditor = ({
         <PlateContent
           style={{
             minHeight: 350,
+            maxHeight: '80vh',
+            overflowY: 'auto',
             padding: `${theme.spacing(2)} ${theme.spacing(1)}`,
             boxSizing: 'border-box',
             outline: 'none',

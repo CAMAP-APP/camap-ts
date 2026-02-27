@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { PlateMessageViewer } from '../editor/PlateMessageViewer';
-import { getMessageEditorValueFromSlateContent } from '../editor/getMessageEditorValue';
+import { getMessageEditorValueFromSlateContent } from '../editor/messageEditorSchema';
 
 export interface MessageTableProps {
   messageId: number;
