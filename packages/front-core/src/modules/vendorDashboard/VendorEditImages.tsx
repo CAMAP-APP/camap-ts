@@ -15,7 +15,7 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
         loading,
         error,
         refetch
-    } = useVendorImagesQuery({ variables: { vendorId }});
+    } = useVendorImagesQuery({ variables: { vendorId } });
 
     const [deleteImageMutation] = useDeleteDocumentMutation();
 
@@ -30,43 +30,44 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
 
     return (<>
         <Grid container sx={{ gap: 1 }}>
-        {vendorImages && vendorImages
-            .map(({ id, name, url }) => (<Card 
-                key={id}
-                sx={{
-                    backgroundColor: "#e0e0e0",
-                    width: 180,
-                    flexGrow: 0
-                }}
-            >
-                <CardHeader
-                    titleTypographyProps={{
-                        variant: "body1",
-                        fontSize: '14px',
-                        sx: {
-                            wordBreak: 'break-all'
-                        }
-                    }}
-                    title={name}
-                    action={<IconButton aria-label="delete" size="small"
-                        onClick={() => deleteImageMutation({ variables: { id } }).then(() => refetch())}
-                    >
-                        <CamapIcon id={CamapIconId.delete}/>
-                    </IconButton>
-                    }
-                />
-                <CardMedia
+            {vendorImages && vendorImages
+                .map(({ id, name, url }) => (<Card
+                    key={id}
                     sx={{
-                        height: 200,
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
+                        backgroundColor: "#e0e0e0",
+                        width: 180,
+                        flexGrow: 0
                     }}
-                    image={url}
-                />
-            </Card>
-            ))
-        }</Grid>
+                >
+                    <CardHeader
+                        titleTypographyProps={{
+                            variant: "body1",
+                            fontSize: '14px',
+                            sx: {
+                                wordBreak: 'break-all'
+                            }
+                        }}
+                        title={name}
+                        action={<IconButton aria-label="delete" size="small"
+                            onClick={() => deleteImageMutation({ variables: { id } }).then(() => refetch())}
+                        >
+                            <CamapIcon id={CamapIconId.delete} />
+                        </IconButton>
+                        }
+                    />
+                    <CardMedia
+                        sx={{
+                            height: 200,
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            backgroundSize: 'contain',
+                        }}
+                        image={url}
+                    />
+                </Card>
+                ))
+            }</Grid>
         <Box sx={{ mt: 2, mb: 2 }}>
             <Button variant="contained" onClick={() => setOpen(true)}>{tVendorDash("uploadMedia")}</Button>
         </Box>
@@ -78,7 +79,7 @@ function VendorEditImages({ vendorId }: { vendorId: number }) {
             width={1200}
             height={1200}
             onSuccess={refetch}
-            />
+        />
     </>
     );
 }
