@@ -34,7 +34,7 @@ const MessageLatestMessagesSelect = ({
 
   const { data, error, refetch } = useGetLatestMessagesQuery();
 
-  const options = data?.getLatestMessages.filter((m) => !!m.slateContent) || [];
+  const options: LatestMessagesType[] = data?.getLatestMessages.filter((m) => !!m.slateContent) || [];
 
   React.useEffect(() => {
     setError(error);
@@ -58,9 +58,9 @@ const MessageLatestMessagesSelect = ({
       t('latestSentMessage', {
         title: option.title,
         date: formatDate(new Date(option.date), true, false),
-        group: option.group.name,
+        group: option.group?.name ?? '',
       }),
-    [],
+    [t],
   );
 
   return (
@@ -75,6 +75,7 @@ const MessageLatestMessagesSelect = ({
           group: o.group ?? { name: '' }
         }))}
         noOptionsText={t('noMessageWithSlateContent')}
+        isOptionEqualToValue={(option, value) => option.slateContent === value.slateContent}
         getOptionLabel={optionLabel}
         clearOnEscape
         renderInput={(params) => {

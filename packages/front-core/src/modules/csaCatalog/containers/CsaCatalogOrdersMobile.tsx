@@ -137,7 +137,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
       let initialValue =
         initialOrders[distributionId] != null &&
-        initialOrders[distributionId][productId] != null
+          initialOrders[distributionId][productId] != null
           ? initialOrders[distributionId][productId]
           : 0;
       if (prevValue == null) {
@@ -220,8 +220,8 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
   const distribution = (distributionIndex < 0)
     ? distributions[0]
     : distributionIndex >= distributions.length
-        ? distributions[distributions.length-1]
-        : distributions[distributionIndex];
+      ? distributions[distributions.length - 1]
+      : distributions[distributionIndex];
 
   const [defaultOrdersModalOpen, setDefaultOrdersModalOpen] =
     React.useState(false);
@@ -263,10 +263,10 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
 
   const onCancelOrder = async () => {
     const newOrders = { ...updatedOrders };
-    
+
     newOrders[distribution.id] = catalog?.products
-      .reduce((o, p) => ({...o, [p.id]:0}), {}) ?? {};
-    
+      .reduce((o, p) => ({ ...o, [p.id]: 0 }), {}) ?? {};
+
     // TODO manage stocks
 
     setUpdatedOrders(newOrders);
@@ -313,29 +313,19 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
   }
 
   return (
-    <Box
-        sx={{
-            mx: {
-                xs: 0,
-                sm: 1
-            }
-        }}
-    >
-      <Block
-        title={adminMode ? t('changeOrders') : t('changeMyOrders')}
-        icon={<MediumActionIcon id={CamapIconId.basket} />}
-        sx={{
-          height: '100%',
-        }}
-        contentSx={{
-          p: {
-            xs: 0,
-            sm: 2,
-          },
-        }}
-      >
-        <Box>
-
+    <Box>
+      <MobileContainer title={adminMode ? t('changeOrders') : t('changeMyOrders')}>
+        <Box
+          sx={{
+            position: {
+              xs: 'sticky',
+              sm: 'relative'
+            },
+            backgroundColor: t => t.palette.background.paper,
+            top: 0,
+            zIndex: 1030,
+            boxShadow: t => t.shadows[3]
+          }}>
           {/* Default order label */}
           {/* {displayDefaultOrder && (
             <Box key="default" display="flex" alignSelf="center">
@@ -357,7 +347,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             >
               <ArrowBack />
             </Button>
-            
+
             {/* Distributions box */}
             <Box
               display="flex"
@@ -369,99 +359,99 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
                 ...colorForDistributionState(distribution)
               }}
             >
-                <Typography
-                    textAlign="center"
-                    fontWeight="bold"
-                >
-                    {formatAbsoluteDate(
-                        distribution.distributionStartDate,
-                        false,
-                        true,
-                        true,
-                    )}
-                </Typography>
+              <Typography
+                textAlign="center"
+                fontWeight="bold"
+              >
+                {formatAbsoluteDate(
+                  distribution.distributionStartDate,
+                  false,
+                  true,
+                  true,
+                )}
+              </Typography>
             </Box>
 
             {/* Arrow Next */}
             <Button
-                variant="outlined"
-                size="small"
-                onClick={onNextDistribution}
-                disabled={
-                  distributionIndex >= distributions.length
-                }
-              >
-                <ArrowForward />
-              </Button>
+              variant="outlined"
+              size="small"
+              onClick={onNextDistribution}
+              disabled={
+                distributionIndex >= distributions.length - 1
+              }
+            >
+              <ArrowForward />
+            </Button>
           </Box>
-        </Box>
 
-        
-        <Box
+
+          <Box
             display="flex"
             gap={1}
             fontSize={{ xs: 14, sm: 16 }}
             justifyContent='space-between'
             mx={1}
             mb={1}
-            >
+          >
             {/* Sold box */}
             <Box display="flex" alignItems="center" gap={1}>
-                <Box>
-                    <Typography
-                        fontSize="inherit"
-                        fontWeight="bold"
-                        lineHeight="1em"
-                    >{t('paymentSold')}</Typography>
-                </Box>
-                {subscription !== undefined && <Box
-                    sx={{
-                        backgroundColor: (theme: Theme) =>
-                            subscription.balance >= 0
-                            ? theme.palette.success.main
-                            : theme.palette.error.main,
-                    }}
-                    p={1}
+              <Box>
+                <Typography
+                  fontSize="inherit"
+                  fontWeight="bold"
+                  lineHeight="1em"
+                >{t('paymentSold')}</Typography>
+              </Box>
+              {subscription !== undefined && <Box
+                sx={{
+                  backgroundColor: (theme: Theme) =>
+                    subscription.balance >= 0
+                      ? theme.palette.success.main
+                      : theme.palette.error.main,
+                }}
+                p={1}
+              >
+                <Typography
+                  fontSize="inherit"
+                  fontWeight="bold"
+                  sx={{
+                    color: (theme) =>
+                      subscription.balance >= 0
+                        ? theme.palette.success.contrastText
+                        : theme.palette.error.contrastText,
+                    textAlign: 'center',
+                  }}
                 >
-                    <Typography
-                        fontSize="inherit"
-                        fontWeight="bold"
-                        sx={{
-                            color: (theme) =>
-                            subscription.balance >= 0
-                                ? theme.palette.success.contrastText
-                                : theme.palette.error.contrastText,
-                            textAlign: 'center',
-                        }}
-                    >
-                        {formatCurrency(subscription.balance)}
-                    </Typography>
-                </Box>}
+                  {formatCurrency(subscription.balance)}
+                </Typography>
+              </Box>}
             </Box>
             {/* Total */}
             <Box
-                display="flex"
-                gap={1}
-                alignItems="center"
+              display="flex"
+              gap={1}
+              alignItems="center"
             >
-                <Typography
-                    fontSize="inherit"
-                    fontWeight="bold"
-                    lineHeight="1em"
-                >{t('orderValue')}</Typography>
-                <CamapIcon id={CamapIconId.basket} sx={{
-                        color: 'primary.main'
-                    }}/>
-                <Typography
-                    fontSize="1.2em"
-                    fontWeight="bold"
-                    sx={{
-                        color: 'primary.main'
-                    }}
-                >{getTotalFromDistribution(distribution.id)}</Typography>
+              <Typography
+                fontSize="inherit"
+                fontWeight="bold"
+                lineHeight="1em"
+              >{t('orderValue')}</Typography>
+              <CamapIcon id={CamapIconId.basket} sx={{
+                color: 'primary.main'
+              }} />
+              <Typography
+                fontSize="1.2em"
+                fontWeight="bold"
+                sx={{
+                  color: 'primary.main'
+                }}
+              >{getTotalFromDistribution(distribution.id)}</Typography>
             </Box>
+          </Box>
         </Box>
-        
+
         {distribution.state === RestDistributionState.Absent && <>
           <Box display='flex' justifyContent='center'>
             <Typography variant='h5'>{t("absent")}</Typography>
@@ -469,26 +459,26 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
           </Box>
         </>}
         {distribution.state !== RestDistributionState.Absent && <>
-            {/* Products */}
-            <Box display="grid" gridTemplateColumns='repeat(auto-fill, minmax(150px, 1fr))' gap={1} justifyContent={'center'}>
-              {catalog.products.map(
-                (p) => 
-                    <CsaCatalogOrdersMobileProduct
-                        key={p.id}
-                        product={p}
-                        orderedQuantity={orders[distribution.id][p.id]}
-                        onClick={() => setModalProduct(p)}
-                        onQuantityChange={(q) => onOrderChange(
-                            distribution.id,
-                            p.id,
-                            q
-                        )}
-                        editable={distribution.state === RestDistributionState.Open}
-                    />
-              )}
-              <ProductModal product={modalProduct} onClose={onProductModalClose} />
-            </Box>
-          </>
+          {/* Products */}
+          <Box display="grid" gridTemplateColumns='repeat(auto-fill, minmax(150px, 1fr))' gap={1} justifyItems={'center'}>
+            {catalog.products.map(
+              (p) =>
+                <CsaCatalogOrdersMobileProduct
+                  key={p.id}
+                  product={p}
+                  orderedQuantity={orders[distribution.id][p.id]}
+                  onClick={() => setModalProduct(p)}
+                  onQuantityChange={(q) => onOrderChange(
+                    distribution.id,
+                    p.id,
+                    q
+                  )}
+                  editable={distribution.state === RestDistributionState.Open}
+                />
+            )}
+            <ProductModal product={modalProduct} onClose={onProductModalClose} />
+          </Box>
+        </>
         }
 
         {/* Buttons */}
@@ -508,14 +498,14 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
           </Button> */}
           {(restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
             || catalog?.distribMinOrdersTotal > 0) && (
-            <Button
-              variant="outlined"
-              onClick={onDefaultOrdersChangeClick}
-              sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-            >
-              {t('defaultOrder')}
-            </Button>
-          )}
+              <Button
+                variant="outlined"
+                onClick={onDefaultOrdersChangeClick}
+                sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
+              >
+                {t('defaultOrder')}
+              </Button>
+            )}
           {distribution.state === RestDistributionState.Open && <SuccessButton
             loading={loading}
             toggleSuccess={toggleSuccess}
@@ -526,7 +516,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             {tCommon('save')}
           </SuccessButton>}
         </Box>
-      </Block>
+      </MobileContainer>
       <Modal
         open={defaultOrdersModalOpen}
         onClose={() => handleDefaultOrders(true)}
@@ -539,8 +529,8 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
             transform: 'translate(-50%, -50%)',
             maxWidth: 600,
             width: {
-                xs: '96%',
-                sm: '600px'
+              xs: '96%',
+              sm: '600px'
             }
           }}
         >
@@ -549,6 +539,25 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
       </Modal>
     </Box>
   );
+};
+
+const MobileContainer = ({ children, title }: { children: React.ReactNode, title: string }) => {
+  return <Block
+    title={title}
+    icon={<MediumActionIcon id={CamapIconId.basket} />}
+    sx={{
+      height: '100%',
+      overflow: 'clip'
+    }}
+    contentSx={{
+      p: {
+        xs: 0,
+        sm: 2,
+      },
+    }}
+  >
+    {children}
+  </Block>
 };
 
 export default CsaCatalogOrdersMobile;

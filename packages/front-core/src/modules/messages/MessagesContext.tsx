@@ -1,6 +1,6 @@
 import { ApolloError } from '@apollo/client';
 import { UserLists } from 'camap-common';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { AttachmentFileInput, Group, Message, User } from '../../gql';
 
 interface MessagesContextProviderProps {
@@ -24,7 +24,7 @@ export type LatestMessagesType = Pick<
   Message,
   'title' | 'date' | 'slateContent' | 'recipientListId' | 'attachments'
 > & {
-  group: Pick<Group, 'name'>;
+  group?: Pick<Group, 'name'> | null | undefined;
 };
 
 interface MessagesContextProps extends MessagesContextProviderProps {
@@ -39,7 +39,6 @@ interface MessagesContextProps extends MessagesContextProviderProps {
   selectedUserList: UserLists | undefined;
   setSelectedUserList: (userList: UserLists | undefined) => void;
   embeddedImages: AttachmentFileInput[];
-  addEmbeddedImage: (image: AttachmentFileInput) => void;
   addEmbeddedImages: (images: AttachmentFileInput[]) => void;
   removeEmbeddedImage: (image: AttachmentFileInput) => void;
   slateContent: string;
@@ -55,24 +54,23 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
   whichUser: true,
   attachments: [],
   error: undefined,
-  setError: () => {},
-  addAttachment: () => {},
-  removeAttachment: () => {},
-  resetAttachments: () => {},
+  setError: () => { },
+  addAttachment: () => { },
+  removeAttachment: () => { },
+  resetAttachments: () => { },
   recipients: [],
-  setRecipients: () => {},
+  setRecipients: () => { },
   selectedUserList: undefined,
-  setSelectedUserList: () => {},
+  setSelectedUserList: () => { },
   embeddedImages: [],
-  addEmbeddedImage: () => {},
-  addEmbeddedImages: () => {},
-  removeEmbeddedImage: () => {},
+  addEmbeddedImages: () => { },
+  removeEmbeddedImage: () => { },
   slateContent: '',
-  setSlateContent: () => {},
+  setSlateContent: () => { },
   reuseMessage: undefined,
-  setReuseMessage: () => {},
+  setReuseMessage: () => { },
   defaultRecipients: [],
-  setDefaultRecipients: () => {}
+  setDefaultRecipients: () => { }
 });
 
 const MessagesContextProvider = ({
@@ -95,42 +93,28 @@ const MessagesContextProvider = ({
     LatestMessagesType | undefined
   >();
 
-  const addAttachment = (attachment: File) => {
-    if (attachments.findIndex((a) => a.name === attachment.name) !== -1) return;
-    const newAttachments = [...attachments];
-    newAttachments.push(attachment);
-    setAttachments(newAttachments);
-  };
+  const addAttachment = useCallback((attachment: File) => {
+    setAttachments(attachments => {
+      if (attachments.findIndex((a) => a.name === attachment.name) !== -1) return attachments;
+      return [...attachments, attachment];
+    });
+  }, []);
 
-  const addEmbeddedImage = (image: AttachmentFileInput) => {
-    if (embeddedImages.findIndex((i) => i.cid === image.cid) !== -1) return;
-    const newEmbeddedImages = [...embeddedImages];
-    newEmbeddedImages.push(image);
-    setEmbeddedImages(newEmbeddedImages);
-  };
+  const removeAttachment = useCallback((attachment: File) => {
+    setAttachments(attachments => attachments.filter((a) => a.name !== attachment.name));
+  }, []);
 
-  const addEmbeddedImages = (images: AttachmentFileInput[]) => {
-    images.forEach((i) => addEmbeddedImage(i));
-    const newEmbeddedImages = [...embeddedImages];
-    newEmbeddedImages.push(...images);
-    setEmbeddedImages(newEmbeddedImages);
-  };
+  const addEmbeddedImages = useCallback((images: AttachmentFileInput[]) => {
+    setEmbeddedImages(embeddedImages => [
+      ...embeddedImages,
+      ...images.filter((i) => !embeddedImages.includes(i))
+    ]);
+  }, []);
 
-  const removeAttachment = (attachment: File) => {
-    const newAttachments = [...attachments];
-    const index = newAttachments.indexOf(attachment);
-    if (index === -1) return;
-    newAttachments.splice(index, 1);
-    setAttachments(newAttachments);
-  };
-
-  const removeEmbeddedImage = (embeddedImage: AttachmentFileInput) => {
-    const newEmbeddedImages = [...embeddedImages];
-    const index = newEmbeddedImages.indexOf(embeddedImage);
-    if (index === -1) return;
-    newEmbeddedImages.splice(index, 1);
-    setEmbeddedImages(newEmbeddedImages);
-  };
+  const removeEmbeddedImage = useCallback((image: AttachmentFileInput) => {
+    setEmbeddedImages(embeddedImages =>
+      embeddedImages.filter((i) => i.cid !== image.cid));
+  }, []);
 
   const resetAttachments = () => {
     setAttachments([]);
@@ -154,7 +138,6 @@ const MessagesContextProvider = ({
         selectedUserList,
         setSelectedUserList,
         embeddedImages,
-        addEmbeddedImage,
         addEmbeddedImages,
         removeEmbeddedImage,
         slateContent,

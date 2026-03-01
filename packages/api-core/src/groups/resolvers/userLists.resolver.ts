@@ -170,8 +170,6 @@ export class UserListsResolver {
       }
     });
 
-    console.log(userListOfLists, userLists);
-
     return userLists;
   }
 

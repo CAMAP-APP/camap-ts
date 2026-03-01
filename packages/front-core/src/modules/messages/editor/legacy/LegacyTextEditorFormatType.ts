@@ -1,7 +1,3 @@
-import { BaseEditor, BaseElement } from 'slate';
-import { HistoryEditor } from 'slate-history';
-import { ReactEditor } from 'slate-react';
-
 enum FormatTypes {
   bold = 'bold',
   italic = 'italic',
@@ -31,7 +27,7 @@ export const isFormatAlignment = (format: string) =>
 export const isFormatHeading = (format: string) =>
   format === FormatTypes.headingOne || format === FormatTypes.headingTwo;
 
-export type CustomSlateElementWithText = BaseElement & {
+export type CustomSlateElementWithText = {
   text?: string;
 };
 
@@ -59,23 +55,19 @@ export type CustomSlateText = {
   bold?: boolean;
   underline?: boolean;
   italic?: boolean;
+  color?: string;
   type?: FormatTypes;
+  /**
+   * Legacy editor stores color marks using keys like `#ff00aa: true`.
+   * Plate-based editors may also attach additional mark keys.
+   */
+  [key: string]: unknown;
 };
 
 export type CustomSlateDescendant = {
   text?: string;
 };
 
-export type CustomEditor = BaseEditor & ReactEditor & HistoryEditor;
 export type CustomElement = CustomSlateElement | CustomSlateHyperlinkElement | CustomSlateImageElement;
-
-declare module 'slate' {
-  export interface CustomTypes {
-    Editor: CustomEditor;
-    Element: CustomSlateElement | CustomSlateHyperlinkElement | CustomSlateImageElement;
-    Text: CustomSlateText;
-    Descandant: CustomSlateDescendant;
-  }
-}
 
 export default FormatTypes;

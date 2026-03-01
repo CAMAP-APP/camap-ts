@@ -1330,7 +1330,7 @@ export type VendorQueryVariables = Exact<{
 }>;
 
 
-export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, showEmail: boolean, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, companyNumber?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null } };
+export type VendorQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, name: string, email?: string | null, showEmail: boolean, city: string, address1?: string | null, address2?: string | null, zipCode?: string | null, phone?: string | null, showPhone: boolean, linkText?: string | null, desc?: string | null, linkUrl?: string | null, country?: string | null, longDesc?: string | null, companyNumber?: string | null, profession?: number | null, production2?: number | null, production3?: number | null, peopleName?: string | null, lat?: number | null, lng?: number | null, image?: string | null } };
 
 export type VendorActiveCatalogsQueryVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -2295,6 +2295,7 @@ export const VendorDocument = gql`
     peopleName
     lat
     lng
+    image
   }
 }
     `;

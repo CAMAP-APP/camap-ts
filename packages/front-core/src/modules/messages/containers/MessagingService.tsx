@@ -3,7 +3,7 @@ import { Box, CircularProgress } from '@mui/material';
 import { UserLists } from 'camap-common';
 import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EMPTY_EDITOR_HTML_REGEX } from '../../../components/textEditor/SlateTextEditor';
+import { isEmptyEmailHtml } from '../editor/isEmptyEmailHtml';
 import {
   AttachmentFileInput,
   CreateMessageInput,
@@ -133,7 +133,7 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
     }
     if (
       values.message.length === 0 ||
-      values.message.match(EMPTY_EDITOR_HTML_REGEX)
+      isEmptyEmailHtml(values.message)
     ) {
       setFormError(bag, t('form.errorEmptyMessage'));
       return;

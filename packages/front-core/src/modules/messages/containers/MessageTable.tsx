@@ -1,5 +1,6 @@
 import ApolloErrorAlert from '@components/utils/errors/ApolloErrorAlert';
 import {
+  Alert,
   Box,
   Chip,
   CircularProgress,
@@ -11,12 +12,12 @@ import {
   useTheme,
 } from '@mui/material';
 import { formatUserName, UserLists, UserListsType } from 'camap-common';
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import SlateViewer from '../../../components/textEditor/SlateViewer';
 import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
-import DOMPurify from 'dompurify';
+import { PlateMessageViewer } from '../editor/PlateMessageViewer';
+import { getMessageEditorValueFromSlateContent } from '../editor/messageEditorSchema';
 
 export interface MessageTableProps {
   messageId: number;
@@ -68,10 +69,17 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
     </TableCell>
   );
 
+  const [parseError, setParseError] = useState<string | null>(null);
   const messageBody = React.useMemo(() => {
-    if (!message) return;
-    return JSON.parse(decodeURIComponent(atob(message.slateContent)));
-  }, [message]);
+    if (!message?.slateContent) return;
+    try {
+      return getMessageEditorValueFromSlateContent(message.slateContent);
+    }
+    catch (e) {
+      console.error('Error getting message editor value from slate content:', e);
+      setParseError((e as Error).message);
+    }
+  }, [message, setParseError]);
 
   if (messageError) return <ApolloErrorAlert error={messageError} />;
   if (messageLoading) return <CircularProgress />;
@@ -84,6 +92,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
   return (
     <>
+      {parseError && <Alert severity="error">{t('errorReusingMessage', { error: parseError })}</Alert>}
       {message && (
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableBody>
@@ -162,13 +171,7 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
             <TableRow>
               <TableCell colSpan={2}>
-                <SlateViewer value={messageBody} />
-              </TableCell>
-            </TableRow>
-
-            <TableRow>
-              <TableCell colSpan={2}>
-                <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(messageBody) }} />
+                {messageBody && <PlateMessageViewer value={messageBody} />}
               </TableCell>
             </TableRow>
           </TableBody>
