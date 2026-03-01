@@ -1,6 +1,6 @@
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { useVendorCatalogsQuery, VendorCatalogsQuery } from "@gql";
-import { Alert, Box, Button, Divider, List, ListItem, ListItemText, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, List, ListItem, ListItemButton, ListItemText, Paper, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { useMemo } from "react";
 
@@ -30,6 +30,27 @@ function groupCatalogsByGroup(catalogs: VendorCatalog[]): CatalogsByGroup[] {
             catalogs: [...catalogs].sort((a, b) => a.name.localeCompare(b.name)),
         }))
         .sort((a, b) => a.group.name.localeCompare(b.group.name));
+}
+
+function CatalogListItem({ catalog, catalogIndex }: { catalog: VendorCatalog, catalogIndex: number }) {
+    const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+
+    return (
+        <Box key={catalog.id}>
+            {catalogIndex > 0 && <Divider />}
+            <ListItemButton
+                sx={{ px: 0 }}
+                href={`/user/choose?group=${catalog.group.id}&redirect=/contractAdmin/view/${catalog.id}`}
+            >
+                <ListItemText
+                    primary={tVendorDash("vendorCatalogListItem", {
+                        catalogName: catalog.name,
+                        subscriptionCount: catalog.subscriptionsCount ?? 0,
+                    })}
+                />
+            </ListItemButton>
+        </Box>
+    )
 }
 
 function VendorContracts({ vendorId }: { vendorId: number }) {
@@ -81,28 +102,7 @@ function VendorContracts({ vendorId }: { vendorId: number }) {
                             </Typography>
                             <List dense disablePadding>
                                 {catalogs.map((catalog, catalogIndex) => (
-                                    <Box key={catalog.id}>
-                                        {catalogIndex > 0 && <Divider />}
-                                        <ListItem
-                                            sx={{ px: 0 }}
-                                            secondaryAction={
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    href={`/user/choose?group=${catalog.group.id}&redirect=/contractAdmin/view/${catalog.id}`}
-                                                >
-                                                    {tVendorDash("goToContract")}
-                                                </Button>
-                                            }
-                                        >
-                                            <ListItemText
-                                                primary={tVendorDash("vendorCatalogListItem", {
-                                                    catalogName: catalog.name,
-                                                    subscriptionCount: catalog.subscriptionsCount ?? 0,
-                                                })}
-                                            />
-                                        </ListItem>
-                                    </Box>
+                                    <CatalogListItem key={catalog.id} catalog={catalog} catalogIndex={catalogIndex} />
                                 ))}
                             </List>
                         </Box>
@@ -125,28 +125,7 @@ function VendorContracts({ vendorId }: { vendorId: number }) {
                             </Typography>
                             <List dense disablePadding>
                                 {catalogs.map((catalog, catalogIndex) => (
-                                    <Box key={catalog.id}>
-                                        {catalogIndex > 0 && <Divider />}
-                                        <ListItem
-                                            sx={{ px: 0 }}
-                                            secondaryAction={
-                                                <Button
-                                                    variant="outlined"
-                                                    size="small"
-                                                    href={`/catalog/${catalog.id}`}
-                                                >
-                                                    {tVendorDash("goToContract")}
-                                                </Button>
-                                            }
-                                        >
-                                            <ListItemText
-                                                primary={tVendorDash("vendorCatalogListItem", {
-                                                    catalogName: catalog.name,
-                                                    subscriptionCount: catalog.subscriptionsCount ?? 0,
-                                                })}
-                                            />
-                                        </ListItem>
-                                    </Box>
+                                    <CatalogListItem key={catalog.id} catalog={catalog} catalogIndex={catalogIndex} />
                                 ))}
                             </List>
                         </Box>
