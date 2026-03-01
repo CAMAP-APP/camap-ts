@@ -8,17 +8,16 @@ import {
   MenuItem,
   TextField,
 } from '@mui/material';
-import { AutocompleteChangeReason } from '@mui/material/useAutocomplete';
 import { logError } from '@utils/logger';
-import imageCompression from 'browser-image-compression';
 import React, { SyntheticEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useEditorRef } from '@platejs/core/react';
-import { insertImage, insertImageFromFiles } from '@platejs/media';
+import { insertImage } from '@platejs/media';
 import CamapIcon, { CamapIconId } from '@components/utils/CamapIcon';
-import { getCamapHost } from 'lib/runtimeCfg';
 import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 import type { MessageEditor } from '../platePlugins';
+import { insertImageWithCid } from '../nodes/insertImageWithCid';
+import { getCamapHost } from '@lib/runtimeCfg';
 
 type VendorLike = Pick<Vendor, 'name' | 'id' | 'image'>;
 
@@ -73,21 +72,11 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     document.body.style.cursor = 'wait';
     const files = event.target.files;
 
-    const options = {
-      maxSizeMB: 1,
-      maxWidthOrHeight: 500,
-      useWebWorker: true,
-    };
-
     try {
-      insertImageFromFiles(editor, files);
 
-      const compressedFiles = await Promise.all(
-        Array.from(files).map(
-          (file) => imageCompression(file, options)
-        )
-      );
-      onAddImagesCustomHandle?.(compressedFiles);
+      insertImageWithCid(editor, files);
+
+      onAddImagesCustomHandle?.(Array.from(files));
     } catch (error) {
       logError(error);
     } finally {
@@ -105,7 +94,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
 
     const url = newValue?.image;
     if (url)
-      insertImage(editor, url);
+      insertImage(editor, `${getCamapHost()}/${url}`);
   };
 
   const vendorsWithImage = new Set(

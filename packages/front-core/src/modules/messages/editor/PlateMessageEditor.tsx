@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
-import type { Value } from 'platejs';
+import { createEditor, createSlateEditor, type Value } from 'platejs';
 import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
@@ -11,10 +11,10 @@ import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
 import {
+  EMAIL_RENDER_PLUGINS,
   MESSAGE_EDITOR_PLUGINS,
   type MessageEditorPlugin,
 } from './platePlugins';
-import { mediaImageNodePatchEnter } from './nodes/mediaImageNodePatchEnter';
 import { plateStyles } from './plateStyles';
 
 type Props = {
@@ -75,10 +75,7 @@ export const PlateMessageEditor = ({
         if (!dt) return;
         editor.tf.insertData(dt);
         event.preventDefault();
-      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>,
-      onKeyDown: (({ event, editor }) => {
-        mediaImageNodePatchEnter(editor as any, event);
-      }) as DOMHandler<MessageEditorPlugin, React.KeyboardEvent>,
+      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>
     },
   });
 
@@ -86,9 +83,16 @@ export const PlateMessageEditor = ({
   const pendingSerialize = useRef<number | null>(null);
 
   const serializeToFormikHtml = useCallback(async () => {
-    const html = await serializeHtml(editor);
+    const html = await serializeHtml(createSlateEditor({
+      plugins: EMAIL_RENDER_PLUGINS,
+      value: editor.children,
+    }), {
+      stripClassNames: true,
+      stripDataAttributes: true,
+    });
     onHtmlSerialized?.(html);
     onChange(name)(html);
+    console.log('html', html);
   }, [editor, name, onChange, onHtmlSerialized]);
 
   const scheduleSerialize = useCallback(() => {

@@ -1,6 +1,5 @@
 import * as React from 'react';
 import type { TCaptionProps, TImageElement, TResizableProps } from 'platejs';
-import { NodeApi } from 'platejs';
 import type { PlateElementProps } from '@platejs/core/react';
 import { PlateElement, useEditorRef, useFocused, useSelected } from '@platejs/core/react';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,9 +8,9 @@ import theme from '../../../../theme/default/theme';
 
 /* adapted from the ImageElementStatic component from plate ui */
 export function MediaImageNode(
-  props: PlateElementProps<TImageElement & TCaptionProps & TResizableProps>,
+  { cid, ...props }: PlateElementProps<TImageElement & TCaptionProps & TResizableProps> & { cid: string },
 ) {
-  const { align = 'center', caption, url, width } = props.element;
+  const { align = 'left', url, width } = props.element;
   const editor = useEditorRef();
   const { t } = useTranslation(['messages/default']);
   const isSelected = useSelected();
@@ -117,20 +116,6 @@ export function MediaImageNode(
               alt=""
               src={url}
             />
-            {caption && (
-              <figcaption
-                style={{
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  marginTop: 8,
-                  height: 24,
-                  maxWidth: '100%',
-                  textAlign: 'center',
-                }}
-              >
-                {NodeApi.string(caption[0])}
-              </figcaption>
-            )}
           </div>
         </figure>
       </div>

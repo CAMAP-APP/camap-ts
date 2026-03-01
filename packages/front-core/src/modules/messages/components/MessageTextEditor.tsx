@@ -1,13 +1,14 @@
 import React from 'react';
 import type { Value } from 'platejs';
 import { encodeFileToBase64String } from '../../../utils/encoding';
-import { removeAccents, removeSpaces } from '../../../utils/fomat/string';
 import { MessagesContext } from '../MessagesContext';
 import AttachmentList from './attachments/AttachmentList';
 import InsertAttachmentButton from '../editor/toolbar/InsertAttachmentButton';
 import { PlateMessageEditor } from '../editor/PlateMessageEditor';
 import { encodeMessageSlateContentV2, getMessageEditorValueFromSlateContent } from '../editor/messageEditorSchema';
 import { reusedMessageEmbeddedImages } from '../editor/reusedMessageEmbeddedImages';
+import { getCid } from '../utils/cid';
+import imageCompression from 'browser-image-compression';
 
 // Formik passes (name, value, onBlur, onChange) props.
 type MessageTextEditorFormikProps = {
@@ -47,16 +48,19 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
   }, [addEmbeddedImages, reuseMessage, setSlateContent]);
 
   const onAddImages = async (files: File[]) => {
-    const base64EncodedFiles = await Promise.all(
-      files.map((f) => encodeFileToBase64String(f)),
-    );
-    const images = files.map((f, index) => ({
+    const images = await Promise.all(files.map(async (f) => ({
       filename: f.name,
       contentType: f.type,
       encoding: 'base64',
-      content: base64EncodedFiles[index].toString(),
-      cid: removeSpaces(removeAccents(f.name)),
-    }));
+      content: await encodeFileToBase64String(
+        await imageCompression(f, {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 500,
+          useWebWorker: true,
+        })
+      ),
+      cid: getCid(f.name),
+    })));
     addEmbeddedImages(images);
   };
 

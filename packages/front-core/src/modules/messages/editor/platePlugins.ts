@@ -12,12 +12,14 @@ import {
     IndentPlugin
 } from '@platejs/indent/react';
 import { ImagePlugin } from '@platejs/media/react';
-import { MediaImageNode } from './nodes/MediaImageNode';
 import { AutoformatPlugin } from '@platejs/autoformat';
 import type { InferConfig, PlatePlugin, TPlateEditor } from '@platejs/core/react';
 import type { PluginConfig, Value } from 'platejs';
 import { autoformatRules } from './autoformat';
 import { LinkNode } from './nodes/LinkNode';
+import { MessageImageElement } from './messageEditorSchema';
+import { MediaImageNode } from './nodes/MediaImageNode';
+import EmailImageStatic from './nodes/EmailImageStatic';
 
 // `@platejs/basic-nodes` currently exports these as `PluginConfig<any, ...>` which collapses
 // `InferTransforms<...>` to `any` when deriving the editor type. We keep runtime behavior
@@ -40,8 +42,7 @@ export const MESSAGE_BASE_PLUGINS = [
     BulletedListPlugin,
     NumberedListPlugin,
     TaskListPlugin,
-    ListItemPlugin,
-    ImagePlugin.withComponent(MediaImageNode),
+    ListItemPlugin
 ] as const;
 
 export const MESSAGE_EDITOR_PLUGINS = [
@@ -51,13 +52,24 @@ export const MESSAGE_EDITOR_PLUGINS = [
             rules: [...autoformatRules],
         },
     }),
+    ImagePlugin.extend({
+        rules: {
+            break: {
+                default: 'exit'
+            }
+        }
+    }).withComponent(MediaImageNode)
 ] as const;
 
 export type MessageEditorPlugin = InferConfig<(typeof MESSAGE_EDITOR_PLUGINS)[number]>;
 export type MessageEditor = TPlateEditor<Value, MessageEditorPlugin>;
 
-/**
- * Backward-compatible helper for call sites that want a fresh array instance.
- * Keeps the historical behavior (no autoformat plugin).
- */
-export const getPlatePlugins = () => [...MESSAGE_BASE_PLUGINS];
+export const MESSAGE_VIEWER_PLUGINS = [
+    ...MESSAGE_BASE_PLUGINS,
+    ImagePlugin
+]
+
+export const EMAIL_RENDER_PLUGINS = [
+    ...MESSAGE_BASE_PLUGINS,
+    ImagePlugin.withComponent(EmailImageStatic)
+]
