@@ -1,13 +1,13 @@
 import { useMemo } from 'react';
 import type { Value } from 'platejs';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
-import { getPlatePlugins } from './platePlugins';
 import { plateStyles } from './plateStyles';
 import { Box } from '@mui/material';
+import { MESSAGE_VIEWER_PLUGINS } from './platePlugins';
 
 export const PlateMessageViewer = ({ value }: { value: Value }) => {
   const plugins = useMemo(
-    () => getPlatePlugins(),
+    () => [...MESSAGE_VIEWER_PLUGINS],
     [],
   );
 
