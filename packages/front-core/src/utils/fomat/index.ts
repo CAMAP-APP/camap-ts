@@ -227,6 +227,40 @@ export const formatPricePerUnit = (
   return `${formatCurrency(ppu, currency)}/${formatUnit(u, qt, t)}`;
 };
 
+/**
+ * Price per Kg/Liter...
+ */
+export const formatStocks = (
+  stock: number,
+  unit: ProductUnit,
+  bulk: boolean
+): string => {
+  // turn big values into larger units
+  if (stock > 1000) {
+    switch (unit) {
+      case ProductUnit.Gram:
+        stock /= 1000;
+        unit = ProductUnit.Kilogram;
+        break;
+      case ProductUnit.Centilitre:
+        stock /= 100;
+        unit = ProductUnit.Litre;
+        break;
+      case ProductUnit.Millilitre:
+        stock /= 1000;
+        unit = ProductUnit.Litre;
+        break;
+      default:
+    }
+  }
+  if (!bulk) unit = ProductUnit.Piece
+  return `${round(stock)
+    }${unit !== ProductUnit.Piece
+      ? ` ${formatUnit(unit, stock)}`
+      : ''
+    }`;
+};
+
 export const round = (number: number): number => {
   return Math.round(number * 100) / 100;
 };

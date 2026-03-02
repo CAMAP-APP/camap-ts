@@ -2,7 +2,7 @@ import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import ProductLabels from "@components/utils/Product/ProductLabels";
 import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
 import { Colors } from "@theme/commonPalette";
-import { formatPricePerUnit, formatUnit } from "@utils/fomat";
+import { formatPricePerUnit, formatStocks, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatCurrency, StockTracking, Unit } from "camap-common";
 import { useCallback, useEffect, useState } from "react";
@@ -124,9 +124,14 @@ const OrderControlsUnit = ({
         setQ(orderedQuantity.toString());
     }, [orderedQuantity]);
 
+    const onQuantityChangeDebounce = useCallback(
+        (value: number) => debounce((v: number) => onQuantityChange(v), 100)(value),
+        [onQuantityChange]
+    );
+
     if (orderedQuantity === 0)
         return <Button
-            onClick={() => onQuantityChange(1)}
+            onClick={() => onQuantityChangeDebounce(1)}
             sx={{
                 visibility: editable ? 'visible' : 'hidden',
                 fontSize: '20px',
@@ -149,7 +154,7 @@ const OrderControlsUnit = ({
             m: 0,
             p: 0,
         }}
-            onClick={() => onQuantityChange(orderedQuantity - 1)}
+            onClick={() => onQuantityChangeDebounce(orderedQuantity - 1)}
             disabled={!editable}
         >
             {"-"}
@@ -176,15 +181,17 @@ const OrderControlsUnit = ({
             onChange={(
                 event: React.ChangeEvent<HTMLInputElement>,
             ) => {
-                const q = parseInt(event.target.value);
-                if (!isNaN(q) && q !== 0)
-                    setTimeout(() => onQuantityChange(q), 1);
+                const newValue = parseInt(event.target.value);
+                if (!isNaN(newValue) && newValue !== 0)
+                    onQuantityChangeDebounce(max !== undefined ? Math.min(newValue, max) : newValue);
                 else
                     setQ(event.target.value.replace(/[^\d]/gm, ''))
             }
             }
             onBlur={() => {
-                onQuantityChange(parseInt(q));
+                const newValue = parseInt(q);
+                if (!isNaN(newValue))
+                    onQuantityChangeDebounce(max !== undefined ? Math.min(newValue, max) : newValue);
             }}
             hiddenLabel
         />
@@ -196,7 +203,7 @@ const OrderControlsUnit = ({
             m: 0,
             p: 0
         }}
-            disabled={!editable}
+            disabled={!editable || (max !== undefined && orderedQuantity >= max)}
             onClick={() => onQuantityChange(orderedQuantity + 1)}
         >
             {"+"}
@@ -237,7 +244,7 @@ function CsaCatalogOrdersMobileProduct({
 ) {
 
     const { t } = useCamapTranslation({
-        t: "translation"
+        t: "csa-catalog"
     });
 
     const [stocks] = useStocks(product, distribution);
@@ -280,16 +287,11 @@ function CsaCatalogOrdersMobileProduct({
                         gap: 0.5,
                         background: t => Colors.background3
                     }}>
-                        <Tooltip title={t('stockCount', { count: stocks ?? 0 })}>
+                        <Tooltip title={t('stockCount', { stock: formatStocks((stocks ?? 0) * product.qt, product.unitType, product.bulk) })}>
                             <Box display='flex' flexDirection='row' gap={1} py={0.2} px={0.5} alignItems='center'>
                                 <CamapIcon id={CamapIconId.wholesale} sx={{ fontSize: '1.2em' }} />
                                 <Typography fontSize="0.9em">{
-                                    `${stocks ?? 0
-                                    } ${formatUnit(
-                                        product.variablePrice ? Unit.Piece : product.unitType,
-                                        stocks ?? 0
-                                    )
-                                    }`}</Typography>
+                                    formatStocks((stocks ?? 0) * product.qt, product.unitType, product.bulk)}</Typography>
                             </Box>
                         </Tooltip>
                     </Box>
@@ -362,7 +364,7 @@ function CsaCatalogOrdersMobileProduct({
                     onQuantityChange={onQuantityChange} />
             </Box>
         </Box>
-    </Card>
+    </Card >
 }
 
 export default CsaCatalogOrdersMobileProduct;
