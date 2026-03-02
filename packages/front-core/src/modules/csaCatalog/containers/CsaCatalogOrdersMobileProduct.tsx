@@ -5,11 +5,11 @@ import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatCurrency, StockTracking, Unit } from "camap-common";
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { RestCsaCatalog } from "../interfaces";
-import { CsaCatalogContext } from "../CsaCatalog.context";
 import useStocks from "./useStocks";
 import { Distribution } from "@gql";
+import { debounce } from "lodash";
 
 function smartRound(v: number, unit: Unit) {
     if (v === undefined) return '';
@@ -31,12 +31,14 @@ const OrderControlsBulk = ({
     product,
     orderedQuantity,
     onQuantityChange,
-    editable
+    editable,
+    max
 }: {
     product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void,
-    editable: boolean
+    editable: boolean,
+    max?: number
 }) => {
 
     const { t } = useCamapTranslation({
@@ -46,7 +48,12 @@ const OrderControlsBulk = ({
     const [q, setQ] = useState(smartRound(orderedQuantity * product.qt, product.unitType));
     useEffect(() => {
         setQ(smartRound(orderedQuantity * product.qt, product.unitType));
-    }, [orderedQuantity, product]);
+    }, [orderedQuantity, product, max]);
+
+    const onQuantityChangeDebounce = useCallback(
+        (value: number) => debounce((v: number) => onQuantityChange(v), 100)(value),
+        [onQuantityChange]
+    );
 
     return <TextField
         size="small"
@@ -75,12 +82,14 @@ const OrderControlsBulk = ({
         onChange={(
             event: React.ChangeEvent<HTMLInputElement>,
         ) => {
-            const v = parseFloat(event.target.value.replace(',', '.'));
+            let v = parseFloat(event.target.value.replace(',', '.'));
             console.log(event.target.value, v);
-            if (!isNaN(v) && v !== 0 && !event.target.value.endsWith(',') && !event.target.value.endsWith(','))
-                setTimeout(() => onQuantityChange(
-                    v / product.qt
-                ), 1);
+            if (!isNaN(v) && v !== 0 && !event.target.value.endsWith(',') && !event.target.value.endsWith('.')) {
+                let newValue = v / product.qt
+                if (max !== undefined && newValue > max) newValue = max;
+                setQ('' + (newValue * product.qt));
+                onQuantityChangeDebounce(newValue);
+            }
             else
                 setQ(event.target.value.replace(/[^\d,.]/gm, ''))
         }}
@@ -89,7 +98,8 @@ const OrderControlsBulk = ({
             setTimeout(() => {
                 let v = parseFloat(q) / product.qt;
                 if (isNaN(v)) v = 0;
-                onQuantityChange(v);
+                if (max && v > max) v = max;
+                onQuantityChangeDebounce(v);
             });
         }}
         hiddenLabel
@@ -99,12 +109,14 @@ const OrderControlsBulk = ({
 const OrderControlsUnit = ({
     orderedQuantity,
     onQuantityChange,
-    editable
+    editable,
+    max
 }: {
     product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void,
     editable: boolean
+    max?: number
 }) => {
 
     const [q, setQ] = useState(orderedQuantity.toString());
@@ -199,7 +211,8 @@ const OrderControls = ({
     product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void
-    editable: boolean
+    editable: boolean,
+    max?: number
 }) => {
     return product.bulk
         ? <OrderControlsBulk product={product} {...props} />
@@ -341,7 +354,12 @@ function CsaCatalogOrdersMobileProduct({
                 display: 'flex',
                 justifyContent: 'flex-end'
             }}>
-                <OrderControls editable={editable} product={product} orderedQuantity={orderedQuantity} onQuantityChange={onQuantityChange} />
+                <OrderControls
+                    editable={editable}
+                    product={product}
+                    orderedQuantity={orderedQuantity}
+                    max={stocks != null ? (stocks + orderedQuantity) : undefined}
+                    onQuantityChange={onQuantityChange} />
             </Box>
         </Box>
     </Card>
