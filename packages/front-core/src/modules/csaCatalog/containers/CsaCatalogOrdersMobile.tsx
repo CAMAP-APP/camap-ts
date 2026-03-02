@@ -160,6 +160,8 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
         return Object.entries(productOrders).some(([productIdString, qty]) => {
           const productId = parseInt(productIdString, 10);
           const initialQty = initialOrders[distributionId]?.[productId] ?? 0;
+          if (qty !== initialQty)
+            console.log('hasChanges', distributionId, productId, qty, initialQty);
           return qty !== initialQty;
         });
       },
@@ -222,15 +224,22 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     setLoading(false);
   };
 
-  const onCancelOrder = async () => {
-    const newOrders = { ...updatedOrders };
+  const onCancelOrder = useCallback(() => {
+    const upd = { ...updatedOrders };
+    const added = { ...addedOrders };
 
-    newOrders[distribution.id] = catalog?.products
-      .reduce((o, p) => ({ ...o, [p.id]: 0 }), {}) ?? {};
+    if (!upd[distribution.id]) {
+      upd[distribution.id] = {};
+    }
+    catalog?.products.forEach(p => {
+      upd[distribution.id][p.id] = 0;
+      added[p.id] = (added[p.id] ?? 0) - (initialOrders[distribution.id][p.id] ?? 0);
+    })
 
-    setUpdatedOrders(newOrders);
-    await onNext();
-  };
+    setUpdatedOrders(upd);
+    setAddedOrders(added);
+    void onNext();
+  }, [distribution.id, catalog?.products, addedOrders, updatedOrders, initialOrders, setUpdatedOrders, setAddedOrders, onNext]);
 
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
 
