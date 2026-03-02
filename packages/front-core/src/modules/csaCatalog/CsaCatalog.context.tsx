@@ -43,32 +43,34 @@ interface CsaCatalogContextProps {
     value: RestStocksPerProductDistribution | undefined,
   ) => void;
   adminMode?: boolean | undefined;
+  initialOrders: Orders;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   catalogId: -1,
   initialSubscriptionId: undefined,
   updatedOrders: {},
-  setUpdatedOrders: () => {},
+  setUpdatedOrders: () => { },
   catalog: undefined,
   subscriptionAbsences: undefined,
   error: undefined,
-  setError: () => {},
+  setError: () => { },
   distributions: [],
   nextDistributionIndex: -1,
   absenceDistributionsIds: null,
-  setAbsenceDistributionsIds: () => {},
+  setAbsenceDistributionsIds: () => { },
   subscription: undefined,
-  getSubscription: () => {},
-  setSubscription: () => {},
-  setSubscriptionAbsences: () => {},
+  getSubscription: () => { },
+  setSubscription: () => { },
+  setSubscriptionAbsences: () => { },
   defaultOrder: {},
-  setDefaultOrder: () => {},
+  setDefaultOrder: () => { },
   addedOrders: {},
-  setAddedOrders: () => {},
+  setAddedOrders: () => { },
   stocksPerProductDistribution: {},
-  setStocksPerProductDistribution: () => {},
+  setStocksPerProductDistribution: () => { },
   adminMode: false,
+  initialOrders: {},
 });
 
 const CsaCatalogContextProvider = ({
@@ -170,6 +172,33 @@ const CsaCatalogContextProvider = ({
     return index !== -1 ? index : 0;
   }, [distributions]);
 
+  const initialOrders = React.useMemo(() => {
+    if (!catalog || !subscription) return {};
+
+    let initialOrders = subscription.distributions.reduce((acc, d) => {
+      acc[d.id] = d.orders.reduce((acc2, o) => {
+        acc2[o.productId] = o.qty;
+        return acc2;
+      }, {} as Record<number, number>);
+      return acc;
+    }, {} as Record<number, Record<number, number>>);
+
+    // Check all other products to 0
+    Object.keys(initialOrders).forEach((distributionIdString) => {
+      const distributionId = parseInt(distributionIdString, 10);
+      initialOrders[distributionId] = catalog.products.reduce((acc, p) => {
+        if (initialOrders[distributionId][p.id]) {
+          acc[p.id] = initialOrders[distributionId][p.id];
+        } else {
+          acc[p.id] = 0;
+        }
+        return acc;
+      }, {} as Record<number, number>);
+    });
+
+    return initialOrders;
+  }, [catalog, subscription]);
+
   /** */
   return (
     <CsaCatalogContext.Provider
@@ -202,6 +231,7 @@ const CsaCatalogContextProvider = ({
         stocksPerProductDistribution,
         setStocksPerProductDistribution,
         adminMode,
+        initialOrders,
       }}
     >
       {children}

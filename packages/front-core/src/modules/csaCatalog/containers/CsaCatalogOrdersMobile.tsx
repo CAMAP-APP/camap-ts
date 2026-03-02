@@ -51,7 +51,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     setError,
     addedOrders,
     setAddedOrders,
-    stocksPerProductDistribution,
+    initialOrders,
   } = React.useContext(CsaCatalogContext);
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
@@ -76,33 +76,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     if (!updatedSubscriptionData) return;
     setSubscription(updatedSubscriptionData);
   }, [setSubscription, updatedSubscriptionData]);
-
-  const initialOrders = React.useMemo(() => {
-    if (!catalog || !subscription) return {};
-
-    let initialOrders = subscription.distributions.reduce((acc, d) => {
-      acc[d.id] = d.orders.reduce((acc2, o) => {
-        acc2[o.productId] = o.qty;
-        return acc2;
-      }, {} as Record<number, number>);
-      return acc;
-    }, {} as Record<number, Record<number, number>>);
-
-    // Check all other products to 0
-    Object.keys(initialOrders).forEach((distributionIdString) => {
-      const distributionId = parseInt(distributionIdString, 10);
-      initialOrders[distributionId] = catalog.products.reduce((acc, p) => {
-        if (initialOrders[distributionId][p.id]) {
-          acc[p.id] = initialOrders[distributionId][p.id];
-        } else {
-          acc[p.id] = 0;
-        }
-        return acc;
-      }, {} as Record<number, number>);
-    });
-
-    return initialOrders;
-  }, [catalog, subscription]);
 
   // user modified order
   const onOrderChange = (
@@ -283,35 +256,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     return <CircularProgressBox />;
   }
 
-  function getStockValue(
-    isGlobalStock: boolean,
-    p: { id: number },
-    d: { id: number },
-  ) {
-    const isDistributionStock =
-      catalog != null &&
-      catalog.hasStockManagement &&
-      !isGlobalStock &&
-      stocksPerProductDistribution != null &&
-      stocksPerProductDistribution[p.id] != null &&
-      stocksPerProductDistribution[p.id][d.id] != null;
-    let distributionStock = null;
-    if (isDistributionStock) {
-      distributionStock = stocksPerProductDistribution[p.id][d.id];
-      var initialOrder: number =
-        initialOrders[d.id] != null && initialOrders[d.id][p.id] != null
-          ? initialOrders[d.id][p.id]
-          : 0;
-      var updatedOrder: number =
-        updatedOrders[d.id] != null && updatedOrders[d.id][p.id] != null
-          ? updatedOrders[d.id][p.id]
-          : initialOrder;
-      var added = updatedOrder - initialOrder;
-      distributionStock -= added;
-    }
-    return distributionStock;
-  }
-
   return (
     <Box>
       <MobileContainer title={adminMode ? t('changeOrders') : t('changeMyOrders')}>
@@ -474,6 +418,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
                     q
                   )}
                   editable={distribution.state === RestDistributionState.Open}
+                  distribution={distribution}
                 />
             )}
             <ProductModal product={modalProduct} onClose={onProductModalClose} />

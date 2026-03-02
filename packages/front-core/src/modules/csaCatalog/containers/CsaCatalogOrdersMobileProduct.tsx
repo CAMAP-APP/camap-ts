@@ -1,12 +1,15 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import ProductLabels from "@components/utils/Product/ProductLabels";
-import { Product } from "@gql";
-import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornment, TextField, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
 import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
-import { formatCurrency, Unit } from "camap-common";
-import { useEffect, useState } from "react";
+import { formatCurrency, StockTracking, Unit } from "camap-common";
+import { useContext, useEffect, useState } from "react";
+import { RestCsaCatalog } from "../interfaces";
+import { CsaCatalogContext } from "../CsaCatalog.context";
+import useStocks from "./useStocks";
+import { Distribution } from "@gql";
 
 function smartRound(v: number, unit: Unit) {
     if (v === undefined) return '';
@@ -30,7 +33,7 @@ const OrderControlsBulk = ({
     onQuantityChange,
     editable
 }: {
-    product: Product,
+    product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void,
     editable: boolean
@@ -98,7 +101,7 @@ const OrderControlsUnit = ({
     onQuantityChange,
     editable
 }: {
-    product: Product,
+    product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void,
     editable: boolean
@@ -193,7 +196,7 @@ const OrderControls = ({
     product,
     ...props
 }: {
-    product: Product,
+    product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onQuantityChange: (quantity: number) => void
     editable: boolean
@@ -208,19 +211,23 @@ function CsaCatalogOrdersMobileProduct({
     orderedQuantity,
     onClick,
     onQuantityChange,
-    editable
+    editable,
+    distribution
 }: {
-    product: Product,
+    product: RestCsaCatalog['products'][number],
     orderedQuantity: number,
     onClick: () => void,
     onQuantityChange: (quantity: number) => void,
     editable: boolean
+    distribution: Distribution
 }
 ) {
 
     const { t } = useCamapTranslation({
         t: "translation"
     });
+
+    const [stocks] = useStocks(product, distribution);
 
     return <Card
         sx={{
@@ -233,20 +240,41 @@ function CsaCatalogOrdersMobileProduct({
         elevation={3}
     >
         <CardActionArea onClick={onClick}>
-            <CardMedia
-                component="img"
-                image={product.image}
-                alt=""
-            />
-            <Box sx={{
-                position: 'absolute',
-                top: 4,
-                left: 4,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 0.5
-            }}>
-                <ProductLabels product={product} />
+            <Box sx={{ position: 'relative' }}>
+                <CardMedia
+                    component="img"
+                    image={product.image}
+                    alt=""
+                />
+                <Box sx={{
+                    position: 'absolute',
+                    top: 4,
+                    left: 4,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0.5
+                }}>
+                    <ProductLabels product={product} />
+                </Box>
+                {product.stockTracking !== StockTracking.Disabled &&
+                    <Box sx={{
+                        position: 'absolute',
+                        left: 4,
+                        bottom: 4,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        gap: 0.5,
+                        background: t => Colors.background3
+                    }}>
+                        <Tooltip title={t('stockCount', { count: stocks ?? 0 })}>
+                            <Box display='flex' flexDirection='row' gap={1} py={0.2} px={0.5} alignItems='center'>
+                                <CamapIcon id={CamapIconId.wholesale} sx={{ fontSize: '1.2em' }} />
+                                <Typography fontSize="0.9em">{stocks ?? 0}</Typography>
+                            </Box>
+                        </Tooltip>
+                    </Box>
+                }
             </Box>
             <CardContent
                 sx={{
@@ -265,10 +293,7 @@ function CsaCatalogOrdersMobileProduct({
                 </Box>
                 <Box display='flex' justifyContent='flex-end' width='100%'>
                     <Typography fontSize="0.7em" noWrap fontWeight="bold" color='primary.main' visibility={orderedQuantity > 0 ? 'visible' : 'hidden'}>
-                        {product.bulk
-                            ? formatCurrency(product.price * orderedQuantity)
-                            : formatCurrency(product.price * orderedQuantity)
-                        }
+                        {formatCurrency(product.price * orderedQuantity)}
                     </Typography>
                 </Box>
             </CardContent>

@@ -1,5 +1,6 @@
 import { isAfter, isBefore } from 'date-fns';
-import { Catalog, CatalogType, Distribution, User } from '../../gql';
+import { Catalog, CatalogType, Distribution, Product, User } from '../../gql';
+import { StockTracking } from 'camap-common';
 
 export const restCsaCatalogTypeToType = (type: 0 | 1): CatalogType => {
   return type === 0 ? CatalogType.TYPE_CONSTORDERS : CatalogType.TYPE_VARORDER;
@@ -19,7 +20,7 @@ type RestDistribution = Distribution & {
 
 export type RestCsaCatalog = Pick<
   Catalog,
-  'id' | 'name' | 'startDate' | 'endDate' | 'vendor' | 'products'
+  'id' | 'name' | 'startDate' | 'endDate' | 'vendor'
 > & {
   absences: string;
   documents: RestCsaCatalogDocument[];
@@ -31,6 +32,28 @@ export type RestCsaCatalog = Pick<
   absentDistribsMaxNb?: number;
   distribMinOrdersTotal: number;
   hasStockManagement: boolean;
+  products: (Pick<Product,
+    'id' |
+    'ref' |
+    'name' |
+    'image' |
+    'price' |
+    'vat' |
+    'desc' |
+    'qt' |
+    'unitType' |
+    'organic' |
+    'variablePrice' |
+    'bulk' |
+    'active' |
+    'catalogId' |
+    'vendorId' |
+    'multiWeight'
+  > & {
+    vatValue: number | null,
+    orderable: boolean,
+    stockTracking: StockTracking
+  })[]
 };
 
 export type RestStocksPerProductDistribution = { [productId: number]: { [distribId: number]: number } };

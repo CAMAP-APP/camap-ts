@@ -480,7 +480,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
           {catalog.products.map((p) => {
             const isGlobalStock =
               catalog.hasStockManagement &&
-              p.stockTracking === StockTracking[StockTracking.Global] &&
+              p.stockTracking === StockTracking.Global &&
               stocksPerProductDistribution != null;
             var globalStock = 0;
             if (
