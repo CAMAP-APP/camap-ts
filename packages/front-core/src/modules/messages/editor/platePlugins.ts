@@ -1,0 +1,75 @@
+import { LinkPlugin } from '@platejs/link/react';
+import { ListPlugin, BulletedListPlugin, NumberedListPlugin, TaskListPlugin, ListItemPlugin } from '@platejs/list-classic/react';
+import {
+    BasicBlocksPlugin,
+    BasicMarksPlugin,
+} from '@platejs/basic-nodes/react';
+import {
+    FontColorPlugin,
+    TextAlignPlugin,
+} from '@platejs/basic-styles/react';
+import {
+    IndentPlugin
+} from '@platejs/indent/react';
+import { ImagePlugin } from '@platejs/media/react';
+import { AutoformatPlugin } from '@platejs/autoformat';
+import type { InferConfig, PlatePlugin, TPlateEditor } from '@platejs/core/react';
+import type { PluginConfig, Value } from 'platejs';
+import { autoformatRules } from './autoformat';
+import { LinkNode } from './nodes/LinkNode';
+import { MessageImageElement } from './messageEditorSchema';
+import { MediaImageNode } from './nodes/MediaImageNode';
+import EmailImageStatic from './nodes/EmailImageStatic';
+
+// `@platejs/basic-nodes` currently exports these as `PluginConfig<any, ...>` which collapses
+// `InferTransforms<...>` to `any` when deriving the editor type. We keep runtime behavior
+// but provide a stable string key for type inference.
+const TypedBasicBlocksPlugin = BasicBlocksPlugin as PlatePlugin<
+    PluginConfig<'basicBlocks', {}, {}, {}, {}>
+>;
+const TypedBasicMarksPlugin = BasicMarksPlugin as PlatePlugin<
+    PluginConfig<'basicMarks', {}, {}, {}, {}>
+>;
+
+export const MESSAGE_BASE_PLUGINS = [
+    TypedBasicBlocksPlugin,
+    TypedBasicMarksPlugin,
+    FontColorPlugin,
+    TextAlignPlugin,
+    LinkPlugin.withComponent(LinkNode),
+    IndentPlugin,
+    ListPlugin,
+    BulletedListPlugin,
+    NumberedListPlugin,
+    TaskListPlugin,
+    ListItemPlugin
+] as const;
+
+export const MESSAGE_EDITOR_PLUGINS = [
+    ...MESSAGE_BASE_PLUGINS,
+    AutoformatPlugin.configure({
+        options: {
+            rules: [...autoformatRules],
+        },
+    }),
+    ImagePlugin.extend({
+        rules: {
+            break: {
+                default: 'exit'
+            }
+        }
+    }).withComponent(MediaImageNode)
+] as const;
+
+export type MessageEditorPlugin = InferConfig<(typeof MESSAGE_EDITOR_PLUGINS)[number]>;
+export type MessageEditor = TPlateEditor<Value, MessageEditorPlugin>;
+
+export const MESSAGE_VIEWER_PLUGINS = [
+    ...MESSAGE_BASE_PLUGINS,
+    ImagePlugin
+]
+
+export const EMAIL_RENDER_PLUGINS = [
+    ...MESSAGE_BASE_PLUGINS,
+    ImagePlugin.withComponent(EmailImageStatic)
+]

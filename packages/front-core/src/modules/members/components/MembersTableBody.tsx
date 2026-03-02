@@ -1,5 +1,5 @@
 import { Checkbox, TableBody, TableCell, TableRow } from '@mui/material';
-import React, { ReactChild } from 'react';
+import React, { ReactChild, ReactNode } from 'react';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { Order, stableSort } from '../../../utils/table';
 
@@ -8,19 +8,20 @@ export interface DefaultFormattedMember {
   id: number;
 }
 
-interface MembersTableBodyProps<T> {
+type MemberTableFields<Headers extends string> = { [field in Headers]: string | Date | ReactNode };
+interface MembersTableBodyProps<Headers extends string, T extends DefaultFormattedMember & MemberTableFields<Headers>> {
   formattedMembers: T[];
   order: Order;
-  orderBy: keyof T;
+  orderBy: Headers;
   rowsPerPage: number;
   page: number;
-  headCells: (keyof T)[];
+  headCells: Headers[];
   isSelected?: (id: number) => boolean;
   handleRowClick?: (id: number) => void;
   handleCheckboxClick?: (id: number) => void;
 }
 
-const MembersTableBody = <T extends DefaultFormattedMember>({
+const MembersTableBody = <H extends string, T extends DefaultFormattedMember & MemberTableFields<H>>({
   formattedMembers,
   order,
   orderBy,
@@ -30,7 +31,7 @@ const MembersTableBody = <T extends DefaultFormattedMember>({
   isSelected = undefined,
   handleRowClick = undefined,
   handleCheckboxClick = undefined,
-}: MembersTableBodyProps<T>) => {
+}: MembersTableBodyProps<H, T>) => {
   return (
     <TableBody>
       {stableSort(formattedMembers, order, orderBy)
@@ -55,14 +56,11 @@ const MembersTableBody = <T extends DefaultFormattedMember>({
                   wordBreak: 'break-word',
                 }}
               >
-                {cell !== 'registrationDate'
-                  ? String(row[cell])
-                  : formatAbsoluteDate(
-                      row[cell] as unknown as Date,
-                      true,
-                      true,
-                      true,
-                    )}
+                {
+                  (typeof row[cell] === 'object' && row[cell] instanceof Date)
+                    ? formatAbsoluteDate(row[cell] as unknown as Date, true, true, true)
+                    : row[cell]
+                }
               </TableCell>,
             );
           });

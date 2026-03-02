@@ -1,8 +1,8 @@
 import { AttachFile } from '@mui/icons-material';
 import { Box } from '@mui/material';
 import React from 'react';
-import { TextEditorComponents } from '../../../../components/textEditor/TextEditorComponents';
 import { MessagesContext } from '../../MessagesContext';
+import { TextEditorToolbarButton } from './TextEditorToolbarButton';
 
 const InsertAttachmentButton = () => {
   const { addAttachment } = React.useContext(MessagesContext);
@@ -41,7 +41,7 @@ const InsertAttachmentButton = () => {
   };
 
   return (
-    <TextEditorComponents
+    <TextEditorToolbarButton
       active={isActive}
       onMouseDown={onMouseDown}
       aria-controls="attachment-upload-menu"
@@ -57,7 +57,7 @@ const InsertAttachmentButton = () => {
           onChange={uploadAttachment}
         />
       </Box>
-    </TextEditorComponents>
+    </TextEditorToolbarButton>
   );
 };
 
