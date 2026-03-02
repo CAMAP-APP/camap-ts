@@ -270,7 +270,13 @@ function CsaCatalogOrdersMobileProduct({
                         <Tooltip title={t('stockCount', { count: stocks ?? 0 })}>
                             <Box display='flex' flexDirection='row' gap={1} py={0.2} px={0.5} alignItems='center'>
                                 <CamapIcon id={CamapIconId.wholesale} sx={{ fontSize: '1.2em' }} />
-                                <Typography fontSize="0.9em">{stocks ?? 0}</Typography>
+                                <Typography fontSize="0.9em">{
+                                    `${stocks ?? 0
+                                    } ${formatUnit(
+                                        product.variablePrice ? Unit.Piece : product.unitType,
+                                        stocks ?? 0
+                                    )
+                                    }`}</Typography>
                             </Box>
                         </Tooltip>
                     </Box>
@@ -317,7 +323,7 @@ function CsaCatalogOrdersMobileProduct({
                 <Box sx={{
                     fontWeight: "bold"
                 }}>
-                    {product.variablePrice && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
+                    {!product.bulk && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
                 </Box>
                 <Box>
                     {formatPricePerUnit(
