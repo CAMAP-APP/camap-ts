@@ -232,9 +232,13 @@ export const formatPricePerUnit = (
  */
 export const formatStocks = (
   stock: number,
+  qt: number,
   unit: ProductUnit,
+  variablePrice: boolean,
   bulk: boolean
 ): string => {
+  if (!variablePrice)
+    stock *= qt;
   // turn big values into larger units
   if (stock > 1000) {
     switch (unit) {
