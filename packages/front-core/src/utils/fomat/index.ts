@@ -200,7 +200,7 @@ export const formatPricePerUnit = (
 ): string => {
   if (!price) return '';
 
-  if(!qt || !unit)
+  if (!qt || !unit)
     return formatCurrency(price, currency);
 
   let ppu = price / qt;

@@ -1,5 +1,6 @@
 {
-    "product": "Produit",
+	"product": "Produit",
 	"soldInBulk": "Vendu en Vrac",
+	"variablePrice": "Prix variable selon la pesée",
 	"organicAgriculture": "Agriculture Biologique"
 }

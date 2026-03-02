@@ -3,7 +3,7 @@ import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
 import CamapIcon, { CamapIconId } from '../CamapIcon';
 import { ProductInfos } from './ProductModal';
 
-const Label = ({iconId, name, organic = false}
+const Label = ({ iconId, name, organic = false }
   : {
     iconId: CamapIconId,
     name: string,
@@ -41,7 +41,7 @@ const Label = ({iconId, name, organic = false}
   );
 };
 
-function ProductLabels({ product }: {product: ProductInfos}) {
+function ProductLabels({ product }: { product: ProductInfos }) {
   const { t } = useCamapTranslation({ t: 'shop/default' });
 
   // if (product.wholesale) {
@@ -50,6 +50,7 @@ function ProductLabels({ product }: {product: ProductInfos}) {
   return <>
     {product.organic && <Label iconId={CamapIconId.bio} name={t('organicAgriculture')} organic />}
     {product.bulk && <Label iconId={CamapIconId.bulk} name={t('soldInBulk')} />}
+    {product.variablePrice && <Label iconId={CamapIconId.scale} name={t('variablePrice')} />}
   </>
 };
 
