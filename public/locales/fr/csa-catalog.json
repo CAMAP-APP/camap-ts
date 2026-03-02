@@ -51,5 +51,6 @@
   "defaultOrderInfosConstOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat.",
   "defaultOrder": "Commande par défaut",
   "Available": "Disponible",
-  "stockCount": "{{stock}} en stock"
+  "stockCount": "{{stock}} en stock",
+  "unsavedOrdersConfirmLeave": "Vous avez des commandes non enregistrées. Voulez-vous quitter cette page ?"
 }
