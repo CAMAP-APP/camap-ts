@@ -1,4 +1,4 @@
-import { Box, Button } from "@mui/material"
+import { Box, Button, Tooltip } from "@mui/material"
 import { ArrowBack, ArrowForward } from "@mui/icons-material"
 import { formatAbsoluteDate } from "@utils/fomat"
 import { formatCurrency } from "camap-common"
@@ -131,53 +131,90 @@ export const CsaCatalogOrdersMobileHeader = (
 
             <Box
                 display="grid"
-                gridTemplateColumns={{
-                    xs: '1fr 1fr',
-                    lg: 'auto 1fr auto'
-                }}
+                gridTemplateColumns={'min-content min-content 1fr min-content min-content'}
                 gridTemplateAreas={{
-                    xs: '"status status" "sold total"',
-                    lg: '"sold status total"'
+                    xs: `"status status status status status"
+                        "balance contract-min . order-min total"`,
+                    lg: '"balance contract-min status order-min total"'
                 }}
-                gap={1}
                 fontSize={{ xs: 14, sm: 16 }}
                 justifyContent='space-between'
-                mx={1}
+                alignItems='stretch'
+                mx={0}
                 mb={1}
             >
-                {/* Sold box */}
-                <Box gridArea="sold" display="flex" alignItems="center" gap={1}>
-                    <Box>
-                        <Typography
-                            fontSize="inherit"
-                            fontWeight="bold"
-                            lineHeight="1em"
-                        >{t('paymentSold')}</Typography>
-                    </Box>
-                    {subscription !== undefined && <Box
+                {/* Balance box */}
+                {subscription !== undefined && <Tooltip title={t('paymentSold')}>
+                    <Box gridArea="balance"
+                        display="flex"
+                        flexDirection="column"
+                        justifyContent="center"
+                        alignItems="center"
                         sx={{
                             backgroundColor: (theme: Theme) =>
                                 subscription.balance >= 0
                                     ? theme.palette.success.main
                                     : theme.palette.error.main,
+
+                            color: (theme) =>
+                                subscription.balance >= 0
+                                    ? theme.palette.success.contrastText
+                                    : theme.palette.error.contrastText,
                         }}
-                        p={1}
+                        px={0.5}
                     >
+                        <Box>
+                            <Typography
+                                whiteSpace="nowrap"
+                                fontSize="0.8em"
+                            >{t('paymentSoldShort')}</Typography>
+                        </Box>
                         <Typography
                             fontSize="inherit"
                             fontWeight="bold"
                             sx={{
-                                color: (theme) =>
-                                    subscription.balance >= 0
-                                        ? theme.palette.success.contrastText
-                                        : theme.palette.error.contrastText,
                                 textAlign: 'center',
                             }}
+                            alignSelf="center"
+                            px={0.5}
                         >
                             {formatCurrency(subscription.balance)}
                         </Typography>
-                    </Box>}
-                </Box>
+                    </Box>
+                </Tooltip>}
+                {/* minimum order contract */}
+                {subscription !== undefined &&
+                    catalog?.catalogMinOrdersTotal != null &&
+                    catalog?.catalogMinOrdersTotal > 0 &&
+                    <Tooltip title={t('contractMin')}>
+                        <Box gridArea="contract-min" display="flex" flexDirection="column" alignItems="center"
+                            sx={{
+                                backgroundColor: (theme: Theme) => theme.palette.primary.main,
+                                color: (theme) => theme.palette.primary.contrastText,
+                            }}
+                            px={0.5}
+                        >
+                            <Typography
+                                whiteSpace="nowrap"
+                                fontSize="0.8em"
+                            >{t('contractMinShort')}</Typography>
+                            <Typography
+                                fontSize="inherit"
+                                fontWeight="bold"
+                                sx={{
+                                    textAlign: 'center',
+                                }}
+                                alignSelf="center"
+                                px={0.5}
+                            >
+                                {formatCurrency(catalog?.catalogMinOrdersTotal)}
+                            </Typography>
+                            <Typography
+                                    whiteSpace="nowrap"
+                                    fontSize="0.8em"
+                                >{t('contractMinCurrent', { total: formatCurrency(subscription?.totalOrdered ?? 0) })}</Typography>
+                        </Box>
+                    </Tooltip>}
 
                 {/* Status, place and time */}
                 <Box
@@ -222,30 +259,64 @@ export const CsaCatalogOrdersMobileHeader = (
                     </Typography>
                 </Box>
 
+                {/* minimum per order */}
+                {subscription != null &&
+                    catalog?.distribMinOrdersTotal != null &&
+                    catalog?.distribMinOrdersTotal > 0 &&
+                    <Tooltip title={t('orderMin')}>
+                        <Box gridArea="order-min" display="flex" flexDirection="column" alignItems="center"
+                            sx={{
+                                backgroundColor: (theme: Theme) => theme.palette.primary.main,
+                                color: (theme) => theme.palette.primary.contrastText,
+                            }}
+                            px={0.5}
+                        >
+                            <Box>
+                                <Typography
+                                    whiteSpace="nowrap"
+                                    fontSize="0.8em"
+                                >{t('orderMinShort')}</Typography>
+                            </Box>
+                            <Typography
+                                fontSize="inherit"
+                                fontWeight="bold"
+                                sx={{
+                                    textAlign: 'center',
+                                }}
+                                alignSelf="center"
+                                px={0.5}
+                            >
+                                {formatCurrency(catalog?.distribMinOrdersTotal)}
+                            </Typography>
+                        </Box>
+                    </Tooltip>}
+
                 {/* Total */}
-                <Box
-                    gridArea="total"
-                    display="flex"
-                    gap={1}
-                    alignItems="center"
-                    justifyContent={"flex-end"}
-                >
-                    <Typography
-                        fontSize="inherit"
-                        fontWeight="bold"
-                        lineHeight="1em"
-                    >{t('orderValue')}</Typography>
-                    <CamapIcon id={CamapIconId.basket} sx={{
-                        color: 'primary.main'
-                    }} />
-                    <Typography
-                        fontSize={{ xs: "1.1em", lg: "1.2em" }}
-                        fontWeight="bold"
-                        sx={{
-                            color: 'primary.main'
-                        }}
-                    >{getTotalFromDistribution(distribution.id)}</Typography>
-                </Box>
+                <Tooltip title={t('orderValue')}>
+                    <Box
+                        gridArea="total"
+                        display="flex"
+                        flexDirection="column"
+                        alignItems='flex-end'
+                        px={0.5}
+                    >
+                        <Typography
+                            fontSize="0.8em"
+                        >{t('orderValueShort')}</Typography>
+                        <Box display="flex" alignItems="center" alignSelf="center" gap={1}>
+                            <CamapIcon id={CamapIconId.basket} sx={{
+                                color: 'primary.main'
+                            }} />
+                            <Typography
+                                fontSize={{ xs: "1.1em", lg: "1.2em" }}
+                                fontWeight="bold"
+                                sx={{
+                                    color: 'primary.main'
+                                }}
+                            >{getTotalFromDistribution(distribution.id)}</Typography>
+                        </Box>
+                    </Box>
+                </Tooltip>
             </Box>
         </Box >
     )

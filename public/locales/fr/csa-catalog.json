@@ -52,5 +52,12 @@
   "defaultOrder": "Commande par défaut",
   "Available": "Disponible",
   "stockCount": "{{stock}} en stock",
-  "unsavedOrdersConfirmLeave": "Vous avez des commandes non enregistrées. Voulez-vous quitter cette page ?"
+  "unsavedOrdersConfirmLeave": "Vous avez des commandes non enregistrées. Voulez-vous quitter cette page ?",
+  "contractMin": "Minimum de commandes sur la durée du contrat",
+  "paymentSoldShort": "Solde",
+  "contractMinShort": "Min. contrat",
+  "orderValueShort": "Panier",
+  "orderMin": "Minimum de commandes par distribution",
+  "orderMinShort": "Commande min.",
+  "contractMinCurrent": "Total actuel : {{total}}"
 }

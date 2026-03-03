@@ -32,6 +32,7 @@ export type RestCsaCatalog = Pick<
   absentDistribsMaxNb?: number;
   distribMinOrdersTotal: number;
   hasStockManagement: boolean;
+  catalogMinOrdersTotal: number;
   products: (Pick<Product,
     'id' |
     'ref' |
