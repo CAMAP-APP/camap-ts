@@ -83,7 +83,6 @@ const OrderControlsBulk = ({
             event: React.ChangeEvent<HTMLInputElement>,
         ) => {
             let v = parseFloat(event.target.value.replace(',', '.'));
-            console.log(event.target.value, v);
             if (!isNaN(v) && v !== 0 && !event.target.value.endsWith(',') && !event.target.value.endsWith('.')) {
                 let newValue = v / product.qt
                 if (max !== undefined && newValue > max) newValue = max;

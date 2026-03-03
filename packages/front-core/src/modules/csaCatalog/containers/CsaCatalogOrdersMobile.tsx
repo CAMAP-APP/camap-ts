@@ -26,9 +26,15 @@ import MediumActionIcon from './MediumActionIcon';
 interface CsacatalogProps {
   adminMode?: boolean;
   onNext: () => Promise<boolean>;
+  mode?: 'defaultOrder' | 'orders';
 }
 
-const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
+const CsaCatalogOrdersMobile = ({
+  adminMode,
+  onNext,
+  mode = 'orders'
+}: CsacatalogProps) => {
+
   const { t, tCommon } = useCamapTranslation(
     {
       t: 'csa-catalog',
@@ -163,8 +169,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
         return Object.entries(productOrders).some(([productIdString, qty]) => {
           const productId = parseInt(productIdString, 10);
           const initialQty = initialOrders[distributionId]?.[productId] ?? 0;
-          if (qty !== initialQty)
-            console.log('hasChanges', distributionId, productId, qty, initialQty);
           return qty !== initialQty;
         });
       },
@@ -190,7 +194,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
       : distributions[distributionIndex];
 
   const [defaultOrdersMode, setDefaultOrdersMode] =
-    React.useState(false);
+    React.useState(mode === 'defaultOrder');
 
   const onDefaultOrderChange = (productId: number, quantity: number) => {
     const newDefaultOrder = { ...defaultOrder };
@@ -247,7 +251,6 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
           quantity: orders[distribution.id][p.id] ?? 0
         }
       });
-      console.log('defaultOrderProducts', defaultOrderProducts);
 
       setToggleSetDefaultOrderSuccess(true);
       const rqStart = Date.now();
@@ -268,7 +271,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     setModalProduct(undefined);
   };
 
-  if (!catalog || !distributions || !Object.keys(orders).length) {
+  if (mode !== 'defaultOrder' && (!catalog || !distributions || !Object.keys(orders).length)) {
     return <CircularProgressBox />;
   }
 
@@ -279,7 +282,12 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     buttons.push(<Button
       key="update-default-order"
       variant="contained"
-      onClick={() => updateDefaultOrders()}
+      onClick={async () => {
+        await updateDefaultOrders();
+        if (mode === 'defaultOrder') {
+          void onNext();
+        }
+      }}
     >
       {t('setAsDefaultOrderBtn')}
     </Button>)
@@ -293,7 +301,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
         {t('cancelOrder')}
       </Button>)
     }
-    if (restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_VARORDER) {
+    if (restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER) {
       buttons.push(
         <Tooltip key="set-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
           <SuccessButton
@@ -322,11 +330,9 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     }
   }
 
-  console.log('defaultOrder', defaultOrder);
-
   return (
     <MobileContainer title={title} actions={<>
-      {restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_VARORDER && (
+      {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
         <ToggleButton
           value="default-order"
           onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
@@ -354,7 +360,7 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
         : <>
           {/* Products */}
           <Box display="grid" gridTemplateColumns='repeat(auto-fill, minmax(150px, 1fr))' gap={1} justifyItems={'center'}>
-            {catalog.products.map(
+            {catalog?.products?.map(
               (p) =>
                 <CsaCatalogOrdersMobileProduct
                   key={p.id}
