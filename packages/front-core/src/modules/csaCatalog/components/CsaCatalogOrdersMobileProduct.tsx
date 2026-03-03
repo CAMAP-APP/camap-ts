@@ -255,7 +255,8 @@ function CsaCatalogOrdersMobileProduct({
     return <Card
         sx={{
             position: 'relative',
-            minWidth: 150,
+            width: '100%',
+            minWidth: 0,
             maxWidth: 180,
             flexBasis: 150,
             flexGrow: 1
@@ -311,7 +312,7 @@ function CsaCatalogOrdersMobileProduct({
                 <Box sx={{
                     textTransform: "uppercase"
                 }}>
-                    <Typography fontSize="0.7em" noWrap width="100%" fontWeight="bold">
+                    <Typography fontSize="0.7em" noWrap width="100%" fontWeight="bold" sx={{ minWidth: 0 }}>
                         {product.name}
                     </Typography>
                 </Box>
