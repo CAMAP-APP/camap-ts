@@ -6,7 +6,6 @@ import {
   Typography
 } from '@mui/material';
 import React, { useCallback, useEffect } from 'react';
-import Block from '../../../components/utils/Block/Block';
 import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import ProductModal, {
@@ -19,9 +18,9 @@ import { useUnsavedChangesPrompt } from '../../../utils/hooks/use-unsaved-change
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
-import { CsaCatalogOrdersMobileHeader } from './CsaCatalogOrdersMobileHeader';
-import CsaCatalogOrdersMobileProduct from './CsaCatalogOrdersMobileProduct';
-import MediumActionIcon from './MediumActionIcon';
+import { CsaCatalogOrdersMobileHeader } from '../components/CsaCatalogOrdersMobileHeader';
+import CsaCatalogOrdersMobileProduct from '../components/CsaCatalogOrdersMobileProduct';
+import { MobileContainer } from './MobileContainer';
 
 interface CsacatalogProps {
   adminMode?: boolean;
@@ -43,6 +42,7 @@ const CsaCatalogOrdersMobile = ({
   );
 
   const {
+    isConstOrders,
     updatedOrders,
     setUpdatedOrders,
     catalog,
@@ -58,6 +58,8 @@ const CsaCatalogOrdersMobile = ({
     setDefaultOrder,
     remainingDistributions,
   } = React.useContext(CsaCatalogContext);
+
+  const isConstOrDefaults = mode === 'defaultOrder' || isConstOrders;
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [toggleSetDefaultOrderSuccess, setToggleSetDefaultOrderSuccess] = React.useState(false);
@@ -194,7 +196,7 @@ const CsaCatalogOrdersMobile = ({
       : distributions[distributionIndex];
 
   const [defaultOrdersMode, setDefaultOrdersMode] =
-    React.useState(mode === 'defaultOrder');
+    React.useState(isConstOrDefaults);
 
   const onDefaultOrderChange = (productId: number, quantity: number) => {
     const newDefaultOrder = { ...defaultOrder };
@@ -275,22 +277,24 @@ const CsaCatalogOrdersMobile = ({
     return <CircularProgressBox />;
   }
 
-  const title = defaultOrdersMode ? t('defaultOrder') : (adminMode ? t('changeOrders') : t('changeMyOrders'));
+  const title = isConstOrders
+    ? t('constOrder')
+    : defaultOrdersMode ? t('defaultOrder') : (adminMode ? t('changeOrders') : t('changeMyOrders'));
 
   const buttons = [];
   if (defaultOrdersMode) {
-    buttons.push(<Button
+    buttons.push(<SuccessButton
       key="update-default-order"
       variant="contained"
       onClick={async () => {
         await updateDefaultOrders();
-        if (mode === 'defaultOrder') {
+        if (isConstOrDefaults) {
           void onNext();
         }
       }}
     >
-      {t('setAsDefaultOrderBtn')}
-    </Button>)
+      {isConstOrDefaults ? tCommon('save') : t('setAsDefaultOrderBtn')}
+    </SuccessButton>)
   } else if (distribution.state !== RestDistributionState.Absent) {
     if (distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
       buttons.push(<Button
@@ -331,17 +335,19 @@ const CsaCatalogOrdersMobile = ({
   }
 
   return (
-    <MobileContainer title={title} actions={<>
-      {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
-        <ToggleButton
-          value="default-order"
-          onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
-          selected={defaultOrdersMode}
-        >
-          {defaultOrdersMode ? t('changeOrders') : t('defaultOrder')}
-        </ToggleButton>
-      )}
-    </>}>
+    <MobileContainer title={title}
+      icon={isConstOrders ? CamapIconId.refresh : CamapIconId.basket}
+      actions={<>
+        {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
+          <ToggleButton
+            value="default-order"
+            onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
+            selected={defaultOrdersMode}
+          >
+            {defaultOrdersMode ? t('changeOrders') : t('defaultOrder')}
+          </ToggleButton>
+        )}
+      </>}>
       <CsaCatalogOrdersMobileHeader
         distribution={distribution}
         onPreviousDistribution={onPreviousDistribution}
@@ -397,34 +403,6 @@ const CsaCatalogOrdersMobile = ({
       </Box>
     </MobileContainer>
   );
-};
-
-const MobileContainer = ({
-  children,
-  title,
-  actions
-}: {
-  children: React.ReactNode,
-  title: string
-  actions: React.ReactNode
-}) => {
-  return <Block
-    title={title}
-    icon={<MediumActionIcon id={CamapIconId.basket} />}
-    sx={{
-      height: '100%',
-      overflow: 'clip'
-    }}
-    contentSx={{
-      p: {
-        xs: 0,
-        sm: 2,
-      },
-    }}
-    headerAction={actions}
-  >
-    {children}
-  </Block>
 };
 
 export default CsaCatalogOrdersMobile;

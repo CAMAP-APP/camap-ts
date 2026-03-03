@@ -29,6 +29,7 @@ export enum CamapIconId {
   delete = 'delete',
   download = 'download',
   edit = 'edit',
+  refresh = 'refresh',
   euro = 'euro',
   eye = 'eye',
   facebook = 'facebook',

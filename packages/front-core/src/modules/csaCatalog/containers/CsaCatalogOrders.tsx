@@ -775,7 +775,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
             maxWidth: 600,
           }}
         >
-          <CsaCatalogDefaultOrder onNext={handleDefaultOrders} />
+          <CsaCatalogDefaultOrder onNext={async () => { await handleDefaultOrders(); return true; }} />
         </Box>
       </Modal>
     </Box>

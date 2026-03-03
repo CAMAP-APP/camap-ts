@@ -7,7 +7,7 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatCurrency, StockTracking, Unit } from "camap-common";
 import { useCallback, useEffect, useState } from "react";
 import { RestCsaCatalog } from "../interfaces";
-import useStocks from "./useStocks";
+import useStocks from "../containers/useStocks";
 import { Distribution } from "@gql";
 import { debounce } from "lodash";
 

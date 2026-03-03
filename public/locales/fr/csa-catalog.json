@@ -63,5 +63,6 @@
   "setAsDefaultOrderBtn": "Définir par défaut",
   "setAsDefaultOrder": "Définir la commande actuelle comme commande par défaut pour les {{distrib}} distributions à venir.",
   "defaultOrderForDistribsUntil": "Jusqu'à la fin du contrat le {{date}}.",
-  "defaultOrderForNextDistribs": "{{distrib}} distributions à venir."
+  "defaultOrderForNextDistribs": "{{distrib}} distributions à venir.",
+  "constOrder": "Contenu du panier identique sur toute la durée du contrat"
 }

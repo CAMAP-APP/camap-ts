@@ -1,23 +1,21 @@
+import Block from '@components/utils/Block/Block';
+import { CamapIconId } from '@components/utils/CamapIcon';
 import { Alert, Box } from '@mui/material';
 import React from 'react';
-import { CatalogType } from '../../gql';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
 import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
+import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
-import { restCsaCatalogTypeToType } from './interfaces';
+import MediumActionIcon from './containers/MediumActionIcon';
 import {
   useRestCheckSubscriptionDefaultOrderPost,
   useRestSubscriptionPost,
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
 } from './requests';
-import Block from '@components/utils/Block/Block';
-import MediumActionIcon from './containers/MediumActionIcon';
-import { CamapIconId } from '@components/utils/CamapIcon';
-import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 
 interface CsaCatalogRouterProps {
   userId: number;
@@ -240,14 +238,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       )}
       {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
       {showOrders && catalog && (
-        <>
-          {isConstOrders ? (
-            <CsaCatalogDefaultOrder onNext={onOrderNext} />
-          ) : (
-            // <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
-            <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
-          )}
-        </>
+        <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
       )}
       {showOrders && !!subscription && !adminMode && (
         <Box mt={3}>
