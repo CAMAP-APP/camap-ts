@@ -1,6 +1,6 @@
 import { LoadingButton } from '@mui/lab';
 import { Box, ButtonProps, CircularProgressProps } from '@mui/material';
-import React from 'react';
+import React, { forwardRef } from 'react';
 import Check from '../../svg/Check';
 
 export interface SuccessButtonProps extends ButtonProps {
@@ -9,7 +9,7 @@ export interface SuccessButtonProps extends ButtonProps {
   circularProgressProps?: CircularProgressProps;
 }
 
-const SuccessButton = ({
+const SuccessButton = forwardRef(({
   loading = false,
   toggleSuccess = false,
   variant,
@@ -19,7 +19,7 @@ const SuccessButton = ({
   circularProgressProps,
   startIcon,
   ...other
-}: SuccessButtonProps) => {
+}: SuccessButtonProps, ref: React.Ref<HTMLButtonElement>) => {
   const [success, setSuccess] = React.useState(false);
 
   React.useEffect(() => {
@@ -39,6 +39,7 @@ const SuccessButton = ({
   /** */
   return (
     <LoadingButton
+      ref={ref}
       {...other}
       loading={loading}
       variant={variant}
@@ -72,6 +73,6 @@ const SuccessButton = ({
       </Box>
     </LoadingButton>
   );
-};
+});
 
 export default SuccessButton;

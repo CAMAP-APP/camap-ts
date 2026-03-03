@@ -1,23 +1,21 @@
+import Block from '@components/utils/Block/Block';
+import { CamapIconId } from '@components/utils/CamapIcon';
 import { Alert, Box } from '@mui/material';
 import React from 'react';
-import { CatalogType } from '../../gql';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
 import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
+import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
-import { restCsaCatalogTypeToType } from './interfaces';
+import MediumActionIcon from './containers/MediumActionIcon';
 import {
   useRestCheckSubscriptionDefaultOrderPost,
   useRestSubscriptionPost,
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
 } from './requests';
-import Block from '@components/utils/Block/Block';
-import MediumActionIcon from './containers/MediumActionIcon';
-import { CamapIconId } from '@components/utils/CamapIcon';
-import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 
 interface CsaCatalogRouterProps {
   userId: number;
@@ -39,6 +37,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     initialSubscriptionId,
     error: contextError,
     adminMode,
+    isConstOrders
   } = React.useContext(CsaCatalogContext);
 
   const [showPresentation, setShowPresentation] = React.useState(
@@ -47,13 +46,6 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   const [showAbsences, setShowAbsences] = React.useState(false);
   const [showDefaultOrder, setShowDefaultOrder] = React.useState(false);
   const [showOrders, setShowOrders] = React.useState(!!initialSubscriptionId);
-
-  const isConstOrders = React.useMemo(() => {
-    if (!catalog) return;
-    return (
-      restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
-    );
-  }, [catalog]);
 
   const [
     createSubscription,
@@ -132,9 +124,10 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       }),
     );
 
-    if (!checkDefaultOrderData) return;
+    if (!checkDefaultOrderData) return false;
 
     onDefaultOrderNext();
+    return true;
   };
 
   const onAbsencesNext = async () => {
@@ -245,25 +238,18 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       )}
       {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
       {showOrders && catalog && (
-        <>
-          {isConstOrders ? (
-            <CsaCatalogDefaultOrder onNext={onOrderNext} />
-          ) : (
-            // <CsaCatalogOrders onNext={onOrderNext} adminMode={adminMode} />
-            <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
-          )}
-        </>
+        <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
       )}
       {showOrders && !!subscription && !adminMode && (
         <Box mt={3}>
-            <Block
-              title={t('mySubscription')}
-              icon={<MediumActionIcon id={CamapIconId.subscription} />}
-              sx={{ height: '100%' }}
-              contentSx={{ textAlign: 'center' }}
-            >
-              <CsaCatalogSubscription />
-            </Block>
+          <Block
+            title={t('mySubscription')}
+            icon={<MediumActionIcon id={CamapIconId.subscription} />}
+            sx={{ height: '100%' }}
+            contentSx={{ textAlign: 'center' }}
+          >
+            <CsaCatalogSubscription />
+          </Block>
         </Box>
       )}
     </>

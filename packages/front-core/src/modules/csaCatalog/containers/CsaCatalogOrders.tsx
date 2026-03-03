@@ -480,7 +480,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
           {catalog.products.map((p) => {
             const isGlobalStock =
               catalog.hasStockManagement &&
-              p.stockTracking === StockTracking[StockTracking.Global] &&
+              p.stockTracking === StockTracking.Global &&
               stocksPerProductDistribution != null;
             var globalStock = 0;
             if (
@@ -775,7 +775,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
             maxWidth: 600,
           }}
         >
-          <CsaCatalogDefaultOrder onNext={handleDefaultOrders} />
+          <CsaCatalogDefaultOrder onNext={async () => { await handleDefaultOrders(); return true; }} />
         </Box>
       </Modal>
     </Box>
