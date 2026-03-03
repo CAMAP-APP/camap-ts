@@ -1,7 +1,8 @@
 import {
   Box,
   Button,
-  Modal,
+  ToggleButton,
+  Tooltip,
   Typography
 } from '@mui/material';
 import React, { useCallback, useEffect } from 'react';
@@ -18,7 +19,6 @@ import { useUnsavedChangesPrompt } from '../../../utils/hooks/use-unsaved-change
 import { CsaCatalogContext } from '../CsaCatalog.context';
 import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
-import CsaCatalogDefaultOrder from './CsaCatalogDefaultOrder';
 import { CsaCatalogOrdersMobileHeader } from './CsaCatalogOrdersMobileHeader';
 import CsaCatalogOrdersMobileProduct from './CsaCatalogOrdersMobileProduct';
 import MediumActionIcon from './MediumActionIcon';
@@ -49,9 +49,12 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     addedOrders,
     setAddedOrders,
     initialOrders,
+    setDefaultOrder,
+    remainingDistributions,
   } = React.useContext(CsaCatalogContext);
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
+  const [toggleSetDefaultOrderSuccess, setToggleSetDefaultOrderSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const [distributionIndex, setDistributionIndex] = React.useState(nextDistributionIndex);
@@ -186,30 +189,24 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
       ? distributions[distributions.length - 1]
       : distributions[distributionIndex];
 
-  const [defaultOrdersModalOpen, setDefaultOrdersModalOpen] =
+  const [defaultOrdersMode, setDefaultOrdersMode] =
     React.useState(false);
 
-  const onDefaultOrdersChangeClick = () => {
-    setDefaultOrdersModalOpen(true);
+  const onDefaultOrderChange = (productId: number, quantity: number) => {
+    const newDefaultOrder = { ...defaultOrder };
+    newDefaultOrder[productId] = quantity;
+    setDefaultOrder(newDefaultOrder);
   };
 
-  const onCloseDefaultOrdersModal = () => {
-    setDefaultOrdersModalOpen(false);
-  };
-
-  const handleDefaultOrders = async (canceled?: boolean) => {
+  const updateDefaultOrders = async () => {
     if (!subscription) return;
-    if (!canceled) {
-      await updateSubscriptionDefaultOrder(
-        Object.keys(defaultOrder).map((productId) => ({
-          productId: parseInt(productId, 10),
-          quantity: defaultOrder[parseInt(productId, 10)],
-        })),
-        `${subscription.id}`,
-      );
-    }
-    onCloseDefaultOrdersModal();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    await updateSubscriptionDefaultOrder(
+      Object.keys(defaultOrder).map((productId) => ({
+        productId: parseInt(productId, 10),
+        quantity: defaultOrder[parseInt(productId, 10)],
+      })),
+      `${subscription.id}`,
+    );
   };
 
   const onSaveClick = async () => {
@@ -241,6 +238,30 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     void onNext();
   }, [distribution.id, catalog?.products, addedOrders, updatedOrders, initialOrders, setUpdatedOrders, setAddedOrders, onNext]);
 
+  const setCurrentDistributionAsDefaultOrder = useCallback(() => {
+    if (!subscription || !catalog) return;
+    (async () => {
+      const defaultOrderProducts = catalog.products.map(p => {
+        return {
+          productId: p.id,
+          quantity: orders[distribution.id][p.id] ?? 0
+        }
+      });
+      console.log('defaultOrderProducts', defaultOrderProducts);
+
+      setToggleSetDefaultOrderSuccess(true);
+      const rqStart = Date.now();
+      await updateSubscriptionDefaultOrder(
+        defaultOrderProducts,
+        `${subscription.id}`,
+      )
+
+      setTimeout(() => {
+        setToggleSetDefaultOrderSuccess(false);
+      }, 2000 - (Date.now() - rqStart));
+    })();
+  }, [subscription, catalog, orders, distribution.id, updateSubscriptionDefaultOrder])
+
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
 
   const onProductModalClose = () => {
@@ -251,23 +272,86 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
     return <CircularProgressBox />;
   }
 
-  return (
-    <Box>
-      <MobileContainer title={adminMode ? t('changeOrders') : t('changeMyOrders')}>
-        <CsaCatalogOrdersMobileHeader
-          distribution={distribution}
-          onPreviousDistribution={onPreviousDistribution}
-          onNextDistribution={onNextDistribution}
-          distributionIndex={distributionIndex}
-          orders={orders} />
+  const title = defaultOrdersMode ? t('defaultOrder') : (adminMode ? t('changeOrders') : t('changeMyOrders'));
 
-        {distribution.state === RestDistributionState.Absent && <>
-          <Box display='flex' justifyContent='center'>
+  const buttons = [];
+  if (defaultOrdersMode) {
+    buttons.push(<Button
+      key="update-default-order"
+      variant="contained"
+      onClick={() => updateDefaultOrders()}
+    >
+      {t('setAsDefaultOrderBtn')}
+    </Button>)
+  } else if (distribution.state !== RestDistributionState.Absent) {
+    if (distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
+      buttons.push(<Button
+        key="cancel-order"
+        variant="outlined"
+        onClick={onCancelOrder}
+      >
+        {t('cancelOrder')}
+      </Button>)
+    }
+    if (restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_VARORDER) {
+      buttons.push(
+        <Tooltip key="set-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
+          <SuccessButton
+            variant="contained"
+            color="primary"
+            toggleSuccess={toggleSetDefaultOrderSuccess}
+            onClick={setCurrentDistributionAsDefaultOrder}
+          >
+            {t('setAsDefaultOrderBtn')}
+          </SuccessButton>
+        </Tooltip>);
+    }
+    if (distribution.state === RestDistributionState.Open) {
+      buttons.push(<SuccessButton
+        key="save-order"
+        loading={loading}
+        toggleSuccess={toggleSuccess}
+        variant="contained"
+        color="primary"
+        disabled={!hasChanges}
+        onClick={onSaveClick}
+      >
+        {tCommon('save')}
+      </SuccessButton>
+      );
+    }
+  }
+
+  console.log('defaultOrder', defaultOrder);
+
+  return (
+    <MobileContainer title={title} actions={<>
+      {restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_VARORDER && (
+        <ToggleButton
+          value="default-order"
+          onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
+          selected={defaultOrdersMode}
+        >
+          {defaultOrdersMode ? t('changeOrders') : t('defaultOrder')}
+        </ToggleButton>
+      )}
+    </>}>
+      <CsaCatalogOrdersMobileHeader
+        distribution={distribution}
+        onPreviousDistribution={onPreviousDistribution}
+        onNextDistribution={onNextDistribution}
+        distributionIndex={distributionIndex}
+        orders={orders}
+        defaultOrdersMode={defaultOrdersMode} />
+
+      {!defaultOrdersMode && distribution.state === RestDistributionState.Absent
+        ? <>
+          <Box display='flex' justifyContent='center' my={4}>
             <Typography variant='h5'>{t("absent")}</Typography>
             <CamapIcon id={CamapIconId.vacation} />
           </Box>
-        </>}
-        {distribution.state !== RestDistributionState.Absent && <>
+        </>
+        : <>
           {/* Products */}
           <Box display="grid" gridTemplateColumns='repeat(auto-fill, minmax(150px, 1fr))' gap={1} justifyItems={'center'}>
             {catalog.products.map(
@@ -275,88 +359,49 @@ const CsaCatalogOrdersMobile = ({ adminMode, onNext }: CsacatalogProps) => {
                 <CsaCatalogOrdersMobileProduct
                   key={p.id}
                   product={p}
-                  orderedQuantity={orders[distribution.id][p.id]}
+                  orderedQuantity={
+                    (defaultOrdersMode ? defaultOrder[p.id] : orders[distribution.id][p.id]) ?? 0
+                  }
                   onClick={() => setModalProduct(p)}
-                  onQuantityChange={(q) => onOrderChange(
-                    distribution.id,
-                    p.id,
-                    q
-                  )}
-                  editable={distribution.state === RestDistributionState.Open}
+                  onQuantityChange={(q) => {
+                    defaultOrdersMode
+                      ? onDefaultOrderChange(p.id, q)
+                      : onOrderChange(distribution.id, p.id, q)
+                  }}
+                  editable={defaultOrdersMode || distribution.state === RestDistributionState.Open}
                   distribution={distribution}
+                  defaultOrdersMode={defaultOrdersMode}
                 />
             )}
             <ProductModal product={modalProduct} onClose={onProductModalClose} />
           </Box>
         </>
-        }
+      }
 
-        {/* Buttons */}
-        <Box
-          width="100%"
-          textAlign="end"
-          display={{ xs: 'flex', sm: 'block' }}
-          flexDirection="column"
-          mt={2}
-        >
-          {distribution.state === RestDistributionState.Open &&
-            hasProductOrder(distribution.id) &&
-            <Button
-              variant="outlined"
-              onClick={onCancelOrder}
-              sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-            >
-              {t('cancelOrder')}
-            </Button>
-          }
-          {(restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
-            || catalog?.distribMinOrdersTotal > 0) && (
-              <Button
-                variant="outlined"
-                onClick={onDefaultOrdersChangeClick}
-                sx={{ mr: { xs: 0, sm: 2 }, mb: { xs: 1, sm: 0 } }}
-              >
-                {t('defaultOrder')}
-              </Button>
-            )}
-          {distribution.state === RestDistributionState.Open && <SuccessButton
-            loading={loading}
-            toggleSuccess={toggleSuccess}
-            variant="contained"
-            color="primary"
-            disabled={!hasChanges}
-            onClick={onSaveClick}
-          >
-            {tCommon('save')}
-          </SuccessButton>}
-        </Box>
-      </MobileContainer>
-      <Modal
-        open={defaultOrdersModalOpen}
-        onClose={() => handleDefaultOrders(true)}
+      {/* Buttons */}
+      <Box
+        width="100%"
+        display="flex"
+        flexDirection={{ xs: 'column', sm: 'row' }}
+        flexWrap="wrap"
+        justifyContent='flex-end'
+        mt={2}
       >
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            maxWidth: 600,
-            width: {
-              xs: '96%',
-              sm: '600px'
-            }
-          }}
-        >
-          <CsaCatalogDefaultOrder onNext={handleDefaultOrders} />
-        </Box>
-      </Modal>
-
-    </Box>
+        {buttons}
+      </Box>
+    </MobileContainer>
   );
 };
 
-const MobileContainer = ({ children, title }: { children: React.ReactNode, title: string }) => {
+const MobileContainer = ({
+  children,
+  title,
+  actions
+}: {
+  children: React.ReactNode,
+  title: string
+  actions: React.ReactNode
+}) => {
   return <Block
     title={title}
     icon={<MediumActionIcon id={CamapIconId.basket} />}
@@ -370,6 +415,7 @@ const MobileContainer = ({ children, title }: { children: React.ReactNode, title
         sm: 2,
       },
     }}
+    headerAction={actions}
   >
     {children}
   </Block>

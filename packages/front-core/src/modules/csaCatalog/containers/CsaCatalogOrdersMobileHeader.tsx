@@ -17,13 +17,15 @@ export const CsaCatalogOrdersMobileHeader = (
         onPreviousDistribution,
         onNextDistribution,
         distributionIndex,
-        orders
+        orders,
+        defaultOrdersMode
     }: {
         distribution: RestDistributionEnriched,
         onPreviousDistribution: () => void,
         onNextDistribution: () => void,
         distributionIndex: number
         orders: Record<number, Record<number, number>>
+        defaultOrdersMode: boolean
     }) => {
     const { t } = useCamapTranslation(
         {
@@ -35,7 +37,9 @@ export const CsaCatalogOrdersMobileHeader = (
     const {
         catalog,
         subscription,
-        distributions
+        distributions,
+        remainingDistributions,
+        defaultOrder
     } = useContext(CsaCatalogContext);
 
     const getTotalFromDistribution = useCallback(
@@ -57,6 +61,20 @@ export const CsaCatalogOrdersMobileHeader = (
         [catalog?.products, orders],
     );
 
+    function getTotalFromDefaultOrder() {
+        return formatCurrency(
+            Object.entries(defaultOrder).reduce((acc, [productId, quantity]) => {
+                const product: { price: number } | undefined = catalog?.products.find(
+                    (p) => p.id === parseInt(productId, 10),
+                );
+                if (!product) return acc;
+                return acc + quantity * product.price;
+            }, 0),
+        );
+    }
+
+    if (!subscription) return null;
+
     return (
         <Box
             sx={{
@@ -69,20 +87,15 @@ export const CsaCatalogOrdersMobileHeader = (
                 zIndex: 1030,
                 boxShadow: t => t.shadows[3]
             }}>
-            {/* Default order label */}
-            {/* {displayDefaultOrder && (
-                <Box key="default" display="flex" alignSelf="center">
-                <span>{t('defaultOrder')}</span>
-                </Box>
-            )} */}
 
             {/* Distributions box & arrow buttons */}
             <Box
                 display="flex"
                 overflow="hidden"
+                height={40}
             >
                 {/* Arrow Prev */}
-                <Button
+                {!defaultOrdersMode && <Button
 
                     variant="outlined"
                     size="small"
@@ -90,34 +103,51 @@ export const CsaCatalogOrdersMobileHeader = (
                     disabled={distributionIndex === 0}
                 >
                     <ArrowBack />
-                </Button>
+                </Button>}
 
                 {/* Distributions box */}
-                <Box
-                    display="flex"
-                    alignItems="center"
-                    justifyContent="space-evenly"
-                    flex={1}
-                    position="relative"
-                    sx={{
-                        ...colorForDistributionState(distribution)
-                    }}
-                >
-                    <Typography
-                        textAlign="center"
-                        fontWeight="bold"
+                {defaultOrdersMode ? (
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-evenly"
+                        flex={1}
+                        position="relative"
                     >
-                        {formatAbsoluteDate(
-                            distribution.distributionStartDate,
-                            false,
-                            true,
-                            true,
-                        )}
-                    </Typography>
-                </Box>
+                        <Typography
+                            textAlign="center"
+                            fontWeight="bold"
+                        >
+                            {t('defaultOrderForDistribsUntil', { date: formatAbsoluteDate(new Date(subscription.endDate)) })}
+                        </Typography>
+                    </Box>
+                ) : (
+                    <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-evenly"
+                        flex={1}
+                        position="relative"
+                        sx={{
+                            ...colorForDistributionState(distribution)
+                        }}
+                    >
+                        <Typography
+                            textAlign="center"
+                            fontWeight="bold"
+                        >
+                            {formatAbsoluteDate(
+                                distribution.distributionStartDate,
+                                false,
+                                true,
+                                true,
+                            )}
+                        </Typography>
+                    </Box>
+                )}
 
                 {/* Arrow Next */}
-                <Button
+                {!defaultOrdersMode && <Button
                     variant="outlined"
                     size="small"
                     onClick={onNextDistribution}
@@ -126,7 +156,7 @@ export const CsaCatalogOrdersMobileHeader = (
                     }
                 >
                     <ArrowForward />
-                </Button>
+                </Button>}
             </Box>
 
             <Box
@@ -144,7 +174,7 @@ export const CsaCatalogOrdersMobileHeader = (
                 mb={1}
             >
                 {/* Balance box */}
-                {subscription !== undefined && <Tooltip title={t('paymentSold')}>
+                <Tooltip title={t('paymentSold')}>
                     <Box gridArea="balance"
                         display="flex"
                         flexDirection="column"
@@ -166,7 +196,7 @@ export const CsaCatalogOrdersMobileHeader = (
                         <Box>
                             <Typography
                                 whiteSpace="nowrap"
-                                fontSize="0.8em"
+                                fontSize="0.75em"
                             >{t('paymentSoldShort')}</Typography>
                         </Box>
                         <Typography
@@ -181,10 +211,10 @@ export const CsaCatalogOrdersMobileHeader = (
                             {formatCurrency(subscription.balance)}
                         </Typography>
                     </Box>
-                </Tooltip>}
+                </Tooltip>
+
                 {/* minimum order contract */}
-                {subscription !== undefined &&
-                    catalog?.catalogMinOrdersTotal != null &&
+                {catalog?.catalogMinOrdersTotal != null &&
                     catalog?.catalogMinOrdersTotal > 0 &&
                     <Tooltip title={t('contractMin')}>
                         <Box gridArea="contract-min" display="flex" flexDirection="column" alignItems="center"
@@ -196,7 +226,7 @@ export const CsaCatalogOrdersMobileHeader = (
                         >
                             <Typography
                                 whiteSpace="nowrap"
-                                fontSize="0.8em"
+                                fontSize="0.6em"
                             >{t('contractMinShort')}</Typography>
                             <Typography
                                 fontSize="inherit"
@@ -210,9 +240,9 @@ export const CsaCatalogOrdersMobileHeader = (
                                 {formatCurrency(catalog?.catalogMinOrdersTotal)}
                             </Typography>
                             <Typography
-                                    whiteSpace="nowrap"
-                                    fontSize="0.8em"
-                                >{t('contractMinCurrent', { total: formatCurrency(subscription?.totalOrdered ?? 0) })}</Typography>
+                                whiteSpace="nowrap"
+                                fontSize="0.6em"
+                            >{t('contractMinCurrent', { total: formatCurrency(subscription?.totalOrdered ?? 0) })}</Typography>
                         </Box>
                     </Tooltip>}
 
@@ -224,47 +254,59 @@ export const CsaCatalogOrdersMobileHeader = (
                     rowGap={0}
                     mt={1}
                 >
-                    <Typography variant="caption">
-                        <CamapIcon id={CamapIconId.mapMarker} sx={{ verticalAlign: 'text-top' }} />
-                        &nbsp;
-                        {distribution.place.name}
-                    </Typography>
-                    <Typography
-                        variant="caption"
-                        fontWeight={"bold"}
-                    >
-                        {distribution.state === RestDistributionState.Open &&
-                            <>
-                                <CamapIcon id={CamapIconId.calendar} sx={{ verticalAlign: 'text-top' }} />
+                    {defaultOrdersMode ?
+                        <>
+                            <Typography variant="caption">
+                                <CamapIcon id={CamapIconId.basket} sx={{ verticalAlign: 'text-top' }} />
                                 &nbsp;
-                                {t('orderBeforeThe', {
-                                    date: formatAbsoluteDate(distribution.orderEndDate, true),
-                                })}
-                            </>}
-                        {distribution.state === RestDistributionState.NotYetOpen &&
-                            <>
-                                <CamapIcon id={CamapIconId.calendar} sx={{ verticalAlign: 'text-top' }} />
+                                {t('defaultOrderForNextDistribs', { distrib: remainingDistributions })}
+                            </Typography>
+                        </>
+                        :
+                        <>
+                            <Typography variant="caption">
+                                <CamapIcon id={CamapIconId.mapMarker} sx={{ verticalAlign: 'text-top' }} />
                                 &nbsp;
-                                {t('orderOpenThe', {
-                                    date: formatAbsoluteDate(distribution.orderStartDate, true),
-                                })}
-                            </>}
-                        {distribution.state === RestDistributionState.Closed &&
-                            <>
-                                <CamapIcon id={CamapIconId.clock} sx={{ verticalAlign: 'text-top' }} />
-                                &nbsp;
-                                {t('orderClosed')}
-                            </>}
-                        {distribution.state === RestDistributionState.Absent && t('absent')}
-                    </Typography>
+                                {distribution.place.name}
+                            </Typography>
+                            <Typography
+                                variant="caption"
+                                fontWeight={"bold"}
+                            >
+                                {distribution.state === RestDistributionState.Open &&
+                                    <>
+                                        <CamapIcon id={CamapIconId.calendar} sx={{ verticalAlign: 'text-top' }} />
+                                        &nbsp;
+                                        {t('orderBeforeThe', {
+                                            date: formatAbsoluteDate(distribution.orderEndDate, true),
+                                        })}
+                                    </>}
+                                {distribution.state === RestDistributionState.NotYetOpen &&
+                                    <>
+                                        <CamapIcon id={CamapIconId.calendar} sx={{ verticalAlign: 'text-top' }} />
+                                        &nbsp;
+                                        {t('orderOpenThe', {
+                                            date: formatAbsoluteDate(distribution.orderStartDate, true),
+                                        })}
+                                    </>}
+                                {distribution.state === RestDistributionState.Closed &&
+                                    <>
+                                        <CamapIcon id={CamapIconId.clock} sx={{ verticalAlign: 'text-top' }} />
+                                        &nbsp;
+                                        {t('orderClosed')}
+                                    </>}
+                                {distribution.state === RestDistributionState.Absent && t('absent')}
+                            </Typography>
+                        </>
+                    }
                 </Box>
 
                 {/* minimum per order */}
-                {subscription != null &&
-                    catalog?.distribMinOrdersTotal != null &&
+                {catalog?.distribMinOrdersTotal != null &&
                     catalog?.distribMinOrdersTotal > 0 &&
                     <Tooltip title={t('orderMin')}>
                         <Box gridArea="order-min" display="flex" flexDirection="column" alignItems="center"
+                            justifyContent='center'
                             sx={{
                                 backgroundColor: (theme: Theme) => theme.palette.primary.main,
                                 color: (theme) => theme.palette.primary.contrastText,
@@ -274,7 +316,7 @@ export const CsaCatalogOrdersMobileHeader = (
                             <Box>
                                 <Typography
                                     whiteSpace="nowrap"
-                                    fontSize="0.8em"
+                                    fontSize="0.6em"
                                 >{t('orderMinShort')}</Typography>
                             </Box>
                             <Typography
@@ -297,24 +339,25 @@ export const CsaCatalogOrdersMobileHeader = (
                         gridArea="total"
                         display="flex"
                         flexDirection="column"
-                        alignItems='flex-end'
+                        alignItems='center'
+                        justifyContent='center'
                         px={0.5}
                     >
-                        <Typography
-                            fontSize="0.8em"
-                        >{t('orderValueShort')}</Typography>
                         <Box display="flex" alignItems="center" alignSelf="center" gap={1}>
-                            <CamapIcon id={CamapIconId.basket} sx={{
-                                color: 'primary.main'
-                            }} />
+                            <CamapIcon id={CamapIconId.basket} sx={{ color: 'primary.main' }} />
                             <Typography
-                                fontSize={{ xs: "1.1em", lg: "1.2em" }}
-                                fontWeight="bold"
-                                sx={{
-                                    color: 'primary.main'
-                                }}
-                            >{getTotalFromDistribution(distribution.id)}</Typography>
+                                fontSize="0.75em"
+                            >{t('orderValueShort')}</Typography>
                         </Box>
+                        <Typography
+                            fontSize={{ xs: "1.1em", lg: "1.2em" }}
+                            fontWeight="bold"
+                            sx={{
+                                color: 'primary.main'
+                            }}
+                        >
+                            {defaultOrdersMode ? getTotalFromDefaultOrder() : getTotalFromDistribution(distribution.id)}
+                        </Typography>
                     </Box>
                 </Tooltip>
             </Box>

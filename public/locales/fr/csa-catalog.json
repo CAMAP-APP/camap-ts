@@ -59,5 +59,9 @@
   "orderValueShort": "Panier",
   "orderMin": "Minimum de commandes par distribution",
   "orderMinShort": "Commande min.",
-  "contractMinCurrent": "Total actuel : {{total}}"
+  "contractMinCurrent": "Total actuel : {{total}}",
+  "setAsDefaultOrderBtn": "Définir par défaut",
+  "setAsDefaultOrder": "Définir la commande actuelle comme commande par défaut pour les {{distrib}} distributions à venir.",
+  "defaultOrderForDistribsUntil": "Jusqu'à la fin du contrat le {{date}}.",
+  "defaultOrderForNextDistribs": "{{distrib}} distributions à venir."
 }

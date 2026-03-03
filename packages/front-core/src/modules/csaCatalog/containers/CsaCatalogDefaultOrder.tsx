@@ -31,6 +31,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
 
   const {
     catalog,
+    isConstOrders,
     subscription,
     defaultOrder,
     setDefaultOrder,
@@ -41,32 +42,6 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-
-  const isConstOrders = React.useMemo(() => {
-    if (!catalog) return;
-    return (
-      restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
-    );
-  }, [catalog]);
-
-  React.useEffect(() => {
-    if (!subscription) return;
-    if (isConstOrders) {
-      setDefaultOrder(
-        subscription.distributions[0].orders.reduce((acc, d) => {
-          acc[d.productId] = d.qty;
-          return acc;
-        }, {} as Record<number, number>),
-      );
-    } else {
-      setDefaultOrder(
-        subscription.defaultOrder.reduce((acc, d) => {
-          acc[d.productId] = d.quantity;
-          return acc;
-        }, {} as Record<number, number>),
-      );
-    }
-  }, [isConstOrders, setDefaultOrder, subscription]);
 
   React.useEffect(() => {
     if (!catalog) return;
@@ -96,7 +71,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
   };
 
   const onOrderChange = (productId: number, newValue: number) => {
-    if (addedOrders != null &&!addedOrders.hasOwnProperty(productId)) {
+    if (addedOrders != null && !addedOrders.hasOwnProperty(productId)) {
       addedOrders[productId] = defaultOrder[productId];
       setAddedOrders(addedOrders);
     }
@@ -148,7 +123,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
 
       <Box width="100%" my={2}>
         {catalog.products.map((p) => {
-          let lowestStock:number | null = null;
+          let lowestStock: number | null = null;
           const hasStockTracking = p.stockTracking != null
             && p.stockTracking !== StockTracking.Disabled
             && stocksPerProductDistribution != null
@@ -200,7 +175,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                 {catalog.hasStockManagement && isGlobalStockTracking && lowestStock != null && (
                   <Typography align="center" color="grey" fontSize="0.8em" position="absolute" top={22} right={0} whiteSpace="nowrap">
                     <Tooltip title={<><div>{t('Available')} (global): {lowestStock}</div><div>×{distribCount}&nbsp;distributions</div></>}>
-                      <span><i className="icon icon-wholesale" style={{fontSize: '0.9em'}}/> {lowestStock}</span>
+                      <span><i className="icon icon-wholesale" style={{ fontSize: '0.9em' }} /> {lowestStock}</span>
                     </Tooltip>
                   </Typography>
                 )}
@@ -217,35 +192,35 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                   inputProps={{
                     type: 'number',
                     style: {
-                        textAlign: 'right'
+                      textAlign: 'right'
                     }
                   }}
                   InputProps={{
                     endAdornment: p.bulk
-                        ? <InputAdornment
-                            position="end"
-                        >
-                            {formatUnit(p.unitType, 1, t)}
-                            </InputAdornment>
-                        : undefined
+                      ? <InputAdornment
+                        position="end"
+                      >
+                        {formatUnit(p.unitType, 1, t)}
+                      </InputAdornment>
+                      : undefined
                   }}
                   defaultValue={
                     p.bulk
-                    ? q*p.qt
-                    : q
+                      ? q * p.qt
+                      : q
                   }
                   onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                     onOrderChange(p.id,
                       p.bulk
-                      ? parseFloat(event.target.value)/p.qt
-                      : parseInt(event.target.value, 10)
+                        ? parseFloat(event.target.value) / p.qt
+                        : parseInt(event.target.value, 10)
                     )
                   }
                   onBlur={(event: React.FocusEvent<HTMLInputElement>) =>
                     event.target.value = (
                       p.bulk
-                      ? q*p.qt
-                      : q
+                        ? q * p.qt
+                        : q
                     ).toString()
                   }
                   hiddenLabel
@@ -254,7 +229,7 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
                 {catalog.hasStockManagement && !isGlobalStockTracking && lowestStock != null && (
                   <Typography align="center" color="grey" fontSize="0.8em" position="absolute" bottom={2} right={5} whiteSpace="nowrap">
                     <Tooltip title={`${t('Available')}: ${lowestStock}`}>
-                      <span><i className="icon icon-wholesale" style={{fontSize: '0.9em'}}/> {lowestStock}</span>
+                      <span><i className="icon icon-wholesale" style={{ fontSize: '0.9em' }} /> {lowestStock}</span>
                     </Tooltip>
                   </Typography>
                 )}

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   getEnrichedDistribution,
   RestCsaCatalog,
+  restCsaCatalogTypeToType,
   RestCsaSubscription,
   RestCsaSubscriptionAbsences,
   RestDistributionEnriched,
@@ -14,6 +15,8 @@ import {
   useRestSubscriptionAbsencesLazyGet,
   useRestSubscriptionGet,
 } from './requests';
+import { CatalogType } from '@gql';
+import { isAfter } from 'date-fns';
 
 type Orders = Record<number, Record<number, number>>;
 
@@ -22,6 +25,7 @@ interface CsaCatalogContextProps {
   initialSubscriptionId?: number;
   updatedOrders: Orders;
   setUpdatedOrders: (value: Orders) => void;
+  isConstOrders: boolean;
   catalog?: RestCsaCatalog;
   subscriptionAbsences?: RestCsaSubscriptionAbsences;
   error?: string;
@@ -44,6 +48,7 @@ interface CsaCatalogContextProps {
   ) => void;
   adminMode?: boolean | undefined;
   initialOrders: Orders;
+  remainingDistributions: number;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
@@ -51,6 +56,7 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   initialSubscriptionId: undefined,
   updatedOrders: {},
   setUpdatedOrders: () => { },
+  isConstOrders: false,
   catalog: undefined,
   subscriptionAbsences: undefined,
   error: undefined,
@@ -71,6 +77,7 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   setStocksPerProductDistribution: () => { },
   adminMode: false,
   initialOrders: {},
+  remainingDistributions: 0,
 });
 
 const CsaCatalogContextProvider = ({
@@ -199,12 +206,48 @@ const CsaCatalogContextProvider = ({
     return initialOrders;
   }, [catalog, subscription]);
 
+  const isConstOrders = React.useMemo(() => {
+    if (!catalog) return false;
+    return (
+      restCsaCatalogTypeToType(catalog.type) === CatalogType.TYPE_CONSTORDERS
+    );
+  }, [catalog]);
+
+  React.useEffect(() => {
+    if (!subscription) return;
+    if (isConstOrders) {
+      setDefaultOrder(
+        subscription.distributions[0].orders.reduce((acc, d) => {
+          acc[d.productId] = d.qty;
+          return acc;
+        }, {} as Record<number, number>),
+      );
+    } else {
+      setDefaultOrder(
+        subscription.defaultOrder.reduce((acc, d) => {
+          acc[d.productId] = d.quantity;
+          return acc;
+        }, {} as Record<number, number>),
+      );
+    }
+  }, [isConstOrders, setDefaultOrder, subscription]);
+
+  const remainingDistributions = React.useMemo(() => {
+    if (!subscription) return 0;
+    return distributions.filter(
+      d => subscription.distributions.some(d2 => d2.id === d.id) &&
+        isAfter(new Date(d.distributionStartDate), new Date()) &&
+        d.state !== RestDistributionState.Absent
+    ).length;
+  }, [subscription, distributions]);
+
   /** */
   return (
     <CsaCatalogContext.Provider
       value={{
         catalogId,
         initialSubscriptionId,
+        isConstOrders,
         updatedOrders,
         setUpdatedOrders,
         catalog,
@@ -232,6 +275,7 @@ const CsaCatalogContextProvider = ({
         setStocksPerProductDistribution,
         adminMode,
         initialOrders,
+        remainingDistributions,
       }}
     >
       {children}
