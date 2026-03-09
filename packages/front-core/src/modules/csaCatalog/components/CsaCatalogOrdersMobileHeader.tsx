@@ -341,6 +341,7 @@ export const CsaCatalogOrdersMobileHeader = (
                         flexDirection="column"
                         alignItems='center'
                         justifyContent='center'
+                        minWidth={'5.3em'}
                         px={0.5}
                     >
                         <Box display="flex" alignItems="center" alignSelf="center" gap={1}>
