@@ -6,9 +6,9 @@ import { colorForDistributionState } from "./CsaCatalogDistribution"
 import { Theme } from "@mui/material"
 import { Typography } from "@mui/material"
 import CamapIcon, { CamapIconId } from "../../../components/utils/CamapIcon"
-import { useCallback, useContext } from "react"
 import { CsaCatalogContext } from "../CsaCatalog.context"
 import { RestDistributionEnriched, RestDistributionState } from "../interfaces"
+import { useContext } from "react"
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation"
 
 export const CsaCatalogOrdersMobileHeader = (
@@ -17,7 +17,8 @@ export const CsaCatalogOrdersMobileHeader = (
         onPreviousDistribution,
         onNextDistribution,
         distributionIndex,
-        orders,
+        total,
+        defaultOrderTotal,
         defaultOrdersMode
     }: {
         distribution: RestDistributionEnriched,
@@ -25,6 +26,8 @@ export const CsaCatalogOrdersMobileHeader = (
         onNextDistribution: () => void,
         distributionIndex: number
         orders: Record<number, Record<number, number>>
+        total: number
+        defaultOrderTotal: number
         defaultOrdersMode: boolean
     }) => {
     const { t } = useCamapTranslation(
@@ -38,40 +41,8 @@ export const CsaCatalogOrdersMobileHeader = (
         catalog,
         subscription,
         distributions,
-        remainingDistributions,
-        defaultOrder
+        remainingDistributions
     } = useContext(CsaCatalogContext);
-
-    const getTotalFromDistribution = useCallback(
-        (distributionId: number) => {
-            if (!orders) return 0;
-
-            return formatCurrency(
-                Object.keys(orders[distributionId]).reduce((acc, pid) => {
-                    const product = catalog?.products.find(
-                        (p) => p.id === parseInt(pid, 10),
-                    );
-                    if (!product) return acc;
-                    const quantity = orders[distributionId][parseInt(pid, 10)];
-                    acc += quantity * product.price;
-                    return acc;
-                }, 0),
-            );
-        },
-        [catalog?.products, orders],
-    );
-
-    function getTotalFromDefaultOrder() {
-        return formatCurrency(
-            Object.entries(defaultOrder).reduce((acc, [productId, quantity]) => {
-                const product: { price: number } | undefined = catalog?.products.find(
-                    (p) => p.id === parseInt(productId, 10),
-                );
-                if (!product) return acc;
-                return acc + quantity * product.price;
-            }, 0),
-        );
-    }
 
     if (!subscription) return null;
 
@@ -308,7 +279,9 @@ export const CsaCatalogOrdersMobileHeader = (
                         <Box gridArea="order-min" display="flex" flexDirection="column" alignItems="center"
                             justifyContent='center'
                             sx={{
-                                backgroundColor: (theme: Theme) => theme.palette.primary.main,
+                                backgroundColor: (theme: Theme) => catalog?.distribMinOrdersTotal > total && distribution.state !== RestDistributionState.Absent
+                                    ? theme.palette.error.main
+                                    : theme.palette.primary.main,
                                 color: (theme) => theme.palette.primary.contrastText,
                             }}
                             px={0.5}
@@ -357,7 +330,9 @@ export const CsaCatalogOrdersMobileHeader = (
                                 color: 'primary.main'
                             }}
                         >
-                            {defaultOrdersMode ? getTotalFromDefaultOrder() : getTotalFromDistribution(distribution.id)}
+                            {formatCurrency(
+                                defaultOrdersMode ? defaultOrderTotal : total
+                            )}
                         </Typography>
                     </Box>
                 </Tooltip>

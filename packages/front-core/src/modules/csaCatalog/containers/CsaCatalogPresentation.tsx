@@ -168,7 +168,7 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
                     mb: 2,
                   }}
                 />
-                <CamapIcon id={CamapIconId.search} sx={{ position: 'absolute', left: '50%', ml: '50px', bottom: 80, fontSize: 24 }}/>
+                <CamapIcon id={CamapIconId.search} sx={{ position: 'absolute', left: '50%', ml: '50px', bottom: 80, fontSize: 24 }} />
                 <Typography variant="h4">
                   <b>{catalog.vendor.name}</b>
                 </Typography>

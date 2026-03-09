@@ -5,7 +5,7 @@ import {
   Tooltip,
   Typography
 } from '@mui/material';
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import CamapIcon, { CamapIconId } from '../../../components/utils/CamapIcon';
 import CircularProgressBox from '../../../components/utils/CircularProgressBox';
 import ProductModal, {
@@ -21,6 +21,7 @@ import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import { CsaCatalogOrdersMobileHeader } from '../components/CsaCatalogOrdersMobileHeader';
 import CsaCatalogOrdersMobileProduct from '../components/CsaCatalogOrdersMobileProduct';
 import { MobileContainer } from './MobileContainer';
+import { formatCurrency } from 'camap-common';
 
 interface CsacatalogProps {
   adminMode?: boolean;
@@ -177,11 +178,6 @@ const CsaCatalogOrdersMobile = ({
     );
   }, [initialOrders, updatedOrders]);
 
-  useUnsavedChangesPrompt({
-    when: hasChanges,
-    message: t('unsavedOrdersConfirmLeave'),
-  });
-
   const onPreviousDistribution = () => {
     setDistributionIndex(Math.max(distributionIndex - 1, 0));
   };
@@ -194,6 +190,40 @@ const CsaCatalogOrdersMobile = ({
     : distributionIndex >= distributions.length
       ? distributions[distributions.length - 1]
       : distributions[distributionIndex];
+
+  const total = useMemo(
+    () => {
+      if (!orders || !distribution.id || !orders[distribution.id]) return 0;
+
+      return Object.keys(orders[distribution.id]).reduce((acc, pid) => {
+        const product = catalog?.products.find(
+          (p) => p.id === parseInt(pid, 10),
+        );
+        if (!product) return acc;
+        const quantity = orders[distribution.id][parseInt(pid, 10)];
+        acc += quantity * product.price;
+        return acc;
+      }, 0)
+    },
+    [catalog?.products, orders, distribution.id],
+  );
+
+  const defaultOrderTotal = useMemo(
+    () => {
+      return Object.entries(defaultOrder).reduce((acc, [productId, quantity]) => {
+        const product: { price: number } | undefined = catalog?.products.find(
+          (p) => p.id === parseInt(productId, 10),
+        );
+        if (!product) return acc;
+        return acc + quantity * product.price;
+      }, 0);
+    }, [catalog?.products, defaultOrder]
+  );
+
+  useUnsavedChangesPrompt({
+    when: hasChanges,
+    message: t('unsavedOrdersConfirmLeave'),
+  });
 
   const [defaultOrdersMode, setDefaultOrdersMode] =
     React.useState(isConstOrDefaults);
@@ -283,23 +313,28 @@ const CsaCatalogOrdersMobile = ({
 
   const buttons = [];
   if (defaultOrdersMode) {
-    buttons.push(<SuccessButton
-      key="update-default-order"
-      variant="contained"
-      onClick={async () => {
-        await updateDefaultOrders();
-        if (isConstOrDefaults) {
-          void onNext();
-        }
-      }}
-    >
-      {isConstOrDefaults ? tCommon('save') : t('setAsDefaultOrderBtn')}
-    </SuccessButton>)
+    buttons.push(<Tooltip key="update-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
+      <span>{/* prevents disable state to inhibit tooltip */}
+        <SuccessButton
+          variant="contained"
+          disabled={(catalog?.distribMinOrdersTotal ?? 0) > defaultOrderTotal}
+          onClick={async () => {
+            await updateDefaultOrders();
+            if (isConstOrDefaults) {
+              void onNext();
+            }
+          }}
+        >
+          {isConstOrDefaults ? tCommon('save') : t('setAsDefaultOrderBtn')}
+        </SuccessButton>
+      </span>
+    </Tooltip>)
   } else if (distribution.state !== RestDistributionState.Absent) {
     if (distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
       buttons.push(<Button
         key="cancel-order"
         variant="outlined"
+        disabled={(catalog?.distribMinOrdersTotal ?? 0) > 0}
         onClick={onCancelOrder}
       >
         {t('cancelOrder')}
@@ -308,14 +343,17 @@ const CsaCatalogOrdersMobile = ({
     if (restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER) {
       buttons.push(
         <Tooltip key="set-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
-          <SuccessButton
-            variant="contained"
-            color="primary"
-            toggleSuccess={toggleSetDefaultOrderSuccess}
-            onClick={setCurrentDistributionAsDefaultOrder}
-          >
-            {t('setAsDefaultOrderBtn')}
-          </SuccessButton>
+          <span>{/* prevents disable state to inhibit tooltip */}
+            <SuccessButton
+              variant="contained"
+              color="primary"
+              toggleSuccess={toggleSetDefaultOrderSuccess}
+              disabled={(catalog?.distribMinOrdersTotal ?? 0) > total}
+              onClick={setCurrentDistributionAsDefaultOrder}
+            >
+              {t('setAsDefaultOrderBtn')}
+            </SuccessButton>
+          </span>
         </Tooltip>);
     }
     if (distribution.state === RestDistributionState.Open) {
@@ -325,12 +363,23 @@ const CsaCatalogOrdersMobile = ({
         toggleSuccess={toggleSuccess}
         variant="contained"
         color="primary"
-        disabled={!hasChanges}
+        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total}
         onClick={onSaveClick}
       >
         {tCommon('save')}
       </SuccessButton>
       );
+    }
+  }
+  const errors = [];
+  if (distribution.state !== RestDistributionState.Absent) {
+    if (catalog?.distribMinOrdersTotal && catalog.distribMinOrdersTotal > 0) {
+      if (!defaultOrdersMode && catalog.distribMinOrdersTotal > total) {
+        errors.push(<Typography key="error-total" color="error">{t('totalOrdersTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
+      }
+      if (defaultOrdersMode && catalog.distribMinOrdersTotal > defaultOrderTotal) {
+        errors.push(<Typography key="error-total" color="error">{t('totalOrdersTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
+      }
     }
   }
 
@@ -354,6 +403,8 @@ const CsaCatalogOrdersMobile = ({
         onNextDistribution={onNextDistribution}
         distributionIndex={distributionIndex}
         orders={orders}
+        total={total}
+        defaultOrderTotal={defaultOrderTotal}
         defaultOrdersMode={defaultOrdersMode} />
 
       {!defaultOrdersMode && distribution.state === RestDistributionState.Absent
@@ -399,7 +450,19 @@ const CsaCatalogOrdersMobile = ({
         justifyContent='flex-end'
         mt={2}
       >
-        {buttons}
+        {errors.length > 0 && <Box>
+          {errors}
+        </Box>}
+        <Box
+          width="100%"
+          display="flex"
+          flexDirection={{ xs: 'column', sm: 'row' }}
+          flexWrap="wrap"
+          justifyContent='flex-end'
+          mt={2}
+        >
+          {buttons}
+        </Box>
       </Box>
     </MobileContainer>
   );
