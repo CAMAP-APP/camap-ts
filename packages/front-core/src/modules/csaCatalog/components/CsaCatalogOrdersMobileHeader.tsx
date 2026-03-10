@@ -49,10 +49,7 @@ export const CsaCatalogOrdersMobileHeader = (
     return (
         <Box
             sx={{
-                position: {
-                    xs: 'sticky',
-                    sm: 'relative'
-                },
+                position: 'sticky',
                 backgroundColor: t => t.palette.background.paper,
                 top: 0,
                 zIndex: 1030,
