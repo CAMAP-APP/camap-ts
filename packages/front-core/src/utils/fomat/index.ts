@@ -237,27 +237,29 @@ export const formatStocks = (
   variablePrice: boolean,
   bulk: boolean
 ): string => {
-  if (!variablePrice)
+  if (bulk) {
     stock *= qt;
-  // turn big values into larger units
-  if (stock > 1000) {
-    switch (unit) {
-      case ProductUnit.Gram:
-        stock /= 1000;
-        unit = ProductUnit.Kilogram;
-        break;
-      case ProductUnit.Centilitre:
-        stock /= 100;
-        unit = ProductUnit.Litre;
-        break;
-      case ProductUnit.Millilitre:
-        stock /= 1000;
-        unit = ProductUnit.Litre;
-        break;
-      default:
+    // turn big values into larger units
+    if (stock > 1000) {
+      switch (unit) {
+        case ProductUnit.Gram:
+          stock /= 1000;
+          unit = ProductUnit.Kilogram;
+          break;
+        case ProductUnit.Centilitre:
+          stock /= 100;
+          unit = ProductUnit.Litre;
+          break;
+        case ProductUnit.Millilitre:
+          stock /= 1000;
+          unit = ProductUnit.Litre;
+          break;
+        default:
+      }
     }
+  } else {
+    unit = ProductUnit.Piece
   }
-  if (!bulk) unit = ProductUnit.Piece
   return `${round(stock)
     }${unit !== ProductUnit.Piece
       ? ` ${formatUnit(unit, stock)}`
