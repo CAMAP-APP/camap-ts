@@ -182,8 +182,8 @@ export const CsaCatalogOrdersMobileHeader = (
                 </Tooltip>
 
                 {/* minimum order contract */}
-                {catalog?.catalogMinOrdersTotal != null &&
-                    catalog?.catalogMinOrdersTotal > 0 &&
+                {subscription?.minSubscriptionOrder != null &&
+                    subscription.minSubscriptionOrder > 0 &&
                     <Tooltip title={t('contractMin')}>
                         <Box gridArea="contract-min" display="flex" flexDirection="column" alignItems="center"
                             sx={{
@@ -205,7 +205,7 @@ export const CsaCatalogOrdersMobileHeader = (
                                 alignSelf="center"
                                 px={0.5}
                             >
-                                {formatCurrency(catalog?.catalogMinOrdersTotal)}
+                                {formatCurrency(subscription.minSubscriptionOrder)}
                             </Typography>
                             <Typography
                                 whiteSpace="nowrap"
