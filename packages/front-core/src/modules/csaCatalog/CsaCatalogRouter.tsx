@@ -247,6 +247,12 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           </Block>
         </Box>
       )}
+
+      {error && (
+        <Box mb={2}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      )}
     </>
   );
 };
