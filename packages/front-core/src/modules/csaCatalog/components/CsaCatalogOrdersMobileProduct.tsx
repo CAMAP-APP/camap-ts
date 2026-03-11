@@ -5,11 +5,12 @@ import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatStocks, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatCurrency, StockTracking, Unit } from "camap-common";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { RestCsaCatalog } from "../interfaces";
 import useStocks from "../containers/useStocks";
 import { Distribution } from "@gql";
 import { debounce } from "lodash";
+import { CsaCatalogContext } from "../CsaCatalog.context";
 
 function smartRound(v: number, unit: Unit) {
     if (v === undefined) return '';
@@ -248,9 +249,12 @@ function CsaCatalogOrdersMobileProduct({
         t: "csa-catalog"
     });
 
-    const [stocks] = useStocks(product, distribution);
+    const [stocks] = useStocks(product, defaultOrdersMode ? undefined : distribution);
 
-    const showStocks = !defaultOrdersMode && product.stockTracking !== StockTracking.Disabled && stocks != null;
+    const { remainingDistributions } = useContext(CsaCatalogContext);
+
+    const showStocks = product.stockTracking !== StockTracking.Disabled && stocks != null;
+    const stockFactor = defaultOrdersMode ? remainingDistributions : 1;
 
     return <Card
         sx={{
