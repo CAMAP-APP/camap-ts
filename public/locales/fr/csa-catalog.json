@@ -49,7 +49,7 @@
   "enterYourDefaultOrder": "Saisissez votre commande par défaut",
   "defaultOrderInfosVarOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat. Vous aurez ensuite la possibilité de personnaliser votre commande date par date.",
   "defaultOrderInfosConstOrder": "Cette commande sera enregistrée pour toutes les dates de distribution du contrat.",
-  "defaultOrder": "Commande par défaut",
+  "defaultOrder": "Commande par défaut à chaque distribution",
   "Available": "Disponible",
   "stockCount": "{{stock}} en stock",
   "unsavedOrdersConfirmLeave": "Vous avez des commandes non enregistrées. Voulez-vous quitter cette page ?",
