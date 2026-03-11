@@ -226,12 +226,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       )}
       {showDefaultOrder && (
         <Box
-          width={{
-            xs: '100%',
-            sm: '75%',
-            md: '50%',
-          }}
-          mx="auto"
+          width={'100%'}
         >
           <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
         </Box>
