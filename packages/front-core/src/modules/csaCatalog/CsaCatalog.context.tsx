@@ -233,12 +233,17 @@ const CsaCatalogContextProvider = ({
   }, [isConstOrders, setDefaultOrder, subscription]);
 
   const remainingDistributions = React.useMemo(() => {
-    if (!subscription) return 0;
     return distributions.filter(
-      d => subscription.distributions.some(d2 => d2.id === d.id) &&
-        isAfter(new Date(d.distributionStartDate), new Date()) &&
-        d.state !== RestDistributionState.Absent
-    ).length;
+      d => {
+        if (subscription) {
+          return subscription.distributions.some(d2 => d2.id === d.id) &&
+            isAfter(new Date(d.distributionStartDate), new Date()) &&
+            d.state !== RestDistributionState.Absent
+        } else {
+          return isAfter(new Date(d.distributionStartDate), new Date()) &&
+            d.state !== RestDistributionState.Absent
+        }
+      }).length;
   }, [subscription, distributions]);
 
   /** */
