@@ -265,11 +265,38 @@ function CsaCatalogOrdersMobileProduct({
     >
         <CardActionArea onClick={onClick}>
             <Box sx={{ position: 'relative' }}>
-                <CardMedia
-                    component="img"
-                    image={product.image}
-                    alt=""
-                />
+                <Box sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    aspectRatio: 1,
+                    overflow: 'hidden'
+                }}>
+                    <Box sx={{
+                        position: 'absolute',
+                        top: "-5%",
+                        left: "-5%",
+                        width: '110%',
+                        height: '110%',
+                        backgroundImage: `url(${product.image})`,
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'repeat',
+                        filter: 'blur(5px)'
+                    }} />
+                    <img
+                        src={product.image}
+                        alt=""
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain'
+                        }}
+                    />
+                </Box>
                 <Box sx={{
                     position: 'absolute',
                     top: 4,
