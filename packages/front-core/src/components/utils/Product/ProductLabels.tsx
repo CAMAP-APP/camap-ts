@@ -50,7 +50,7 @@ function ProductLabels({ product }: { product: ProductInfos }) {
   return <>
     {product.organic && <Label iconId={CamapIconId.bio} name={t('organicAgriculture')} organic />}
     {product.bulk && <Label iconId={CamapIconId.bulk} name={t('soldInBulk')} />}
-    {product.variablePrice && <Label iconId={CamapIconId.scale} name={t('variablePrice')} />}
+    {product.variablePrice && <Label iconId={CamapIconId.variablePrice} name={t('variablePrice')} />}
   </>
 };
 

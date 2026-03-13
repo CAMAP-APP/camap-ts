@@ -14,7 +14,6 @@ const CsaCatalogDefaultOrder = ({ onNext }: CsaCatalogDefaultOrderProps) => {
   } = React.useContext(CsaCatalogContext);
 
   React.useEffect(() => {
-    console.log(catalog, subscription);
     if (!catalog) return;
     if (!!subscription) return;
     setDefaultOrder(

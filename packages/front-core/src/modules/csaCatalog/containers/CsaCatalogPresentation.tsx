@@ -89,7 +89,7 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
               title={t('distribution', {
                 count: catalog.distributions.length,
               })}
-              icon={<MediumActionIcon id={CamapIconId.calendar} />}
+              icon={<MediumActionIcon id={CamapIconId.distribution} />}
               contentSx={{
                 overflow: 'auto',
                 maxHeight:
@@ -145,7 +145,7 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
           <Grid item>
             <Block
               title={t('vendor')}
-              icon={<MediumActionIcon id={CamapIconId.farmer} />}
+              icon={<MediumActionIcon id={CamapIconId.vendor} />}
               sx={{ display: 'flex', flexDirection: 'column' }}
               contentSx={{
                 flex: 1,

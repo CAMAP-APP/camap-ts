@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  ToggleButton,
   Tooltip,
   Typography
 } from '@mui/material';
@@ -53,11 +52,10 @@ const CsaCatalogOrdersMobile = ({
     setSubscription,
     defaultOrder,
     setError,
-    addedOrders,
-    setAddedOrders,
     initialOrders,
     setDefaultOrder,
     remainingDistributions,
+    cancelOrder,
   } = React.useContext(CsaCatalogContext);
 
   const isConstOrDefaults = mode === 'defaultOrder' || isConstOrders;
@@ -101,40 +99,11 @@ const CsaCatalogOrdersMobile = ({
     ) {
       return;
     }
-    let prevValue = updatedOrders[distributionId]
-      ? updatedOrders[distributionId][productId]
-      : null;
-
     const newOrders = { ...updatedOrders };
     if (!newOrders[distributionId]) {
       newOrders[distributionId] = {};
     }
     newOrders[distributionId][productId] = adaptedNewValue;
-
-    // Count "added orders" for global stock estimations
-    // initialOrders is what we received from server
-    // updatedOrders is the current user input
-    // addedOrders keep track of the difference between initialOrders and current use input
-    // Estimating the next stock according to current user input is then done by subtracting addedOrders from initialStock
-    if (catalog != null && catalog.hasStockManagement && addedOrders != null) {
-      let initialValue =
-        initialOrders[distributionId] != null &&
-          initialOrders[distributionId][productId] != null
-          ? initialOrders[distributionId][productId]
-          : 0;
-      if (prevValue == null) {
-        prevValue = initialValue;
-      }
-
-      var addedOrder = adaptedNewValue - prevValue;
-      if (!addedOrders.hasOwnProperty(productId)) {
-        addedOrders[productId] = 0;
-      }
-      addedOrders[productId] += addedOrder;
-      setAddedOrders(addedOrders);
-
-      newOrders[distributionId][productId] = adaptedNewValue;
-    }
     setUpdatedOrders(newOrders);
   };
 
@@ -228,11 +197,12 @@ const CsaCatalogOrdersMobile = ({
   const [defaultOrdersMode, setDefaultOrdersMode] =
     React.useState(isConstOrDefaults);
 
-  const onDefaultOrderChange = (productId: number, quantity: number) => {
-    const newDefaultOrder = { ...defaultOrder };
-    newDefaultOrder[productId] = quantity;
-    setDefaultOrder(newDefaultOrder);
-  };
+  const onDefaultOrderChange = useCallback((productId: number, quantity: number) => {
+    setDefaultOrder({
+      ...defaultOrder,
+      [productId]: quantity
+    });
+  }, [defaultOrder, setDefaultOrder]);
 
   const updateDefaultOrders = async () => {
     if (!subscription) return;
@@ -258,21 +228,9 @@ const CsaCatalogOrdersMobile = ({
   };
 
   const onCancelOrder = useCallback(() => {
-    const upd = { ...updatedOrders };
-    const added = { ...addedOrders };
-
-    if (!upd[distribution.id]) {
-      upd[distribution.id] = {};
-    }
-    catalog?.products.forEach(p => {
-      upd[distribution.id][p.id] = 0;
-      added[p.id] = (added[p.id] ?? 0) - (initialOrders[distribution.id][p.id] ?? 0);
-    })
-
-    setUpdatedOrders(upd);
-    setAddedOrders(added);
+    cancelOrder(distribution.id);
     void onNext();
-  }, [distribution.id, catalog?.products, addedOrders, updatedOrders, initialOrders, setUpdatedOrders, setAddedOrders, onNext]);
+  }, [distribution.id, cancelOrder, onNext]);
 
   const setCurrentDistributionAsDefaultOrder = useCallback(() => {
     if (!subscription || !catalog) return;
@@ -385,16 +343,17 @@ const CsaCatalogOrdersMobile = ({
 
   return (
     <MobileContainer title={title}
-      icon={isConstOrders ? CamapIconId.refresh : CamapIconId.basket}
+      icon={isConstOrders ? CamapIconId.constOrders : CamapIconId.varOrders}
       actions={<>
         {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
-          <ToggleButton
+          <Button
+            color="primary"
+            variant="contained"
             value="default-order"
             onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
-            selected={defaultOrdersMode}
           >
-            {defaultOrdersMode ? t('changeOrders') : t('defaultOrder')}
-          </ToggleButton>
+            {defaultOrdersMode ? t('changeOrders') : t('defaultOrderBtn')}
+          </Button>
         )}
       </>}>
       <CsaCatalogOrdersMobileHeader
@@ -411,7 +370,7 @@ const CsaCatalogOrdersMobile = ({
         ? <>
           <Box display='flex' justifyContent='center' my={4}>
             <Typography variant='h5'>{t("absent")}</Typography>
-            <CamapIcon id={CamapIconId.vacation} />
+            <CamapIcon id={CamapIconId.absent} />
           </Box>
         </>
         : <>

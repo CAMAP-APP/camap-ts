@@ -129,7 +129,10 @@ const OrderControlsUnit = ({
         [onQuantityChange]
     );
 
-    if (orderedQuantity === 0)
+    if (orderedQuantity === 0) {
+        // if there is no stock and with have nothing to return, no action available
+        if (max !== undefined && max === 0)
+            return null;
         return <Button
             onClick={() => onQuantityChangeDebounce(1)}
             sx={{
@@ -141,18 +144,25 @@ const OrderControlsUnit = ({
         >
             <CamapIcon id={CamapIconId.basketAdd} />
         </Button>
+    }
+
+    const btnProps = {
+        flexGrow: 0,
+        width: 25,
+        minWidth: 25,
+        height: "90%",
+        minHeight: 25,
+        m: "auto",
+        p: 0,
+    }
+
     return <Box
         display='flex'
         flexDirection='row'
         width={80}
     >
         <Button size='small' variant='contained' sx={{
-            flexGrow: 0,
-            width: 25,
-            minWidth: 25,
-            minHeight: 25,
-            m: 0,
-            p: 0,
+            ...btnProps
         }}
             onClick={() => onQuantityChangeDebounce(orderedQuantity - 1)}
             disabled={!editable}
@@ -196,12 +206,7 @@ const OrderControlsUnit = ({
             hiddenLabel
         />
         <Button size='small' variant='contained' sx={{
-            flexGrow: 0,
-            width: 25,
-            minWidth: 25,
-            minHeight: 25,
-            m: 0,
-            p: 0
+            ...btnProps
         }}
             disabled={!editable || (max !== undefined && orderedQuantity >= max)}
             onClick={() => onQuantityChange(orderedQuantity + 1)}
@@ -254,7 +259,10 @@ function CsaCatalogOrdersMobileProduct({
     const { remainingDistributions } = useContext(CsaCatalogContext);
 
     const showStocks = product.stockTracking !== StockTracking.Disabled && stocks != null;
-    const stockFactor = defaultOrdersMode ? remainingDistributions : 1;
+
+    const formattedStocks = stocks != null ? formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk) : null;
+    const stockFactor = defaultOrdersMode && product.stockTracking === StockTracking.Global ? remainingDistributions : 1;
+    const max = showStocks ? (Math.floor((stocks) / stockFactor) + orderedQuantity) : undefined
 
     return <Card
         sx={{
@@ -322,11 +330,22 @@ function CsaCatalogOrdersMobileProduct({
                         gap: 0.5,
                         background: t => Colors.background3
                     }}>
-                        <Tooltip title={t('stockCount', { stock: formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk) })}>
+                        <Tooltip title={
+                            product.stockTracking === StockTracking.Global
+                                ? t('stockCount', { stock: formattedStocks })
+                                : t('stockCountPerDistribution', { stock: formattedStocks })
+                        }>
                             <Box display='flex' flexDirection='row' gap={1} py={0.2} px={0.5} alignItems='center'>
-                                <CamapIcon id={CamapIconId.wholesale} sx={{ fontSize: '1.2em' }} />
-                                <Typography fontSize="0.9em">{
-                                    formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk)}</Typography>
+                                <CamapIcon id={CamapIconId.stock} sx={{ fontSize: '1.2em' }} />
+                                <Typography fontSize="0.9em">
+                                    {
+                                        formattedStocks
+                                    }
+                                    {defaultOrdersMode && product.stockTracking !== StockTracking.Global && stocks > 0 && <>
+                                        {' / '}
+                                        <CamapIcon id={CamapIconId.distribution} sx={{ verticalAlign: 'baseline', fontSize: '0.9em' }} />
+                                    </>}
+                                </Typography>
                             </Box>
                         </Tooltip>
                     </Box>
@@ -373,7 +392,9 @@ function CsaCatalogOrdersMobileProduct({
                 <Box sx={{
                     fontWeight: "bold"
                 }}>
-                    {!product.bulk && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
+                    {!product.bulk && product.unitType !== Unit.Piece &&
+                        `${product.variablePrice ? '≈' : ``}${product.qt}${formatUnit(product.unitType)}`
+                    }
                 </Box>
                 <Box>
                     {formatPricePerUnit(
@@ -395,7 +416,7 @@ function CsaCatalogOrdersMobileProduct({
                     editable={editable}
                     product={product}
                     orderedQuantity={orderedQuantity}
-                    max={showStocks ? (stocks + orderedQuantity) : undefined}
+                    max={max}
                     onQuantityChange={onQuantityChange} />
             </Box>
         </Box>

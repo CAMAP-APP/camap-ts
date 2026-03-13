@@ -226,7 +226,7 @@ export const CsaCatalogOrdersMobileHeader = (
                     {defaultOrdersMode ?
                         <>
                             <Typography variant="caption">
-                                <CamapIcon id={CamapIconId.basket} sx={{ verticalAlign: 'text-top' }} />
+                                <CamapIcon id={CamapIconId.varOrders} sx={{ verticalAlign: 'text-top' }} />
                                 &nbsp;
                                 {t('defaultOrderForNextDistribs', { distrib: remainingDistributions })}
                             </Typography>

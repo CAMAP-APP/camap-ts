@@ -366,7 +366,7 @@ const CsaCatalogOrders = ({ adminMode, onNext }: CsacatalogProps) => {
     <Box>
       <Block
         title={adminMode ? t('changeOrders') : t('changeMyOrders')}
-        icon={<MediumActionIcon id={CamapIconId.basket} />}
+        icon={<MediumActionIcon id={CamapIconId.varOrders} />}
         sx={{
           height: '100%',
         }}
