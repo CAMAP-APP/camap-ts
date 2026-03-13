@@ -70,6 +70,11 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
     setModalProduct(undefined);
   };
 
+  const onSubscribe = () => {
+    window._Camap.clearNotifications();
+    onNext?.();
+  };
+
   if (!catalog || !distributions) return <CircularProgressBox />;
 
   return (
@@ -272,7 +277,7 @@ const CsaCatalogPresentation = ({ onNext }: CsaCatalogPresentationProps) => {
         <Button
           variant="contained"
           startIcon={<ChevronRight />}
-          onClick={onNext}
+          onClick={onSubscribe}
         >
           {t('subscribeToThisContract')}
         </Button>
