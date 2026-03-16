@@ -89,17 +89,21 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setStep('defaultOrder');
     if (!isConstOrders && catalog?.distribMinOrdersTotal === 0) {
       onDefaultOrderNext();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const onDefaultOrderNext = async () => {
+    console.log(step);
     if (step !== 'defaultOrder') return;
     setStep('absences');
-    if (catalog && !catalog.absentDistribsMaxNb) {
-      setStep('review');
+    console.log(catalog?.absentDistribsMaxNb);
+    if ((catalog?.absentDistribsMaxNb ?? 0) <= 0) {
+      onAbsencesNext();
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const checkDefaultOrderAndContinue = async () => {
