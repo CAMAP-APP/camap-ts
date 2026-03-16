@@ -1,4 +1,4 @@
-import { BreakpointsOptions, createTheme, ThemeOptions } from '@mui/material';
+import { BreakpointsOptions, createTheme, PaletteColorOptions, ThemeOptions } from '@mui/material';
 import { frFR } from '@mui/material/locale';
 import { palette } from './palette';
 declare module '@mui/material/styles' {
@@ -12,8 +12,28 @@ declare module '@mui/material/styles' {
     xxl: true;
   }
 }
+
+declare module '@mui/material/styles' {
+  interface PaletteOptions {
+    lightgrey: PaletteColorOptions | undefined;
+  }
+}
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    lightgrey: true;
+  }
+}
+
 export const themeOptions: ThemeOptions = {
-  palette,
+  palette: {
+    ...palette,
+    lightgrey: {
+      main: "#e7e7e7",
+      light: "#ebebeb",
+      dark: "#e0e0e0",
+      contrastText: "#404040"
+    }
+  },
   typography: {
     fontSize: 16,
     fontFamily: 'Cabin, Arial, Helvetica, sans-serif',
@@ -61,11 +81,11 @@ export const themeOptions: ThemeOptions = {
     },
     MuiButton: {
       styleOverrides: {
-        contained: {
+        containedPrimary: {
           '&:hover': {
             color: '#FFF',
           },
-          '&:focus': {
+          '&.Mui-focusVisible': {
             color: '#FFF',
             outline: 0,
             textDecoration: 'none',
@@ -75,7 +95,7 @@ export const themeOptions: ThemeOptions = {
           '&:hover': {
             color: palette.primary.main,
           },
-          '&:focus': {
+          '&.Mui-focusVisible': {
             color: palette.primary.main,
             outline: 0,
             textDecoration: 'none',

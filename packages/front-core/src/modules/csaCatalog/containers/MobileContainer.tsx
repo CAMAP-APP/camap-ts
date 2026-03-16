@@ -15,7 +15,8 @@ export const MobileContainer = ({
 }) => {
     return <Block
         title={title}
-        icon={<MediumActionIcon id={icon} />}
+        icon={<MediumActionIcon id={icon} sx={{ color: theme => theme.palette.primary.contrastText }} />}
+        variant="primary"
         sx={{
             height: '100%',
             overflow: 'clip'

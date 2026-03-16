@@ -347,7 +347,7 @@ const CsaCatalogOrdersMobile = ({
       actions={<>
         {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
           <Button
-            color="primary"
+            color="lightgrey"
             variant="contained"
             value="default-order"
             onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
