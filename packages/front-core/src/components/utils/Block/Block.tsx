@@ -13,6 +13,7 @@ import React, { PropsWithChildren } from 'react';
 interface BlockProps {
   title?: string | React.ReactNode;
   icon?: React.ReactNode;
+  variant?: 'normal' | 'primary';
   sx?: SxProps<Theme>;
   headerSx?: SxProps<Theme>;
   contentSx?: SxProps<Theme>;
@@ -23,6 +24,7 @@ interface BlockProps {
 function Block({
   title,
   icon,
+  variant = 'normal',
   sx,
   headerSx,
   contentSx,
@@ -36,7 +38,8 @@ function Block({
       {title && (
         <CardHeader
           sx={{
-            backgroundColor: (theme) => theme.palette.action.selected,
+            backgroundColor: (theme) => variant === 'primary' ? theme.palette.primary.main : theme.palette.action.selected,
+            color: (theme) => variant === 'primary' ? theme.palette.primary.contrastText : theme.palette.text.primary,
             fontSize: {
               xs: '0.7rem',
               sm: '1rem'

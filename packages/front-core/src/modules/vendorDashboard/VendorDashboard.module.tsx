@@ -53,18 +53,18 @@ const MultipleVendorDashContent = ({
                         <div style={{ marginBottom: "10px" }}>
                             <VendorImage vendor={vendor} />
                         </div>
-                        
+
                         <h4 style={{ margin: "10px 0 5px 0", fontSize: "16px", fontWeight: "bold" }}>
                             {vendor.name}
                         </h4>
-                        
+
                         <div style={{ marginBottom: "8px" }}>
                             <small className="text-muted">
                                 <i className="icon icon-file-text" style={{ marginRight: "5px" }} />
                                 {vendor.companyNumber ?? tVendorDash("unknownVatNumber")}
                             </small>
                         </div>
-                        
+
                         <div style={{ marginBottom: "15px" }}>
                             <small>
                                 <i className="icon icon-users" style={{ marginRight: "5px" }} />
@@ -73,7 +73,7 @@ const MultipleVendorDashContent = ({
                                     .join(", ") || tVendorDash("none")}
                             </small>
                         </div>
-                        
+
                         <button
                             className="btn btn-primary btn-sm"
                             onClick={() => handleVendorSelection(vendor.id)}
@@ -88,12 +88,12 @@ const MultipleVendorDashContent = ({
         </div>
 
         <VendorConsolidation
-                    open={selectedVendor != null}
-                    onClose={handleCancelConsolidation}
-                    selectedVendor={selectedVendor}
-                    vendorsToConsolidate={claimedVendors}
-                    onConsolidationComplete={handleConsolidationComplete}
-                />
+            open={selectedVendor != null}
+            onClose={handleCancelConsolidation}
+            selectedVendor={selectedVendor}
+            vendorsToConsolidate={claimedVendors}
+            onConsolidationComplete={handleConsolidationComplete}
+        />
     </>
 }
 
@@ -108,12 +108,12 @@ const VendorDashContent = ({
     return <>
         <Typography variant="h2" gutterBottom>{tVendorDash("welcome")}</Typography>
         <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
-        <Divider sx={{ mt:2, mb: 2 }} />
-        <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
+        <Divider sx={{ mt: 2, mb: 2 }} />
+        <VendorClaims onClaim={() => { refetchClaimedVendors() }} />
     </>
 }
 
-const VendorDashboardRouter = (props: {basePath: string}) => {
+const VendorDashboardRouter = (props: { basePath: string }) => {
 
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
     const {
@@ -143,18 +143,18 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
         </Alert>;
     }
 
-    if(claimedVendors?.length !== 1)
+    if (claimedVendors?.length !== 1)
         return <Paper>
             <div className="row">
                 <div className="col-md-12">
                     {!claimedVendors || claimedVendors?.length < 1 && <h4>{tVendorDash("noVendorProfiles")}</h4>}
                     {claimedVendors && claimedVendors?.length > 1 && <MultipleVendorDashContent
-                            claimedVendors={claimedVendors}
-                            refetchClaimedVendors={refetchClaimedVendors} />}
+                        claimedVendors={claimedVendors}
+                        refetchClaimedVendors={refetchClaimedVendors} />}
                 </div>
             </div>
             <div className="row">
-                <VendorClaims onClaim={() => {refetchClaimedVendors()}} />
+                <VendorClaims onClaim={() => { refetchClaimedVendors() }} />
             </div>
         </Paper>
 
@@ -169,9 +169,9 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
         },
         {
             label: tVendorDash('contracts'),
-            icon: <CamapIcon id={CamapIconId.book} />,
+            icon: <CamapIcon id={CamapIconId.contract} />,
             path: '/contracts',
-            element: <VendorContracts vendorId={vendor.id}/>
+            element: <VendorContracts vendorId={vendor.id} />
         },
         {
             label: tVendorDash('vendorDashboardDocuments'),
@@ -200,7 +200,7 @@ const VendorDashboardRouter = (props: {basePath: string}) => {
                     navigation={nav}
                     home={{
                         label: tVendorDash('vendorDashboardHome', { vendorName: vendor.name }),
-                        icon: <CamapIcon id={CamapIconId.farmer} />,
+                        icon: <CamapIcon id={CamapIconId.vendor} />,
                         path: '/'
                     }}
                 />

@@ -7,4 +7,4 @@ export const palette = {
   secondary: {
     main: '#f6a96c',
   }
-} satisfies PaletteOptions;
+} satisfies Partial<PaletteOptions>;

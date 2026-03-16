@@ -10,18 +10,18 @@ interface CsaCatalogDistributionProps {
 }
 
 export function colorForDistributionState(distribution: RestDistributionEnriched) {
-  if(distribution.state === RestDistributionState.Open)
+  if (distribution.state === RestDistributionState.Open)
     return {
-      bgcolor: (theme:Theme) => alpha(theme.palette.success.light, 0.15),
-      color: (theme:Theme) => darken(theme.palette.success.dark, 0.05),
+      bgcolor: (theme: Theme) => alpha(theme.palette.success.light, 0.15),
+      color: (theme: Theme) => darken(theme.palette.success.dark, 0.05),
     }
-  if(distribution.state === RestDistributionState.NotYetOpen ||
+  if (distribution.state === RestDistributionState.NotYetOpen ||
     distribution.state === RestDistributionState.Closed)
     return {
-      bgcolor: (theme:Theme) => theme.palette.action.disabledBackground,
-      color: (theme:Theme) => alpha(theme.palette.text.primary, 0.75),
+      bgcolor: (theme: Theme) => theme.palette.action.disabledBackground,
+      color: (theme: Theme) => alpha(theme.palette.text.primary, 0.75),
     }
-  if(distribution.state === RestDistributionState.Absent)
+  if (distribution.state === RestDistributionState.Absent)
     return {
       bgcolor: alpha(Colors.terreLight, 0.65),
       color: darken(Colors.terreDark, 0.1),
@@ -43,7 +43,7 @@ const CsaCatalogDistribution = ({
   )
     iconId = CamapIconId.clock;
   if (distribution.state === RestDistributionState.Absent)
-    iconId = CamapIconId.vacation;
+    iconId = CamapIconId.absent;
 
   return (
     <Box

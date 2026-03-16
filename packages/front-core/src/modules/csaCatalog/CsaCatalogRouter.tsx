@@ -16,6 +16,7 @@ import {
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
 } from './requests';
+import CircularProgressBox from '@components/utils/CircularProgressBox';
 
 interface CsaCatalogRouterProps {
   userId: number;
@@ -40,13 +41,9 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     isConstOrders
   } = React.useContext(CsaCatalogContext);
 
-  const [showPresentation, setShowPresentation] = React.useState(
-    !initialSubscriptionId,
+  const [step, setStep] = React.useState<'presentation' | 'absences' | 'defaultOrder' | 'review'>(
+    !initialSubscriptionId ? 'presentation' : 'review'
   );
-  const [showAbsences, setShowAbsences] = React.useState(false);
-  const [showDefaultOrder, setShowDefaultOrder] = React.useState(false);
-  const [showOrders, setShowOrders] = React.useState(!!initialSubscriptionId);
-
   const [
     createSubscription,
     { data: subscriptionData, error: postSubscriptionError },
@@ -88,25 +85,19 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   }, [updatedDefaultOrderData, setSubscription]);
 
   const onPresentationNext = () => {
-    if (!showPresentation) return;
-    setShowPresentation(false);
-    setShowOrders(false);
+    if (step !== 'presentation') return;
+    setStep('defaultOrder');
     if (!isConstOrders && catalog?.distribMinOrdersTotal === 0) {
       onDefaultOrderNext();
-    } else {
-      setShowDefaultOrder(true);
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const onDefaultOrderNext = async () => {
-    setShowPresentation(false);
-    setShowOrders(false);
-    setShowDefaultOrder(false);
+    if (step !== 'defaultOrder') return;
+    setStep('absences');
     if (catalog && !catalog.absentDistribsMaxNb) {
-      onAbsencesNext();
-    } else {
-      setShowAbsences(true);
+      setStep('review');
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -144,10 +135,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     if (!subscriptionSucceeded) return;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    setShowPresentation(false);
-    setShowAbsences(false);
-    setShowDefaultOrder(false);
-    setShowOrders(true);
+    setStep('review');
   };
 
   React.useEffect(() => {
@@ -155,7 +143,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   }, [subscriptionData, setSubscription]);
 
   const onOrderNext = async () => {
-    if (!showOrders || !subscription || !catalog) return false;
+    if (step !== 'review' || !subscription || !catalog) return false;
     let success = false;
     if (isConstOrders) {
       success = await updateSubscriptionDefaultOrder(
@@ -205,6 +193,8 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updateDefaultOrderError ||
     checkDefaultOrderError;
 
+  if (!catalog) return <CircularProgressBox />;
+
   return (
     <>
       {error && (
@@ -221,26 +211,24 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         </Box>
       )}
 
-      {showPresentation && (
+      {/* This is the flow when user is not subscribed */}
+      {step === 'presentation' && (
         <CsaCatalogPresentation onNext={onPresentationNext} />
       )}
-      {showDefaultOrder && (
+      {step === 'defaultOrder' && (
         <Box
-          width={{
-            xs: '100%',
-            sm: '75%',
-            md: '50%',
-          }}
-          mx="auto"
+          width={'100%'}
         >
           <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
         </Box>
       )}
-      {showAbsences && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
-      {showOrders && catalog && (
+      {step === 'absences' && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
+
+      {/* This is the end of the flow once subscribed */}
+      {step === 'review' && !isConstOrders && (
         <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
       )}
-      {showOrders && !!subscription && !adminMode && (
+      {step === 'review' && !!subscription && !adminMode && (
         <Box mt={3}>
           <Block
             title={t('mySubscription')}
@@ -250,6 +238,13 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           >
             <CsaCatalogSubscription />
           </Block>
+        </Box>
+      )}
+
+      {/* repeat error messages for visibility */}
+      {error && (
+        <Box mb={2}>
+          <Alert severity="error">{error}</Alert>
         </Box>
       )}
     </>

@@ -44,7 +44,8 @@ export const CsaCatalogOrdersMobileHeader = (
         remainingDistributions
     } = useContext(CsaCatalogContext);
 
-    if (!subscription) return null;
+    if (!catalog) return null;
+    const endDate = new Date(subscription?.endDate ?? catalog.endDate);
 
     return (
         <Box
@@ -86,7 +87,7 @@ export const CsaCatalogOrdersMobileHeader = (
                             textAlign="center"
                             fontWeight="bold"
                         >
-                            {t('defaultOrderForDistribsUntil', { date: formatAbsoluteDate(new Date(subscription.endDate)) })}
+                            {t('defaultOrderForDistribsUntil', { date: formatAbsoluteDate(new Date(endDate)) })}
                         </Typography>
                     </Box>
                 ) : (
@@ -142,7 +143,7 @@ export const CsaCatalogOrdersMobileHeader = (
                 mb={1}
             >
                 {/* Balance box */}
-                <Tooltip title={t('paymentSold')}>
+                {subscription && <Tooltip title={t('paymentSold')}>
                     <Box gridArea="balance"
                         display="flex"
                         flexDirection="column"
@@ -179,7 +180,7 @@ export const CsaCatalogOrdersMobileHeader = (
                             {formatCurrency(subscription.balance)}
                         </Typography>
                     </Box>
-                </Tooltip>
+                </Tooltip>}
 
                 {/* minimum order contract */}
                 {subscription?.minSubscriptionOrder != null &&
@@ -225,7 +226,7 @@ export const CsaCatalogOrdersMobileHeader = (
                     {defaultOrdersMode ?
                         <>
                             <Typography variant="caption">
-                                <CamapIcon id={CamapIconId.basket} sx={{ verticalAlign: 'text-top' }} />
+                                <CamapIcon id={CamapIconId.varOrders} sx={{ verticalAlign: 'text-top' }} />
                                 &nbsp;
                                 {t('defaultOrderForNextDistribs', { distrib: remainingDistributions })}
                             </Typography>

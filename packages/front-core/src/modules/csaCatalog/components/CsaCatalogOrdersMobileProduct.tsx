@@ -1,15 +1,16 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import ProductLabels from "@components/utils/Product/ProductLabels";
-import { Box, Button, Card, CardActionArea, CardContent, CardMedia, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
+import { Box, Button, Card, CardActionArea, CardContent, InputAdornment, TextField, Tooltip, Typography } from "@mui/material";
 import { Colors } from "@theme/commonPalette";
 import { formatPricePerUnit, formatStocks, formatUnit } from "@utils/fomat";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import { formatCurrency, StockTracking, Unit } from "camap-common";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { RestCsaCatalog } from "../interfaces";
 import useStocks from "../containers/useStocks";
 import { Distribution } from "@gql";
 import { debounce } from "lodash";
+import { CsaCatalogContext } from "../CsaCatalog.context";
 
 function smartRound(v: number, unit: Unit) {
     if (v === undefined) return '';
@@ -128,7 +129,10 @@ const OrderControlsUnit = ({
         [onQuantityChange]
     );
 
-    if (orderedQuantity === 0)
+    if (orderedQuantity === 0) {
+        // if there is no stock and with have nothing to return, no action available
+        if (max !== undefined && max === 0)
+            return null;
         return <Button
             onClick={() => onQuantityChangeDebounce(1)}
             sx={{
@@ -140,18 +144,25 @@ const OrderControlsUnit = ({
         >
             <CamapIcon id={CamapIconId.basketAdd} />
         </Button>
+    }
+
+    const btnProps = {
+        flexGrow: 0,
+        width: 25,
+        minWidth: 25,
+        height: "90%",
+        minHeight: 25,
+        m: "auto",
+        p: 0,
+    }
+
     return <Box
         display='flex'
         flexDirection='row'
         width={80}
     >
         <Button size='small' variant='contained' sx={{
-            flexGrow: 0,
-            width: 25,
-            minWidth: 25,
-            minHeight: 25,
-            m: 0,
-            p: 0,
+            ...btnProps
         }}
             onClick={() => onQuantityChangeDebounce(orderedQuantity - 1)}
             disabled={!editable}
@@ -195,12 +206,7 @@ const OrderControlsUnit = ({
             hiddenLabel
         />
         <Button size='small' variant='contained' sx={{
-            flexGrow: 0,
-            width: 25,
-            minWidth: 25,
-            minHeight: 25,
-            m: 0,
-            p: 0
+            ...btnProps
         }}
             disabled={!editable || (max !== undefined && orderedQuantity >= max)}
             onClick={() => onQuantityChange(orderedQuantity + 1)}
@@ -248,9 +254,15 @@ function CsaCatalogOrdersMobileProduct({
         t: "csa-catalog"
     });
 
-    const [stocks] = useStocks(product, distribution);
+    const [stocks] = useStocks(product, defaultOrdersMode ? undefined : distribution);
 
-    const showStocks = !defaultOrdersMode && product.stockTracking !== StockTracking.Disabled && stocks != null;
+    const { remainingDistributions } = useContext(CsaCatalogContext);
+
+    const showStocks = product.stockTracking !== StockTracking.Disabled && stocks != null;
+
+    const formattedStocks = stocks != null ? formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk) : null;
+    const stockFactor = defaultOrdersMode && product.stockTracking === StockTracking.Global ? remainingDistributions : 1;
+    const max = showStocks ? (Math.floor((stocks) / stockFactor) + orderedQuantity) : undefined
 
     return <Card
         sx={{
@@ -265,11 +277,38 @@ function CsaCatalogOrdersMobileProduct({
     >
         <CardActionArea onClick={onClick}>
             <Box sx={{ position: 'relative' }}>
-                <CardMedia
-                    component="img"
-                    image={product.image}
-                    alt=""
-                />
+                <Box sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: '100%',
+                    aspectRatio: 1,
+                    overflow: 'hidden'
+                }}>
+                    <Box sx={{
+                        position: 'absolute',
+                        top: "-5%",
+                        left: "-5%",
+                        width: '110%',
+                        height: '110%',
+                        backgroundImage: `url(${product.image})`,
+                        backgroundSize: 'contain',
+                        backgroundPosition: 'center',
+                        backgroundRepeat: 'repeat',
+                        filter: 'blur(5px)'
+                    }} />
+                    <img
+                        src={product.image}
+                        alt=""
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain'
+                        }}
+                    />
+                </Box>
                 <Box sx={{
                     position: 'absolute',
                     top: 4,
@@ -291,11 +330,22 @@ function CsaCatalogOrdersMobileProduct({
                         gap: 0.5,
                         background: t => Colors.background3
                     }}>
-                        <Tooltip title={t('stockCount', { stock: formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk) })}>
+                        <Tooltip title={
+                            product.stockTracking === StockTracking.Global
+                                ? t('stockCount', { stock: formattedStocks })
+                                : t('stockCountPerDistribution', { stock: formattedStocks })
+                        }>
                             <Box display='flex' flexDirection='row' gap={1} py={0.2} px={0.5} alignItems='center'>
-                                <CamapIcon id={CamapIconId.wholesale} sx={{ fontSize: '1.2em' }} />
-                                <Typography fontSize="0.9em">{
-                                    formatStocks(stocks, product.qt, product.unitType, product.variablePrice, product.bulk)}</Typography>
+                                <CamapIcon id={CamapIconId.stock} sx={{ fontSize: '1.2em' }} />
+                                <Typography fontSize="0.9em">
+                                    {
+                                        formattedStocks
+                                    }
+                                    {defaultOrdersMode && product.stockTracking !== StockTracking.Global && stocks > 0 && <>
+                                        {' / '}
+                                        <CamapIcon id={CamapIconId.distribution} sx={{ verticalAlign: 'baseline', fontSize: '0.9em' }} />
+                                    </>}
+                                </Typography>
                             </Box>
                         </Tooltip>
                     </Box>
@@ -342,7 +392,9 @@ function CsaCatalogOrdersMobileProduct({
                 <Box sx={{
                     fontWeight: "bold"
                 }}>
-                    {!product.bulk && product.unitType !== Unit.Piece && `${product.qt}${formatUnit(product.unitType)}`}
+                    {!product.bulk && product.unitType !== Unit.Piece &&
+                        `${product.variablePrice ? '≈' : ``}${product.qt}${formatUnit(product.unitType)}`
+                    }
                 </Box>
                 <Box>
                     {formatPricePerUnit(
@@ -364,7 +416,7 @@ function CsaCatalogOrdersMobileProduct({
                     editable={editable}
                     product={product}
                     orderedQuantity={orderedQuantity}
-                    max={showStocks ? (stocks + orderedQuantity) : undefined}
+                    max={max}
                     onQuantityChange={onQuantityChange} />
             </Box>
         </Box>

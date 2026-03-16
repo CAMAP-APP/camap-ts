@@ -4,65 +4,81 @@ import { StockTracking } from "camap-common";
 import { RestCsaCatalog } from "../interfaces";
 import { Distribution } from "@gql";
 
-export default function useStocks(product: RestCsaCatalog['products'][number], distribution: Distribution) {
+export default function useStocks(
+    product: RestCsaCatalog['products'][number],
+    distribution?: Distribution
+) {
 
     const {
         catalog,
-        addedOrders,
         stocksPerProductDistribution,
         initialOrders,
         updatedOrders
     } = useContext(CsaCatalogContext);
 
-    const stocks = useMemo(() => {
+    /*
+     * If the stock tracking isnot global and distribution == null,
+     * meaning this is the context of a default order or const order,
+     * we may return a "least stock" value, which is the lowest the stock will go
+     */
+    const [stocks, isLeast] = useMemo(() => {
 
-        const isGlobalStock =
-            catalog?.hasStockManagement &&
-            product.stockTracking === StockTracking.Global &&
-            stocksPerProductDistribution != null;
+        if (catalog == null || !catalog.hasStockManagement || stocksPerProductDistribution == null)
+            return [null, false];
 
-        if (isGlobalStock) {
-            var globalStock = 0;
-            if (
-                isGlobalStock &&
-                stocksPerProductDistribution[product.id] != null &&
-                addedOrders != null
-            ) {
-                globalStock = Object.values(
-                    stocksPerProductDistribution[product.id],
-                ).reduce((acc, v) => Math.min(acc, v), Number.MAX_VALUE);
-                globalStock -= addedOrders.hasOwnProperty(product.id)
-                    ? addedOrders[product.id]
+        const productStockPerDistribution = stocksPerProductDistribution[product.id];
+        const diffForDistribution = (dId: number) => {
+            var initialOrder: number =
+                initialOrders[dId] != null && initialOrders[dId][product.id] != null
+                    ? initialOrders[dId][product.id]
                     : 0;
+            var updatedOrder: number =
+                updatedOrders[dId] != null && updatedOrders[dId][product.id] != null
+                    ? updatedOrders[dId][product.id]
+                    : initialOrder;
+            return updatedOrder - initialOrder;
+        }
+        const stockForDistribution = (dId: number) => {
+            if (productStockPerDistribution[dId] != null) {
+                let distributionStock = productStockPerDistribution[dId];
+                return distributionStock - diffForDistribution(dId);
             }
-
-            return globalStock;
-        } else {
-            const isDistributionStock =
-                catalog != null &&
-                catalog.hasStockManagement &&
-                stocksPerProductDistribution != null &&
-                stocksPerProductDistribution[product.id] != null &&
-                stocksPerProductDistribution[product.id][distribution.id] != null;
-            let distributionStock = null;
-            if (isDistributionStock) {
-                distributionStock = stocksPerProductDistribution[product.id][distribution.id];
-                var initialOrder: number =
-                    initialOrders[distribution.id] != null && initialOrders[distribution.id][product.id] != null
-                        ? initialOrders[distribution.id][product.id]
-                        : 0;
-                var updatedOrder: number =
-                    updatedOrders[distribution.id] != null && updatedOrders[distribution.id][product.id] != null
-                        ? updatedOrders[distribution.id][product.id]
-                        : initialOrder;
-                var added = updatedOrder - initialOrder;
-                distributionStock -= added;
-            }
-            return distributionStock;
+            return null;
         }
 
-    }, [product, catalog, addedOrders, stocksPerProductDistribution, initialOrders, updatedOrders, distribution]);
+        if (product.stockTracking === StockTracking.Global) {
+            // initialize with lowest stock value in a distribution from the server (even though should all be equel)
+            let globalStock = Object.values(productStockPerDistribution)
+                .reduce(
+                    (min: number, v: number): number => Math.min(min, v),
+                    Number.MAX_VALUE
+                );
+            // add/remove stock variation of current edit
+            globalStock = Object.keys(productStockPerDistribution)
+                .reduce(
+                    (acc: number, dId: string): number =>
+                        acc - diffForDistribution(parseInt(dId, 10))
+                    ,
+                    globalStock
+                );
 
-    return [stocks];
+            return globalStock === Number.MAX_VALUE ? [null, false] : [globalStock, false];
+        } else {
+            if (productStockPerDistribution == null)
+                return [null, false];
+            if (distribution != null) {
+                return [stockForDistribution(distribution.id), false];
+            }
+            const distributions = distribution != null ? [distribution] : catalog.distributions;
+            const distributionStock = distributions.reduce((acc, d) => {
+                const stock = stockForDistribution(d.id);
+                return Math.min(acc, stock ?? Number.MAX_VALUE);
+            }, Number.MAX_VALUE);
+            return distributionStock === Number.MAX_VALUE ? [null, false] : [distributionStock, true];
+        }
+
+    }, [product, catalog, stocksPerProductDistribution, initialOrders, updatedOrders, distribution]);
+
+    return [stocks, isLeast] as const;
 
 }

@@ -15,6 +15,7 @@ declare global {
       userName?: string;
       userEmail?: string;
       version: string;
+      clearNotifications: () => void;
     };
     // GTM data layer
     dataLayer: any[];

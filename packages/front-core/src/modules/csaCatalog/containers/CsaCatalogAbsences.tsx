@@ -67,7 +67,7 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
     const newAbsenceDistributions = absenceDistributionsIds
       ? [...absenceDistributionsIds]
       : [];
-    if(value < 0)
+    if (value < 0)
       delete newAbsenceDistributions[index];
     else
       newAbsenceDistributions[index] = value;
@@ -125,10 +125,10 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
 
   const isDisabledDistribution = React.useCallback(
     (index: number) => {
-      return !!absenceDistributionsIds && 
+      return !!absenceDistributionsIds &&
         passedDistributions.some(
-            (d) => d.id === absenceDistributionsIds[index],
-          );
+          (d) => d.id === absenceDistributionsIds[index],
+        );
     },
     [absenceDistributionsIds, passedDistributions],
   );
@@ -176,7 +176,7 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
     >
       <Block
         title={t('absences')}
-        icon={<MediumActionIcon id={CamapIconId.vacation} />}
+        icon={<MediumActionIcon id={CamapIconId.absent} />}
         sx={{ height: '100%' }}
       >
         <Typography sx={{ whiteSpace: 'pre-wrap', textAlign: 'center' }}>
@@ -225,8 +225,8 @@ const CsaCatalogAbsences = ({ adminMode, onNext }: CsaCatalogAbsencesProps) => {
                   title={
                     isDisabledDistribution(i)
                       ? `${t(
-                          'orderEndDateIsPassedItsTooLateToChangeThisAbsence',
-                        )}`
+                        'orderEndDateIsPassedItsTooLateToChangeThisAbsence',
+                      )}`
                       : ''
                   }
                 >

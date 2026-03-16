@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   getEnrichedDistribution,
   RestCsaCatalog,
@@ -40,8 +40,6 @@ interface CsaCatalogContextProps {
   setSubscriptionAbsences: (value?: RestCsaSubscriptionAbsences) => void;
   defaultOrder: Record<number, number>;
   setDefaultOrder: (value: Record<number, number>) => void;
-  addedOrders: Record<number, number>;
-  setAddedOrders: (value: Record<number, number>) => void;
   stocksPerProductDistribution: RestStocksPerProductDistribution | undefined;
   setStocksPerProductDistribution: (
     value: RestStocksPerProductDistribution | undefined,
@@ -49,6 +47,7 @@ interface CsaCatalogContextProps {
   adminMode?: boolean | undefined;
   initialOrders: Orders;
   remainingDistributions: number;
+  cancelOrder: (distributionId: number) => void;
 }
 
 export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
@@ -71,13 +70,12 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   setSubscriptionAbsences: () => { },
   defaultOrder: {},
   setDefaultOrder: () => { },
-  addedOrders: {},
-  setAddedOrders: () => { },
   stocksPerProductDistribution: {},
   setStocksPerProductDistribution: () => { },
   adminMode: false,
   initialOrders: {},
   remainingDistributions: 0,
+  cancelOrder: () => { },
 });
 
 const CsaCatalogContextProvider = ({
@@ -106,9 +104,6 @@ const CsaCatalogContextProvider = ({
     Record<number, number>
   >({});
   const [otherError, setOtherError] = React.useState<string | undefined>();
-  const [addedOrders, setAddedOrders] = React.useState<Record<number, number>>(
-    {},
-  );
   const [stocksPerProductDistribution, setStocksPerProductDistribution] =
     React.useState<RestStocksPerProductDistribution | undefined>({});
 
@@ -154,7 +149,6 @@ const CsaCatalogContextProvider = ({
   // reset stocks data whenever new stock information arrives with a subscription
   React.useEffect(() => {
     getStocksPerProductDistribution();
-    setAddedOrders({});
   }, [getStocksPerProductDistribution, subscription]);
 
   const distributions = React.useMemo(() => {
@@ -232,13 +226,44 @@ const CsaCatalogContextProvider = ({
     }
   }, [isConstOrders, setDefaultOrder, subscription]);
 
+  const cancelOrder = useCallback((distributionId: number) => {
+    const upd = { ...updatedOrders };
+
+    if (!upd[distributionId]) {
+      upd[distributionId] = {};
+    }
+    catalog?.products.forEach(p => {
+      upd[distributionId][p.id] = 0;
+    })
+
+    setUpdatedOrders(upd);
+  }, [catalog?.products, updatedOrders, setUpdatedOrders]);
+
+  const setDefaultOrderWithStockTracking = useCallback((newDefaultOrder: Record<number, number>) => {
+    setUpdatedOrders(updatedOrders => {
+      const upd = { ...updatedOrders };
+      for (const d of distributions) {
+        if (d.state === RestDistributionState.NotYetOpen || d.state === RestDistributionState.Open) {
+          upd[d.id] = { ...newDefaultOrder };
+        }
+      }
+      return upd
+    });
+    setDefaultOrder(newDefaultOrder);
+  }, [distributions]);
+
   const remainingDistributions = React.useMemo(() => {
-    if (!subscription) return 0;
     return distributions.filter(
-      d => subscription.distributions.some(d2 => d2.id === d.id) &&
-        isAfter(new Date(d.distributionStartDate), new Date()) &&
-        d.state !== RestDistributionState.Absent
-    ).length;
+      d => {
+        if (subscription) {
+          return subscription.distributions.some(d2 => d2.id === d.id) &&
+            isAfter(new Date(d.distributionStartDate), new Date()) &&
+            d.state !== RestDistributionState.Absent
+        } else {
+          return isAfter(new Date(d.distributionStartDate), new Date()) &&
+            d.state !== RestDistributionState.Absent
+        }
+      }).length;
   }, [subscription, distributions]);
 
   /** */
@@ -268,14 +293,13 @@ const CsaCatalogContextProvider = ({
         setSubscription,
         setSubscriptionAbsences,
         defaultOrder,
-        setDefaultOrder,
-        addedOrders,
-        setAddedOrders,
+        setDefaultOrder: setDefaultOrderWithStockTracking,
         stocksPerProductDistribution,
         setStocksPerProductDistribution,
         adminMode,
         initialOrders,
         remainingDistributions,
+        cancelOrder,
       }}
     >
       {children}
