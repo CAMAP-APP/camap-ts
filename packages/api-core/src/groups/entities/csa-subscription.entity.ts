@@ -1,11 +1,13 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { OperationEntity } from '../../payments/entities/operation.entity';
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';
@@ -25,6 +27,12 @@ export class CsaSubscriptionEntity {
 
   @Column('datetime')
   endDate: Date;
+
+  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP()" })
+  cdate: Date;
+
+  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP()", onUpdate: "CURRENT_TIMESTAMP()" })
+  mdate: Date;
 
   // @Column('tinyint', { width: 1 })
   // isPaid: boolean;

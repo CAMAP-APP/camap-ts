@@ -22,7 +22,7 @@ Après avoir modifié des entités, on peut générer une migration en rentrant 
 
 ```
   cd packages/api-core
-  typeorm migration:generate -n NomDeMaMigration
+  npm run typeorm migration:generate -n NomDeMaMigration
 ```
 
 Cela va générer une migration dans src/migrations/. Vous pouvez compléter le code de la migration si besoin. Attention, dans ce contexte on a pas les classes métier de l'app car les migrations sont des scripts "standalone".
@@ -35,8 +35,8 @@ Pour faire tourner des migrations, il faut aussi se logger dans le container.
 
 ```
   cd packages/api-core
-  typeorm migration:show // Pour voir les migrations pas encore effecutée ici
-  typeorm migration:run // Pour faire tourner les migrations
+  npm run typeorm migration:show // Pour voir les migrations pas encore effecutée ici
+  npm run typeorm migration:run // Pour faire tourner les migrations
 ```
 
 Vous pourrez utiliser `npm i -g typeorm` pour avoir la cli typeorm dans le container
