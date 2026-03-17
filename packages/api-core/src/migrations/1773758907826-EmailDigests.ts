@@ -1,10 +1,10 @@
 import {MigrationInterface, QueryRunner} from "typeorm";
 
-export class EmailDigest1773221580440 implements MigrationInterface {
-    name = 'EmailDigest1773221580440'
+export class EmailDigests1773758907826 implements MigrationInterface {
+    name = 'EmailDigests1773758907826'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TABLE \`NotificationMail\` (\`id\` int NOT NULL AUTO_INCREMENT, \`htmlBody\` mediumtext NULL, \`textBody\` mediumtext NULL, \`digest\` int NOT NULL, \`recipients\` mediumtext NULL, \`attachments\` mediumtext NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
+        await queryRunner.query(`CREATE TABLE \`NotificationMail\` (\`id\` int NOT NULL AUTO_INCREMENT, \`cdate\` datetime(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6), \`htmlBody\` mediumtext NULL, \`textBody\` mediumtext NULL, \`digest\` int NOT NULL, \`subject\` varchar(256) NOT NULL, \`groupId\` int NOT NULL, \`attachments\` mediumtext NULL, PRIMARY KEY (\`id\`)) ENGINE=InnoDB`);
         await queryRunner.query(`ALTER TABLE \`Subscription\` ADD \`cdate\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP`);
         await queryRunner.query(`ALTER TABLE \`Subscription\` ADD \`mdate\` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP()`);
     }

@@ -28,12 +28,6 @@ export class CsaSubscriptionEntity {
   @Column('datetime')
   endDate: Date;
 
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP()" })
-  cdate: Date;
-
-  @UpdateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP()", onUpdate: "CURRENT_TIMESTAMP()" })
-  mdate: Date;
-
   // @Column('tinyint', { width: 1 })
   // isPaid: boolean;
 

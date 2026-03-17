@@ -1,4 +1,5 @@
 import { GroupEntity } from 'src/groups/entities/group.entity';
+import { UserEntity } from 'src/users/models/user.entity';
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 /*
@@ -43,25 +44,9 @@ export class NotificationMailEntity {
   @JoinColumn([{ name: 'groupId', referencedColumnName: 'id' }])
   group: Promise<GroupEntity>;
 
-  @Column('mediumtext', { name: 'recipients', nullable: true })
-  raw_recipients: string | null;
-
-  get recipients(): Array<{ name?: string; email: string; userId?: number }> | null {
-    if (!this.raw_recipients || this.raw_recipients.trim() === '') return null;
-    try {
-      return JSON.parse(this.raw_recipients);
-    } catch (error) {
-      throw new Error("can't parse NotificationMailEntity:recipients");
-    }
-  }
-
-  set recipients(value: Array<{ name?: string; email: string; userId?: number }> | null) {
-    if (!value) {
-      this.raw_recipients = null;
-    } else {
-      this.raw_recipients = JSON.stringify(value);
-    }
-  }
+  @Column('int', { name: 'recipientId' })
+  @JoinColumn([{ name: 'recipientId', referencedColumnName: 'id' }])
+  recipient: Promise<UserEntity>;
 
   @Column('mediumtext', { name: 'attachments', nullable: true })
   raw_attachments: string | null;
