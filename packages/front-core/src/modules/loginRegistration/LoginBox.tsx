@@ -59,7 +59,7 @@ const LoginBox = ({
           password: '',
         },
       });
-      let errorMessage = (e  instanceof Error) ? e.message : ''+e;
+      let errorMessage = (e instanceof Error) ? e.message : '' + e;
       if (errorMessage === 'wrongPassword') {
         await recordBadLoginMutation();
         errorMessage = 'wrongCredentials';
@@ -98,6 +98,7 @@ const LoginBox = ({
             <Box pt={2} pb={2}>
               <LoadingButton
                 fullWidth
+                type="submit"
                 onClick={() => handleSubmit()}
                 variant="contained"
                 startIcon={<CamapIcon id={CamapIconId.user} />}
