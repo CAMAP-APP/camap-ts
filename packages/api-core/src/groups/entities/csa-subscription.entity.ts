@@ -1,11 +1,13 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { OperationEntity } from '../../payments/entities/operation.entity';
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';

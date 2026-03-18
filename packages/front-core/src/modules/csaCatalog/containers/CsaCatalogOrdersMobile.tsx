@@ -275,7 +275,7 @@ const CsaCatalogOrdersMobile = ({
       <span>{/* prevents disable state to inhibit tooltip */}
         <SuccessButton
           variant="contained"
-          disabled={(catalog?.distribMinOrdersTotal ?? 0) > defaultOrderTotal}
+          disabled={isConstOrders ? defaultOrderTotal === 0 : (catalog?.distribMinOrdersTotal ?? 0) > defaultOrderTotal}
           onClick={async () => {
             await updateDefaultOrders();
             if (isConstOrDefaults) {
