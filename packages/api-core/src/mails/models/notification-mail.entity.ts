@@ -10,6 +10,9 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, Primary
 enum DigestType {
   HOURLY = 1,
   DAILY = 2,
+
+  COORDINATOR_HOURLY = 11,
+  COORDINATOR_DAILY = 12,
 }
 
 @Entity('NotificationMail')
