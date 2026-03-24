@@ -84,24 +84,22 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setSubscription(updatedDefaultOrderData);
   }, [updatedDefaultOrderData, setSubscription]);
 
-  const onPresentationNext = () => {
-    if (step !== 'presentation') return;
-    setStep('defaultOrder');
-    if (!isConstOrders && catalog?.distribMinOrdersTotal === 0) {
-      onDefaultOrderNext();
+  const gotoDefaultOrder = () => {
+    console.log(isConstOrders, catalog?.distribMinOrdersTotal);
+    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0) {
+      gotoAbsences();
     } else {
+      setStep('defaultOrder');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const onDefaultOrderNext = async () => {
-    console.log(step);
-    if (step !== 'defaultOrder') return;
-    setStep('absences');
+  const gotoAbsences = async () => {
     console.log(catalog?.absentDistribsMaxNb);
     if ((catalog?.absentDistribsMaxNb ?? 0) <= 0) {
       onAbsencesNext();
     } else {
+      setStep('absences');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -121,7 +119,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
 
     if (!checkDefaultOrderData) return false;
 
-    onDefaultOrderNext();
+    gotoAbsences();
     return true;
   };
 
@@ -217,7 +215,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
 
       {/* This is the flow when user is not subscribed */}
       {step === 'presentation' && (
-        <CsaCatalogPresentation onNext={onPresentationNext} />
+        <CsaCatalogPresentation onNext={gotoDefaultOrder} />
       )}
       {step === 'defaultOrder' && (
         <Box
