@@ -5,7 +5,6 @@ import React from 'react';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
-import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
 import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
@@ -104,7 +103,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     }
   };
 
-  const checkDefaultOrderAndContinue = async () => {
+  const checkInitialOrdersAndContinue = async () => {
     const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
       Object.keys(defaultOrder).map((productId) => {
         const productIdNumber = parseInt(productId, 10);
@@ -221,7 +220,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         <Box
           width={'100%'}
         >
-          <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
+          <CsaCatalogOrdersMobile onNext={checkInitialOrdersAndContinue} mode={isConstOrders || catalog?.catalogMinOrdersTotal === 0 ? 'defaultOrder' : 'orders'}/>
         </Box>
       )}
       {step === 'absences' && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}

@@ -208,23 +208,33 @@ const CsaCatalogContextProvider = ({
   }, [catalog]);
 
   React.useEffect(() => {
-    if (!subscription) return;
-    if (isConstOrders) {
+    if (!subscription) {
+      if(!catalog) return;
+      // if no subscription, initialize the default order with 0 for all products
       setDefaultOrder(
-        subscription.distributions[0].orders.reduce((acc, d) => {
-          acc[d.productId] = d.qty;
+        catalog.products.reduce((acc, p) => {
+          acc[p.id] = 0;
           return acc;
         }, {} as Record<number, number>),
       );
     } else {
-      setDefaultOrder(
-        subscription.defaultOrder.reduce((acc, d) => {
-          acc[d.productId] = d.quantity;
-          return acc;
-        }, {} as Record<number, number>),
-      );
+      if (isConstOrders) {
+        setDefaultOrder(
+          subscription.distributions[0].orders.reduce((acc, d) => {
+            acc[d.productId] = d.qty;
+            return acc;
+          }, {} as Record<number, number>),
+        );
+      } else {
+        setDefaultOrder(
+          subscription.defaultOrder.reduce((acc, d) => {
+            acc[d.productId] = d.quantity;
+            return acc;
+          }, {} as Record<number, number>),
+        );
+      }
     }
-  }, [isConstOrders, setDefaultOrder, subscription]);
+  }, [isConstOrders, setDefaultOrder, subscription, catalog]);
 
   const cancelOrder = useCallback((distributionId: number) => {
     const upd = { ...updatedOrders };
