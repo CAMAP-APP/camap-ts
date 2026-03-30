@@ -1,7 +1,7 @@
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
 import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
-import { Alert, Button, Divider, Paper, Typography } from "@mui/material";
+import { Alert, Box, Button, Divider, Paper, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
@@ -106,10 +106,16 @@ const VendorDashContent = ({
 }) => {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
     return <>
-        <Typography variant="h2" gutterBottom>{tVendorDash("welcome")}</Typography>
-        <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+        <Box sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        }}>
+            <Typography variant="h2">{tVendorDash("welcome")}</Typography>
+            <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+        </Box>
         <Divider sx={{ mt: 2, mb: 2 }} />
-        <VendorClaims onClaim={() => { refetchClaimedVendors() }} />
+        <VendorDashDistributions vendorId={vendor.id} />
     </>
 }
 
@@ -174,6 +180,12 @@ const VendorDashboardRouter = (props: { basePath: string }) => {
             element: <VendorContracts vendorId={vendor.id} />
         },
         {
+            label: tVendorDash('vendorDashboardDistributions'),
+            icon: <CamapIcon id={CamapIconId.distribution} />,
+            path: '/distributions',
+            element: <VendorDashDistributions vendorId={vendor.id} />
+        },
+        {
             label: tVendorDash('vendorDashboardDocuments'),
             icon: <CamapIcon id={CamapIconId.file} />,
             path: '/documents',
@@ -184,12 +196,6 @@ const VendorDashboardRouter = (props: { basePath: string }) => {
             icon: <CamapIcon id={CamapIconId.image} />,
             path: '/images',
             element: <VendorEditImages vendorId={vendor.id} />
-        },
-        {
-            label: tVendorDash('vendorDashboardDistributions'),
-            icon: <CamapIcon id={CamapIconId.delivery} />,
-            path: '/distributions',
-            element: <VendorDashDistributions vendorId={vendor.id} />
         }
     ]
 
