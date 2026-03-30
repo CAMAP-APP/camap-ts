@@ -353,6 +353,7 @@ const CsaCatalogOrdersMobile = ({
     if (catalog?.distribMinOrdersTotal && catalog.distribMinOrdersTotal > 0) {
       if (!defaultOrdersMode) {
         for(const d of distributions) {
+          if(d.state === RestDistributionState.Absent || absenceDistributionsIds?.includes(d.id)) continue;
           const ditribTotal = computeOrderTotal(orders?.[d.id]);
           if(ditribTotal < catalog.distribMinOrdersTotal) {
             if(d.id !== distribution.id) {
