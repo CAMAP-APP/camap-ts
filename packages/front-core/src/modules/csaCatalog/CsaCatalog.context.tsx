@@ -255,14 +255,17 @@ const CsaCatalogContextProvider = ({
     setUpdatedOrders(updatedOrders => {
       const upd = { ...updatedOrders };
       for (const d of distributions) {
-        if (d.state === RestDistributionState.NotYetOpen || d.state === RestDistributionState.Open) {
+        if (
+          (d.state === RestDistributionState.NotYetOpen || d.state === RestDistributionState.Open)
+          && !absenceDistributionsIds?.includes(d.id)
+        ) {
           upd[d.id] = { ...newDefaultOrder };
         }
       }
       return upd
     });
     setDefaultOrder(newDefaultOrder);
-  }, [distributions]);
+  }, [distributions, absenceDistributionsIds]);
 
   const remainingDistributions = React.useMemo(() => {
     return distributions.filter(
@@ -270,18 +273,20 @@ const CsaCatalogContextProvider = ({
         if (subscription) {
           return subscription.distributions.some(d2 => d2.id === d.id) &&
             isAfter(new Date(d.distributionStartDate), new Date()) &&
+            !absenceDistributionsIds?.includes(d.id) &&
             d.state !== RestDistributionState.Absent
         } else {
           return isAfter(new Date(d.distributionStartDate), new Date()) &&
+            !absenceDistributionsIds?.includes(d.id) &&
             d.state !== RestDistributionState.Absent
         }
       }).length;
-  }, [subscription, distributions]);
+  }, [subscription, distributions, absenceDistributionsIds]);
 
   const minSubscriptionOrder = React.useMemo(() => {
     return !!subscription
       ? subscription?.minSubscriptionOrder
-      : (catalog?.catalogMinOrdersTotal ?? 0) / distributions.length * remainingDistributions;
+      : Math.floor((catalog?.catalogMinOrdersTotal ?? 0) / distributions.length * remainingDistributions);
   }, [subscription, catalog, distributions, remainingDistributions]);
 
   /** */

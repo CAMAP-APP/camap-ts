@@ -10,7 +10,6 @@ import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
 import MediumActionIcon from './containers/MediumActionIcon';
 import {
-  useRestCheckSubscriptionDefaultOrderPost,
   useRestSubscriptionPost,
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
@@ -55,8 +54,6 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updateSubscriptionDefaultOrder,
     { data: updatedDefaultOrderData, error: updateDefaultOrderError },
   ] = useRestUpdateSubscriptionDefaultOrderPost();
-  const [checkSubscriptionDefaultOrder, { error: checkDefaultOrderError }] =
-    useRestCheckSubscriptionDefaultOrderPost(catalogId);
 
   React.useEffect(() => {
     if (
@@ -83,44 +80,26 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setSubscription(updatedDefaultOrderData);
   }, [updatedDefaultOrderData, setSubscription]);
 
-  const gotoDefaultOrder = () => {
-    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0 && (catalog?.catalogMinOrdersTotal ?? 0) === 0) {
-      gotoAbsences();
-    } else {
-      setStep('requiredOrders');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
-
   const gotoAbsences = async () => {
     console.log(catalog?.absentDistribsMaxNb);
     if ((catalog?.absentDistribsMaxNb ?? 0) <= 0) {
-      onAbsencesNext();
+      gotoDefaultOrder();
     } else {
       setStep('absences');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const checkInitialOrdersAndContinue = async () => {
-    const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
-      Object.keys(defaultOrder).map((productId) => {
-        const productIdNumber = parseInt(productId, 10);
-        const product = catalog!.products.find((p) => p.id === productIdNumber);
-        return {
-          productId: productIdNumber,
-          quantity: defaultOrder[productIdNumber],
-          productPrice: product!.price,
-        };
-      }),
-    );
-    if (!checkDefaultOrderData) return false;
-
-    gotoAbsences();
-    return true;
+  const gotoDefaultOrder = () => {
+    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0 && (catalog?.catalogMinOrdersTotal ?? 0) === 0) {
+      finishWizard();
+    } else {
+      setStep('requiredOrders');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
-  const onAbsencesNext = async () => {
+  const finishWizard = async () => {
     const subscriptionSucceeded = await createSubscription({
       userId,
       catalogId,
@@ -129,20 +108,23 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
       absentDistribIds: absenceDistributionsIds,
-      initialOrders: Object.keys(updatedOrders).map((distributionId) => ({
-        id: parseInt(distributionId, 10),
-        orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
-          productId: parseInt(productId, 10),
-          qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
-        })),
+      initialOrders: Object.keys(updatedOrders)
+        .filter((distributionId) => !absenceDistributionsIds?.includes(parseInt(distributionId, 10)))
+        .map((distributionId) => ({
+          id: parseInt(distributionId, 10),
+          orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
+            productId: parseInt(productId, 10),
+            qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
+          })),
       }))
     });
 
-    if (!subscriptionSucceeded) return;
+    if (!subscriptionSucceeded) return false;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setStep('review');
+    return true;
   };
 
   React.useEffect(() => {
@@ -197,8 +179,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updatedSubscriptionError ||
     postSubscriptionError ||
     contextError ||
-    updateDefaultOrderError ||
-    checkDefaultOrderError;
+    updateDefaultOrderError;
 
   if (!catalog) return <CircularProgressBox />;
 
@@ -220,16 +201,16 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
 
       {/* This is the flow when user is not subscribed */}
       {step === 'presentation' && (
-        <CsaCatalogPresentation onNext={gotoDefaultOrder} />
+        <CsaCatalogPresentation onNext={gotoAbsences} />
       )}
+      {step === 'absences' && <CsaCatalogAbsences onNext={async () => gotoDefaultOrder()} adminMode={adminMode} />}
       {step === 'requiredOrders' && (
         <Box
           width={'100%'}
         >
-          <CsaCatalogOrdersMobile onNext={checkInitialOrdersAndContinue} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
+          <CsaCatalogOrdersMobile onNext={finishWizard} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
         </Box>
       )}
-      {step === 'absences' && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
 
       {/* This is the end of the flow once subscribed */}
       {step === 'review' && !isConstOrders && (
