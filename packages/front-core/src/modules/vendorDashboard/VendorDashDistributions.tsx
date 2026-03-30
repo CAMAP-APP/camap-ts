@@ -26,16 +26,22 @@ const MultiDistribRow = ({ distributions }: { distributions: VendorDistributions
         for(const order of d.userOrders) {
             let p = products.get(order.product.id) ?? {
                 ...order.product,
-                ordered: 0
+                ordered: 0,
+                group: d.catalog.group,
+                catalog: d.catalog,
+                distribution: d
             };
             p.ordered += order.quantity;
             products.set(p.id, p);
         }
 
         return products;
-    }, new Map<number, ProductLike & { ordered: number }>())
-
-    // console.log(distributions, products);
+    }, new Map<number, ProductLike & {
+        ordered: number,
+        group: { id: number },
+        catalog: VendorDistributions['distributions'][number]['catalog'],
+        distribution: VendorDistributions['distributions'][number]}
+    >())
 
     return <>
         <TableRow>
@@ -49,7 +55,14 @@ const MultiDistribRow = ({ distributions }: { distributions: VendorDistributions
         </TableRow>
         {Array.from(products.values()).map(p => 
             <TableRow key={p.id}>
-                <TableCell>{formatSmartQt(p, {quantity: p.ordered}, { forceShowSingleUnit: true })}</TableCell>
+                <TableCell>
+                    {formatSmartQt(p, {quantity: p.ordered}, { forceShowSingleUnit: true })}
+                </TableCell>
+                <TableCell>
+                    <a href={`/user/choose?group=${distributions[0].catalog.group.id}&redirect=/contractAdmin/distributions/${distributions[0].catalog.id}`}>
+                        <Typography>{p.catalog.name}</Typography>
+                    </a>
+                </TableCell>
             </TableRow>
         )}
     </>
@@ -66,12 +79,12 @@ const DistributionByGroupDateRow = ({
         return md;
     }, new Map<number, typeof distributions>)
 
-    console.log(multiDistribs.entries());
-
     return <>
         <TableRow>
             <TableCell colSpan={3}>
-                <Typography variant="h6">{group.name}</Typography>
+                <Typography variant="h6">
+                    <a href={`/user/choose?group=${group.id}&redirect=/contractAdmin`}>{group.name}</a>
+                </Typography>
             </TableCell>
         </TableRow>
         {Array.from(multiDistribs.entries()).map(([id, distributions]) => 
@@ -95,7 +108,7 @@ const DistributionByDateRow = ({ date, groups, forceOpen=false }: {
                     size="small"
                     onClick={() => setOpen(!open)}
                 >
-                    <CamapIcon id={open ? CamapIconId.chevronUp : CamapIconId.chevronDown} />
+                    <CamapIcon id={open ? CamapIconId.chevronDown : CamapIconId.chevronRight} />
                 </IconButton>
             </TableCell>
         <TableCell colSpan={1}>
@@ -144,8 +157,6 @@ function VendorDashDistributions({ vendorId }:{ vendorId: number }) {
         },
         new Map<number, Map<number, VendorDistributions>>
     ), [nextDistributions]);
-
-    console.log(nextDistributions, distributionsByDateAndGroup);
 
     return <Paper sx={{ padding: 1 }}>
         <Typography variant="h5">{tVendorDash("dashDistributionsTitle")}</Typography>

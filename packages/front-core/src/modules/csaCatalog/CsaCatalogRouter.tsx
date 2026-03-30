@@ -5,7 +5,6 @@ import React from 'react';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
-import CsaCatalogDefaultOrder from './containers/CsaCatalogDefaultOrder';
 import CsaCatalogOrdersMobile from './containers/CsaCatalogOrdersMobile';
 import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
@@ -41,7 +40,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     isConstOrders
   } = React.useContext(CsaCatalogContext);
 
-  const [step, setStep] = React.useState<'presentation' | 'absences' | 'defaultOrder' | 'review'>(
+  const [step, setStep] = React.useState<'presentation' | 'absences' | 'requiredOrders' | 'review'>(
     !initialSubscriptionId ? 'presentation' : 'review'
   );
   const [
@@ -84,29 +83,26 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     setSubscription(updatedDefaultOrderData);
   }, [updatedDefaultOrderData, setSubscription]);
 
-  const onPresentationNext = () => {
-    if (step !== 'presentation') return;
-    setStep('defaultOrder');
-    if (!isConstOrders && catalog?.distribMinOrdersTotal === 0) {
-      onDefaultOrderNext();
+  const gotoDefaultOrder = () => {
+    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0 && (catalog?.catalogMinOrdersTotal ?? 0) === 0) {
+      gotoAbsences();
     } else {
+      setStep('requiredOrders');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const onDefaultOrderNext = async () => {
-    console.log(step);
-    if (step !== 'defaultOrder') return;
-    setStep('absences');
+  const gotoAbsences = async () => {
     console.log(catalog?.absentDistribsMaxNb);
     if ((catalog?.absentDistribsMaxNb ?? 0) <= 0) {
       onAbsencesNext();
     } else {
+      setStep('absences');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  const checkDefaultOrderAndContinue = async () => {
+  const checkInitialOrdersAndContinue = async () => {
     const checkDefaultOrderData = await checkSubscriptionDefaultOrder(
       Object.keys(defaultOrder).map((productId) => {
         const productIdNumber = parseInt(productId, 10);
@@ -118,10 +114,9 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         };
       }),
     );
-
     if (!checkDefaultOrderData) return false;
 
-    onDefaultOrderNext();
+    gotoAbsences();
     return true;
   };
 
@@ -133,10 +128,18 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
-      absentDistribIds: absenceDistributionsIds
+      absentDistribIds: absenceDistributionsIds,
+      initialOrders: Object.keys(updatedOrders).map((distributionId) => ({
+        id: parseInt(distributionId, 10),
+        orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
+          productId: parseInt(productId, 10),
+          qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
+        })),
+      }))
     });
 
     if (!subscriptionSucceeded) return;
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setStep('review');
@@ -217,13 +220,13 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
 
       {/* This is the flow when user is not subscribed */}
       {step === 'presentation' && (
-        <CsaCatalogPresentation onNext={onPresentationNext} />
+        <CsaCatalogPresentation onNext={gotoDefaultOrder} />
       )}
-      {step === 'defaultOrder' && (
+      {step === 'requiredOrders' && (
         <Box
           width={'100%'}
         >
-          <CsaCatalogDefaultOrder onNext={checkDefaultOrderAndContinue} />
+          <CsaCatalogOrdersMobile onNext={checkInitialOrdersAndContinue} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
         </Box>
       )}
       {step === 'absences' && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}

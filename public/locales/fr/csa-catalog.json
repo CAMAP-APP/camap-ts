@@ -68,5 +68,7 @@
   "defaultOrderForDistribsUntil": "Jusqu'à la fin du contrat le {{date}}.",
   "defaultOrderForNextDistribs": "{{distrib}} distributions à venir.",
   "constOrder": "Contenu du panier identique sur toute la durée du contrat",
-  "totalOrdersTooLow": "Ce contrat a un minimum de commande par distribution de {{minOrderTotal}}"
+  "totalOrderTooLow": "Ce contrat a un minimum de commande par distribution de {{minOrderTotal}}",
+  "totalOrderTooLowAt": "Ce contrat a un minimum de commande par distribution de {{minOrderTotal}} (commande trop faible le {{distrib}})",
+  "totalContractTooLow": "Ce contrat a un minimum de commande sur la durée du contrat de {{minOrderTotal}}"
 }

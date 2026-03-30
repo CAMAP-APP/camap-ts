@@ -72,7 +72,7 @@ export enum CamapIconId {
   // youtube = 'youtube',
 
   absent = 'vacation',
-  contract = 'contract',
+  contract = 'book',
   constOrders = "refresh",
   varOrders = "basket",
   delivery = 'clock',

@@ -46,14 +46,11 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
   const { t } = useTranslation(['shop/default']);
   const { t: tUnit } = useTranslation(['unit']);
 
-  // eslint-disable-next-line no-empty-pattern
-  const [] = React.useState();
-
   if (!product) return null;
 
   return (
     <Dialog open onClose={onClose} maxWidth="md" scroll="body">
-      <Box p={3}>
+      <Box pt={8} pb={3} px={3}>
         <Tooltip title={`${t('close')}`}>
           <IconButton
             onClick={onClose}
@@ -89,7 +86,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
             <Typography
               component="h3"
               sx={{
-                fontSize: '1.4rem',
+                fontSize: '1.2rem',
                 textTransform: 'uppercase',
                 mb: 1,
                 mr: 4,
@@ -100,7 +97,7 @@ const ProductModal = ({ product, onClose }: ProductModalProps) => {
                 <Typography
                   component="span"
                   sx={{
-                    fontSize: '1.4rem',
+                    fontSize: '1.2rem',
                     textTransform: 'initial',
                   }}
                 >

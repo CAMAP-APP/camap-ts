@@ -59,6 +59,13 @@ type PostSubscriptionBody = {
   catalogId: number;
   defaultOrder: RestCsaDefaultOrder[];
   absentDistribIds: Array<number> | null;
+  initialOrders: Array<{
+    id: number;
+    orders: Array<{
+      productId: number;
+      qty: number;
+    }> | null;
+  }>;
 };
 
 export const useRestSubscriptionPost = () => {

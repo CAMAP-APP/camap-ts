@@ -1,9 +1,9 @@
 import { Alert, Box, Button, Modal } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
-import CsaCatalogDefaultOrder from '../csaCatalog/containers/CsaCatalogDefaultOrder';
 import { CsaCatalogContext } from '../csaCatalog/CsaCatalog.context';
 import { useRestSubscriptionPost } from '../csaCatalog/requests';
+import CsaCatalogOrdersMobile from 'modules/csaCatalog/containers/CsaCatalogOrdersMobile';
 
 interface BatchOrderCreateSubProps {
   selectedMember: number;
@@ -36,7 +36,7 @@ const BatchOrderCreateSub = ({
   };
 
   const handleDefaultOrder = async () => {
-    createSub(
+    return await createSub(
       Object.keys(defaultOrder).map((productId) => ({
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
@@ -45,17 +45,22 @@ const BatchOrderCreateSub = ({
   };
 
   const createSub = async (dOrder: any) => {
-    await createSubscription({
+    const succeeded = await createSubscription({
       userId: selectedMember!,
       catalogId,
       defaultOrder: dOrder,
       absentDistribIds: [],
     });
 
-    setShowDefaultOrderModal(false);
 
-    // // we have to recall /api/subscription to refresh orders displaying
-    refetchSubscriptions();
+    if(succeeded) {
+      setShowDefaultOrderModal(false);
+
+      // // we have to recall /api/subscription to refresh orders displaying
+      refetchSubscriptions();
+    }
+
+    return succeeded;
   };
 
   return (
@@ -91,7 +96,7 @@ const BatchOrderCreateSub = ({
             transform: 'translate(-50%, -50%)',
           }}
         >
-          <CsaCatalogDefaultOrder onNext={() => handleDefaultOrder()} />
+          <CsaCatalogOrdersMobile onNext={() => handleDefaultOrder()} mode="defaultOrder" />
         </Box>
       </Modal>
     </>

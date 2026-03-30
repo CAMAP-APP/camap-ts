@@ -2,6 +2,7 @@ import { useHasVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
 import { VendorClaims } from "./VendorClaims";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
+import { Box } from "@mui/material";
 
 const VendorHomeWidget = () => {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
@@ -34,11 +35,20 @@ const VendorHomeWidget = () => {
     return (
         <>
             <VendorClaims onClaim={() => refetchClaimedVendors()} sx={{ mb: 2 }} />
-            {claimedVendors && <div className="col-md-12 text-center" style={{ marginBottom: "1em"}}>
+            {claimedVendors && <Box sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                mb: 2,
+                '& .btn': {
+                    maxWidth: '100%',
+                    whiteSpace: 'unset',
+                },
+            }}>
                 <a className="btn btn-lg btn-primary" href="/vendor/dashboard">
                     <i className="icon icon-farmer" />&nbsp;{tVendorDash("goToVendorDashboard")}
                 </a>
-            </div>}
+            </Box>}
         </>
     );
 };
