@@ -10,7 +10,6 @@ import CsaCatalogPresentation from './containers/CsaCatalogPresentation';
 import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
 import MediumActionIcon from './containers/MediumActionIcon';
 import {
-  useRestCheckSubscriptionDefaultOrderPost,
   useRestSubscriptionPost,
   useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
@@ -55,8 +54,6 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updateSubscriptionDefaultOrder,
     { data: updatedDefaultOrderData, error: updateDefaultOrderError },
   ] = useRestUpdateSubscriptionDefaultOrderPost();
-  const [checkSubscriptionDefaultOrder, { error: checkDefaultOrderError }] =
-    useRestCheckSubscriptionDefaultOrderPost(catalogId);
 
   React.useEffect(() => {
     if (
@@ -111,20 +108,23 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
       absentDistribIds: absenceDistributionsIds,
-      initialOrders: Object.keys(updatedOrders).map((distributionId) => ({
-        id: parseInt(distributionId, 10),
-        orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
-          productId: parseInt(productId, 10),
-          qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
-        })),
+      initialOrders: Object.keys(updatedOrders)
+        .filter((distributionId) => !absenceDistributionsIds?.includes(parseInt(distributionId, 10)))
+        .map((distributionId) => ({
+          id: parseInt(distributionId, 10),
+          orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
+            productId: parseInt(productId, 10),
+            qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
+          })),
       }))
     });
 
-    if (!subscriptionSucceeded) return;
+    if (!subscriptionSucceeded) return false;
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setStep('review');
+    return true;
   };
 
   React.useEffect(() => {
@@ -179,8 +179,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updatedSubscriptionError ||
     postSubscriptionError ||
     contextError ||
-    updateDefaultOrderError ||
-    checkDefaultOrderError;
+    updateDefaultOrderError;
 
   if (!catalog) return <CircularProgressBox />;
 
@@ -204,7 +203,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       {step === 'presentation' && (
         <CsaCatalogPresentation onNext={gotoAbsences} />
       )}
-      {step === 'absences' && <CsaCatalogAbsences onNext={gotoDefaultOrder} adminMode={adminMode} />}
+      {step === 'absences' && <CsaCatalogAbsences onNext={async () => gotoDefaultOrder()} adminMode={adminMode} />}
       {step === 'requiredOrders' && (
         <Box
           width={'100%'}

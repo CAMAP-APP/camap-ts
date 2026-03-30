@@ -58,6 +58,7 @@ const CsaCatalogOrdersMobile = ({
     remainingDistributions,
     cancelOrder,
     minSubscriptionOrder,
+    absenceDistributionsIds,
   } = React.useContext(CsaCatalogContext);
 
   const isConstOrDefaults = (mode === 'defaultOrder') || isConstOrders;
@@ -70,10 +71,13 @@ const CsaCatalogOrdersMobile = ({
     if (mode === 'initialOrders') {
       return allDistributions
         .filter(d => [RestDistributionState.Open, RestDistributionState.NotYetOpen].includes(d.state))
-        .map(d => ({...d, state: RestDistributionState.Open}));
+        .map(d => ({
+          ...d,
+          state: absenceDistributionsIds?.includes(d.id) ? RestDistributionState.Absent : RestDistributionState.Open
+        }));
     }
     return allDistributions;
-  }, [allDistributions, mode]);
+  }, [allDistributions, mode, absenceDistributionsIds]);
 
   const [distributionIndex, setDistributionIndex] = React.useState(0);
 
