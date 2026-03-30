@@ -281,7 +281,7 @@ const CsaCatalogContextProvider = ({
   const minSubscriptionOrder = React.useMemo(() => {
     return !!subscription
       ? subscription?.minSubscriptionOrder
-      : (catalog?.catalogMinOrdersTotal ?? 0) / distributions.length * remainingDistributions;
+      : Math.floor((catalog?.catalogMinOrdersTotal ?? 0) / distributions.length * remainingDistributions);
   }, [subscription, catalog, distributions, remainingDistributions]);
 
   /** */
