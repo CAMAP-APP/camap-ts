@@ -21,11 +21,12 @@ import { CsaCatalogOrdersMobileHeader } from '../components/CsaCatalogOrdersMobi
 import CsaCatalogOrdersMobileProduct from '../components/CsaCatalogOrdersMobileProduct';
 import { MobileContainer } from './MobileContainer';
 import { formatCurrency } from 'camap-common';
+import { formatAbsoluteDate } from '@utils/fomat';
 
 interface CsacatalogProps {
   adminMode?: boolean;
   onNext: () => Promise<boolean>;
-  mode?: 'defaultOrder' | 'orders';
+  mode?: 'initialOrders' | 'defaultOrder' | 'orders';
 }
 
 const CsaCatalogOrdersMobile = ({
@@ -47,7 +48,7 @@ const CsaCatalogOrdersMobile = ({
     setUpdatedOrders,
     catalog,
     subscription,
-    distributions,
+    distributions: allDistributions,
     nextDistributionIndex,
     setSubscription,
     defaultOrder,
@@ -58,17 +59,28 @@ const CsaCatalogOrdersMobile = ({
     cancelOrder,
   } = React.useContext(CsaCatalogContext);
 
-  const isConstOrDefaults = mode === 'defaultOrder' || isConstOrders;
+  const isConstOrDefaults = (mode === 'defaultOrder') || isConstOrders;
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [toggleSetDefaultOrderSuccess, setToggleSetDefaultOrderSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const [distributionIndex, setDistributionIndex] = React.useState(nextDistributionIndex);
+  const distributions = useMemo(() => {
+    if (mode === 'initialOrders') {
+      return allDistributions
+        .filter(d => [RestDistributionState.Open, RestDistributionState.NotYetOpen].includes(d.state))
+        .map(d => ({...d, state: RestDistributionState.Open}));
+    }
+    return allDistributions;
+  }, [allDistributions, mode]);
+
+  const [distributionIndex, setDistributionIndex] = React.useState(0);
 
   useEffect(() => {
-    setDistributionIndex(nextDistributionIndex);
-  }, [nextDistributionIndex])
+    setDistributionIndex(
+      distributions.findIndex(d => d.id === allDistributions[nextDistributionIndex].id)
+    );
+  }, [nextDistributionIndex, allDistributions, distributions])
 
   const [
     updateSubscriptionDefaultOrder,
@@ -112,22 +124,21 @@ const CsaCatalogOrdersMobile = ({
     if (!catalog) return {};
 
     // performant deep copy to prevent mutation on initialOrders
-    const os = structuredClone(initialOrders);
-    Object.keys(os).forEach((distributionIdString) => {
-      const distributionId = parseInt(distributionIdString, 10);
+    const os = (mode === 'initialOrders') ? {} : structuredClone(initialOrders);
+    distributions.forEach(({ id: distributionId }) => {
       os[distributionId] = catalog.products.reduce((acc, p) => {
         const updatedDistribution = updatedOrders[distributionId];
         const updatedOrder = updatedDistribution && updatedDistribution[p.id];
         if (updatedOrder !== undefined) {
           acc[p.id] = updatedOrder;
         } else {
-          acc[p.id] = os[distributionId][p.id];
+          acc[p.id] = os[distributionId]?.[p.id] ?? 0;
         }
         return acc;
       }, {} as Record<number, number>);
     });
     return os;
-  }, [catalog, initialOrders, updatedOrders]);
+  }, [catalog, initialOrders, updatedOrders, mode, distributions]);
 
   const hasProductOrder = useCallback((distributionId: number) => {
     return Object.keys(orders[distributionId]).some((productId) =>
@@ -160,34 +171,36 @@ const CsaCatalogOrdersMobile = ({
       ? distributions[distributions.length - 1]
       : distributions[distributionIndex];
 
-  const total = useMemo(
-    () => {
-      if (!orders || !distribution.id || !orders[distribution.id]) return 0;
+  const computeOrderTotal = useCallback((order: Record<number, number>) => {
+    if(order == null) return 0;
+    return Object.keys(order).reduce((acc, pid) => {
+      const product = catalog?.products.find(
+        (p) => p.id === parseInt(pid, 10),
+      );
+      if (!product) return acc;
+      return acc + (order[parseInt(pid, 10)] ?? 0) * product.price;
+    }, 0);
+  }, [catalog?.products]);
 
-      return Object.keys(orders[distribution.id]).reduce((acc, pid) => {
-        const product = catalog?.products.find(
-          (p) => p.id === parseInt(pid, 10),
-        );
-        if (!product) return acc;
-        const quantity = orders[distribution.id][parseInt(pid, 10)];
-        acc += quantity * product.price;
-        return acc;
-      }, 0)
-    },
-    [catalog?.products, orders, distribution.id],
+  const total = useMemo(
+    () => computeOrderTotal(orders?.[distribution.id]),
+    [orders, distribution.id, computeOrderTotal],
   );
 
   const defaultOrderTotal = useMemo(
-    () => {
-      return Object.entries(defaultOrder).reduce((acc, [productId, quantity]) => {
-        const product: { price: number } | undefined = catalog?.products.find(
-          (p) => p.id === parseInt(productId, 10),
-        );
-        if (!product) return acc;
-        return acc + quantity * product.price;
-      }, 0);
-    }, [catalog?.products, defaultOrder]
+    () => computeOrderTotal(defaultOrder),
+    [defaultOrder, computeOrderTotal]
   );
+
+  const contractTotal = useMemo(
+    () => distributions.reduce((acc, distribution) => acc + computeOrderTotal(orders?.[distribution.id]), 0),
+    [orders, distributions, computeOrderTotal]
+  );
+  const contractBalance = useMemo(() => {
+    const initialBalance = subscription?.balance ?? 0;
+    const initialOrdersTotal = distributions.reduce((acc, distribution) => acc + computeOrderTotal(initialOrders?.[distribution.id]), 0);
+    return initialBalance + initialOrdersTotal - contractTotal;
+  }, [subscription?.balance, initialOrders, contractTotal, distributions, computeOrderTotal]);
 
   useUnsavedChangesPrompt({
     when: hasChanges,
@@ -233,7 +246,7 @@ const CsaCatalogOrdersMobile = ({
   }, [distribution.id, cancelOrder, onNext]);
 
   const setCurrentDistributionAsDefaultOrder = useCallback(() => {
-    if (!subscription || !catalog) return;
+    if (!catalog) return;
     (async () => {
       const defaultOrderProducts = catalog.products.map(p => {
         return {
@@ -241,19 +254,21 @@ const CsaCatalogOrdersMobile = ({
           quantity: orders[distribution.id][p.id] ?? 0
         }
       });
+      setDefaultOrder(Object.fromEntries(defaultOrderProducts.map(p => [p.productId, p.quantity])));
 
-      setToggleSetDefaultOrderSuccess(true);
-      const rqStart = Date.now();
-      await updateSubscriptionDefaultOrder(
-        defaultOrderProducts,
-        `${subscription.id}`,
-      )
-
-      setTimeout(() => {
-        setToggleSetDefaultOrderSuccess(false);
-      }, 2000 - (Date.now() - rqStart));
+      if (subscription) {
+        setToggleSetDefaultOrderSuccess(true);
+        const rqStart = Date.now();
+        await updateSubscriptionDefaultOrder(
+          defaultOrderProducts,
+          `${subscription.id}`,
+        )
+        setTimeout(() => {
+          setToggleSetDefaultOrderSuccess(false);
+        }, 2000 - (Date.now() - rqStart));
+      }
     })();
-  }, [subscription, catalog, orders, distribution.id, updateSubscriptionDefaultOrder])
+  }, [subscription, catalog, orders, distribution.id, updateSubscriptionDefaultOrder, setDefaultOrder])
 
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
 
@@ -261,7 +276,7 @@ const CsaCatalogOrdersMobile = ({
     setModalProduct(undefined);
   };
 
-  if (mode !== 'defaultOrder' && (!catalog || !distributions || !Object.keys(orders).length)) {
+  if (!catalog || (mode !== 'defaultOrder' && !distributions) || !Object.keys(orders).length) {
     return <CircularProgressBox />;
   }
 
@@ -288,7 +303,7 @@ const CsaCatalogOrdersMobile = ({
       </span>
     </Tooltip>)
   } else if (distribution.state !== RestDistributionState.Absent) {
-    if (distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
+    if (mode !== 'initialOrders' && distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
       buttons.push(<Button
         key="cancel-order"
         variant="outlined"
@@ -321,7 +336,7 @@ const CsaCatalogOrdersMobile = ({
         toggleSuccess={toggleSuccess}
         variant="contained"
         color="primary"
-        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total}
+        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total || (catalog?.catalogMinOrdersTotal ?? 0) > contractTotal}
         onClick={onSaveClick}
       >
         {tCommon('save')}
@@ -329,15 +344,31 @@ const CsaCatalogOrdersMobile = ({
       );
     }
   }
+
   const errors = [];
   if (distribution.state !== RestDistributionState.Absent) {
     if (catalog?.distribMinOrdersTotal && catalog.distribMinOrdersTotal > 0) {
-      if (!defaultOrdersMode && catalog.distribMinOrdersTotal > total) {
-        errors.push(<Typography key="error-total" color="error">{t('totalOrdersTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
+      if (!defaultOrdersMode) {
+        for(const d of distributions) {
+          const ditribTotal = computeOrderTotal(orders?.[d.id]);
+          if(ditribTotal < catalog.distribMinOrdersTotal) {
+            if(d.id !== distribution.id) {
+              errors.push(<Typography key="error-total-distrib" color="error">{t('totalOrderTooLowAt', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal), distrib: formatAbsoluteDate(d.distributionStartDate, false, true, true)})}</Typography>);
+            } else {
+              errors.push(<Typography key="error-total-distrib" color="error">{t('totalOrderTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
+            }
+            break;
+          }
+        }
       }
       if (defaultOrdersMode && catalog.distribMinOrdersTotal > defaultOrderTotal) {
-        errors.push(<Typography key="error-total" color="error">{t('totalOrdersTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
+        errors.push(<Typography key="error-total-distrib" color="error">{t('totalOrderTooLow', { minOrderTotal: formatCurrency(catalog.distribMinOrdersTotal) })}</Typography>);
       }
+    }
+  }
+  if(catalog?.catalogMinOrdersTotal && catalog.catalogMinOrdersTotal > 0) {
+    if (catalog.catalogMinOrdersTotal > contractTotal) {
+      errors.push(<Typography key="error-total-contract" color="error">{t('totalContractTooLow', { minOrderTotal: formatCurrency(catalog.catalogMinOrdersTotal) })}</Typography>);
     }
   }
 
@@ -345,12 +376,17 @@ const CsaCatalogOrdersMobile = ({
     <MobileContainer title={title}
       icon={isConstOrders ? CamapIconId.constOrders : CamapIconId.varOrders}
       actions={<>
-        {restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER && mode === 'orders' && (
+        {mode !== 'defaultOrder' && (
           <Button
             color="lightgrey"
             variant="contained"
             value="default-order"
             onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
+            sx={{
+              maxWidth: {'xs': '170px', 'sm': 'unset'},
+              fontSize: {'xs': '0.875rem', 'sm': '1rem'},
+              padding: {'xs': '4px 8px', 'sm': '10px 20px'},
+            }}  
           >
             {defaultOrdersMode ? t('changeOrders') : t('defaultOrderBtn')}
           </Button>
@@ -358,12 +394,15 @@ const CsaCatalogOrdersMobile = ({
       </>}>
       <CsaCatalogOrdersMobileHeader
         distribution={distribution}
+        distributions={distributions}
         onPreviousDistribution={onPreviousDistribution}
         onNextDistribution={onNextDistribution}
         distributionIndex={distributionIndex}
         orders={orders}
-        total={total}
+        orderTotal={total}
         defaultOrderTotal={defaultOrderTotal}
+        contractBalance={contractBalance}
+        contractTotal={contractTotal}
         defaultOrdersMode={defaultOrdersMode} />
 
       {!defaultOrdersMode && distribution.state === RestDistributionState.Absent
@@ -409,9 +448,15 @@ const CsaCatalogOrdersMobile = ({
         justifyContent='flex-end'
         mt={2}
       >
-        {errors.length > 0 && <Box>
-          {errors}
-        </Box>}
+        {errors.length > 0 && <Box
+            display="flex"
+            flexDirection="column"
+            flexWrap="wrap"
+            alignItems='flex-end'
+          >
+            {errors}
+          </Box>
+        }
         <Box
           width="100%"
           display="flex"

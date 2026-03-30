@@ -14,20 +14,26 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation"
 export const CsaCatalogOrdersMobileHeader = (
     {
         distribution,
+        distributions,
         onPreviousDistribution,
         onNextDistribution,
         distributionIndex,
-        total,
+        orderTotal,
         defaultOrderTotal,
+        contractBalance,
+        contractTotal,
         defaultOrdersMode
     }: {
         distribution: RestDistributionEnriched,
+        distributions: RestDistributionEnriched[],
         onPreviousDistribution: () => void,
         onNextDistribution: () => void,
         distributionIndex: number
         orders: Record<number, Record<number, number>>
-        total: number
+        orderTotal: number
         defaultOrderTotal: number
+        contractBalance: number
+        contractTotal: number
         defaultOrdersMode: boolean
     }) => {
     const { t } = useCamapTranslation(
@@ -40,7 +46,6 @@ export const CsaCatalogOrdersMobileHeader = (
     const {
         catalog,
         subscription,
-        distributions,
         remainingDistributions
     } = useContext(CsaCatalogContext);
 
@@ -65,7 +70,6 @@ export const CsaCatalogOrdersMobileHeader = (
             >
                 {/* Arrow Prev */}
                 {!defaultOrdersMode && <Button
-
                     variant="outlined"
                     size="small"
                     onClick={onPreviousDistribution}
@@ -143,22 +147,20 @@ export const CsaCatalogOrdersMobileHeader = (
                 mb={1}
             >
                 {/* Balance box */}
-                {subscription && <Tooltip title={t('paymentSold')}>
+                {subscription != null && <Tooltip title={t('paymentSold')}>
                     <Box gridArea="balance"
                         display="flex"
                         flexDirection="column"
                         justifyContent="center"
                         alignItems="center"
                         sx={{
-                            backgroundColor: (theme: Theme) =>
-                                subscription.balance >= 0
-                                    ? theme.palette.success.main
-                                    : theme.palette.error.main,
-
-                            color: (theme) =>
-                                subscription.balance >= 0
-                                    ? theme.palette.success.contrastText
-                                    : theme.palette.error.contrastText,
+                            ...(contractBalance >= 0 ? {
+                                backgroundColor: (theme: Theme) => theme.palette.success.main,
+                                color: (theme) => theme.palette.success.contrastText
+                            } : {
+                                backgroundColor: (theme: Theme) => theme.palette.error.main,
+                                color: (theme) => theme.palette.error.contrastText
+                            })
                         }}
                         px={0.5}
                     >
@@ -177,7 +179,7 @@ export const CsaCatalogOrdersMobileHeader = (
                             alignSelf="center"
                             px={0.5}
                         >
-                            {formatCurrency(subscription.balance)}
+                            {formatCurrency(contractBalance)}
                         </Typography>
                     </Box>
                 </Tooltip>}
@@ -207,12 +209,12 @@ export const CsaCatalogOrdersMobileHeader = (
                             >
                                 {formatCurrency(catalog.catalogMinOrdersTotal)}
                             </Typography>
-                            {subscription != null && <Typography
+                            <Typography
                                 whiteSpace="nowrap"
                                 fontSize="0.6em"
                             >
-                                {t('contractMinCurrent', { total: formatCurrency(subscription.totalOrdered ?? 0) })}
-                            </Typography>}
+                                {t('contractMinCurrent', { total: formatCurrency(contractTotal) })}
+                            </Typography>
                         </Box>
                     </Tooltip>}
 
@@ -278,7 +280,7 @@ export const CsaCatalogOrdersMobileHeader = (
                         <Box gridArea="order-min" display="flex" flexDirection="column" alignItems="center"
                             justifyContent='center'
                             sx={{
-                                backgroundColor: (theme: Theme) => catalog?.distribMinOrdersTotal > total && distribution.state !== RestDistributionState.Absent
+                                backgroundColor: (theme: Theme) => catalog?.distribMinOrdersTotal > orderTotal && distribution.state !== RestDistributionState.Absent
                                     ? theme.palette.error.main
                                     : theme.palette.primary.main,
                                 color: (theme) => theme.palette.primary.contrastText,
@@ -330,7 +332,7 @@ export const CsaCatalogOrdersMobileHeader = (
                             }}
                         >
                             {formatCurrency(
-                                defaultOrdersMode ? defaultOrderTotal : total
+                                defaultOrdersMode ? defaultOrderTotal : orderTotal
                             )}
                         </Typography>
                     </Box>

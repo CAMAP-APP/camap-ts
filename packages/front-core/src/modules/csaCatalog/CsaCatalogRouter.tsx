@@ -40,7 +40,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     isConstOrders
   } = React.useContext(CsaCatalogContext);
 
-  const [step, setStep] = React.useState<'presentation' | 'absences' | 'defaultOrder' | 'review'>(
+  const [step, setStep] = React.useState<'presentation' | 'absences' | 'requiredOrders' | 'review'>(
     !initialSubscriptionId ? 'presentation' : 'review'
   );
   const [
@@ -84,11 +84,10 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   }, [updatedDefaultOrderData, setSubscription]);
 
   const gotoDefaultOrder = () => {
-    console.log(isConstOrders, catalog?.distribMinOrdersTotal);
     if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0) {
       gotoAbsences();
     } else {
-      setStep('defaultOrder');
+      setStep('requiredOrders');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -216,11 +215,11 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
       {step === 'presentation' && (
         <CsaCatalogPresentation onNext={gotoDefaultOrder} />
       )}
-      {step === 'defaultOrder' && (
+      {step === 'requiredOrders' && (
         <Box
           width={'100%'}
         >
-          <CsaCatalogOrdersMobile onNext={checkInitialOrdersAndContinue} mode={isConstOrders || catalog?.catalogMinOrdersTotal === 0 ? 'defaultOrder' : 'orders'}/>
+          <CsaCatalogOrdersMobile onNext={checkInitialOrdersAndContinue} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
         </Box>
       )}
       {step === 'absences' && <CsaCatalogAbsences onNext={onAbsencesNext} adminMode={adminMode} />}
