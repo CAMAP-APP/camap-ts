@@ -84,7 +84,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   }, [updatedDefaultOrderData, setSubscription]);
 
   const gotoDefaultOrder = () => {
-    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0) {
+    if (!isConstOrders && (catalog?.distribMinOrdersTotal ?? 0) === 0 && (catalog?.catalogMinOrdersTotal ?? 0) === 0) {
       gotoAbsences();
     } else {
       setStep('requiredOrders');
@@ -114,7 +114,6 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         };
       }),
     );
-
     if (!checkDefaultOrderData) return false;
 
     gotoAbsences();
@@ -129,10 +128,18 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
-      absentDistribIds: absenceDistributionsIds
+      absentDistribIds: absenceDistributionsIds,
+      initialOrders: Object.keys(updatedOrders).map((distributionId) => ({
+        id: parseInt(distributionId, 10),
+        orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
+          productId: parseInt(productId, 10),
+          qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
+        })),
+      }))
     });
 
     if (!subscriptionSucceeded) return;
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
     setStep('review');

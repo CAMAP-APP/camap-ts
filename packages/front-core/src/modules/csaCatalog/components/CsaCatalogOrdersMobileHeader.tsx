@@ -46,7 +46,8 @@ export const CsaCatalogOrdersMobileHeader = (
     const {
         catalog,
         subscription,
-        remainingDistributions
+        remainingDistributions,
+        minSubscriptionOrder
     } = useContext(CsaCatalogContext);
 
     if (!catalog) return null;
@@ -207,7 +208,7 @@ export const CsaCatalogOrdersMobileHeader = (
                                 alignSelf="center"
                                 px={0.5}
                             >
-                                {formatCurrency(catalog.catalogMinOrdersTotal)}
+                                {formatCurrency(minSubscriptionOrder)}
                             </Typography>
                             <Typography
                                 whiteSpace="nowrap"

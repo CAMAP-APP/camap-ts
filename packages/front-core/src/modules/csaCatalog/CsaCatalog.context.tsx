@@ -47,6 +47,7 @@ interface CsaCatalogContextProps {
   adminMode?: boolean | undefined;
   initialOrders: Orders;
   remainingDistributions: number;
+  minSubscriptionOrder: number;
   cancelOrder: (distributionId: number) => void;
 }
 
@@ -76,6 +77,7 @@ export const CsaCatalogContext = React.createContext<CsaCatalogContextProps>({
   initialOrders: {},
   remainingDistributions: 0,
   cancelOrder: () => { },
+  minSubscriptionOrder: 0,
 });
 
 const CsaCatalogContextProvider = ({
@@ -276,6 +278,12 @@ const CsaCatalogContextProvider = ({
       }).length;
   }, [subscription, distributions]);
 
+  const minSubscriptionOrder = React.useMemo(() => {
+    return !!subscription
+      ? subscription?.minSubscriptionOrder
+      : (catalog?.catalogMinOrdersTotal ?? 0) / distributions.length * remainingDistributions;
+  }, [subscription, catalog, distributions, remainingDistributions]);
+
   /** */
   return (
     <CsaCatalogContext.Provider
@@ -310,6 +318,7 @@ const CsaCatalogContextProvider = ({
         initialOrders,
         remainingDistributions,
         cancelOrder,
+        minSubscriptionOrder,
       }}
     >
       {children}

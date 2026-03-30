@@ -57,6 +57,7 @@ const CsaCatalogOrdersMobile = ({
     setDefaultOrder,
     remainingDistributions,
     cancelOrder,
+    minSubscriptionOrder,
   } = React.useContext(CsaCatalogContext);
 
   const isConstOrDefaults = (mode === 'defaultOrder') || isConstOrders;
@@ -316,7 +317,6 @@ const CsaCatalogOrdersMobile = ({
     if (restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER) {
       buttons.push(
         <Tooltip key="set-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
-          <span>{/* prevents disable state to inhibit tooltip */}
             <SuccessButton
               variant="contained"
               color="primary"
@@ -326,7 +326,6 @@ const CsaCatalogOrdersMobile = ({
             >
               {t('setAsDefaultOrderBtn')}
             </SuccessButton>
-          </span>
         </Tooltip>);
     }
     if (distribution.state === RestDistributionState.Open) {
@@ -336,7 +335,7 @@ const CsaCatalogOrdersMobile = ({
         toggleSuccess={toggleSuccess}
         variant="contained"
         color="primary"
-        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total || (catalog?.catalogMinOrdersTotal ?? 0) > contractTotal}
+        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total || minSubscriptionOrder > contractTotal}
         onClick={onSaveClick}
       >
         {tCommon('save')}
@@ -366,10 +365,8 @@ const CsaCatalogOrdersMobile = ({
       }
     }
   }
-  if(catalog?.catalogMinOrdersTotal && catalog.catalogMinOrdersTotal > 0) {
-    if (catalog.catalogMinOrdersTotal > contractTotal) {
-      errors.push(<Typography key="error-total-contract" color="error">{t('totalContractTooLow', { minOrderTotal: formatCurrency(catalog.catalogMinOrdersTotal) })}</Typography>);
-    }
+  if (minSubscriptionOrder > contractTotal) {
+    errors.push(<Typography key="error-total-contract" color="error">{t('totalContractTooLow', { minOrderTotal: formatCurrency(minSubscriptionOrder) })}</Typography>);
   }
 
   return (
