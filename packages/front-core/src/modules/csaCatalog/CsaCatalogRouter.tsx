@@ -115,7 +115,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
           orders: Object.keys(updatedOrders[parseInt(distributionId, 10)]).map((productId) => ({
             productId: parseInt(productId, 10),
             qty: updatedOrders[parseInt(distributionId, 10)][parseInt(productId, 10)],
-          })),
+          })).filter((order) => order.qty > 0),
       }))
     });
 
