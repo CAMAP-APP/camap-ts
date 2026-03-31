@@ -12,4 +12,6 @@ export default yup.object().shape({
   CAMAP_HOST: yup.string().required(),
 
   MAPBOX_KEY: yup.string().required(),
+
+  CACHE_KEY: yup.string().required(),
 });

@@ -1,4 +1,5 @@
 const path = require('path');
+const { execSync } = require('child_process');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
@@ -38,6 +39,7 @@ module.exports = {
       // On ne fige plus FRONT_URL / FRONT_GRAPHQL_URL / CAMAP_HOST / MAPBOX_KEY.
       // La config front (URLs, clés) est désormais injectée AU RUNTIME via window.__APP_CONFIG__.
       'process.env.NODE_ENV': JSON.stringify(MODE),
+      '__CACHE_KEY__': JSON.stringify(execSync('git rev-parse --short HEAD').toString()),
     }),
     new HtmlWebpackPlugin({
       title: 'Dév - Neo',

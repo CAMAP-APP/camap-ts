@@ -9,6 +9,8 @@ type Cfg = Partial<{
   MAPBOX_KEY: string;
 }>;
 
+declare const __CACHE_KEY__: string;
+
 export function getRuntimeCfg(): Cfg {
   if (typeof window === 'undefined') return {};
   return ((window as any).__APP_CONFIG__ ?? {}) as Cfg;
@@ -22,7 +24,7 @@ export function getGraphqlUrl(): string {
 export function getLocalesLoadPath(): string {
   const cfg = getRuntimeCfg();
   const base = cfg.CAMAP_HOST || '';
-  return `${base}/locales/{{lng}}/{{ns}}.json`;
+  return `${base}/locales/{{lng}}/{{ns}}.json?v=${__CACHE_KEY__}`;
 }
 
 export function getMapboxKey(): string | undefined {
