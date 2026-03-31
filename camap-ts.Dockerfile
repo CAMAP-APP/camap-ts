@@ -1,7 +1,7 @@
 FROM node:20.19-slim AS builder
 
 RUN apt-get update && apt-get install -y \
-    g++ libconfig-tiny-perl libtest-script-perl make python3 && \
+    g++ libconfig-tiny-perl libtest-script-perl make python3 git && \
     rm -rf /var/lib/apt/lists/*
 
 RUN adduser --disabled-password --disabled-login --gecos "InterAMAP user" --home /home/interamap interamap
@@ -14,8 +14,8 @@ COPY --chown=interamap:interamap ./packages/ /srv/packages
 COPY --chown=interamap:interamap ./public/  /srv/public
 
 # use .env configuration for builder
- COPY --chown=interamap:interamap ./.env.sample /srv/.env
- RUN bash -c "source /srv/.env && export"
+COPY --chown=interamap:interamap ./.env.sample /srv/.env
+RUN bash -c "source /srv/.env && export"
 
 USER interamap
 RUN npm install --fetch-retries 4 && npm cache clean --force
