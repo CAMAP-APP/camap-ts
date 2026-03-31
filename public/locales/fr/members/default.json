@@ -25,8 +25,8 @@
   "accept": "Accepter",
   "refuse": "Refuser",
 
-  "membershipConfirmDialogTitle": "Saisir une cotisation par chèque pour les membres sélectionnés.",
-  "membershipConfirmDialogContent": "Cette action va saisir une cotisation par chèque pour l'année en cours pour tous les membres sélectionnés.",
+  "membershipConfirmDialogTitle": "Saisir une cotisation pour les membres sélectionnés.",
+  "membershipConfirmDialogContent": "Cette action va saisir une cotisation pour l'année en cours pour tous les membres sélectionnés.",
   "excludeConfirmDialogContent": "Cette action va retirer le membre sélectionné de votre groupe.",
   "excludeConfirmDialogContent_plural": "Cette action va retirer les {{nbOfMembers}} membres sélectionnés de votre groupe.",
   "excludeConfirmDialogTitle": "Retirer {{nbOfMembers}} membre de votre groupe ?",
