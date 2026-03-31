@@ -5,6 +5,8 @@ import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
 import { getLocalesLoadPath } from './runtimeCfg';
 
+declare const __CACHE_KEY__: string;
+
 const PRODUCTION = process.env.NODE_ENV === 'production';
 
 i18n
@@ -16,12 +18,12 @@ i18n
     debug: !PRODUCTION,
 
     backend: {
-      // 1) LocalStorage (cache) -> 2) HTTP (runtime via env.js ou fallback /locales)
+      // 1) LocalStorage (cache) -> 2) HTTP (runtime via env.js ou fallback /locales)   
       backends: [LocalStorageBackend, HttpBackend],
       backendOptions: [
         {
-          expirationTime: PRODUCTION ? 1 * 24 * 60 * 60 * 1000 : 0, // 1 days
-          defaultVersion: 'v1.9',
+          expirationTime: PRODUCTION ? 1 * 24 * 60 * 60 * 1000 : 0,
+          defaultVersion: __CACHE_KEY__,
         },
         {
           // IMPORTANT : runtime (FRONT_URL depuis env.js) ou fallback relatif /locales
