@@ -395,6 +395,7 @@ const CsaCatalogOrdersMobile = ({
         )}
       </>}>
       <CsaCatalogOrdersMobileHeader
+        mode={mode}
         distribution={distribution}
         distributions={distributions}
         onPreviousDistribution={onPreviousDistribution}

@@ -13,6 +13,7 @@ import { useCamapTranslation } from "@utils/hooks/use-camap-translation"
 
 export const CsaCatalogOrdersMobileHeader = (
     {
+        mode,
         distribution,
         distributions,
         onPreviousDistribution,
@@ -24,6 +25,7 @@ export const CsaCatalogOrdersMobileHeader = (
         contractTotal,
         defaultOrdersMode
     }: {
+        mode: 'initialOrders' | 'defaultOrder' | 'orders',
         distribution: RestDistributionEnriched,
         distributions: RestDistributionEnriched[],
         onPreviousDistribution: () => void,
@@ -210,12 +212,14 @@ export const CsaCatalogOrdersMobileHeader = (
                             >
                                 {formatCurrency(minSubscriptionOrder)}
                             </Typography>
-                            <Typography
-                                whiteSpace="nowrap"
-                                fontSize="0.6em"
-                            >
-                                {t('contractMinCurrent', { total: formatCurrency(contractTotal) })}
-                            </Typography>
+                            {mode !== 'initialOrders' &&
+                                <Typography
+                                    whiteSpace="nowrap"
+                                    fontSize="0.6em"
+                                >
+                                    {t('contractMinCurrent', { total: formatCurrency(contractTotal) })}
+                                </Typography>
+                            }
                         </Box>
                     </Tooltip>}
 
@@ -332,9 +336,11 @@ export const CsaCatalogOrdersMobileHeader = (
                                 color: 'primary.main'
                             }}
                         >
-                            {formatCurrency(
-                                defaultOrdersMode ? defaultOrderTotal : orderTotal
-                            )}
+                            {mode === 'initialOrders'
+                                ? formatCurrency(contractTotal)
+                                : formatCurrency(
+                                    defaultOrdersMode ? defaultOrderTotal : orderTotal
+                                )}
                         </Typography>
                     </Box>
                 </Tooltip>
