@@ -79,6 +79,7 @@ jobs:
           sha8="$(git rev-parse --short=8 HEAD)"
           echo "tag=$safe_tag"           >> "$GITHUB_OUTPUT"
           echo "tag_sha=${safe_tag}-${sha8}" >> "$GITHUB_OUTPUT"
+          echo "sha8=${sha8}" >> "$GITHUB_OUTPUT"
 
       - name: Build & push (tag feature-*)
         if: github.ref_type == 'tag'
@@ -89,6 +90,8 @@ jobs:
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            GIT_COMMIT_SHORT=${{ steps.tag_meta.outputs.sha8 }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.tag_meta.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.tag_meta.outputs.tag_sha }}
@@ -112,6 +115,7 @@ jobs:
           sha8="$(git rev-parse --short=8 HEAD)"
           echo "branch=$safe_branch"                >> "$GITHUB_OUTPUT"
           echo "branch_sha=${safe_branch}-${sha8}"  >> "$GITHUB_OUTPUT"
+          echo "sha8=${sha8}" >> "$GITHUB_OUTPUT"
 
       - name: Build & push (feature branches)
         if: github.ref_type == 'branch'
@@ -122,6 +126,8 @@ jobs:
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            GIT_COMMIT_SHORT=${{ steps.tag_meta.outputs.sha8 }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.branch_meta.outputs.branch }}
             ${{ env.IMAGE_NAME }}:${{ steps.branch_meta.outputs.branch_sha }}

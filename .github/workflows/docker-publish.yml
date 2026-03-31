@@ -71,11 +71,13 @@ jobs:
           minor_patch="${semver#${major}.}"
           minor="${minor_patch%%.*}"
           major_minor="${major}.${minor}"
+          sha8="$(git rev-parse --short=8 HEAD)"
 
           echo "tag=$tag"           >> $GITHUB_OUTPUT
           echo "semver=$semver"     >> $GITHUB_OUTPUT
           echo "major=$major"       >> $GITHUB_OUTPUT
           echo "major_minor=$major_minor" >> $GITHUB_OUTPUT
+          echo "sha8=$sha8"   >> $GITHUB_OUTPUT
 
       # Multi-arch prerequisites
       - uses: docker/setup-qemu-action@v3
@@ -98,6 +100,8 @@ jobs:
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64,linux/arm64
+          build-args: |
+            GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
           provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
@@ -116,6 +120,8 @@ jobs:
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
           provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}

@@ -11,6 +11,22 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const MODE = 'production';
 const DIST_PATH = path.resolve(__dirname, '../../public/neostatic');
 
+function getCacheKey() {
+  if (process.env.GIT_COMMIT_SHORT) {
+    return process.env.GIT_COMMIT_SHORT.trim();
+  }
+
+  try {
+    return execSync('git rev-parse --short HEAD', {
+      stdio: ['ignore', 'pipe', 'ignore'],
+    })
+      .toString()
+      .trim();
+  } catch (err) {
+    return 'unknown';
+  }
+}
+
 module.exports = {
   mode: MODE,
   entry: {
@@ -60,7 +76,7 @@ module.exports = {
       // On ne fige plus FRONT_URL / FRONT_GRAPHQL_URL / CAMAP_HOST / MAPBOX_KEY ici :
       // tout ce qui est URL / tokens front est désormais lu via __APP_CONFIG__ côté browser.
       'process.env.NODE_ENV': JSON.stringify(MODE),
-      '__CACHE_KEY__': JSON.stringify(execSync('git rev-parse --short HEAD').toString()),
+      '__CACHE_KEY__': JSON.stringify(getCacheKey()),
     }),
     new FileManagerPlugin({
       events: {

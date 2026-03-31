@@ -60,8 +60,10 @@ jobs:
         run: |
           ref="${GITHUB_REF##*/}"      # staging-v2.0.8[-rcN]
           short="${ref#staging-}"      # v2.0.8[-rcN]
+          sha8="$(git rev-parse --short=8 HEAD)"
           echo "tag=$ref"     >> $GITHUB_OUTPUT
           echo "short=$short" >> $GITHUB_OUTPUT
+          echo "sha8=$sha8"   >> $GITHUB_OUTPUT
 
       - uses: docker/setup-buildx-action@v3
 
@@ -80,6 +82,8 @@ jobs:
           file: ./camap-ts.Dockerfile
           push: true
           platforms: linux/amd64
+          build-args: |
+            GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.short }}

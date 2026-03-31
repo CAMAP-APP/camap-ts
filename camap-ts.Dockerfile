@@ -1,5 +1,8 @@
 FROM node:20.19-slim AS builder
 
+ARG GIT_COMMIT_SHORT=unknown
+ENV GIT_COMMIT_SHORT=${GIT_COMMIT_SHORT}
+
 RUN apt-get update && apt-get install -y \
     g++ libconfig-tiny-perl libtest-script-perl make python3 git && \
     rm -rf /var/lib/apt/lists/*
