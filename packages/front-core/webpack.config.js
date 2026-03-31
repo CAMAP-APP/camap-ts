@@ -1,4 +1,5 @@
 const path = require('path');
+const { execSync } = require('child_process');
 const dotenv = require('dotenv');
 const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -59,6 +60,7 @@ module.exports = {
       // On ne fige plus FRONT_URL / FRONT_GRAPHQL_URL / CAMAP_HOST / MAPBOX_KEY ici :
       // tout ce qui est URL / tokens front est désormais lu via __APP_CONFIG__ côté browser.
       'process.env.NODE_ENV': JSON.stringify(MODE),
+      '__CACHE_KEY__': JSON.stringify(execSync('git rev-parse --short HEAD').toString()),
     }),
     new FileManagerPlugin({
       events: {
