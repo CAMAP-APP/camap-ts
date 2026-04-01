@@ -24,13 +24,11 @@ import { formatCurrency } from 'camap-common';
 import { formatAbsoluteDate } from '@utils/fomat';
 
 interface CsacatalogProps {
-  adminMode?: boolean;
   onNext: () => Promise<boolean>;
   mode?: 'initialOrders' | 'defaultOrder' | 'orders';
 }
 
 const CsaCatalogOrdersMobile = ({
-  adminMode,
   onNext,
   mode = 'orders'
 }: CsacatalogProps) => {
@@ -43,6 +41,7 @@ const CsaCatalogOrdersMobile = ({
   );
 
   const {
+    adminMode,
     isConstOrders,
     updatedOrders,
     setUpdatedOrders,
@@ -339,7 +338,7 @@ const CsaCatalogOrdersMobile = ({
         toggleSuccess={toggleSuccess}
         variant="contained"
         color="primary"
-        disabled={!hasChanges || (catalog?.distribMinOrdersTotal ?? 0) > total || minSubscriptionOrder > contractTotal}
+        disabled={(!hasChanges && mode !== 'initialOrders') || (catalog?.distribMinOrdersTotal ?? 0) > total || minSubscriptionOrder > contractTotal}
         onClick={onSaveClick}
       >
         {tCommon('save')}
@@ -375,7 +374,8 @@ const CsaCatalogOrdersMobile = ({
   }
 
   return (
-    <MobileContainer title={title}
+    <MobileContainer
+      title={title}
       icon={isConstOrders ? CamapIconId.constOrders : CamapIconId.varOrders}
       actions={<>
         {mode !== 'defaultOrder' && (

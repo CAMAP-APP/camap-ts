@@ -2,13 +2,14 @@ import {
   useGetCatalogSubscriptionsLazyQuery,
   useGetMembersOfGroupByListTypeLazyQuery,
 } from '@gql';
-import { Alert, Box, Button, MenuItem, Select } from '@mui/material';
+import { Alert, Box, Button, MenuItem, Modal, Select } from '@mui/material';
 import { useCamapTranslation } from '@utils/hooks/use-camap-translation';
-import CsaCatalogContextProvider from 'modules/csaCatalog/CsaCatalog.context';
+import CsaCatalogContextProvider, { CsaCatalogContext } from 'modules/csaCatalog/CsaCatalog.context';
 import React, { useEffect } from 'react';
-import BatchOrderCreateSub from './BatchOrderCreateSub';
-import BatchOrderPage from './BatchOrderPage';
 import { formatUserName } from 'camap-common';
+import CsaCatalogRouter from 'modules/csaCatalog/CsaCatalogRouter';
+import CsaCatalogAbsences from 'modules/csaCatalog/containers/CsaCatalogAbsences';
+import { useRestUpdateSubscriptionAbsencesPost } from 'modules/csaCatalog/requests';
 
 interface BatchOrderProps {
   catalogId: number;
@@ -36,7 +37,6 @@ const BatchOrder = ({
   });
 
   const [showAbsencesModal, setShowAbsencesModal] = React.useState(false);
-  const [absencesAutorized, setAbsencesAutorized] = React.useState(false);
 
   /**
    * Requests
@@ -66,11 +66,13 @@ const BatchOrder = ({
     refetchSubscriptions();
   }, [catalogId, getCatalogSubscriptions, refetchSubscriptions]);
 
+  console.log(subscriptions)
+
   // select subscription of selected member
   useEffect(() => {
     const selectedSubscription = subscriptions?.catalog.subscriptions.filter(
       (s) => s.user.id === selectedMember,
-    )[0];
+    ).find((s) => s.endDate >= new Date());
     setSelectedSubcription(selectedSubscription?.id);
   }, [selectedMember, subscriptions?.catalog.subscriptions]);
 
@@ -88,6 +90,8 @@ const BatchOrder = ({
         {t('noUsers')}
       </Alert>
     );
+
+  const absencesAutorized = selectedSubscription != null;
 
   return (
     <>
@@ -150,35 +154,49 @@ const BatchOrder = ({
         </Alert>
       )}
 
-      {!selectedSubscription && selectedMember && (
-        <CsaCatalogContextProvider
-          catalogId={catalogId}
-          initialSubscriptionId={selectedSubscription}
-          adminMode={true}
-        >
-          <BatchOrderCreateSub
-            selectedMember={selectedMember}
-            refetchSubscriptions={refetchSubscriptions}
-          />
-        </CsaCatalogContextProvider>
-      )}
-
       {/* Orders */}
-      {selectedMember && selectedSubscription && (
+      {selectedMember && (
         <CsaCatalogContextProvider
+          key={selectedMember}
           catalogId={catalogId}
           initialSubscriptionId={selectedSubscription}
           adminMode={true}
         >
-          <BatchOrderPage
-            selectedSubscription={selectedSubscription}
-            showAbsencesModal={showAbsencesModal}
-            setShowAbsencesModal={setShowAbsencesModal}
-            setAbsencesAutorized={setAbsencesAutorized}
-          />
+          <AbsencesModal open={showAbsencesModal} onClose={() => setShowAbsencesModal(false)} />
+          <CsaCatalogRouter userId={selectedMember} />
         </CsaCatalogContextProvider>
       )}
     </>
   );
 };
 export default BatchOrder;
+
+const AbsencesModal = ({ open, onClose }: { open: boolean, onClose: () => void }) => {
+
+  const { subscription, absenceDistributionsIds, setSubscriptionAbsences } = React.useContext(CsaCatalogContext);
+
+  const [
+    updateSubscriptionAbsences,
+    { data: postAbsencesData, error: postAbsencesError },
+  ] = useRestUpdateSubscriptionAbsencesPost(subscription?.id ?? -1);
+
+  React.useEffect(() => {
+    setSubscriptionAbsences(postAbsencesData);
+  }, [postAbsencesData, setSubscriptionAbsences]);
+
+  const onNext = async () => {
+    console.log(absenceDistributionsIds);
+    onClose();
+    if(absenceDistributionsIds === null) return;
+    await updateSubscriptionAbsences({
+      absentDistribIds: absenceDistributionsIds,
+    });
+  }
+
+  return <Modal open={open && subscription !== undefined} onClose={onClose}>
+    <div style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>   
+      <CsaCatalogAbsences onNext={onNext} adminMode={true} />
+      {postAbsencesError && <Alert severity="error">{postAbsencesError}</Alert>}
+    </div>
+  </Modal>
+}
