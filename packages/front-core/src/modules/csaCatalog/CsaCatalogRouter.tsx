@@ -1,7 +1,7 @@
 import Block from '@components/utils/Block/Block';
 import { CamapIconId } from '@components/utils/CamapIcon';
-import { Alert, Box } from '@mui/material';
-import React from 'react';
+import { Alert, Box, Button } from '@mui/material';
+import React, { useEffect } from 'react';
 import { useCamapTranslation } from '../../utils/hooks/use-camap-translation';
 import { CsaCatalogContext } from './CsaCatalog.context';
 import CsaCatalogAbsences from './containers/CsaCatalogAbsences';
@@ -21,8 +21,9 @@ interface CsaCatalogRouterProps {
 }
 
 const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
-  const { t } = useCamapTranslation({
+  const { t, tBatch } = useCamapTranslation({
     t: 'csa-catalog',
+    tBatch: 'batch-order',
   });
   const {
     catalogId,
@@ -39,9 +40,16 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     isConstOrders
   } = React.useContext(CsaCatalogContext);
 
+  console.log(initialSubscriptionId);
+
   const [step, setStep] = React.useState<'presentation' | 'absences' | 'requiredOrders' | 'review'>(
     !initialSubscriptionId ? 'presentation' : 'review'
   );
+
+  useEffect(() => {
+    setStep(!initialSubscriptionId ? 'presentation' : 'review')
+  }, [initialSubscriptionId]);
+
   const [
     createSubscription,
     { data: subscriptionData, error: postSubscriptionError },
@@ -191,43 +199,64 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         </Box>
       )}
 
-      {subscriptionData && (
-        <Box mb={2}>
-          <Alert severity="success">
-            {t('yourSubscriptionHasBeenCreated')}
-          </Alert>
-        </Box>
-      )}
+      <Box mb={2}>        
+        {subscriptionData && (
+          <Box mb={2}>
+            <Alert severity="success">
+              {t('yourSubscriptionHasBeenCreated')}
+            </Alert>
+          </Box>
+        )}
 
-      {/* This is the flow when user is not subscribed */}
-      {step === 'presentation' && (
-        <CsaCatalogPresentation onNext={gotoAbsences} />
-      )}
-      {step === 'absences' && <CsaCatalogAbsences onNext={async () => gotoDefaultOrder()} adminMode={adminMode} />}
-      {step === 'requiredOrders' && (
-        <Box
-          width={'100%'}
-        >
-          <CsaCatalogOrdersMobile onNext={finishWizard} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
-        </Box>
-      )}
-
-      {/* This is the end of the flow once subscribed */}
-      {step === 'review' && !isConstOrders && (
-        <CsaCatalogOrdersMobile onNext={onOrderNext} adminMode={adminMode} />
-      )}
-      {step === 'review' && !!subscription && !adminMode && (
-        <Box mt={3}>
-          <Block
-            title={t('mySubscription')}
-            icon={<MediumActionIcon id={CamapIconId.subscription} />}
-            sx={{ height: '100%' }}
-            contentSx={{ textAlign: 'center' }}
+        {/* This is the flow when user is not subscribed */}
+        {step === 'presentation' && (
+          adminMode 
+          ? <>
+              <Alert severity="warning" sx={{ margin: '16px 0px' }}>
+                {tBatch('userHasNoSubscription')}
+              </Alert>
+        
+              {/* Create subscription button*/}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginBottom: '16px',
+                }}
+              >
+                <Button variant="contained" onClick={() => gotoAbsences()}>
+                  {tBatch('createSubscription')}
+                </Button>
+              </div>
+            </>
+          : <CsaCatalogPresentation onNext={gotoAbsences} />
+        )}
+        {step === 'absences' && <CsaCatalogAbsences onNext={async () => gotoDefaultOrder()} adminMode={adminMode} />}
+        {step === 'requiredOrders' && (
+          <Box
+            width={'100%'}
           >
-            <CsaCatalogSubscription />
-          </Block>
-        </Box>
-      )}
+            <CsaCatalogOrdersMobile onNext={finishWizard} mode={catalog?.catalogMinOrdersTotal > 0 ? 'initialOrders' : 'defaultOrder'}/>
+          </Box>
+        )}
+
+        {/* This is the end of the flow once subscribed */}
+        {step === 'review' && !isConstOrders && (
+          <CsaCatalogOrdersMobile onNext={onOrderNext} />
+        )}
+        {step === 'review' && !!subscription && !adminMode && (
+          <Box mt={3}>
+            <Block
+              title={t('mySubscription')}
+              icon={<MediumActionIcon id={CamapIconId.subscription} />}
+              sx={{ height: '100%' }}
+              contentSx={{ textAlign: 'center' }}
+            >
+              <CsaCatalogSubscription />
+            </Block>
+          </Box>
+        )}
+      </Box>
 
       {/* repeat error messages for visibility */}
       {error && (

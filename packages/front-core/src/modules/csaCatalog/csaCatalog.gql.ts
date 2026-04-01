@@ -8,6 +8,8 @@ export const getCatalogSubscriptions = gql`
       name
       subscriptions {
         id
+        startDate,
+        endDate,
         user {
           id
           firstName
