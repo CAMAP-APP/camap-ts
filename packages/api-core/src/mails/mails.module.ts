@@ -27,16 +27,22 @@ import { BufferedJsonMailEntity } from './models/buffered-json-mail.entity';
         const transport = configService.get<'smtp'>('MAILER_TRANSPORT');
 
         if (transport === 'smtp') {
+          const smtpSecure = (process.env.SMTP_SECURE || '').trim().toLowerCase() === 'true';
+
           return {
             ...base,
             transport: {
               host: process.env.SMTP_HOST || 'localhost',
               port: parseInt(process.env.SMTP_PORT, 10) || 1025,
-              secure: process.env.SMTP_SECURE === 'true',
-              ignoreTLS: process.env.SMTP_SECURE !== 'false',
+              secure: smtpSecure,
+              ignoreTLS: false,
+              requireTLS: !smtpSecure,
               auth: {
                 user: process.env.SMTP_AUTH_USER,
                 pass: process.env.SMTP_AUTH_PASS,
+              },
+              tls: {
+                servername: process.env.SMTP_TLS_SERVERNAME || process.env.SMTP_HOST,
               },
             },
           };
