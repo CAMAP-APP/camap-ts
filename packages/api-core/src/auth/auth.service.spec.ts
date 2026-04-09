@@ -30,6 +30,9 @@ const MOCK_USER = {
 
 describe('AuthService', () => {
   let service: AuthService;
+  let config: {
+    DISABLE_BRUTE_FORCE?: string;
+  };
 
   const mockUserService = {
     findOneByEmail: () => {
@@ -65,6 +68,10 @@ describe('AuthService', () => {
   };
 
   beforeEach(async () => {
+    config = {};
+
+    jest.clearAllMocks();
+
     const module = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -77,6 +84,8 @@ describe('AuthService', () => {
                 return JWT_ACCESS_TOKEN_EXPIRATION_TIME;
               if (key === 'JWT_REFRESH_TOKEN_EXPIRATION_TIME')
                 return JWT_REFRESH_TOKEN_EXPIRATION_TIME;
+              if (key === 'DISABLE_BRUTE_FORCE')
+                return config.DISABLE_BRUTE_FORCE;
             },
           },
         },
@@ -113,6 +122,20 @@ describe('AuthService', () => {
       await expect(
         service.login('email@alilo.fr', 'password', '192.0.0.1', 'sid'),
       ).rejects.toThrow('bruteForce');
+    });
+
+    it('If brute force is disabled, should not throw bruteForce even if cache says banned', async () => {
+      config.DISABLE_BRUTE_FORCE = 'true';
+
+      jest.spyOn(mockCacheService, 'get').mockResolvedValueOnce('5');
+      jest.spyOn(service, 'isValidPassword').mockResolvedValueOnce(true);
+      jest.spyOn(mockSessionService, 'getBySid').mockResolvedValueOnce({});
+      jest.spyOn(mockJwtService, 'sign').mockReturnValueOnce('jwttoken');
+      jest.spyOn(mockJwtService, 'sign').mockReturnValueOnce('wtrefreshtoken');
+
+      await expect(
+        service.login('email@alilo.fr', 'password', '192.0.0.1', 'sid'),
+      ).resolves.toBeDefined();
     });
 
     it(`If password is correct, 
@@ -247,7 +270,8 @@ describe('AuthService', () => {
 
       expect(result).toBe(true);
 
-      const bcryptEncryptedPassword = await bcryptPasswordSpy.mock.results[0].value;
+      const bcryptEncryptedPassword =
+        await bcryptPasswordSpy.mock.results[0].value;
 
       expect(mockUserService.update).toHaveBeenCalledWith({
         id: 1,
@@ -276,6 +300,16 @@ describe('AuthService', () => {
       const badLogin = await service.recordBadLogin('ip');
       expect(badLogin).toBe(2);
       expect(mockCacheService.set).toHaveBeenCalled();
+    });
+
+    it('Should do nothing if brute force is disabled', async () => {
+      config.DISABLE_BRUTE_FORCE = 'true';
+
+      const badLogin = await service.recordBadLogin('ip');
+
+      expect(badLogin).toBe(0);
+      expect(mockCacheService.get).not.toHaveBeenCalled();
+      expect(mockCacheService.set).not.toHaveBeenCalled();
     });
   });
 });
