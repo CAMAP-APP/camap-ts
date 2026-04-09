@@ -3,13 +3,15 @@ import {
   ExecutionContext,
   Inject,
   mixin,
+  Type,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { AuthGuard, IAuthGuard, Type } from '@nestjs/passport';
+import { AuthGuard, IAuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { ExtractJwt } from 'passport-jwt';
+
 import {
   AUTHENTICATION_COOKIE_NAME,
   AuthService,
@@ -21,6 +23,7 @@ import { SessionService } from '../../auth/session.service';
 import { SessionEntity } from '../../tools/models/session.entity';
 import { UsersService } from '../../users/users.service';
 
+// Factory Nest pour créer dynamiquement un AuthGuard compatible GraphQL
 export const GqlAuthAbstractGuard: (type?: string | string[]) => Type<IAuthGuard> =
   createAuthGuard;
 
@@ -35,6 +38,10 @@ function createAuthGuard(type?: string | string[]): Type<IAuthGuard> {
       super();
     }
 
+    /**
+     * Méthode standard Nest pour récupérer la request
+     * → utilisée par passport
+     */
     getRequest(context: ExecutionContext) {
       const contextType = context.getType<ContextType & 'graphql'>();
 
@@ -43,119 +50,202 @@ function createAuthGuard(type?: string | string[]): Type<IAuthGuard> {
         : GqlExecutionContext.create(context).getContext().req;
     }
 
-    async canActivate(context: ExecutionContext): Promise<boolean> {
+    /**
+     * Helper interne pour récupérer request + response
+     * compatible HTTP et GraphQL
+     */
+    private getReqRes(context: ExecutionContext): {
+      request: Request;
+      response: Response;
+      contextType: ContextType | 'graphql';
+    } {
       const contextType = context.getType<ContextType & 'graphql'>();
 
-      let request: Request;
-      let response: Response;
-
       if (contextType === 'http') {
-        request = context.switchToHttp().getRequest();
-        response = context.switchToHttp().getResponse();
+        return {
+          request: context.switchToHttp().getRequest<Request>(),
+          response: context.switchToHttp().getResponse<Response>(),
+          contextType,
+        };
       }
-      if (contextType === 'graphql') {
-        request = GqlExecutionContext.create(context).getContext().req as Request;
-        response = GqlExecutionContext.create(context).getContext().res as Response;
+
+      const gqlContext = GqlExecutionContext.create(context).getContext();
+
+      return {
+        request: gqlContext.req as Request,
+        response: gqlContext.res as Response,
+        contextType,
+      };
+    }
+
+    /**
+     * Vérifie que le cookie SID côté Neko et Nest sont synchronisés
+     * → évite les états incohérents entre front et API
+     */
+    private checkSidSync(request: Request): void {
+      const authSidCookie = request.cookies?.[SID_COOKIE_NAME];
+      const sidCookie = request.cookies?.['sid'];
+
+      if (authSidCookie && sidCookie && authSidCookie !== sidCookie) {
+        throw new Error('Neko/Nest logged state sync error');
       }
+    }
+
+    /**
+     * Écrit les cookies d'authentification
+     * IMPORTANT :
+     * - ne rien faire si headers déjà envoyés (sinon ERR_HTTP_HEADERS_SENT)
+     */
+    private setAuthCookies(
+      response: Response | undefined,
+      accessToken: string,
+      refreshToken: string,
+    ): void {
+      if (!response || response.headersSent) {
+        return;
+      }
+
+      response.cookie(AUTHENTICATION_COOKIE_NAME, accessToken, {
+        maxAge: this.configService.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
+        httpOnly: true,
+      });
+
+      response.cookie(REFRESH_COOKIE_NAME, refreshToken, {
+        maxAge: this.configService.get<number>('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
+        httpOnly: true,
+      });
+    }
+
+    /**
+     * Supprime les cookies d'auth
+     * → utilisé en cas d'erreur / logout
+     */
+    private clearAuthCookies(response: Response | undefined): void {
+      if (!response || response.headersSent) {
+        return;
+      }
+
+      response.clearCookie(AUTHENTICATION_COOKIE_NAME, {
+        maxAge: 0,
+        httpOnly: true,
+      });
+
+      response.clearCookie(REFRESH_COOKIE_NAME, {
+        maxAge: 0,
+        httpOnly: true,
+      });
+
+      response.clearCookie(SID_COOKIE_NAME, {
+        maxAge: 0,
+        httpOnly: true,
+      });
+    }
+
+    /**
+     * Nettoyage serveur des sessions + refresh tokens
+     * → logout complet côté backend
+     */
+    private async handleLogout(request: Request): Promise<void> {
+      const sid = request.cookies?.[SID_COOKIE_NAME];
+      if (!sid) {
+        return;
+      }
+
+      const session: SessionEntity | undefined = await this.sessionService.getBySid(sid);
+      if (!session?.uid) {
+        return;
+      }
+
+      await Promise.all([
+        this.usersService.removeRefreshToken(session.uid),
+        this.sessionService.delete(sid),
+      ]);
+    }
+
+    /**
+     * Méthode principale du guard
+     */
+    async canActivate(context: ExecutionContext): Promise<boolean> {
+      const { request, response } = this.getReqRes(context);
 
       try {
-        // We might be logged out in Neko but not here
-        const authSidCookie = request.cookies[SID_COOKIE_NAME];
-        const sidCookie = request.cookies['sid'];
-        if (authSidCookie && sidCookie && authSidCookie !== sidCookie) {
-          throw new Error('Neko/Nest logged state sync error');
-        }
+        // 1. Vérification cohérence session
+        this.checkSidSync(request);
 
-        const accessToken = ExtractJwt.fromExtractors([authCookieExtractor])(
-          request,
-        );
+        // 2. Tentative via access token (cas nominal)
+        const accessToken = ExtractJwt.fromExtractors([authCookieExtractor])(request);
         const accessTokenPayload =
           accessToken && this.authService.getPayloadFromToken(accessToken);
-        const isValidAccessToken = !!accessTokenPayload;
-        if (isValidAccessToken) return this.activate(context);
 
-        const refreshToken = request.cookies[REFRESH_COOKIE_NAME];
-        if (!refreshToken)
+        if (accessTokenPayload) {
+          return this.activate(context);
+        }
+
+        // 3. Fallback via refresh token
+        const refreshToken = request.cookies?.[REFRESH_COOKIE_NAME];
+        if (!refreshToken) {
           throw new UnauthorizedException('Refresh token is not set');
+        }
+
         const refreshTokenPayload = this.authService.getPayloadFromToken(
           refreshToken,
           true,
         );
-        const isValidRefreshToken = !!refreshTokenPayload;
-        if (!isValidRefreshToken)
-          throw new UnauthorizedException('Refresh token is not valid');
 
+        if (!refreshTokenPayload) {
+          throw new UnauthorizedException('Refresh token is not valid');
+        }
+
+        // 4. Vérification user + refresh token
         const user = await this.usersService.getUserIfRefreshTokenMatches(
           refreshToken,
           refreshTokenPayload.id,
         );
 
+        // 5. Génération nouveaux tokens
         const newAccessToken = this.authService.getAccessToken(user);
         const newRefreshToken =
           await this.authService.getRefreshTokenAndSaveItInUser(user);
 
+        // 6. Mise à jour côté request (important pour la suite du pipeline)
         request.cookies[AUTHENTICATION_COOKIE_NAME] = newAccessToken;
         request.cookies[REFRESH_COOKIE_NAME] = newRefreshToken;
 
-        response.cookie(AUTHENTICATION_COOKIE_NAME, newAccessToken, {
-          maxAge: this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
-          httpOnly: true,
-        });
-        response.cookie(REFRESH_COOKIE_NAME, newRefreshToken, {
-          maxAge: this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME'),
-          httpOnly: true,
-        });
-        response.setHeader('Set-Cookie', [
-          this.authService.getCookieWithJwtAccessToken(user, newAccessToken),
-          await this.authService.getCookieWithJwtRefreshToken(user, newRefreshToken),
-        ]);
+        // 7. Écriture cookies HTTP
+        this.setAuthCookies(response, newAccessToken, newRefreshToken);
 
         return this.activate(context);
       } catch (err) {
-        // Test environment
+        // Cas spécifique test
         if (process.env.NODE_ENV === 'test') {
           return false;
         }
 
-        response.clearCookie(AUTHENTICATION_COOKIE_NAME, {
-          maxAge: 0,
-          httpOnly: true,
-        });
-        response.clearCookie(REFRESH_COOKIE_NAME, {
-          maxAge: 0,
-          httpOnly: true,
-        });
+        // Nettoyage backend
+        await this.handleLogout(request);
 
-        // Logout in Haxe
-        const sid = request.cookies[SID_COOKIE_NAME];
-        let session: SessionEntity;
-        session = sid && (await this.sessionService.getBySid(sid));
+        // Nettoyage cookies client
+        this.clearAuthCookies(response);
 
-        if (session && session.uid) {
-          await Promise.all([
-            this.usersService.removeRefreshToken(session.uid),
-            this.sessionService.delete(sid),
-          ]);
+        // Cas fallback strategy "void"
+        if (Array.isArray(type) && type.includes('void')) {
+          return this.activate(context);
         }
 
-        response.clearCookie(SID_COOKIE_NAME, {
-          maxAge: 0,
-          httpOnly: true,
-        });
-
-        if (typeof type !== 'string') {
-          // If one of the AuthGuard types is void, we don't want to return false
-          // because we want to fallback to the void strategy.
-          if (type.includes('void')) return this.activate(context);
-        }
-        return typeof contextType === 'string' ? false : this.activate(context);
+        return false;
       }
     }
 
+    /**
+     * Délègue au AuthGuard passport
+     */
     async activate(context: ExecutionContext): Promise<boolean> {
       return super.canActivate(context) as Promise<boolean>;
     }
 
+    /**
+     * Gestion du résultat final du guard
+     */
     handleRequest(err: Error, user: any) {
       if (err || !user) {
         throw new UnauthorizedException();
