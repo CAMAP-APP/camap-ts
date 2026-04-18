@@ -104,7 +104,7 @@ export class UsersResolver {
     @CurrentUser() currentUser: UserEntity,
   ) {
     if(this.userGroupsService.canManageMessages(currentUser, groupId)) {
-      console.log("finding message recipients by id", ids, groupId);
+      // console.log("finding message recipients by id", ids, groupId);
       const recipients = (await this.userGroupsService.find({
           where: {
             userId: In(ids),
@@ -112,7 +112,7 @@ export class UsersResolver {
           },
           relations: ['user']
         })).map(ug => (ug as UserGroupEntity).user);
-      console.log(recipients);
+      // console.log(recipients);
       return recipients;
     }
     return [];
