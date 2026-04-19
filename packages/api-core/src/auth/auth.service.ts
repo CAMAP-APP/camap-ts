@@ -35,7 +35,7 @@ export class AuthService {
     private readonly variableService: VariableService,
     private readonly sessionService: SessionService,
     private readonly cryptoService: CryptoService,
-  ) { }
+  ) {}
 
   @Transactional()
   async login(
@@ -47,10 +47,12 @@ export class AuthService {
     const user = await this.usersService.findOneByEmail(email, true);
     if (!user) throw new UnauthorizedException('wrongCredentials');
 
-    // Anti bruteforce
-    const isIpBanned = await this.isBanned(ip);
-    if (isIpBanned) {
-      throw new UnauthorizedException('bruteForce');
+    // Anti bruteforce (désactivable temporairement via config)
+    if (this.isBruteForceEnabled()) {
+      const isIpBanned = await this.isBanned(ip);
+      if (isIpBanned) {
+        throw new UnauthorizedException('bruteForce');
+      }
     }
 
     const isValidPassword = await this.isValidPassword(user, password);
@@ -160,7 +162,9 @@ export class AuthService {
     try {
       return this.jwtService.verify<TokenPayload>(token, {
         secret: this.configService.get(
-          isRefreshToken ? 'JWT_REFRESH_TOKEN_SECRET' : 'JWT_ACCESS_TOKEN_SECRET',
+          isRefreshToken
+            ? 'JWT_REFRESH_TOKEN_SECRET'
+            : 'JWT_ACCESS_TOKEN_SECRET',
         ),
       });
     } catch {
@@ -186,12 +190,15 @@ export class AuthService {
 
   private getCookiesForLogOut(): { [key: string]: string } {
     const cookies = {};
-    cookies[AUTHENTICATION_COOKIE_NAME] = `${AUTHENTICATION_COOKIE_NAME}=; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
-    cookies[REFRESH_COOKIE_NAME] = `${REFRESH_COOKIE_NAME}=; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
-    cookies[SID_COOKIE_NAME] = `${SID_COOKIE_NAME}=; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
+    cookies[AUTHENTICATION_COOKIE_NAME] = `${AUTHENTICATION_COOKIE_NAME}=; ${
+      process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
+    } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
+    cookies[REFRESH_COOKIE_NAME] = `${REFRESH_COOKIE_NAME}=; ${
+      process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
+    } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
+    cookies[SID_COOKIE_NAME] = `${SID_COOKIE_NAME}=; ${
+      process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
+    } Path=/; Max-Age=0; ${this.getDomainProperty()}`;
     return cookies;
   }
 
@@ -214,12 +221,13 @@ export class AuthService {
     };
   }
 
-  /** */
   getAccessToken(user: Pick<UserEntity, 'id' | 'email'>) {
     const payload: TokenPayload = { email: user.email, id: user.id };
     return this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}s`,
+      expiresIn: `${this.configService.get(
+        'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+      )}s`,
     });
   }
 
@@ -227,11 +235,11 @@ export class AuthService {
     user: Pick<UserEntity, 'id' | 'email'>,
     accessToken?: string,
   ) {
-    return `${AUTHENTICATION_COOKIE_NAME}=${accessToken || this.getAccessToken(user)
-      }; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=${this.configService.get(
-        'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
-      )}; ${this.getDomainProperty()}`;
+    return `${AUTHENTICATION_COOKIE_NAME}=${
+      accessToken || this.getAccessToken(user)
+    }; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''} Path=/; Max-Age=${this.configService.get(
+      'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
+    )}; ${this.getDomainProperty()}`;
   }
 
   @Transactional()
@@ -239,7 +247,9 @@ export class AuthService {
     const payload: TokenPayload = { email: user.email, id: user.id };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-      expiresIn: `${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`,
+      expiresIn: `${this.configService.get(
+        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+      )}s`,
     });
     await this.usersService.setCurrentRefreshToken(token, user.id);
     return token;
@@ -250,18 +260,25 @@ export class AuthService {
     user: Pick<UserEntity, 'id' | 'email'>,
     refreshToken?: string,
   ) {
-    const token = refreshToken || (await this.getRefreshTokenAndSaveItInUser(user));
-    return `${REFRESH_COOKIE_NAME}=${token}; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=${this.configService.get(
-        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-      )}; ${this.getDomainProperty()}`;
+    const token =
+      refreshToken || (await this.getRefreshTokenAndSaveItInUser(user));
+    return `${REFRESH_COOKIE_NAME}=${token}; ${
+      process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
+    } Path=/; Max-Age=${this.configService.get(
+      'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+    )}; ${this.getDomainProperty()}`;
   }
 
   getAuthSidCookie(sid: string) {
-    return `${SID_COOKIE_NAME}=${sid}; ${process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
-      } Path=/; Max-Age=${this.configService.get(
-        'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-      )}; ${this.getDomainProperty()}`;
+    return `${SID_COOKIE_NAME}=${sid}; ${
+      process.env.NODE_ENV !== 'development' ? 'HttpOnly;' : ''
+    } Path=/; Max-Age=${this.configService.get(
+      'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
+    )}; ${this.getDomainProperty()}`;
+  }
+
+  private isBruteForceEnabled(): boolean {
+    return this.configService.get('DISABLE_BRUTE_FORCE') !== 'true';
   }
 
   @Transactional()
@@ -275,12 +292,16 @@ export class AuthService {
   }
 
   @Transactional()
-  async recordBadLogin(ip: string) {
-    const badTriesString = await this.getIpBan(ip);
+  async recordBadLogin(_ip: string) {
+    if (!this.isBruteForceEnabled()) {
+      return 0;
+    }
+
+    const badTriesString = await this.getIpBan(_ip);
     let badTries = parseInt(badTriesString, 10) || 0;
     badTries += 1;
     await this.cacheService.set(
-      this.getIpBanCacheName(ip),
+      this.getIpBanCacheName(_ip),
       badTries.toString(),
       60 * 10,
     );
@@ -302,7 +323,8 @@ export class AuthService {
   ): Promise<boolean> {
     // First, check the Bcrypt password
     const isBcryptPasswordMatching =
-      user.pass2 != "" && user.pass2 != null &&
+      user.pass2 != '' &&
+      user.pass2 != null &&
       (await this.cryptoService.bcryptCompare(plainTextPassword, user.pass2));
 
     if (isBcryptPasswordMatching) return true;
