@@ -1,4 +1,4 @@
-FROM node:20.19-slim AS builder
+FROM node:20.19.5-slim AS builder
 
 ARG GIT_COMMIT_SHORT=unknown
 ENV GIT_COMMIT_SHORT=${GIT_COMMIT_SHORT}
@@ -36,7 +36,7 @@ RUN set -eux; \
 COPY --chown=interamap:interamap ./scripts/ /srv/scripts
 
 # ---------- runtime ----------
-FROM node:20.19-slim
+FROM node:20.19.5-slim
 
 LABEL org.opencontainers.image.authors="InterAMAP44 inter@amap44.org"
 LABEL org.opencontainers.image.vendor="InterAMAP 44"
