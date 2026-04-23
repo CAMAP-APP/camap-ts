@@ -25,6 +25,7 @@ const REPLY_TO_HEADER_KEY = 'Reply-To';
 
 type SenderType = Pick<UserEntity, 'firstName' | 'lastName' | 'email'> &
   Partial<Pick<UserEntity, 'id'>>;
+
 type RecipientType = {
   email: string;
   firstName?: string;
@@ -52,11 +53,18 @@ export class MailsService {
     initTwig(this.twing);
   }
 
+  private isValidEmail(email?: string): boolean {
+    if (!email) return false;
+    const normalized = email.trim();
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized);
+  }
+
   // Actually send an email
   @Transactional()
   private async sendMail(options: ISendMailOptions) {
     const theme = await this.variableService.getTheme();
     const sendMailOptions: ISendMailOptions = { ...options };
+
     if (!sendMailOptions.from) {
       sendMailOptions.from = {
         address: theme.email.senderEmail,
@@ -71,7 +79,7 @@ export class MailsService {
 
   /**
    * Create a BufferedJsonMail
-   */
+   */  
   @Transactional()
   async createBufferedJsonMail(
     templateName: string,
@@ -95,6 +103,17 @@ export class MailsService {
       templateParameters.theme = theme;
       const templatedHtml = await this.renderTwing(templateName, templateParameters);
 
+      const sanitizedRecipients = (recipients ?? []).filter((r) =>
+        this.isValidEmail(r.email),
+      );
+
+      if (sanitizedRecipients.length === 0) {
+        this.logger.error(
+          `createBufferedJsonMail skipped: no valid recipients for subject "${subject}"`,
+        );
+        return null;
+      }
+
       let rawSender = null;
       if ('groupName' in templateParameters) {
         rawSender = JSON.stringify({
@@ -115,20 +134,26 @@ export class MailsService {
         htmlBody: templatedHtml,
         raw_sender: rawSender,
         raw_recipients: JSON.stringify(
-          recipients.map((r) => {
+          sanitizedRecipients.map((r) => {
             const recipient: { name?: string; email: string; userId?: number } = {
-              email: r.email,
+              email: r.email.trim(),
               userId: r.id,
             };
-            if(r.firstName && r.lastName)
-              recipient.name = formatUserName({ firstName: r.firstName!, lastName: r.lastName! });
+
+            if (r.firstName && r.lastName) {
+              recipient.name = formatUserName({
+                firstName: r.firstName,
+                lastName: r.lastName,
+              });
+            }
+
             return recipient;
           }),
         ),
         raw_headers: replyToSenderHeader
           ? JSON.stringify({
-            [REPLY_TO_HEADER_KEY]: `${sender.firstName}<${sender.email}>`,
-          })
+              [REPLY_TO_HEADER_KEY]: `${sender.firstName}<${sender.email}>`,
+            })
           : JSON.stringify({}),
         cdate: new Date(),
         raw_attachments: JSON.stringify(attachments),
@@ -138,7 +163,7 @@ export class MailsService {
     }
   }
 
-  // Get unsent emails (used for debugging)
+  // Get unsent emails (used for debugging)  
   getUnsentMails = async () => {
     return this.mailRepo.find({
       select: ['id', 'cdate', 'tries', 'title', 'htmlBody', 'rawStatus'],
@@ -152,6 +177,7 @@ export class MailsService {
   /**
    * CRONS
    */
+  
   @Transactional()
   @Cron(CronExpression.EVERY_MINUTE)
   async sendEmailsFromBuffer() {
@@ -166,54 +192,63 @@ export class MailsService {
     });
 
     const emailsToDelete = emails.filter(
-      (mail) => mail.recipients === null || mail.recipients.length === 0,
+      (mail) => !mail.recipients || mail.recipients.length === 0,
     );
 
     await Promise.all(
-      emailsToDelete.map((mail) => {
-        return this.mailRepo.delete(mail.id);
-      }),
+      emailsToDelete.map((mail) => this.mailRepo.delete(mail.id)),
     );
 
-    const emailsGroupByRecipientsBunch: BufferedJsonMailEntity[] = emails
-      .filter((e) => emailsToDelete.findIndex((e2) => e2.id === e.id) === -1)
-      .reduce((acc, mail) => {
-        const recipients = [...mail.recipients];
-        if (recipients.length > 99) {
-          while (recipients.length > 0) {
-            const bunchOfRecipients = recipients.splice(0, 99);
-            acc.push({
-              ...mail,
-              sender: mail.sender,
-              attachments: mail.attachments,
-              headers: mail.headers,
-              recipients: bunchOfRecipients,
-            });
-          }
-        } else {
-          acc.push(mail);
+    const mailsToProcess = emails.filter(
+      (e) => emailsToDelete.findIndex((e2) => e2.id === e.id) === -1,
+    );
+
+    const emailsGroupByRecipientsBunch: BufferedJsonMailEntity[] = [];
+
+    for (const mail of mailsToProcess) {
+      const validRecipients = (mail.recipients ?? []).filter((r) =>
+        this.isValidEmail(r.email),
+      );
+
+      if (validRecipients.length === 0) {
+        this.logger.error(`Mail ${mail.id}: no valid recipients, deleting`);
+        await this.mailRepo.delete(mail.id);
+        continue;
+      }
+
+      if (validRecipients.length > 99) {
+        const recipientsCopy = [...validRecipients];
+
+        while (recipientsCopy.length > 0) {
+          const bunchOfRecipients = recipientsCopy.splice(0, 99);
+
+          const chunk = new BufferedJsonMailEntity();
+          Object.assign(chunk, mail);
+          chunk.recipients = bunchOfRecipients;
+
+          emailsGroupByRecipientsBunch.push(chunk);
         }
-        return acc;
-      }, []);
+      } else {
+        mail.recipients = validRecipients;
+        emailsGroupByRecipientsBunch.push(mail);
+      }
+    }
 
     const theme = await this.variableService.getTheme();
 
     const sentOrFailedMails = await Promise.allSettled(
       emailsGroupByRecipientsBunch.map((mail: BufferedJsonMailEntity) => {
-        let text: string;
-        let html: string;
-        let title: string;
-        // decode UTF8, je comprends pas pourquoi je dois changer l'encodage à ce moment là...
-        // UTF-decode may fail        
-        /*try {
-          text = decodeURIComponent(escape(mail.textBody));
-          html = decodeURIComponent(escape(mail.htmlBody));
-          title = decodeURIComponent(escape(mail.title));
-        } catch (e) {*/
-        text = mail.textBody;
-        html = mail.htmlBody;
-        title = mail.title;
-        //}
+        if (!mail.recipients || mail.recipients.length === 0) {
+          return Promise.resolve({
+            skipped: true,
+            accepted: [],
+            rejected: [],
+          });
+        }
+
+        const text = mail.textBody;
+        const html = mail.htmlBody;
+        const title = mail.title;
 
         let from: Address = undefined;
         if (mail.sender) {
@@ -225,7 +260,7 @@ export class MailsService {
 
         try {
           return this.sendMail({
-            bcc: mail.recipients.map((r) => r.email), // all recipients are in BCC
+            bcc: mail.recipients.map((r) => r.email),
             subject: title,
             text,
             html,
@@ -242,46 +277,63 @@ export class MailsService {
     await Promise.all(
       sentOrFailedMails.map((sentOrFailed, index) => {
         const mail = emailsGroupByRecipientsBunch[index];
+
+        if (!mail.recipients || mail.recipients.length === 0) {
+          return this.mailRepo.delete(mail.id);
+        }
+
         if (sentOrFailed.status === 'fulfilled') {
           const res: {
-            messageId: string;
+            messageId?: string;
             accepted: Array<any>;
             rejected: Array<any>;
+            skipped?: boolean;
           } = sentOrFailed.value;
-          if (res.rejected.length > 0) {
-            // some emails have been rejected
-            this.logger.error(`Rejected:${JSON.stringify(res.rejected)}`);
-            // remove accepted emails from recipients
-            const acceptedEmails = res.accepted;
-            return this.mailRepo.update(mail.id, {
-              tries: mail.tries + 1,
-              rawStatus: JSON.stringify(res),
-              recipients: [...mail.recipients].filter(
-                (r) => !acceptedEmails.includes(r.email),
-              ),
-            });
-          } else {
-            // email has been sent
-            // mail.sdate = new Date();
-            // mail.rawStatus = JSON.stringify(res);
-            // return this.mailRepo.save(mail);
+
+          if (res.skipped) {
             return this.mailRepo.delete(mail.id);
           }
-        } else if (sentOrFailed.status === 'rejected') {
+
+          if (res.rejected.length > 0) {
+            this.logger.error(`Rejected:${JSON.stringify(res.rejected)}`);
+
+            const acceptedEmails = res.accepted;
+            const remainingRecipients = [...mail.recipients].filter(
+              (r) => !acceptedEmails.includes(r.email),
+            );
+
+            if (remainingRecipients.length === 0) {
+              return this.mailRepo.delete(mail.id);
+            }
+
+            mail.tries = mail.tries + 1;
+            mail.rawStatus = JSON.stringify(res);
+            mail.recipients = remainingRecipients;
+
+            return this.mailRepo.save(mail);
+          }
+
+          return this.mailRepo.delete(mail.id);
+        }
+
+        if (sentOrFailed.status === 'rejected') {
           const stringifiedError = JSON.stringify(
             sentOrFailed.reason,
-            Object.getOwnPropertyNames(sentOrFailed.reason),
+            Object.getOwnPropertyNames(sentOrFailed.reason ?? {}),
           );
+
           this.logger.error(`Error:${stringifiedError}`);
-          return this.mailRepo.update(mail.id, {
-            tries: mail.tries + 1,
-            rawStatus: stringifiedError,
-          });
+
+          mail.tries = mail.tries + 1;
+          mail.rawStatus = stringifiedError;
+
+          return this.mailRepo.save(mail);
         }
+
+        return Promise.resolve();
       }),
     );
 
-    // delete old mails
     const oldDate = subDays(new Date(), 10);
     await this.mailRepo.delete({ sdate: LessThan(oldDate) });
   }
@@ -314,6 +366,7 @@ export class MailsService {
         host: this.configService.get('CAMAP_HOST'),
         ...context,
       });
+
     return inlineCSS(rendered, {
       url: `file://${MAILS_TEMPLATE_DIR}/`,
       applyStyleTags: false,
