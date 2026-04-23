@@ -203,47 +203,36 @@ export class MailsService {
       (e) => emailsToDelete.findIndex((e2) => e2.id === e.id) === -1,
     );
 
-    const emailsGroupByRecipientsBunch: BufferedJsonMailEntity[] = mailsToProcess.reduce(
-      (acc: BufferedJsonMailEntity[], mail) => {
-        const validRecipients = (mail.recipients ?? []).filter((r) =>
-          this.isValidEmail(r.email),
-        );
+    const emailsGroupByRecipientsBunch: BufferedJsonMailEntity[] = [];
 
-        if (validRecipients.length === 0) {
-          this.logger.error(`Mail ${mail.id}: no valid recipients, deleting`);
-          acc.push({
-            ...mail,
-            recipients: [],
-          });
-          return acc;
+    for (const mail of mailsToProcess) {
+      const validRecipients = (mail.recipients ?? []).filter((r) =>
+        this.isValidEmail(r.email),
+      );
+
+      if (validRecipients.length === 0) {
+        this.logger.error(`Mail ${mail.id}: no valid recipients, deleting`);
+        await this.mailRepo.delete(mail.id);
+        continue;
+      }
+
+      if (validRecipients.length > 99) {
+        const recipientsCopy = [...validRecipients];
+
+        while (recipientsCopy.length > 0) {
+          const bunchOfRecipients = recipientsCopy.splice(0, 99);
+
+          const chunk = new BufferedJsonMailEntity();
+          Object.assign(chunk, mail);
+          chunk.recipients = bunchOfRecipients;
+
+          emailsGroupByRecipientsBunch.push(chunk);
         }
-
-        if (validRecipients.length > 99) {
-          const recipientsCopy = [...validRecipients];
-          while (recipientsCopy.length > 0) {
-            const bunchOfRecipients = recipientsCopy.splice(0, 99);
-            acc.push({
-              ...mail,
-              sender: mail.sender,
-              attachments: mail.attachments,
-              headers: mail.headers,
-              recipients: bunchOfRecipients,
-            });
-          }
-        } else {
-          acc.push({
-            ...mail,
-            sender: mail.sender,
-            attachments: mail.attachments,
-            headers: mail.headers,
-            recipients: validRecipients,
-          });
-        }
-
-        return acc;
-      },
-      [],
-    );
+      } else {
+        mail.recipients = validRecipients;
+        emailsGroupByRecipientsBunch.push(mail);
+      }
+    }
 
     const theme = await this.variableService.getTheme();
 
