@@ -1,7 +1,7 @@
 import SimpleField from '@components/utils/SimpleField';
-import { ChevronRight } from '@mui/icons-material';
+import { ChevronRight, Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Box, Container } from '@mui/material';
+import { Box, Container, IconButton, InputAdornment } from '@mui/material';
 import {
   addressSchema,
   addressSchemaNotRequired,
@@ -79,6 +79,7 @@ const RegistrationBox = ({
   const invitedUser = data?.getInvitedUserToRegister;
 
   const [error, setError] = React.useState<string>();
+  const [showPassword, setShowPassword] = React.useState(false);
 
   React.useEffect(() => {
     if (!unexpectedError) return;
@@ -313,14 +314,40 @@ const RegistrationBox = ({
                 name="password"
                 label={t('password')}
                 disabled={isSubmitting}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 helperText={t('min8Char')}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <SimpleField
                 name="confirmPassword"
                 label={t('confirmPassword')}
                 disabled={isSubmitting}
-                type="password"
+                type={showPassword ? 'text' : 'password'}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
               <Box pt={1} textAlign="center">
                 <Field
