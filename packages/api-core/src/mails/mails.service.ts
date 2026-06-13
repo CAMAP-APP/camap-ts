@@ -101,6 +101,9 @@ export class MailsService {
     try {
       const theme = await this.variableService.getTheme();
       templateParameters.theme = theme;
+      if (replyToSenderHeader && sender) {
+        templateParameters.replyTo = sender.email;
+      }
       const templatedHtml = await this.renderTwing(templateName, templateParameters);
 
       const sanitizedRecipients = (recipients ?? []).filter((r) =>
