@@ -95,5 +95,7 @@
     "uploadMedia": "Téléverser une image",
     "unknownVAT": "SIRET Inconnu",
     "dashDistributionsTitle": "Vos prochaines distributions",
-    "companyNumberContactItem": "SIRET {{num}}"
+    "companyNumberContactItem": "SIRET {{num}}",
+    "gdprVendorDisclaimer": "Les données que vous renseignez (nom, prénom, email, téléphone, SIRET, description de votre activité, photos et textes de présentation) sont collectées par votre AMAP, responsable de traitement, pour gérer votre référencement, vos catalogues produits, vos contrats et votre page de présentation publique. Certaines données (page de présentation, catalogue) sont visibles publiquement. Vous disposez d'un droit d'accès, de rectification, d'effacement, de limitation, de portabilité et d'opposition.",
+    "gdprVendorDisclaimerLink": "Pour en savoir plus et exercer vos droits"
 }

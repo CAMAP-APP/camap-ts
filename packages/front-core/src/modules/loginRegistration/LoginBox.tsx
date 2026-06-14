@@ -1,6 +1,7 @@
 import SimpleField from '@components/utils/SimpleField';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { LoadingButton } from '@mui/lab';
-import { Box, Container } from '@mui/material';
+import { Box, Container, IconButton, InputAdornment } from '@mui/material';
 import { loginSchema } from 'camap-common';
 import { Form, Formik, FormikHelpers } from 'formik';
 import React from 'react';
@@ -35,6 +36,7 @@ const LoginBox = ({
   const [recordBadLoginMutation] = useRecordBadLoginMutation();
 
   const [error, setError] = React.useState<string>();
+  const [showPassword, setShowPassword] = React.useState(false);
 
   async function submit(
     values: LoginBoxFormValues,
@@ -93,7 +95,20 @@ const LoginBox = ({
               name="password"
               label={t('password')}
               disabled={isSubmitting}
-              type="password"
+              type={showPassword ? 'text' : 'password'}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showPassword ? t('hidePassword') : t('showPassword')}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
             <Box pt={2} pb={2}>
               <LoadingButton
