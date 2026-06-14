@@ -11,6 +11,7 @@ import {
   FormControlLabel,
   Grid,
   InputLabel,
+  Link,
   MenuItem,
   Paper,
   Select,
@@ -585,6 +586,16 @@ const VendorForm: React.FC<VendorFormProps> = ({ vendorId, onSuccess }) => {
                     />
                   )}
                 </Field>
+              </Grid>
+
+              {/* RGPD disclaimer */}
+              <Grid item xs={12}>
+                <Alert severity="info" sx={{ mt: 2, fontSize: '0.85em' }}>
+                  {tVendorDash('gdprVendorDisclaimer')}{' '}
+                  <Link href="https://wiki.amap44.org/fr/LEGAL/RGPD" target="_blank" rel="noopener noreferrer">
+                    {tVendorDash('gdprVendorDisclaimerLink')}
+                  </Link>.
+                </Alert>
               </Grid>
 
               {/* Submit Button */}
