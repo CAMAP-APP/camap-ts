@@ -45,4 +45,7 @@
 		Pour vous désabonner,
 		<a href={{ "#{quitGroupLink}" }} rel="notrack">quittez ce groupe</a>
 		si vous ne souhaitez plus recevoir de messages</p>
+	{% if replyTo is defined and replyTo %}
+	<p>Vous pouvez répondre à : <a href={{ "mailto:#{replyTo}" }}>{{ replyTo }}</a></p>
+	{% endif %}
 {% endblock %}
