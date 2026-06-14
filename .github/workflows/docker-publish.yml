@@ -79,8 +79,6 @@ jobs:
           echo "major_minor=$major_minor" >> $GITHUB_OUTPUT
           echo "sha8=$sha8"   >> $GITHUB_OUTPUT
 
-      # Multi-arch prerequisites
-      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
 
       - name: Login to GHCR
@@ -90,31 +88,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # --- Build multi-arch (ARM64 peut échouer si mod-neko indisponible) ---
-      - name: Build & push (try multi-arch)
-        id: build_multi
-        continue-on-error: true
+      - name: Build & push
         uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./camap-ts.Dockerfile
-          push: true
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
-          provenance: false
-          tags: |
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
-            ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major }}
-            ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha,scope=camap-ts
-          cache-to:   type=gha,scope=camap-ts,mode=max
-
-      # --- En cas d’échec ARM64, fallback amd64-only ---
-      - name: Build & push (fallback amd64-only)
-        if: steps.build_multi.outcome == 'failure'
-        uses: docker/build-push-action@v6
+        env: { BUILDKIT_PROGRESS: plain }
         with:
           context: .
           file: ./camap-ts.Dockerfile
@@ -122,7 +98,6 @@ jobs:
           platforms: linux/amd64
           build-args: |
             GIT_COMMIT_SHORT=${{ steps.ver.outputs.sha8 }}
-          provenance: false
           tags: |
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.tag }}
             ${{ env.IMAGE_NAME }}:${{ steps.ver.outputs.major_minor }}
