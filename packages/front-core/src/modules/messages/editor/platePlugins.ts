@@ -20,6 +20,7 @@ import { LinkNode } from './nodes/LinkNode';
 import { MessageImageElement } from './messageEditorSchema';
 import { MediaImageNode } from './nodes/MediaImageNode';
 import EmailImageStatic from './nodes/EmailImageStatic';
+import EmailLinkStatic from './nodes/EmailLinkStatic';
 
 // `@platejs/basic-nodes` currently exports these as `PluginConfig<any, ...>` which collapses
 // `InferTransforms<...>` to `any` when deriving the editor type. We keep runtime behavior
@@ -71,5 +72,6 @@ export const MESSAGE_VIEWER_PLUGINS = [
 
 export const EMAIL_RENDER_PLUGINS = [
     ...MESSAGE_BASE_PLUGINS,
-    ImagePlugin.withComponent(EmailImageStatic)
+    LinkPlugin.withComponent(EmailLinkStatic),
+    ImagePlugin.withComponent(EmailImageStatic),
 ]
