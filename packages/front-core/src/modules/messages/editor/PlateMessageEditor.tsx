@@ -69,13 +69,6 @@ export const PlateMessageEditor = ({
         onBlurSaveSlateValue?.(plateEditor.children);
         void serializeToFormikHtml();
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
-      onPaste: (({ event, editor }) => {
-        if (event.defaultPrevented) return;
-        const dt = event.clipboardData;
-        if (!dt) return;
-        editor.tf.insertData(dt);
-        event.preventDefault();
-      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>
     },
   });
 
