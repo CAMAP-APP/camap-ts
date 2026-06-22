@@ -1,5 +1,5 @@
 import theme from '@theme/default/theme';
-import type { AnchorHTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
 import type { TLinkElement } from 'platejs';
 
 type Props = {
@@ -9,9 +9,13 @@ type Props = {
 };
 
 export default function EmailLinkStatic({ element, children, attributes }: Props) {
+  const filteredAttributes = Object.fromEntries(
+    Object.entries(attributes ?? {})
+      .filter((att) => !att[0].startsWith('data-slate-'))
+  );
   return (
     <a
-      {...attributes}
+      {...filteredAttributes}
       href={attributes?.href ?? element.url}
       target="_blank"
       rel="noopener noreferrer"

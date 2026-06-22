@@ -28,6 +28,14 @@ import { BufferedJsonMailEntity } from './models/buffered-json-mail.entity';
 
         if (transport === 'smtp') {
           const smtpSecure = (process.env.SMTP_SECURE || '').trim().toLowerCase() === 'true';
+          const parseEnvBool = (value: string | undefined): boolean | undefined => {
+            const normalized = (value || '').trim().toLowerCase();
+            if (normalized === 'true') return true;
+            if (normalized === 'false') return false;
+            return undefined;
+          };
+          const requireTls = parseEnvBool(process.env.SMTP_REQUIRE_TLS);
+          const ignoreTls = parseEnvBool(process.env.SMTP_IGNORE_TLS);
 
           return {
             ...base,
@@ -35,8 +43,8 @@ import { BufferedJsonMailEntity } from './models/buffered-json-mail.entity';
               host: process.env.SMTP_HOST || 'localhost',
               port: parseInt(process.env.SMTP_PORT, 10) || 1025,
               secure: smtpSecure,
-              ignoreTLS: false,
-              requireTLS: !smtpSecure,
+              ignoreTLS: ignoreTls ?? false,
+              requireTLS: requireTls ?? !smtpSecure,
               auth: {
                 user: process.env.SMTP_AUTH_USER,
                 pass: process.env.SMTP_AUTH_PASS,
