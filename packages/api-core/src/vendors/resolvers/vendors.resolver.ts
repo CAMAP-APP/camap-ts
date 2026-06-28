@@ -508,6 +508,40 @@ export class VendorsResolver {
     return nextDistributions;
   }
 
+  @ResolveField(() => [VendorDistributions])
+  async allDistributions(
+    @Parent() parent: VendorEntity,
+    @Args('fromDate', { type: () => Date, nullable: true }) fromDate?: Date,
+  ) {
+    const catalogs = await this.catalogsService.findByVendor(parent.id, false);
+    const distribs = await this.distributionsService.findAllDistributionsOfCatalogs(
+      catalogs.map((c) => c.id),
+      fromDate,
+    );
+
+    const distributionsByGroupId = new Map<number, {
+      distributions: DistributionEntity[]
+      group: GroupEntity
+    }>();
+    (await Promise.all(distribs.map(async (distribution) => {
+      const catalog = await distribution.catalog;
+      const group = await catalog.group;
+      return { distribution, group };
+    }))).forEach(({ distribution, group }) => {
+      const dists = distributionsByGroupId.get(group.id);
+      if (!dists) {
+        distributionsByGroupId.set(group.id, { distributions: [distribution], group });
+      } else {
+        dists.distributions.push(distribution);
+      }
+    });
+
+    return Array.from(distributionsByGroupId.values()).map(({ distributions, group }) => ({
+      group,
+      distributions: distributions.sort((d1, d2) => d1.date.getTime() - d2.date.getTime()),
+    }));
+  }
+
   /**
    * HELPERS
    */
