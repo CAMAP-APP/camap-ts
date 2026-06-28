@@ -132,6 +132,9 @@ const VendorDashContent = ({
         }}>
             <Typography variant="h2">{tVendorDash("welcome")}</Typography>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Button variant="outlined" onClick={handleExportCsv} disabled={csvLoading}>
+                    {tVendorDash("exportDistributionsCsv")}
+                </Button>
                 <DatePicker
                     label={tVendorDash("exportFromDate")}
                     value={fromDate}
@@ -139,9 +142,6 @@ const VendorDashContent = ({
                     inputFormat="dd/MM/yyyy"
                     textFieldProps={{ size: 'small', sx: { width: 160 } }}
                 />
-                <Button variant="outlined" onClick={handleExportCsv} disabled={csvLoading}>
-                    {tVendorDash("exportDistributionsCsv")}
-                </Button>
                 <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
             </Box>
         </Box>
