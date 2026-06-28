@@ -269,6 +269,14 @@ const VolunteersCalendar = ({
     [multiDistribs, firstDistributionIndex, maxNbDistribToShow],
   );
 
+  const handleUnsubscribeSuccess = React.useCallback(() => {
+    setMultiDistribs([]);
+    setRoles([]);
+    didGetNextDistributionIndexOnce.current = false;
+    const now = new Date();
+    doGetVolunteerMultiDistribs(subMonths(now, 4), addMonths(now, 4));
+  }, [doGetVolunteerMultiDistribs]);
+
   const onBackClick = () => {
     goTo('/');
   };
@@ -454,13 +462,11 @@ const VolunteersCalendar = ({
                               multiDistrib={d}
                               userId={userId}
                               roleId={r.id}
+                              roleName={r.name}
                               daysBeforeDutyPeriodsOpen={
                                 daysBeforeDutyPeriodsOpen
                               }
-                              returnUrl={`/distribution/volunteersCalendar${focusedMultiDistribId
-                                  ? `/${focusedMultiDistribId}`
-                                  : ''
-                                }`}
+                              onUnsubscribeSuccess={handleUnsubscribeSuccess}
                             />
                           </Box>
                         ))}
