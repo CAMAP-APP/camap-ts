@@ -157,10 +157,6 @@ query GetVendorDistributionsCsv($vendorId: Int!, $fromDate: DateTime) {
       products {
         id
         name
-        qt
-        unitType
-        bulk
-        variablePrice
         active
       }
     }

@@ -1,5 +1,5 @@
 import { GetVendorDistributionsCsvQuery } from '@gql';
-import { formatSmartQt } from 'camap-common';
+import { formatNumber } from '@utils/fomat';
 import { format, startOfDay } from 'date-fns';
 import { saveAs } from 'file-saver';
 
@@ -56,7 +56,7 @@ export function exportVendorDistributionsCsv(
       const cells = dateTimestamps.map((dateKey) => {
         const qty = matrix.get(catalog.id)?.get(dateKey)?.get(product.id);
         if (qty == null) return '';
-        return formatSmartQt(product, { quantity: qty });
+        return formatNumber(qty);
       });
       rows.push([catalog.group.name, product.name, ...cells]);
     }
