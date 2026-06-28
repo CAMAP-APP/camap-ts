@@ -1,8 +1,10 @@
+import DatePicker from "@components/forms/Pickers/DatePicker";
 import CamapIcon, { CamapIconId } from "@components/utils/CamapIcon";
 import CircularProgressBox from "@components/utils/CircularProgressBox";
-import { GetVendorsByUserIdQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
+import { GetVendorsByUserIdQuery, useGetVendorDistributionsCsvLazyQuery, useGetVendorsByUserIdQuery, useUserAccountQuery } from "@gql";
 import { Alert, Box, Button, Divider, Paper, Typography } from "@mui/material";
 import { useCamapTranslation } from "@utils/hooks/use-camap-translation";
+import { startOfYear } from "date-fns";
 import DashboardLayout from "layout/DashboardLayout";
 import { useState } from "react";
 import { reactRouterDefaultProps } from "react-router-config";
@@ -15,6 +17,7 @@ import VendorEditDocuments from "./VendorEditDocuments";
 import VendorForm from "./VendorForm";
 import VendorEditImages from "./VendorEditImages";
 import VendorDashDistributions from "./VendorDashDistributions";
+import { exportVendorDistributionsCsv } from "./vendorDistribsCsv.utils";
 
 const MultipleVendorDashContent = ({
     claimedVendors,
@@ -105,6 +108,22 @@ const VendorDashContent = ({
     refetchClaimedVendors: () => void
 }) => {
     const { tVendorDash } = useCamapTranslation({ tVendorDash: "vendorDashboard" });
+    const [fromDate, setFromDate] = useState<Date>(() => startOfYear(new Date()));
+    const [getDistributionsForCsv, { loading: csvLoading }] = useGetVendorDistributionsCsvLazyQuery();
+
+    const handleExportCsv = async () => {
+        const { data } = await getDistributionsForCsv({
+            variables: { vendorId: vendor.id, fromDate },
+        });
+        if (data?.vendor) {
+            exportVendorDistributionsCsv(
+                data.vendor.allCatalogs,
+                data.vendor.allDistributions,
+                vendor.name,
+            );
+        }
+    };
+
     return <>
         <Box sx={{
             display: 'flex',
@@ -112,7 +131,19 @@ const VendorDashContent = ({
             alignItems: 'center',
         }}>
             <Typography variant="h2">{tVendorDash("welcome")}</Typography>
-            <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <DatePicker
+                    label={tVendorDash("exportFromDate")}
+                    value={fromDate}
+                    onChange={(date: Date | null) => { if (date) setFromDate(date); }}
+                    inputFormat="dd/MM/yyyy"
+                    textFieldProps={{ size: 'small', sx: { width: 160 } }}
+                />
+                <Button variant="outlined" onClick={handleExportCsv} disabled={csvLoading}>
+                    {tVendorDash("exportDistributionsCsv")}
+                </Button>
+                <Button variant="contained" href={`/vendor/view/${vendor.id}`}>{tVendorDash("visitPublicProfile")}</Button>
+            </Box>
         </Box>
         <Divider sx={{ mt: 2, mb: 2 }} />
         <VendorDashDistributions vendorId={vendor.id} />

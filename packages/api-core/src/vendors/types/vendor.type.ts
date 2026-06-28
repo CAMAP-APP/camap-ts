@@ -105,4 +105,7 @@ export class Vendor {
 
   @Field(() => [VendorDistributions])
   nextDistributions: VendorDistributions[];
+
+  @Field(() => [VendorDistributions])
+  allDistributions: VendorDistributions[];
 }
