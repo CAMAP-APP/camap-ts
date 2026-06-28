@@ -1,43 +1,51 @@
 import {
+  Alert,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   SxProps,
   Theme,
   Tooltip,
   Typography,
 } from '@mui/material';
+import React from 'react';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
-import { RestCsaMultiDistribWithVolunteerRoles } from '../requests';
+import { RestCsaMultiDistribWithVolunteerRoles, useRestUnsubscribeFromRole } from '../requests';
 
 interface VolunteersCalendarDistributionRoleProps {
   multiDistrib: RestCsaMultiDistribWithVolunteerRoles;
   userId: number;
   roleId: number;
+  roleName: string;
   daysBeforeDutyPeriodsOpen: number;
-  returnUrl: string;
+  onUnsubscribeSuccess: () => void;
 }
 
 const VolunteersCalendarDistributionRole = ({
   multiDistrib,
   userId,
   roleId,
+  roleName,
   daysBeforeDutyPeriodsOpen,
-  returnUrl,
+  onUnsubscribeSuccess,
 }: VolunteersCalendarDistributionRoleProps) => {
   const { t } = useCamapTranslation({
     t: 'volunteers-calendar',
   });
 
-  const from = new Date();
-  const to = new Date();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [unsubscribe, { error }] = useRestUnsubscribeFromRole(multiDistrib.id, roleId);
 
   const roleKey = String(roleId);
   const hasVolunteerRole = !!multiDistrib.hasVolunteerRole?.[roleKey];
-  const volunteerForRole = hasVolunteerRole
-  ? (multiDistrib.volunteerForRole?.[roleKey] ?? null)
-  : null;
-
-  const volunteer = volunteerForRole;
+  const volunteer = hasVolunteerRole
+    ? (multiDistrib.volunteerForRole?.[roleKey] ?? null)
+    : null;
 
   let sxColors: SxProps<Theme> = {
     bgcolor: 'initial',
@@ -49,6 +57,25 @@ const VolunteersCalendarDistributionRole = ({
       color: (theme: Theme) => theme.palette.action.disabled,
     };
   }
+
+  const distribDate = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(multiDistrib.distribStartDate));
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    const success = await unsubscribe({} as Record<string, never>);
+    setLoading(false);
+    if (success) {
+      setDialogOpen(false);
+      onUnsubscribeSuccess();
+    }
+  };
 
   return (
     <Box
@@ -77,7 +104,7 @@ const VolunteersCalendarDistributionRole = ({
                 <Button
                   variant="contained"
                   color="error"
-                  href={`/distribution/unsubscribeFromRole/${multiDistrib.id}/${roleId}?returnUrl=${returnUrl}&from=${from}&to${to}`}
+                  onClick={() => setDialogOpen(true)}
                 >
                   {t('unsubscribe')}
                 </Button>
@@ -87,7 +114,7 @@ const VolunteersCalendarDistributionRole = ({
           {!volunteer && multiDistrib.canVolunteersJoin && (
             <Button
               variant="contained"
-              href={`/distribution/volunteersCalendar?returnUrl=${returnUrl}&distrib=${multiDistrib.id}&role=${roleId}&from=${from}&to=${to}`}
+              href={`/distribution/volunteersCalendar?distrib=${multiDistrib.id}&role=${roleId}`}
             >
               {t('join')}
             </Button>
@@ -109,6 +136,35 @@ const VolunteersCalendarDistributionRole = ({
           <Box position={'absolute'} top={0} left={0} right={0} bottom={0} />
         </Tooltip>
       )}
+
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
+        <DialogTitle>
+          {t('unsubscribeDialogTitle', { roleName, distribDate })}
+        </DialogTitle>
+        <DialogContent>
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          <DialogContentText>
+            {t('unsubscribeDialogMessage')}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)} disabled={loading}>
+            {t('cancel')}
+          </Button>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleConfirm}
+            disabled={loading}
+          >
+            {t('yes')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
