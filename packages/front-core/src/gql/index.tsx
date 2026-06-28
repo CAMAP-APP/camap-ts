@@ -4909,10 +4909,6 @@ export const GetVendorDistributionsCsvDocument = gql`
       products {
         id
         name
-        qt
-        unitType
-        bulk
-        variablePrice
         active
       }
     }
@@ -4943,7 +4939,7 @@ export type GetVendorDistributionsCsvQueryVariables = Exact<{
   fromDate?: InputMaybe<Scalars['DateTime']>;
 }>;
 
-export type GetVendorDistributionsCsvQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, products: Array<{ __typename?: 'Product', id: number, name: string, qt: number, unitType: number, bulk: boolean, variablePrice: boolean, active: boolean }> }>, allDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalog: { __typename?: 'Catalog', id: number }, userOrders: Array<{ __typename?: 'UserOrder', quantity: number, product: { __typename?: 'Product', id: number } }> }> }> } };
+export type GetVendorDistributionsCsvQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, products: Array<{ __typename?: 'Product', id: number, name: string, active: boolean }> }>, allDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalog: { __typename?: 'Catalog', id: number }, userOrders: Array<{ __typename?: 'UserOrder', quantity: number, product: { __typename?: 'Product', id: number } }> }> }> } };
 
 export function useGetVendorDistributionsCsvQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
