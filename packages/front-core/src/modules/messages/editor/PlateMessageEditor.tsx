@@ -59,8 +59,16 @@ export const PlateMessageEditor = ({
     plugins: [...MESSAGE_EDITOR_PLUGINS],
     value: MESSAGE_EDITOR_EMPTY_VALUE,
     handlers: {
-      onFocus: ((_ctx) => {
+      onFocus: (({ event, editor: plateEditor }) => {
         setIsFocused(true);
+
+        // Keyboard focus (Tab): place caret at end of content.
+        if ((event.nativeEvent as UIEvent).detail === 0) {
+          requestAnimationFrame(() => {
+            const end = plateEditor.api.end([]);
+            if (end) plateEditor.tf.select(end);
+          });
+        }
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
       onBlur: (({ event, editor: plateEditor }) => {
         setIsFocused(false);
