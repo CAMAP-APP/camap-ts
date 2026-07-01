@@ -41,7 +41,10 @@ const MessageLatestMessagesSelect = ({
   }, [error, setError]);
 
   React.useEffect(() => {
-    if (reuseMessage === undefined) refetch();
+    if (reuseMessage === undefined) {
+      setValue(null);
+      refetch();
+    }
   }, [refetch, reuseMessage]);
 
   const onClose = (event: React.ChangeEvent<{}>) => {

@@ -13,13 +13,14 @@ import {
 } from '@platejs/indent/react';
 import { ImagePlugin } from '@platejs/media/react';
 import { AutoformatPlugin } from '@platejs/autoformat';
-import type { InferConfig, PlatePlugin, TPlateEditor } from '@platejs/core/react';
-import type { PluginConfig, Value } from 'platejs';
+import { type InferConfig, type PlatePlugin, type TPlateEditor } from '@platejs/core/react';
+import { createTSlatePlugin, type PluginConfig, type Value } from 'platejs';
 import { autoformatRules } from './autoformat';
 import { LinkNode } from './nodes/LinkNode';
-import { MessageImageElement } from './messageEditorSchema';
 import { MediaImageNode } from './nodes/MediaImageNode';
 import EmailImageStatic from './nodes/EmailImageStatic';
+import EmailLinkStatic from './nodes/EmailLinkStatic';
+import EmailParagraphStatic from './nodes/EmailParagraphStatic';
 
 // `@platejs/basic-nodes` currently exports these as `PluginConfig<any, ...>` which collapses
 // `InferTransforms<...>` to `any` when deriving the editor type. We keep runtime behavior
@@ -69,7 +70,19 @@ export const MESSAGE_VIEWER_PLUGINS = [
     ImagePlugin
 ]
 
+const EmailParagraphPlugin = createTSlatePlugin({
+    key: 'emailParagraphRenderer',
+    priority: 1000,
+    override: {
+      components: {
+        p: EmailParagraphStatic,
+      },
+    },
+  });
+
 export const EMAIL_RENDER_PLUGINS = [
     ...MESSAGE_BASE_PLUGINS,
-    ImagePlugin.withComponent(EmailImageStatic)
+    EmailParagraphPlugin,
+    LinkPlugin.withComponent(EmailLinkStatic),
+    ImagePlugin.withComponent(EmailImageStatic),
 ]

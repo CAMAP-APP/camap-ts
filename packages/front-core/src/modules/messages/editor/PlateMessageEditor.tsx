@@ -3,10 +3,11 @@ import { Box } from '@mui/material';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
-import { createEditor, createSlateEditor, type Value } from 'platejs';
+import { createSlateEditor, type Value } from 'platejs';
 import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
+import { isEmptyEmailHtml } from './isEmptyEmailHtml';
 import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
@@ -16,6 +17,7 @@ import {
   type MessageEditorPlugin,
 } from './platePlugins';
 import { plateStyles } from './plateStyles';
+import EmailEditorStatic from './nodes/EmailEditorStatic';
 
 type Props = {
   name: string;
@@ -46,7 +48,6 @@ export const PlateMessageEditor = ({
   value: _formikHtml,
   groupId,
   externalValue,
-  onExternalValueApplied,
   onBlurSaveSlateValue,
   onHtmlSerialized,
   toolbarEnd,
@@ -59,8 +60,16 @@ export const PlateMessageEditor = ({
     plugins: [...MESSAGE_EDITOR_PLUGINS],
     value: MESSAGE_EDITOR_EMPTY_VALUE,
     handlers: {
-      onFocus: ((_ctx) => {
+      onFocus: (({ event, editor: plateEditor }) => {
         setIsFocused(true);
+
+        // Keyboard focus (Tab): place caret at end of content.
+        if ((event.nativeEvent as UIEvent).detail === 0) {
+          requestAnimationFrame(() => {
+            const end = plateEditor.api.end([]);
+            if (end) plateEditor.tf.select(end);
+          });
+        }
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
       onBlur: (({ event, editor: plateEditor }) => {
         setIsFocused(false);
@@ -69,13 +78,6 @@ export const PlateMessageEditor = ({
         onBlurSaveSlateValue?.(plateEditor.children);
         void serializeToFormikHtml();
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
-      onPaste: (({ event, editor }) => {
-        if (event.defaultPrevented) return;
-        const dt = event.clipboardData;
-        if (!dt) return;
-        editor.tf.insertData(dt);
-        event.preventDefault();
-      }) as DOMHandler<MessageEditorPlugin, React.ClipboardEvent>
     },
   });
 
@@ -89,6 +91,7 @@ export const PlateMessageEditor = ({
     }), {
       stripClassNames: true,
       stripDataAttributes: true,
+      editorComponent: EmailEditorStatic,
     });
     onHtmlSerialized?.(html);
     onChange(name)(html);
@@ -103,9 +106,14 @@ export const PlateMessageEditor = ({
   }, [serializeToFormikHtml]);
 
   React.useEffect(() => {
-    if (!externalValue) return;
-    editor.tf.setValue(externalValue);
-  }, [editor, externalValue]);
+    if (externalValue) {
+      editor.tf.setValue(externalValue);
+      return;
+    }
+    if (isEmptyEmailHtml(_formikHtml)) {
+      editor.tf.setValue(MESSAGE_EDITOR_EMPTY_VALUE);
+    }
+  }, [editor, externalValue, _formikHtml]);
 
   const onPlateChange = useCallback(() => {
     console.log('onPlateChange', editor.children);
