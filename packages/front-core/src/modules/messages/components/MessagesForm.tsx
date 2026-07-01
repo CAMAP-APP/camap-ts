@@ -55,6 +55,22 @@ const MessagesForm = ({
   const { t } = useTranslation(['messages/default']);
   const { t: tLists } = useTranslation(['members/lists']);
 
+  const DEFAULT_ORDER: string[] = [
+    'withRunningContract',
+    'withCommandInNextDistribution',
+    'noCommandInNextDistribution',
+    'admins',
+    'catalogsContacts',
+    'vendors',
+    'membership',
+    'noMembership',
+    'hasOrders',
+    'hasNoOrders',
+    'waitingList',
+    'test',
+    'newUsers',
+  ];
+
   const defaultRecipientsOptions: RecipientOption[] = defaultUserLists
     // the 'vendor' type in userlists only lists user-vendors (vendors claimed by a user)
     // here we want to be able to reach all vendors, so we filter out this list and add it manually
@@ -64,11 +80,19 @@ const MessagesForm = ({
         value: ul.type,
         key: ul.type,
         label: formatUserList(ul, tLists),
-        group: RecipientOptionGroup.DEFAULT,
+        group: ul.type === 'all' ? RecipientOptionGroup.TOP : RecipientOptionGroup.DEFAULT,
         disabled: ul.count === 0,
       }),
     );
 
+  const vendorsLists = UserLists.VENDORS;
+  defaultRecipientsOptions.push({
+    key: vendorsLists.type,
+    value: vendorsLists.type,
+    label: tLists(vendorsLists.type),
+    group: RecipientOptionGroup.DEFAULT,
+    disabled: false,
+  });
   const testLists = UserLists.TEST;
   defaultRecipientsOptions.push({
     key: testLists.type,
@@ -77,13 +101,12 @@ const MessagesForm = ({
     group: RecipientOptionGroup.DEFAULT,
     disabled: false,
   });
-  const vendorsLists = UserLists.VENDORS;
-  defaultRecipientsOptions.push({
-    key: vendorsLists.type,
-    value: vendorsLists.type,
-    label: tLists(vendorsLists.type),
-    group: RecipientOptionGroup.DEFAULT,
-    disabled: false,
+
+  defaultRecipientsOptions.sort((a, b) => {
+    if (a.group !== b.group) return a.group.localeCompare(b.group);
+    const aIdx = DEFAULT_ORDER.indexOf(a.value);
+    const bIdx = DEFAULT_ORDER.indexOf(b.value);
+    return (aIdx === -1 ? 999 : aIdx) - (bIdx === -1 ? 999 : bIdx);
   });
 
   let senderEmail = '';

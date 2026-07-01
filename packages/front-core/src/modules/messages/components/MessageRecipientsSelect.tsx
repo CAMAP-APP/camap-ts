@@ -57,9 +57,10 @@ type DistributionWithCatalogName = {
 };
 
 export enum RecipientOptionGroup {
-  DEFAULT = '1DefaultGroup',
-  CONTRACTS = '2ContractsGroup',
-  DISTRIBUTION = '3DistributionGroup',
+  TOP = '0TopGroup',
+  CONTRACTS = '1ContractsGroup',
+  DISTRIBUTION = '2DistributionGroup',
+  DEFAULT = '3DefaultGroup',
 }
 
 export interface RecipientOption {
@@ -141,7 +142,7 @@ const RecipientGroup = ({
     }
   }, [group, groupOpenByKey, groupKey, setGroupOpenByKey]);
 
-  const isDefault = group === RecipientOptionGroup.DEFAULT;
+  const isDefault = group === RecipientOptionGroup.DEFAULT || group === RecipientOptionGroup.TOP;
   const isContracts = group === RecipientOptionGroup.CONTRACTS;
 
   const toggleList = useCallback(() => {
