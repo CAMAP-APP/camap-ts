@@ -37,11 +37,13 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
     resetAttachments,
     error: contextError,
     recipients,
+    setRecipients,
     setDefaultRecipients,
     selectedUserList,
     setSelectedUserList,
     embeddedImages,
     slateContent,
+    setSlateContent,
     setReuseMessage,
   } = context;
 
@@ -70,6 +72,7 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
   const slateContentRef = React.useRef<string>('');
   const [createMail] = useCreateMessageMutation();
   const [isSuccessful, setIsSuccessful] = React.useState(false);
+  const [formResetKey, setFormResetKey] = React.useState(0);
 
   const me = requestData && requestData.me;
   const error = requestError || contextError;
@@ -227,8 +230,11 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
       });
       bag.resetForm();
       resetAttachments();
+      setRecipients([]);
       setSelectedUserList(undefined);
       setReuseMessage(undefined);
+      setSlateContent('');
+      setFormResetKey((key) => key + 1);
       setIsSuccessful(true);
       onMessageSent();
       window.scrollTo(0, 0);
@@ -256,6 +262,7 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
           defaultUserLists={defaultUserLists}
           onSubmit={onFormSubmit}
           isSuccessful={isSuccessful}
+          formResetKey={formResetKey}
           groupName={requestData.groupPreview.name}
         />
       )}

@@ -26,6 +26,7 @@ interface Props {
   defaultUserLists: UserList[];
   onSubmit: (values: MessagesFormValues, bag: MessagesFormikBag) => void;
   isSuccessful: boolean;
+  formResetKey: number;
   groupName: string;
 }
 
@@ -48,6 +49,7 @@ const MessagesForm = ({
   defaultUserLists,
   onSubmit,
   isSuccessful,
+  formResetKey,
   groupName,
 }: Props) => {
   const { t } = useTranslation(['messages/default']);
@@ -141,6 +143,7 @@ const MessagesForm = ({
                 required
                 component={MessageRecipientsSelect}
                 defaultRecipientsOptions={defaultRecipientsOptions}
+                formResetKey={formResetKey}
               />
               <Field
                 fullWidth
@@ -193,7 +196,8 @@ const MessagesForm = ({
 const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   return (
     prevProps.defaultUserLists.length === nextProps.defaultUserLists.length &&
-    prevProps.isSuccessful === nextProps.isSuccessful
+    prevProps.isSuccessful === nextProps.isSuccessful &&
+    prevProps.formResetKey === nextProps.formResetKey
   );
 };
 

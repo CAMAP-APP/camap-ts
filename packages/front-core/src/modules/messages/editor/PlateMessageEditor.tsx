@@ -7,6 +7,7 @@ import { createSlateEditor, type Value } from 'platejs';
 import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
+import { isEmptyEmailHtml } from './isEmptyEmailHtml';
 import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
@@ -105,9 +106,14 @@ export const PlateMessageEditor = ({
   }, [serializeToFormikHtml]);
 
   React.useEffect(() => {
-    if (!externalValue) return;
-    editor.tf.setValue(externalValue);
-  }, [editor, externalValue]);
+    if (externalValue) {
+      editor.tf.setValue(externalValue);
+      return;
+    }
+    if (isEmptyEmailHtml(_formikHtml)) {
+      editor.tf.setValue(MESSAGE_EDITOR_EMPTY_VALUE);
+    }
+  }, [editor, externalValue, _formikHtml]);
 
   const onPlateChange = useCallback(() => {
     console.log('onPlateChange', editor.children);

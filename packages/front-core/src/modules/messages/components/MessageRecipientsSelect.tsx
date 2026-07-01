@@ -47,6 +47,7 @@ export interface MessageRecipientsSelectProps {
   value: string;
   defaultRecipientsOptions: RecipientOption[];
   label: string;
+  formResetKey: number;
 }
 
 type DistributionWithCatalogName = {
@@ -229,6 +230,7 @@ const MessageRecipientsSelect = ({
   field,
   meta,
   form,
+  formResetKey,
 }: MessageRecipientsSelectProps) => {
   const { t } = useTranslation(['messages/default']);
   const { t: tLists } = useTranslation(['members/lists']);
@@ -289,8 +291,28 @@ const MessageRecipientsSelect = ({
 
   const previousSelectedList = React.useRef<UserLists>();
   const wrongEmails = React.useRef<string[]>([]);
+  const defaultRecipientsApplied = React.useRef(false);
 
   const showFreeList = !!freeValue.length;
+
+  const isRecipientsFieldEmpty = useCallback((value: unknown) => {
+    if (value === undefined || value === '') return true;
+    if (value === '[]') return true;
+    return false;
+  }, []);
+
+  const { name: fieldName, onChange: fieldOnChange } = field;
+
+  const resetRecipientField = useCallback(() => {
+    setListValue([]);
+    setFreeValue([]);
+    setFreeValueInput('');
+    wrongEmails.current = [];
+    previousSelectedList.current = undefined;
+    setRecipients([]);
+    setSelectedUserList(undefined);
+    fieldOnChange(fieldName)('');
+  }, [fieldName, fieldOnChange, setRecipients, setSelectedUserList]);
 
   const isInFreeValue = useCallback((value: string) => {
     let email = value;
@@ -311,15 +333,14 @@ const MessageRecipientsSelect = ({
   }, [setError, userListInGroupByListTypeError]);
 
   React.useEffect(() => {
-    if (
-      (field.value === '' && !showFreeList) ||
-      (field.value === undefined && showFreeList)
-    ) {
-      // Form has been reset
-      setListValue([]);
-      setFreeValue([]);
-    }
-  }, [field.value, showFreeList]);
+    if (formResetKey === 0) return;
+    resetRecipientField();
+  }, [formResetKey, resetRecipientField]);
+
+  React.useEffect(() => {
+    if (!isRecipientsFieldEmpty(field.value)) return;
+    resetRecipientField();
+  }, [field.value, isRecipientsFieldEmpty, resetRecipientField]);
 
   React.useEffect(() => {
     if (
@@ -365,7 +386,8 @@ const MessageRecipientsSelect = ({
 
   React.useEffect(() => {
     if (!userListInGroupByListTypeData) return;
-    if (selectedUserList && selectedUserList.type === 'test') return;
+    if (!selectedUserList) return;
+    if (selectedUserList.type === 'test') return;
     setRecipients(userListInGroupByListTypeData.getUserListInGroupByListType);
   }, [selectedUserList, setRecipients, userListInGroupByListTypeData]);
 
@@ -485,17 +507,22 @@ const MessageRecipientsSelect = ({
   const onFreeValueInputChange = (
     _event: React.SyntheticEvent,
     value: string,
+    reason: string,
   ) => {
+    if (reason === 'reset' || reason === 'removeOption') {
+      setFreeValueInput('');
+      return;
+    }
     setFreeValueInput(value);
   };
 
-  const { name: fieldName, onChange: fieldOnChange } = field; // prevent formik rerender loop by extracting the stable props from the unstable object field
   const onFreeValueChange = useCallback((_event: any, newValue: (Recipient | string)[]) => {
     const lastValue = newValue[newValue.length - 1];
     if (typeof lastValue === 'string') {
       if (isInFreeValue(lastValue)) return;
       const newRecipients = [...freeValue, { email: lastValue }];
       setFreeValue(newRecipients);
+      setFreeValueInput('');
       if (lastValue && !isEmail(lastValue)) {
         wrongEmails.current.push(lastValue);
       } else {
@@ -506,8 +533,12 @@ const MessageRecipientsSelect = ({
         );
       }
     } else {
-      setFreeValue(newValue as Recipient[]);
-      const correctEmails = (newValue as Recipient[]).filter((recipient) => {
+      const recipients = newValue as Recipient[];
+      setFreeValue(recipients);
+      if (recipients.length < freeValue.length) {
+        setFreeValueInput('');
+      }
+      const correctEmails = recipients.filter((recipient) => {
         if (!recipient.email) return false;
         if (wrongEmails.current.includes(recipient.email)) {
           return false;
@@ -519,7 +550,9 @@ const MessageRecipientsSelect = ({
         return true;
       });
       setRecipients(correctEmails);
-      fieldOnChange(fieldName)(JSON.stringify(correctEmails));
+      fieldOnChange(fieldName)(
+        correctEmails.length ? JSON.stringify(correctEmails) : '',
+      );
       const userList = UserLists.getListByType('freeList');
       userList?.setData(correctEmails);
     }
@@ -536,6 +569,9 @@ const MessageRecipientsSelect = ({
   ]);
 
   useEffect(() => {
+    if (defaultRecipients.length === 0) return;
+    if (defaultRecipientsApplied.current) return;
+    defaultRecipientsApplied.current = true;
     setFreeValue(defaultRecipients);
     setRecipients(defaultRecipients);
     fieldOnChange(fieldName)(JSON.stringify(defaultRecipients));
@@ -547,7 +583,7 @@ const MessageRecipientsSelect = ({
     fieldName,
     fieldOnChange,
     setSelectedUserList,
-    setRecipients
+    setRecipients,
   ]);
 
   const renderFreeValueTags = React.useCallback(
@@ -608,8 +644,7 @@ const MessageRecipientsSelect = ({
       return (
         <CustomTextField
           {...params}
-          inputProps={{ ...params.inputProps, value: freeValueInput }}
-          field={field}
+          field={{ ...field, value: freeValueInput }}
           meta={meta}
           form={form}
           label={label}
@@ -711,9 +746,11 @@ const MessageRecipientsSelect = ({
     return (
       <Box mt={0.5}>
         <Autocomplete
+          key={`free-recipients-${formResetKey}`}
           multiple
           limitTags={10}
           value={freeValue}
+          inputValue={freeValueInput}
           onChange={onFreeValueChange}
           onClose={onClose}
           options={FREE_VALUES_EMPTY_OPTIONS}
@@ -733,6 +770,7 @@ const MessageRecipientsSelect = ({
   return (
     <Box mt={0.5}>
       <Autocomplete
+        key={`list-recipients-${formResetKey}`}
         multiple
         value={listValue}
         onChange={onListValueChange}
