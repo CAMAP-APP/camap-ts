@@ -1164,6 +1164,7 @@ export type Vendor = {
   address1?: Maybe<Scalars['String']>;
   address2?: Maybe<Scalars['String']>;
   allCatalogs: Array<Catalog>;
+  allDistributions: Array<VendorDistributions>;
   cdate: Scalars['DateTime'];
   city: Scalars['String'];
   companyNumber?: Maybe<Scalars['String']>;
@@ -4894,6 +4895,63 @@ export function useGetNextVendorDistributionsLazyQuery(baseOptions?: ApolloReact
 export type GetNextVendorDistributionsQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsQuery>;
 export type GetNextVendorDistributionsLazyQueryHookResult = ReturnType<typeof useGetNextVendorDistributionsLazyQuery>;
 export type GetNextVendorDistributionsQueryResult = Apollo.QueryResult<GetNextVendorDistributionsQuery, GetNextVendorDistributionsQueryVariables>;
+export const GetVendorDistributionsCsvDocument = gql`
+    query GetVendorDistributionsCsv($vendorId: Int!, $fromDate: DateTime) {
+  vendor(id: $vendorId) {
+    id
+    allCatalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      products {
+        id
+        name
+        active
+      }
+    }
+    allDistributions(fromDate: $fromDate) {
+      group {
+        id
+      }
+      distributions {
+        id
+        date
+        catalog {
+          id
+        }
+        userOrders {
+          quantity
+          product {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+    `;
+
+export type GetVendorDistributionsCsvQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+  fromDate?: InputMaybe<Scalars['DateTime']>;
+}>;
+
+export type GetVendorDistributionsCsvQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, products: Array<{ __typename?: 'Product', id: number, name: string, active: boolean }> }>, allDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalog: { __typename?: 'Catalog', id: number }, userOrders: Array<{ __typename?: 'UserOrder', quantity: number, product: { __typename?: 'Product', id: number } }> }> }> } };
+
+export function useGetVendorDistributionsCsvQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>(GetVendorDistributionsCsvDocument, options);
+      }
+export function useGetVendorDistributionsCsvLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>(GetVendorDistributionsCsvDocument, options);
+        }
+export type GetVendorDistributionsCsvQueryHookResult = ReturnType<typeof useGetVendorDistributionsCsvQuery>;
+export type GetVendorDistributionsCsvLazyQueryHookResult = ReturnType<typeof useGetVendorDistributionsCsvLazyQuery>;
+export type GetVendorDistributionsCsvQueryResult = Apollo.QueryResult<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>;
 export const ClaimVendorDocument = gql`
     mutation ClaimVendor($vendorId: Int!) {
   claimVendor(vendorId: $vendorId)
