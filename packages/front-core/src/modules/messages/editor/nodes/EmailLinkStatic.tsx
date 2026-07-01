@@ -1,5 +1,5 @@
 import theme from '@theme/default/theme';
-import type { AnchorHTMLAttributes, HTMLAttributes, ReactNode } from 'react';
+import type { AnchorHTMLAttributes, ReactNode } from 'react';
 import type { TLinkElement } from 'platejs';
 
 type Props = {

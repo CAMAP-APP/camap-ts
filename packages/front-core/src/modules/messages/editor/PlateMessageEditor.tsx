@@ -3,7 +3,7 @@ import { Box } from '@mui/material';
 import React, { useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { FormikHandlers } from 'formik';
-import { createEditor, createSlateEditor, type Value } from 'platejs';
+import { createSlateEditor, type Value } from 'platejs';
 import type { DOMHandler } from '@platejs/core/react';
 import { serializeHtml } from '@platejs/core/static';
 import theme from '../../../theme/default/theme';
@@ -16,6 +16,7 @@ import {
   type MessageEditorPlugin,
 } from './platePlugins';
 import { plateStyles } from './plateStyles';
+import EmailEditorStatic from './nodes/EmailEditorStatic';
 
 type Props = {
   name: string;
@@ -46,7 +47,6 @@ export const PlateMessageEditor = ({
   value: _formikHtml,
   groupId,
   externalValue,
-  onExternalValueApplied,
   onBlurSaveSlateValue,
   onHtmlSerialized,
   toolbarEnd,
@@ -82,6 +82,7 @@ export const PlateMessageEditor = ({
     }), {
       stripClassNames: true,
       stripDataAttributes: true,
+      editorComponent: EmailEditorStatic,
     });
     onHtmlSerialized?.(html);
     onChange(name)(html);
