@@ -92,15 +92,14 @@ function BaseLeafStatic({
     const decoratedLeaves = TextApi.decorations(text, decorations);
 
     const leafElements = decoratedLeaves.map(({ leaf, position }, index) => {
-        const text = leaf.text.replace(/\n/g, '<br/>');
         const leafElement = renderLeaf({
-            attributes: {  },
+            attributes: {},
             children: (
-                <>{text}</>
+                <>{leaf.text.replace(/\n/g, '<br/>')}</>
             ),
-            leaf: { text },
+            leaf,
             leafPosition: position,
-            text: { text },
+            text: leaf,
         });
 
         return <React.Fragment key={index}>{leafElement}</React.Fragment>;
