@@ -63,6 +63,17 @@ export class DistributionsService {
     });
   }
 
+  async findAllDistributionsOfCatalogs(catalogIds: number[], fromDate?: Date) {
+    if (catalogIds.length === 0) return [];
+    return this.distributionRepo.find({
+      where: {
+        catalogId: In(catalogIds),
+        ...(fromDate ? { raw_date: MoreThanOrEqual(fromDate) } : {}),
+      },
+      order: { raw_date: 'ASC' },
+    });
+  }
+
   searchDistribs({
     catalogId,
     dateRange,
