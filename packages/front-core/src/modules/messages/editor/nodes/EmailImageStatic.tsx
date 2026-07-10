@@ -30,6 +30,7 @@ export default function EmailImageStatic({ element, attributes }: Props) {
                 paddingBottom: MESSAGE_IMAGE_PADDING_Y,
                 display: 'flex',
                 justifyContent: alignStyles.justifyContent,
+                width: '100%',
             }}
         >
             <img

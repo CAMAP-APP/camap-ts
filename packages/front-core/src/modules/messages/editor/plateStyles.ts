@@ -8,7 +8,6 @@ export const MESSAGE_IMAGE_MAX_WIDTH = 500;
 export const MESSAGE_IMAGE_MAX_HEIGHT = 300;
 
 export const messageImageImgStyle: CSSProperties = {
-    width: '100%',
     maxWidth: MESSAGE_IMAGE_MAX_WIDTH,
     height: 'auto',
     maxHeight: MESSAGE_IMAGE_MAX_HEIGHT,

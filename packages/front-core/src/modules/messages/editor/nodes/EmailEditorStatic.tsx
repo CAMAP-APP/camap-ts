@@ -2,7 +2,25 @@ import React from 'react';
 import { pipeDecorate, pipeRenderElementStatic, pipeRenderLeafStatic, pipeRenderTextStatic, PlateStaticProps, SlateRenderElementProps } from "@platejs/core/static";
 
 import { DecoratedRange, Descendant, EditableProps, ElementApi, isElementDecorationsEqual, isTextDecorationsEqual, NodeEntry, Path, RangeApi, SlateEditor, TElement, Text, TextApi, TText } from 'platejs';
-  
+
+function renderEmailLeafContent(text: string): React.ReactNode {
+    if (text === '') {
+        return null;
+    }
+
+    const lines = text.split('\n');
+    if (lines.length === 1) {
+        return text;
+    }
+
+    return lines.map((line, index) => (
+        <React.Fragment key={index}>
+            {index > 0 && <br />}
+            {line}
+        </React.Fragment>
+    ));
+}
+
 function BaseElementStatic({
         decorate,
         decorations,
@@ -95,7 +113,7 @@ function BaseLeafStatic({
         const leafElement = renderLeaf({
             attributes: {},
             children: (
-                <>{leaf.text.replace(/\n/g, '<br/>')}</>
+                <>{renderEmailLeafContent(leaf.text)}</>
             ),
             leaf,
             leafPosition: position,
