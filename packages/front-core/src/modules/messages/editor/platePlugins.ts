@@ -67,7 +67,7 @@ export type MessageEditor = TPlateEditor<Value, MessageEditorPlugin>;
 
 export const MESSAGE_VIEWER_PLUGINS = [
     ...MESSAGE_BASE_PLUGINS,
-    ImagePlugin
+    ImagePlugin,
 ]
 
 const EmailParagraphPlugin = createTSlatePlugin({

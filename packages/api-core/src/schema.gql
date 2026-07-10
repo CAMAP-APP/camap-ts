@@ -228,6 +228,7 @@ type Vendor {
   lat: Float
   lng: Float
   nextDistributions: [VendorDistributions!]!
+  allDistributions(fromDate: DateTime): [VendorDistributions!]!
   image: String
   imageFile: File
   portrait: String!

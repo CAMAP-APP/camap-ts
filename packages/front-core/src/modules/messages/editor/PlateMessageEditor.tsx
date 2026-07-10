@@ -95,7 +95,6 @@ export const PlateMessageEditor = ({
     });
     onHtmlSerialized?.(html);
     onChange(name)(html);
-    console.log('html', html);
   }, [editor, name, onChange, onHtmlSerialized]);
 
   const scheduleSerialize = useCallback(() => {
@@ -105,21 +104,22 @@ export const PlateMessageEditor = ({
     }, 150);
   }, [serializeToFormikHtml]);
 
+  // Apply reused message content once; must not depend on Formik HTML (it updates on every edit).
   React.useEffect(() => {
-    if (externalValue) {
-      editor.tf.setValue(externalValue);
-      return;
-    }
+    if (!externalValue) return;
+    editor.tf.setValue(externalValue);
+  }, [editor, externalValue]);
+
+  React.useEffect(() => {
+    if (externalValue) return;
     if (isEmptyEmailHtml(_formikHtml)) {
       editor.tf.setValue(MESSAGE_EDITOR_EMPTY_VALUE);
     }
   }, [editor, externalValue, _formikHtml]);
 
   const onPlateChange = useCallback(() => {
-    console.log('onPlateChange', editor.children);
-    // Avoid serializing on every selection change? For now debounce and keep small docs.
     scheduleSerialize();
-  }, [scheduleSerialize, editor]);
+  }, [scheduleSerialize]);
 
   return (
     <Box

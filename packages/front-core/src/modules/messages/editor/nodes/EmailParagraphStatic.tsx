@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react';
-import type { TElement } from 'platejs';
+import { NodeApi, type TElement } from 'platejs';
 import { MESSAGE_PARAGRAPH_MARGIN_BOTTOM } from '../plateStyles';
 
 type Props = {
@@ -8,11 +8,13 @@ type Props = {
   attributes?: HTMLAttributes<HTMLParagraphElement>;
 };
 
-export default function EmailParagraphStatic({ children, attributes }: Props) {
+export default function EmailParagraphStatic({ children, attributes, element }: Props) {
   const filteredAttributes = Object.fromEntries(
     Object.entries(attributes ?? {})
       .filter((att) => !att[0].startsWith('data-slate-'))
   );
+  const isEmpty = NodeApi.string(element) === '';
+
   return (
     <p
       {...filteredAttributes}
@@ -23,7 +25,7 @@ export default function EmailParagraphStatic({ children, attributes }: Props) {
         marginBottom: MESSAGE_PARAGRAPH_MARGIN_BOTTOM,
       }}
     >
-      {children}
+      {isEmpty ? <br /> : children}
     </p>
   );
 }
