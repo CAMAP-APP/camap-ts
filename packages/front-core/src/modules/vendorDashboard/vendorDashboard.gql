@@ -144,6 +144,43 @@ query GetNextVendorDistributions($vendorId: Int!) {
   }
 }
 
+query GetVendorDistributionsCsv($vendorId: Int!, $fromDate: DateTime) {
+  vendor(id: $vendorId) {
+    id
+    allCatalogs {
+      id
+      name
+      group {
+        id
+        name
+      }
+      products {
+        id
+        name
+        active
+      }
+    }
+    allDistributions(fromDate: $fromDate) {
+      group {
+        id
+      }
+      distributions {
+        id
+        date
+        catalog {
+          id
+        }
+        userOrders {
+          quantity
+          product {
+            id
+          }
+        }
+      }
+    }
+  }
+}
+
 mutation ClaimVendor($vendorId: Int!) {
   claimVendor(vendorId: $vendorId)
 }

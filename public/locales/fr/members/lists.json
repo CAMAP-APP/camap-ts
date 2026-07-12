@@ -1,19 +1,19 @@
 {
   "all": "Tous les membres du groupe",
   "test": "TEST : moi + partenaire",
-  "admins": "Les administrateurs",
+  "admins": "Membres avec des droits admin",
   "hasNoOrders": "Membres sans commande",
   "hasOrders": "Membres avec commande",
-  "noMembership": "Adhésions à renouveler",
-  "membership": "Adhésions à jour",
+  "noMembership": "Membres avec adhésions à renouveler",
+  "membership": "Membres avec adhésions à jour",
   "contractSubscribers": "{{name}} du {{startDate}} au {{endDate}}",
   "newUsers": "Ne s'est jamais connecté",
-  "waitingList": "Liste d'attente",
+  "waitingList": "Membres en liste d'attente",
   "withProductToGetOnDistribution": "Distribution du {{date}} : {{catalogName}}",
-  "withCommandInNextDistribution": "Ayant déjà commandé pour la prochaine distribution",
-  "noCommandInNextDistribution": "N'ayant pas commandé pour la prochaine distribution",
-  "withRunningContract": "Avec un contrat AMAP en cours",
+  "withCommandInNextDistribution": "Membres avec commande pour la prochaine distribution",
+  "noCommandInNextDistribution": "Membres sans commande pour la prochaine distribution",
+  "withRunningContract": "Membres avec un contrat en cours",
   "catalogsContacts": "Contacts des catalogues",
   "empty": "Cette liste est vide",
-  "vendors": "Producteurs actifs"
+  "vendors": "Producteurs avec catalogues actifs"
 }

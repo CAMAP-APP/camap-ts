@@ -1,6 +1,7 @@
 import React from 'react';
 import { MultiDistrib } from '../../gql';
 import useRestLazyGet from '../../lib/REST/useRestLazyGetApi';
+import useRestPostApi from '../../lib/REST/useRestPostApi';
 
 type Volunteer = {
   id: number;
@@ -30,4 +31,12 @@ export const useRestVolunteerMultiDistribsLazyGet = () => {
     multiDistribs: RestCsaMultiDistribWithVolunteerRoles[];
     roles: RestCsaVolunteerRoles[];
   }>(url);
+};
+
+export const useRestUnsubscribeFromRole = (distribId: number, roleId: number) => {
+  const url = React.useMemo(
+    () => `/distributions/unsubscribeFromRole/${distribId}/${roleId}`,
+    [distribId, roleId],
+  );
+  return useRestPostApi<{ success: boolean }, Record<string, never>>(url);
 };

@@ -45,6 +45,7 @@
     "camap-common": "file:../camap-common",
     "camap-ts": "file:../..",
     "clean-webpack-plugin": "^4",
+    "clsx": "^2.1.1",
     "date-fns": "^2.28.0",
     "dompurify": "^3.1.5",
     "dotenv": "^8.6.0",

@@ -31,7 +31,10 @@ const MessageTextEditor = ({ ...props }: MessageTextEditorFormikProps) => {
   const [externalValue, setExternalValue] = React.useState<Value | undefined>();
 
   React.useEffect(() => {
-    if (!reuseMessage || !reuseMessage.slateContent) return;
+    if (!reuseMessage || !reuseMessage.slateContent) {
+      setExternalValue(undefined);
+      return;
+    }
     const reuseMessageSlateContent = reuseMessage.slateContent;
 
     try {

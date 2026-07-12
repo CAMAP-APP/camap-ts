@@ -16,5 +16,9 @@
   "dutyToDo": "permanence à faire.",
   "dutyToDo_plural": "permanences à faire.",
   "thereIsNoDistributionOnThisPeriod": "Il n'y a pas de distributions sur cette période",
-  "defineGroupRoles": "Définir les rôles du groupe"
+  "defineGroupRoles": "Définir les rôles du groupe",
+  "unsubscribeDialogTitle": "Permanence {{roleName}} du {{distribDate}}",
+  "unsubscribeDialogMessage": "Êtes-vous sûr de vouloir vous désister ?",
+  "yes": "Oui",
+  "cancel": "Annuler"
 }
