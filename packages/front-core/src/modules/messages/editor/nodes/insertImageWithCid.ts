@@ -12,6 +12,7 @@ export const insertImageWithCid = async (editor: PlateEditor, files: FileList, o
       type: editor.getType(KEYS.img),
       url: previewUrl,
       cid,
+      file,
       filename: file.name,
       caption: file.name,
       children: [{ text: '' }],

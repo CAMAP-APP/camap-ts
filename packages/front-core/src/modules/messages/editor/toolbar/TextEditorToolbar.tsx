@@ -73,12 +73,10 @@ const toggleHeading = (editor: PlateEditor, type: 'h1' | 'h2') => {
 
 export default function TextEditorToolbar({
     editor,
-    onAddImagesCustomHandle,
     groupId,
     toolbarEnd
 }: {
     editor: MessageEditor,
-    onAddImagesCustomHandle?: (files: File[]) => void,
     groupId?: number,
     toolbarEnd?: React.ReactNode
 }) {
@@ -186,7 +184,6 @@ export default function TextEditorToolbar({
 
             <MessageLinkButton editor={editor} />
             <MessageImageButton
-                onAddImagesCustomHandle={onAddImagesCustomHandle}
                 groupId={groupId}
             />
 
