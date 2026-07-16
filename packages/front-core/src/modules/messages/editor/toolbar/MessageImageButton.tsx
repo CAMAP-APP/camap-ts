@@ -22,11 +22,10 @@ import { getCamapHost } from '@lib/runtimeCfg';
 type VendorLike = Pick<Vendor, 'name' | 'id' | 'image'>;
 
 interface InsertImageButtonProps {
-  onAddImagesCustomHandle?: (image: File[]) => void;
   groupId?: number;
 }
 
-const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageButtonProps) => {
+const MessageImageButton = ({ groupId }: InsertImageButtonProps) => {
   const { t } = useTranslation(['messages/default']);
   const [getActiveCatalogs, { data: activeContractsData }] =
     useGetActiveCatalogsPicturesLazyQuery();
@@ -73,10 +72,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
     const files = event.target.files;
 
     try {
-
       insertImageWithCid(editor, files);
-
-      onAddImagesCustomHandle?.(Array.from(files));
     } catch (error) {
       logError(error);
     } finally {
@@ -94,7 +90,7 @@ const MessageImageButton = ({ groupId, onAddImagesCustomHandle }: InsertImageBut
 
     const url = newValue?.image;
     if (url)
-      insertImage(editor, `${getCamapHost()}/${url}`);
+      insertImage(editor, new URL(url, getCamapHost()).toString());
   };
 
   const vendorsWithImage = new Set(
