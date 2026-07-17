@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { createSlateEditor, type Value } from 'platejs';
 import { encodeFileToBase64String } from '../../../utils/encoding';
 import { MessagesContext } from '../MessagesContext';
@@ -39,14 +39,22 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
 
   const pendingSerialize = useRef<number | null>(null);
 
+  const embeddedImagesRef = useRef([...embeddedImages]);
+  useEffect(() => {
+    embeddedImagesRef.current = [...embeddedImages];
+  }, [embeddedImages]);
+
   const serializeToFormikHtml = useCallback(async () => {
-    const currentEmbeddedImages = [...embeddedImages];
-    currentEmbeddedImages.forEach((image) => {
-      if(!plateImages.current.some(i => 'name' in i && i.name === image.filename || 'filename' in i && i.filename === image.filename))
+    console.log(plateImages.current, embeddedImagesRef.current);
+    embeddedImagesRef.current.forEach((image) => {
+      if(!plateImages.current.some(
+        i => 'name' in i && i.name === image.filename ||
+        'filename' in i && i.filename === image.filename
+      ))
         removeEmbeddedImage(image)
     });
     const imagesToAdd = await Promise.all(plateImages.current
-      .filter(i => !!i &&!currentEmbeddedImages.some(ii => 'name' in i && ii.filename === i.name || 'filename' in i && ii.filename === i.filename))
+      .filter(i => !!i &&!embeddedImagesRef.current.some(ii => 'name' in i && ii.filename === i.name || 'filename' in i && ii.filename === i.filename))
       .map(async (f) => ({
         filename: 'name' in f ? f.name : f.filename,
         contentType: 'type' in f ? f.type : f.contentType,
@@ -71,7 +79,8 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
       editorComponent: EmailEditorStatic,
     });
     onChange(name)(html);
-  }, [name, onChange, addEmbeddedImages, removeEmbeddedImage, embeddedImages, plateImages]);
+    
+  }, [name, onChange, addEmbeddedImages, removeEmbeddedImage]);
 
   const scheduleSerialize = useCallback(() => {
     if (pendingSerialize.current) window.clearTimeout(pendingSerialize.current);
@@ -80,9 +89,10 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
     }, 150);
   }, [serializeToFormikHtml]);
 
-  const onPlateChange = useCallback(({value: newValue, images: newImages}: {value: Value, images: Array<File|AttachmentFileInput>}) => {
+  const onPlateChange = useCallback(({value: newValue, imagesToUpload}: {value: Value, imagesToUpload: Array<File|AttachmentFileInput>}) => {
+    console.log('onPlateChangeImqges', imagesToUpload);
     plateValue.current = newValue;
-    plateImages.current = [...newImages];
+    plateImages.current = [...imagesToUpload];
     scheduleSerialize();
   }, [scheduleSerialize]);
 
@@ -94,17 +104,18 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
     const reuseMessageSlateContent = reuseMessage.slateContent;
 
     try {
+      console.log('reuseMessageSlateContent', reuseMessageSlateContent);
       const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
       setExternalValue(parsed);
       setSlateContent(reuseMessageSlateContent);
       onPlateChange({
         value: parsed,
-        images: reusedMessageEmbeddedImages(parsed, reuseMessage.attachments || undefined)
+        imagesToUpload: reusedMessageEmbeddedImages(parsed, reuseMessage.attachments || undefined)
       });
     } catch (error) {
       console.error('Error getting message editor value from slate content:', error);
     }
-  }, [addEmbeddedImages, reuseMessage, setSlateContent, scheduleSerialize]);
+  }, [reuseMessage, setSlateContent, onPlateChange]);
 
   return (
     <PlateMessageEditor
