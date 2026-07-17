@@ -45,7 +45,6 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
   }, [embeddedImages]);
 
   const serializeToFormikHtml = useCallback(async () => {
-    console.log(plateImages.current, embeddedImagesRef.current);
     embeddedImagesRef.current.forEach((image) => {
       if(!plateImages.current.some(
         i => 'name' in i && i.name === image.filename ||
@@ -90,7 +89,6 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
   }, [serializeToFormikHtml]);
 
   const onPlateChange = useCallback(({value: newValue, imagesToUpload}: {value: Value, imagesToUpload: Array<File|AttachmentFileInput>}) => {
-    console.log('onPlateChangeImqges', imagesToUpload);
     plateValue.current = newValue;
     plateImages.current = [...imagesToUpload];
     scheduleSerialize();
@@ -104,8 +102,8 @@ const MessageTextEditor = ({ name, onBlur, onChange }: MessageTextEditorFormikPr
     const reuseMessageSlateContent = reuseMessage.slateContent;
 
     try {
-      console.log('reuseMessageSlateContent', reuseMessageSlateContent);
       const parsed = getMessageEditorValueFromSlateContent(reuseMessageSlateContent);
+      console.log('parsed', parsed);
       setExternalValue(parsed);
       setSlateContent(reuseMessageSlateContent);
       onPlateChange({

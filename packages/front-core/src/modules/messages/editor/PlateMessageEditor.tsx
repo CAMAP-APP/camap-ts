@@ -13,6 +13,7 @@ import {
 } from './platePlugins';
 import { plateStyles } from './plateStyles';
 import { KEYS, Value } from 'platejs';
+import { dataURItoBlob, dataURItoFile } from '../utils/dataURItoFile';
 
 type Props = {
   onChange: (data: {value: Value, imagesToUpload: File[]}) => void;
@@ -38,15 +39,26 @@ export const PlateMessageEditor = ({
   const { t } = useTranslation(['messages/default']);
 
   const onChangeWithImages = useCallback(({value, editor}: {value: Value, editor: TPlateEditor<Value, MessageEditorPlugin>}) => {
-    console.log('onChangeWithImages', value);
-    onChange({
-      value,
-      imagesToUpload: value.filter(
-        (node) => node.type === editor.getType(KEYS.img) && node.file
-      ).map(
-        (node) => node.file as File
+    (async () => {
+      console.log('value', value);
+      const imagesToUpload = await Promise.all(
+        value.filter(
+          (node) => node.type === editor.getType(KEYS.img)
+        ).map(async (node, i) => {
+            const url = node.url?.toString();
+            if(!node.file && url?.startsWith('data:image')) {
+              const f = dataURItoFile(url, node.id?.toString() || `image-${i}`);
+              node.file = f;
+              node.cid = f.name;
+            }
+            return node.file as File
+          })
       )
-    });
+      onChange({
+        value,
+        imagesToUpload
+      })
+    })();
   }, [onChange])
 
   const editor = usePlateEditor<Value, MessageEditorPlugin>({

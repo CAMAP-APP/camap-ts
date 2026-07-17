@@ -35,11 +35,6 @@ export const reusedMessageEmbeddedImages = (
                     const imageSource = imageNode.dataUrl ?? imageNode.url;
                     const [content, contentType] = getContentAndTypeFromBase64EncodedImage(imageSource);
 
-                    console.log('imageNode', imageNode);
-                    console.log('content', content);
-                    console.log('contentType', contentType);
-                    console.log('embeddedImageAttachments', embeddedImageAttachments);
-
                     const embeddedImageAttachment = embeddedImageAttachments?.find(
                         (a) => a && a.content === content,
                     );
