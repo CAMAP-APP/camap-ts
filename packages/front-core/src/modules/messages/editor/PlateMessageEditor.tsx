@@ -15,7 +15,7 @@ import { plateStyles } from './plateStyles';
 import { KEYS, Value } from 'platejs';
 
 type Props = {
-  onChange: (data: {value: Value, images: File[]}) => void;
+  onChange: (data: {value: Value, imagesToUpload: File[]}) => void;
   onBlur: (value: Value) => void;
   
   groupId?: number;
@@ -38,10 +38,11 @@ export const PlateMessageEditor = ({
   const { t } = useTranslation(['messages/default']);
 
   const onChangeWithImages = useCallback(({value, editor}: {value: Value, editor: TPlateEditor<Value, MessageEditorPlugin>}) => {
+    console.log('onChangeWithImages', value);
     onChange({
       value,
-      images: value.filter(
-        (node) => node.type === editor.getType(KEYS.img)
+      imagesToUpload: value.filter(
+        (node) => node.type === editor.getType(KEYS.img) && node.file
       ).map(
         (node) => node.file as File
       )
@@ -50,8 +51,9 @@ export const PlateMessageEditor = ({
 
   const editor = usePlateEditor<Value, MessageEditorPlugin>({
     plugins: [...MESSAGE_EDITOR_PLUGINS],
-    value: MESSAGE_EDITOR_EMPTY_VALUE,
+    value: externalValue || MESSAGE_EDITOR_EMPTY_VALUE,
     handlers: {
+      onChange: onChangeWithImages,
       onFocus: (({ event, editor: plateEditor }) => {
         setIsFocused(true);
 
@@ -69,14 +71,9 @@ export const PlateMessageEditor = ({
         onBlur?.(editor.children);
       }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
     },
-  });
+  }, [externalValue]);  
 
   const [isFocused, setIsFocused] = useState(false);
-
-  React.useEffect(() => {
-    if (!externalValue) return;
-    editor.tf.setValue(externalValue);
-  }, [editor, externalValue]);
 
   return (
     <Box
@@ -107,9 +104,7 @@ export const PlateMessageEditor = ({
       mt={2}
       mb={1}
     >
-      <Plate editor={editor}
-        onChange={onChangeWithImages}
-      >
+      <Plate editor={editor}>
         <TextEditorToolbar
           editor={editor}
           groupId={groupId}

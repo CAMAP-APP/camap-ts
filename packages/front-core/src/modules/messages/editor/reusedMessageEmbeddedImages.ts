@@ -7,6 +7,7 @@ import {
 import { removeAccents, removeSpaces } from '../../../utils/fomat/string';
 import { getContentAndTypeFromBase64EncodedImage } from '../../../utils/image';
 import { isUrl } from '@utils/url';
+import { getCid } from '../utils/cid';
 
 export const reusedMessageEmbeddedImages = (
     newContentValue: BaseNode[],
@@ -31,8 +32,13 @@ export const reusedMessageEmbeddedImages = (
                     }
                 } else {
                     const imageNode = n as any;
-                    const imageSource = imageNode.dataUrl || '';
+                    const imageSource = imageNode.dataUrl ?? imageNode.url;
                     const [content, contentType] = getContentAndTypeFromBase64EncodedImage(imageSource);
+
+                    console.log('imageNode', imageNode);
+                    console.log('content', content);
+                    console.log('contentType', contentType);
+                    console.log('embeddedImageAttachments', embeddedImageAttachments);
 
                     const embeddedImageAttachment = embeddedImageAttachments?.find(
                         (a) => a && a.content === content,
@@ -43,13 +49,13 @@ export const reusedMessageEmbeddedImages = (
                         cid = embeddedImageAttachment.cid;
                     } else {
                         cid = imageNode.filename
-                            ? removeSpaces(removeAccents(imageNode.filename))
+                            ? getCid(imageNode.filename)
                             : (imageNode.cid ?? '');
                     }
 
                     if (
                         imageNode.url &&
-                        !imageNode.dataUrl?.startsWith('data:image') &&
+                        !imageNode.url.startsWith('data:image') &&
                         isUrl(imageNode.url)
                     ) {
                         return;
