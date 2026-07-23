@@ -18,6 +18,7 @@ import { createTSlatePlugin, type PluginConfig, type Value } from 'platejs';
 import { autoformatRules } from './autoformat';
 import { LinkNode } from './nodes/LinkNode';
 import { MediaImageNode } from './nodes/MediaImageNode';
+import { ViewerImageNode } from './nodes/ViewerImageNode';
 import EmailImageStatic from './nodes/EmailImageStatic';
 import EmailLinkStatic from './nodes/EmailLinkStatic';
 import EmailParagraphStatic from './nodes/EmailParagraphStatic';
@@ -67,7 +68,7 @@ export type MessageEditor = TPlateEditor<Value, MessageEditorPlugin>;
 
 export const MESSAGE_VIEWER_PLUGINS = [
     ...MESSAGE_BASE_PLUGINS,
-    ImagePlugin,
+    ImagePlugin.withComponent(ViewerImageNode),
 ]
 
 const EmailParagraphPlugin = createTSlatePlugin({

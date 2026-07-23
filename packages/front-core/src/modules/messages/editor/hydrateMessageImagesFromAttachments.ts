@@ -21,10 +21,18 @@ type ImageLikeNode = {
 const isImageNode = (node: ImageLikeNode) =>
   node.type === 'img' || node.type === 'image';
 
+const isUsableImageUrl = (url: string) =>
+  url.startsWith('data:image') ||
+  url.startsWith('http://') ||
+  url.startsWith('https://');
+
 const attachmentCid = (attachment: AttachmentLike) =>
   attachment.cid ||
   (attachment.filename ? getCid(attachment.filename) : undefined) ||
   (attachment.fileName ? getCid(attachment.fileName) : undefined);
+
+const cloneNodes = <T extends Value | ImageLikeNode[]>(nodes: T): T =>
+  JSON.parse(JSON.stringify(nodes)) as T;
 
 /**
  * Rewrite image node urls from stored embedded-image attachments (cid → data URL).
@@ -36,10 +44,16 @@ export const hydrateMessageImagesFromAttachments = <T extends Value | ImageLikeN
 ): T => {
   const embedded = (attachments || []).filter(
     (a): a is AttachmentLike & { cid: string; content: string } =>
-      !!a && typeof a.cid === 'string' && !!a.cid && typeof a.content === 'string' && !!a.content,
+      !!a &&
+      typeof a.cid === 'string' &&
+      !!a.cid &&
+      typeof a.content === 'string' &&
+      a.content.length > 0,
   );
 
-  if (embedded.length === 0) return nodes;
+  const cloned = cloneNodes(nodes);
+
+  if (embedded.length === 0) return cloned;
 
   const byCid = new Map(
     embedded.map((a) => [attachmentCid(a) || a.cid, a] as const),
@@ -62,7 +76,7 @@ export const hydrateMessageImagesFromAttachments = <T extends Value | ImageLikeN
             attachment.fileName ||
             attachment.cid;
           const url = node.url?.toString() || '';
-          if (!url.startsWith('data:image')) {
+          if (!isUsableImageUrl(url)) {
             node.url = getBase64EncodedImage(
               attachment.content,
               attachment.contentType || 'image/png',
@@ -77,6 +91,6 @@ export const hydrateMessageImagesFromAttachments = <T extends Value | ImageLikeN
     }
   };
 
-  walk(nodes as ImageLikeNode[]);
-  return nodes;
+  walk(cloned as ImageLikeNode[]);
+  return cloned;
 };
