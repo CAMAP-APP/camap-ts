@@ -39,9 +39,14 @@ export const getLatestMessages = gql`
         ... on EmbeddedImageAttachment {
           cid
           content
+          contentType
+          filename
         }
         ... on OtherAttachment {
           fileName
+          fileContent: content
+          contentType
+          encoding
         }
       }
       group {
@@ -139,9 +144,14 @@ export const GetMessageById = gql`
         ... on EmbeddedImageAttachment {
           cid
           content
+          contentType
+          filename
         }
         ... on OtherAttachment {
           fileName
+          fileContent: content
+          contentType
+          encoding
         }
       }
     }

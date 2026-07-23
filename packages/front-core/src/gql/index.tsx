@@ -165,6 +165,8 @@ export type EmbeddedImageAttachment = {
   __typename?: 'EmbeddedImageAttachment';
   cid: Scalars['String'];
   content: Scalars['String'];
+  contentType?: Maybe<Scalars['String']>;
+  filename?: Maybe<Scalars['String']>;
 };
 
 export type EntityFile = {
@@ -646,6 +648,9 @@ export type OrderOperationTypeData = {
 
 export type OtherAttachment = {
   __typename?: 'OtherAttachment';
+  content: Scalars['String'];
+  contentType?: Maybe<Scalars['String']>;
+  encoding?: Maybe<Scalars['String']>;
   fileName: Scalars['String'];
 };
 
@@ -1196,6 +1201,11 @@ export type Vendor = {
   zipCode?: Maybe<Scalars['String']>;
 };
 
+
+export type VendorAllDistributionsArgs = {
+  fromDate?: InputMaybe<Scalars['DateTime']>;
+};
+
 export enum VendorDisabledReason {
   Banned = 'Banned',
   IncompleteLegalInfos = 'IncompleteLegalInfos',
@@ -1609,7 +1619,7 @@ export type InitMessagingServiceQuery = { __typename?: 'Query', me: { __typename
 export type GetLatestMessagesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type GetLatestMessagesQuery = { __typename?: 'Query', getLatestMessages: Array<{ __typename?: 'Message', date: any, slateContent: string, title: string, attachments?: Array<{ __typename?: 'EmbeddedImageAttachment', cid: string, content: string } | { __typename?: 'OtherAttachment', fileName: string }> | null, group?: { __typename?: 'Group', name: string } | null }> };
+export type GetLatestMessagesQuery = { __typename?: 'Query', getLatestMessages: Array<{ __typename?: 'Message', date: any, slateContent: string, title: string, attachments?: Array<{ __typename?: 'EmbeddedImageAttachment', cid: string, content: string, contentType?: string | null, filename?: string | null } | { __typename?: 'OtherAttachment', fileName: string, contentType?: string | null, encoding?: string | null, fileContent: string }> | null, group?: { __typename?: 'Group', name: string } | null }> };
 
 export type ContractsUserListsQueryVariables = Exact<{
   groupId: Scalars['Int'];
@@ -1660,7 +1670,7 @@ export type GetMessageByIdQueryVariables = Exact<{
 }>;
 
 
-export type GetMessageByIdQuery = { __typename?: 'Query', message: { __typename?: 'Message', id: number, title: string, date: any, recipientListId?: string | null, slateContent: string, recipients: Array<string>, sender: { __typename?: 'User', id: number, firstName: string, lastName: string }, attachments?: Array<{ __typename?: 'EmbeddedImageAttachment', cid: string, content: string } | { __typename?: 'OtherAttachment', fileName: string }> | null } };
+export type GetMessageByIdQuery = { __typename?: 'Query', message: { __typename?: 'Message', id: number, title: string, date: any, recipientListId?: string | null, slateContent: string, recipients: Array<string>, sender: { __typename?: 'User', id: number, firstName: string, lastName: string }, attachments?: Array<{ __typename?: 'EmbeddedImageAttachment', cid: string, content: string, contentType?: string | null, filename?: string | null } | { __typename?: 'OtherAttachment', fileName: string, contentType?: string | null, encoding?: string | null, fileContent: string }> | null } };
 
 export type GetActiveCatalogsPicturesQueryVariables = Exact<{
   groupId: Scalars['Int'];
@@ -1768,6 +1778,14 @@ export type GetNextVendorDistributionsQueryVariables = Exact<{
 
 
 export type GetNextVendorDistributionsQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, nextDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number, name: string }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, orderEndDate: any, orderStartDate: any, end: any, catalog: { __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number } }, place: { __typename?: 'Place', id: number, name: string, address1?: string | null, city: string, zipCode: string, lng?: number | null, lat?: number | null }, userOrders: Array<{ __typename?: 'UserOrder', id: number, quantity: number, productPrice: number, userId: number, distributionId: number, subscriptionId?: number | null, product: { __typename?: 'Product', id: number, name: string, qt: number, unitType: number, bulk: boolean, variablePrice: boolean } }>, multiDistrib: { __typename?: 'MultiDistrib', id: number, distribStartDate: any, distribEndDate: any } }> }> } };
+
+export type GetVendorDistributionsCsvQueryVariables = Exact<{
+  vendorId: Scalars['Int'];
+  fromDate?: InputMaybe<Scalars['DateTime']>;
+}>;
+
+
+export type GetVendorDistributionsCsvQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, products: Array<{ __typename?: 'Product', id: number, name: string, active: boolean }> }>, allDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalog: { __typename?: 'Catalog', id: number }, userOrders: Array<{ __typename?: 'UserOrder', quantity: number, product: { __typename?: 'Product', id: number } }> }> }> } };
 
 export type ClaimVendorMutationVariables = Exact<{
   vendorId: Scalars['Int'];
@@ -3921,9 +3939,14 @@ export const GetLatestMessagesDocument = gql`
       ... on EmbeddedImageAttachment {
         cid
         content
+        contentType
+        filename
       }
       ... on OtherAttachment {
         fileName
+        fileContent: content
+        contentType
+        encoding
       }
     }
     group {
@@ -4205,9 +4228,14 @@ export const GetMessageByIdDocument = gql`
       ... on EmbeddedImageAttachment {
         cid
         content
+        contentType
+        filename
       }
       ... on OtherAttachment {
         fileName
+        fileContent: content
+        contentType
+        encoding
       }
     }
   }
@@ -4934,13 +4962,23 @@ export const GetVendorDistributionsCsvDocument = gql`
 }
     `;
 
-export type GetVendorDistributionsCsvQueryVariables = Exact<{
-  vendorId: Scalars['Int'];
-  fromDate?: InputMaybe<Scalars['DateTime']>;
-}>;
-
-export type GetVendorDistributionsCsvQuery = { __typename?: 'Query', vendor: { __typename?: 'Vendor', id: number, allCatalogs: Array<{ __typename?: 'Catalog', id: number, name: string, group: { __typename?: 'Group', id: number, name: string }, products: Array<{ __typename?: 'Product', id: number, name: string, active: boolean }> }>, allDistributions: Array<{ __typename?: 'VendorDistributions', group: { __typename?: 'Group', id: number }, distributions: Array<{ __typename?: 'Distribution', id: number, date: any, catalog: { __typename?: 'Catalog', id: number }, userOrders: Array<{ __typename?: 'UserOrder', quantity: number, product: { __typename?: 'Product', id: number } }> }> }> } };
-
+/**
+ * __useGetVendorDistributionsCsvQuery__
+ *
+ * To run a query within a React component, call `useGetVendorDistributionsCsvQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetVendorDistributionsCsvQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetVendorDistributionsCsvQuery({
+ *   variables: {
+ *      vendorId: // value for 'vendorId'
+ *      fromDate: // value for 'fromDate'
+ *   },
+ * });
+ */
 export function useGetVendorDistributionsCsvQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return ApolloReactHooks.useQuery<GetVendorDistributionsCsvQuery, GetVendorDistributionsCsvQueryVariables>(GetVendorDistributionsCsvDocument, options);

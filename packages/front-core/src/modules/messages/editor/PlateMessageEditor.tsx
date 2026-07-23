@@ -1,4 +1,3 @@
-
 import { Box } from '@mui/material';
 import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -13,12 +12,18 @@ import {
 } from './platePlugins';
 import { plateStyles } from './plateStyles';
 import { KEYS, Value } from 'platejs';
-import { dataURItoBlob, dataURItoFile } from '../utils/dataURItoFile';
+import {
+  collectMessageImages,
+  type CollectedMessageImage,
+} from './collectMessageImageFiles';
 
 type Props = {
-  onChange: (data: {value: Value, imagesToUpload: File[]}) => void;
+  onChange: (data: {
+    value: Value;
+    imagesToUpload: CollectedMessageImage[];
+  }) => void;
   onBlur: (value: Value) => void;
-  
+
   groupId?: number;
 
   /** Set editor to a new value (e.g. reuse message). */
@@ -38,52 +43,50 @@ export const PlateMessageEditor = ({
 }: Props) => {
   const { t } = useTranslation(['messages/default']);
 
-  const onChangeWithImages = useCallback(({value, editor}: {value: Value, editor: TPlateEditor<Value, MessageEditorPlugin>}) => {
-    (async () => {
-      console.log('value', value);
-      const imagesToUpload = await Promise.all(
-        value.filter(
-          (node) => node.type === editor.getType(KEYS.img)
-        ).map(async (node, i) => {
-            const url = node.url?.toString();
-            if(!node.file && url?.startsWith('data:image')) {
-              const f = dataURItoFile(url, node.id?.toString() || `image-${i}`);
-              node.file = f;
-              node.cid = f.name;
-            }
-            return node.file as File
-          })
-      )
+  const onChangeWithImages = useCallback(
+    ({
+      value,
+      editor,
+    }: {
+      value: Value;
+      editor: TPlateEditor<Value, MessageEditorPlugin>;
+    }) => {
+      const imgType = editor.getType(KEYS.img);
+      const imagesToUpload = collectMessageImages(value, imgType);
       onChange({
         value,
-        imagesToUpload
-      })
-    })();
-  }, [onChange])
-
-  const editor = usePlateEditor<Value, MessageEditorPlugin>({
-    plugins: [...MESSAGE_EDITOR_PLUGINS],
-    value: externalValue || MESSAGE_EDITOR_EMPTY_VALUE,
-    handlers: {
-      onChange: onChangeWithImages,
-      onFocus: (({ event, editor: plateEditor }) => {
-        setIsFocused(true);
-
-        // Keyboard focus (Tab): place caret at end of content.
-        if ((event.nativeEvent as UIEvent).detail === 0) {
-          requestAnimationFrame(() => {
-            const end = plateEditor.api.end([]);
-            if (end) plateEditor.tf.select(end);
-          });
-        }
-      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
-      onBlur: (({ event, editor: plateEditor }) => {
-        setIsFocused(false);
-        onChangeWithImages({value: editor.children, editor});
-        onBlur?.(editor.children);
-      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+        imagesToUpload,
+      });
     },
-  }, [externalValue]);  
+    [onChange],
+  );
+
+  const editor = usePlateEditor<Value, MessageEditorPlugin>(
+    {
+      plugins: [...MESSAGE_EDITOR_PLUGINS],
+      value: externalValue || MESSAGE_EDITOR_EMPTY_VALUE,
+      handlers: {
+        onChange: onChangeWithImages,
+        onFocus: (({ event, editor: plateEditor }) => {
+          setIsFocused(true);
+
+          // Keyboard focus (Tab): place caret at end of content.
+          if ((event.nativeEvent as UIEvent).detail === 0) {
+            requestAnimationFrame(() => {
+              const end = plateEditor.api.end([]);
+              if (end) plateEditor.tf.select(end);
+            });
+          }
+        }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+        onBlur: (({ editor: plateEditor }) => {
+          setIsFocused(false);
+          onChangeWithImages({ value: plateEditor.children, editor: plateEditor });
+          onBlur?.(plateEditor.children);
+        }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+      },
+    },
+    [externalValue],
+  );
 
   const [isFocused, setIsFocused] = useState(false);
 
@@ -105,13 +108,13 @@ export const PlateMessageEditor = ({
           },
         }),
         isFocused &&
-        (() => ({
-          boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
-          '&:hover': {
-            borderColor: theme.palette.primary.main,
-          },
-        })),
-        ...plateStyles
+          (() => ({
+            boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+            '&:hover': {
+              borderColor: theme.palette.primary.main,
+            },
+          })),
+        ...plateStyles,
       ]}
       mt={2}
       mb={1}
@@ -121,7 +124,7 @@ export const PlateMessageEditor = ({
           editor={editor}
           groupId={groupId}
           toolbarEnd={toolbarEnd}
-          />
+        />
 
         {belowEditor}
 
@@ -141,4 +144,3 @@ export const PlateMessageEditor = ({
     </Box>
   );
 };
-

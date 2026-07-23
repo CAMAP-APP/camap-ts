@@ -43,10 +43,24 @@ export const MESSAGE_EDITOR_EMPTY_VALUE: Value = [
   { type: 'p', children: [{ text: '' }] },
 ];
 
+/** Drop non-serializable `file` (File → {} in JSON) before persisting slate content. */
+const omitImageFileProperties = (nodes: Value): Value =>
+  nodes.map((node) => {
+    if (!node || typeof node !== 'object') return node;
+    const { file: _file, ...rest } = node as Record<string, unknown>;
+    if (Array.isArray(rest.children)) {
+      return {
+        ...rest,
+        children: omitImageFileProperties(rest.children as Value),
+      } as (typeof nodes)[number];
+    }
+    return rest as (typeof nodes)[number];
+  });
+
 export const encodeMessageSlateContentV2 = (value: Value): string => {
   const wrapper: MessageSlateContentV2 = {
     v: MESSAGE_SLATE_CONTENT_VERSION,
-    value,
+    value: omitImageFileProperties(value),
   };
   return btoa(encodeURIComponent(JSON.stringify(wrapper)));
 };
