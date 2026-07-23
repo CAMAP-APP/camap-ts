@@ -183,6 +183,7 @@ const MessagesForm = ({
                 name={'message'}
                 required
                 as={MessageTextEditor}
+                formResetKey={formResetKey}
               />
               <Field
                 fullWidth

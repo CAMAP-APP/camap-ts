@@ -12,12 +12,13 @@ type Props = {
 };
 
 export default function EmailImageStatic({ element, attributes }: Props) {
-    const src = element.cid
-      ? `cid:${element.cid}`
-      : (typeof element.url === 'string'
-        ? new URL(element.url).toString() // normalize url
-        : ''
-      );
+    // Prefer cid for email MIME parts; fall back to persistable url (data:/https:).
+    let src = '';
+    if (element.cid) {
+      src = `cid:${element.cid}`;
+    } else if (typeof element.url === 'string' && element.url.length > 0) {
+      src = element.url;
+    }
     const alignStyles = getMessageImageAlignStyles(element.align);
 
     const filteredAttributes = Object.fromEntries(

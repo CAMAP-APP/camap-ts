@@ -1,7 +1,8 @@
 import { ApolloError } from '@apollo/client';
 import { UserLists } from 'camap-common';
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { AttachmentFileInput, Group, Message, User } from '../../gql';
+import { clearImageFiles } from './utils/imageFileRegistry';
 
 interface MessagesContextProviderProps {
   groupId: number;
@@ -27,12 +28,22 @@ export type LatestMessagesType = Pick<
   group?: Pick<Group, 'name'> | null | undefined;
 };
 
+export type EmbeddedImagesFlushResult = {
+  attachments: AttachmentFileInput[];
+  html: string;
+  slateContent: string;
+};
+
+type EmbeddedImagesFlusher = () => Promise<EmbeddedImagesFlushResult>;
+
 interface MessagesContextProps extends MessagesContextProviderProps {
   attachments: File[];
   error: ApolloError | undefined;
   setError: (error: ApolloError | undefined) => void;
   addAttachment: (attachment: File) => void;
   removeAttachment: (attachment: File) => void;
+  /** Replace file attachments only (does not clear embedded images). */
+  replaceAttachments: (attachments: File[]) => void;
   resetAttachments: () => void;
   recipients: Recipient[];
   setRecipients: (recipients: Recipient[]) => void;
@@ -41,6 +52,10 @@ interface MessagesContextProps extends MessagesContextProviderProps {
   embeddedImages: AttachmentFileInput[];
   addEmbeddedImages: (images: AttachmentFileInput[]) => void;
   removeEmbeddedImage: (image: AttachmentFileInput) => void;
+  setEmbeddedImages: (images: AttachmentFileInput[]) => void;
+  /** Wait for pending image encode/serialize; returns ready attachments + HTML. */
+  flushEmbeddedImages: () => Promise<EmbeddedImagesFlushResult>;
+  registerEmbeddedImagesFlusher: (flusher: EmbeddedImagesFlusher | null) => void;
   slateContent: string;
   setSlateContent: (value: string) => void;
   reuseMessage: LatestMessagesType | undefined;
@@ -57,6 +72,7 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
   setError: () => { },
   addAttachment: () => { },
   removeAttachment: () => { },
+  replaceAttachments: () => { },
   resetAttachments: () => { },
   recipients: [],
   setRecipients: () => { },
@@ -65,6 +81,9 @@ export const MessagesContext = React.createContext<MessagesContextProps>({
   embeddedImages: [],
   addEmbeddedImages: () => { },
   removeEmbeddedImage: () => { },
+  setEmbeddedImages: () => { },
+  flushEmbeddedImages: async () => ({ attachments: [], html: '', slateContent: '' }),
+  registerEmbeddedImagesFlusher: () => { },
   slateContent: '',
   setSlateContent: () => { },
   reuseMessage: undefined,
@@ -92,6 +111,7 @@ const MessagesContextProvider = ({
   const [reuseMessage, setReuseMessage] = React.useState<
     LatestMessagesType | undefined
   >();
+  const embeddedImagesFlusherRef = useRef<EmbeddedImagesFlusher | null>(null);
 
   const addAttachment = useCallback((attachment: File) => {
     setAttachments(attachments => {
@@ -102,6 +122,10 @@ const MessagesContextProvider = ({
 
   const removeAttachment = useCallback((attachment: File) => {
     setAttachments(attachments => attachments.filter((a) => a.name !== attachment.name));
+  }, []);
+
+  const replaceAttachments = useCallback((next: File[]) => {
+    setAttachments(next);
   }, []);
 
   const addEmbeddedImages = useCallback((images: AttachmentFileInput[]) => {
@@ -116,9 +140,21 @@ const MessagesContextProvider = ({
       embeddedImages.filter((i) => i.cid !== image.cid));
   }, []);
 
+  const registerEmbeddedImagesFlusher = useCallback((flusher: EmbeddedImagesFlusher | null) => {
+    embeddedImagesFlusherRef.current = flusher;
+  }, []);
+
+  const flushEmbeddedImages = useCallback(async () => {
+    if (embeddedImagesFlusherRef.current) {
+      return embeddedImagesFlusherRef.current();
+    }
+    return { attachments: embeddedImages, html: '', slateContent };
+  }, [embeddedImages, slateContent]);
+
   const resetAttachments = () => {
     setAttachments([]);
     setEmbeddedImages([]);
+    clearImageFiles();
   };
 
   /** */
@@ -132,6 +168,7 @@ const MessagesContextProvider = ({
         setError,
         addAttachment,
         removeAttachment,
+        replaceAttachments,
         resetAttachments,
         recipients,
         setRecipients,
@@ -140,6 +177,9 @@ const MessagesContextProvider = ({
         embeddedImages,
         addEmbeddedImages,
         removeEmbeddedImage,
+        setEmbeddedImages,
+        flushEmbeddedImages,
+        registerEmbeddedImagesFlusher,
         slateContent,
         setSlateContent,
         reuseMessage,

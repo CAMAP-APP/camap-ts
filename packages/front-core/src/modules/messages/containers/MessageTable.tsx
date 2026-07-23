@@ -8,7 +8,6 @@ import {
   TableBody,
   TableCell,
   TableRow,
-  Tooltip,
   useTheme,
 } from '@mui/material';
 import { formatUserName, UserLists, UserListsType } from 'camap-common';
@@ -18,6 +17,7 @@ import { OtherAttachment, useGetMessageByIdLazyQuery } from '../../../gql';
 import { formatAbsoluteDate } from '../../../utils/fomat';
 import { PlateMessageViewer } from '../editor/PlateMessageViewer';
 import { getMessageEditorValueFromSlateContent } from '../editor/messageEditorSchema';
+import { hydrateMessageImagesFromAttachments } from '../editor/hydrateMessageImagesFromAttachments';
 
 export interface MessageTableProps {
   messageId: number;
@@ -73,13 +73,16 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
   const messageBody = React.useMemo(() => {
     if (!message?.slateContent) return;
     try {
-      return getMessageEditorValueFromSlateContent(message.slateContent);
-    }
-    catch (e) {
+      const parsed = getMessageEditorValueFromSlateContent(message.slateContent);
+      return hydrateMessageImagesFromAttachments(
+        parsed,
+        message.attachments || undefined,
+      );
+    } catch (e) {
       console.error('Error getting message editor value from slate content:', e);
       setParseError((e as Error).message);
     }
-  }, [message, setParseError]);
+  }, [message]);
 
   if (messageError) return <ApolloErrorAlert error={messageError} />;
   if (messageLoading) return <CircularProgress />;
@@ -92,7 +95,11 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
 
   return (
     <>
-      {parseError && <Alert severity="error">{t('errorReusingMessage', { error: parseError })}</Alert>}
+      {parseError && (
+        <Alert severity="error">
+          {t('errorReusingMessage', { error: parseError })}
+        </Alert>
+      )}
       {message && (
         <Table sx={{ tableLayout: 'fixed' }}>
           <TableBody>
@@ -153,15 +160,13 @@ const MessageTable = ({ messageId }: MessageTableProps) => {
                   <Box display="flex" flexWrap="wrap">
                     {otherAttachments.map((r: OtherAttachment) => (
                       <Box m={0.5} key={r.fileName} maxWidth="100%">
-                        <Tooltip title={`${t('attachmentsNotStoredOnServer')}`}>
-                          <Chip
-                            size={
-                              theme.breakpoints.down('md') ? 'small' : 'medium'
-                            }
-                            label={r.fileName}
-                            sx={{ maxWidth: '100%' }}
-                          />
-                        </Tooltip>
+                        <Chip
+                          size={
+                            theme.breakpoints.down('md') ? 'small' : 'medium'
+                          }
+                          label={r.fileName}
+                          sx={{ maxWidth: '100%' }}
+                        />
                       </Box>
                     ))}
                   </Box>

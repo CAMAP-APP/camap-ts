@@ -517,10 +517,15 @@ union AttachmentUnion = EmbeddedImageAttachment | OtherAttachment
 type EmbeddedImageAttachment {
   cid: String!
   content: String!
+  contentType: String
+  filename: String
 }
 
 type OtherAttachment {
   fileName: String!
+  content: String!
+  contentType: String
+  encoding: String
 }
 
 type Query {

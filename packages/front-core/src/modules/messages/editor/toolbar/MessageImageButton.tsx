@@ -72,7 +72,7 @@ const MessageImageButton = ({ groupId }: InsertImageButtonProps) => {
     const files = event.target.files;
 
     try {
-      insertImageWithCid(editor, files);
+      await insertImageWithCid(editor, files);
     } catch (error) {
       logError(error);
     } finally {
