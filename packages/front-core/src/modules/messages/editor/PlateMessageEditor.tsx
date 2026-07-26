@@ -3,6 +3,7 @@ import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { DOMHandler, TPlateEditor } from '@platejs/core/react';
 import theme from '../../../theme/default/theme';
+import { isEmptyEmailHtml } from './isEmptyEmailHtml';
 import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
