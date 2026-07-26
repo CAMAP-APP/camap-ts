@@ -42,6 +42,7 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
     selectedUserList,
     setSelectedUserList,
     embeddedImages,
+    flushEmbeddedImages,
     slateContent,
     setSlateContent,
     setReuseMessage,
@@ -134,37 +135,60 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
       setFormError(bag, t('form.errorNoRecipient'));
       return;
     }
-    if (
-      values.message.length === 0 ||
-      isEmptyEmailHtml(values.message)
-    ) {
+
+    let base64EncodedAttachmentsSize = 0;
+    let encodedAttachments: AttachmentFileInput[] | undefined;
+    let messageHtml = values.message;
+
+    try {
+      if (attachmentsRef.current) {
+        encodedAttachments = await Promise.all(
+          attachmentsRef.current.map(async (a) => {
+            const encodedContent = await encodeFileToBase64String(a);
+            return {
+              filename: a.name,
+              contentType: a.type,
+              encoding: 'base64',
+              content: encodedContent,
+            };
+          }),
+        );
+      }
+
+      // Ensure image encode/serialize finished; never send incomplete attachment objects.
+      const flushed = await flushEmbeddedImages();
+      if (flushed.html) {
+        messageHtml = flushed.html;
+      }
+      if (flushed.slateContent) {
+        slateContentRef.current = flushed.slateContent;
+        setSlateContent(flushed.slateContent);
+      }
+      const flushedEmbeddedImages = flushed.attachments.filter(
+        (image) =>
+          !!image?.filename &&
+          !!image?.contentType &&
+          !!image?.content &&
+          !!image?.encoding,
+      );
+      embeddedImagesRef.current = flushedEmbeddedImages;
+
+      if (flushedEmbeddedImages.length > 0) {
+        if (encodedAttachments)
+          encodedAttachments = encodedAttachments.concat(flushedEmbeddedImages);
+        else encodedAttachments = flushedEmbeddedImages;
+      }
+    } catch (e) {
+      setFormError(bag, t('translation:error', { error: e }));
+      return;
+    }
+
+    if (messageHtml.length === 0 || isEmptyEmailHtml(messageHtml)) {
       setFormError(bag, t('form.errorEmptyMessage'));
       return;
     }
-    const messageSize = byteCount(values.message);
-    let base64EncodedAttachmentsSize = 0;
-    let encodedAttachments: AttachmentFileInput[] | undefined;
-    if (attachmentsRef.current) {
-      encodedAttachments = await Promise.all(
-        attachmentsRef.current.map(async (a) => {
-          const encodedContent = await encodeFileToBase64String(a);
-          return {
-            filename: a.name,
-            contentType: a.type,
-            encoding: 'base64',
-            content: encodedContent,
-          };
-        }),
-      );
-    }
 
-    if (embeddedImagesRef.current.length > 0) {
-      if (encodedAttachments)
-        encodedAttachments = encodedAttachments.concat(
-          embeddedImagesRef.current,
-        );
-      else encodedAttachments = embeddedImagesRef.current;
-    }
+    const messageSize = byteCount(messageHtml);
 
     const stringifiedEncodedAttachments = encodedAttachments
       ? JSON.stringify(encodedAttachments)
@@ -214,7 +238,7 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
 
       const messageInput: CreateMessageInput = {
         title: values.object,
-        htmlBody: values.message,
+        htmlBody: messageHtml,
         senderEmail: values.senderEmail,
         senderName: values.senderName,
         recipients: recipientsList,

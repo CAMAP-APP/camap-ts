@@ -117,11 +117,12 @@ const SentMessageList = ({
                   <ListItem
                     button
                     divider
-                    key={m.id}
+                    key={`${m.id}=${m.date.getTime()}`}
                     selected={selectedMessageId === m.id}
                     onClick={() => onSelectMessage(m.id)}
                     sx={{
-                      p: 0
+                      px: 2,
+                      py: 0,
                     }}
                   >
                     <ListItemText

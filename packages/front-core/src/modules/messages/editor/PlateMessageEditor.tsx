@@ -1,125 +1,95 @@
-
 import { Box } from '@mui/material';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { FormikHandlers } from 'formik';
-import { createSlateEditor, type Value } from 'platejs';
-import type { DOMHandler } from '@platejs/core/react';
-import { serializeHtml } from '@platejs/core/static';
+import type { DOMHandler, TPlateEditor } from '@platejs/core/react';
 import theme from '../../../theme/default/theme';
 import { isEmptyEmailHtml } from './isEmptyEmailHtml';
 import { MESSAGE_EDITOR_EMPTY_VALUE } from './messageEditorSchema';
 import TextEditorToolbar from './toolbar/TextEditorToolbar';
 import { Plate, PlateContent, usePlateEditor } from '@platejs/core/react';
 import {
-  EMAIL_RENDER_PLUGINS,
   MESSAGE_EDITOR_PLUGINS,
   type MessageEditorPlugin,
 } from './platePlugins';
 import { plateStyles } from './plateStyles';
-import EmailEditorStatic from './nodes/EmailEditorStatic';
+import { KEYS, Value } from 'platejs';
+import {
+  collectMessageImages,
+  type CollectedMessageImage,
+} from './collectMessageImageFiles';
 
 type Props = {
-  name: string;
-  onChange: FormikHandlers['handleChange'];
-  onBlur: FormikHandlers['handleBlur'];
-  /** Formik field value: HTML. */
-  value: string;
+  onChange: (data: {
+    value: Value;
+    imagesToUpload: CollectedMessageImage[];
+  }) => void;
+  onBlur: (value: Value) => void;
 
   groupId?: number;
 
   /** Set editor to a new value (e.g. reuse message). */
   externalValue?: Value;
-  onExternalValueApplied?: () => void;
-
-  onBlurSaveSlateValue?: (value: Value) => void;
-  onHtmlSerialized?: (html: string) => void;
 
   toolbarEnd?: React.ReactNode;
   belowEditor?: React.ReactNode;
-
-  onAddImagesCustomHandle?: (files: File[]) => void;
 };
 
 export const PlateMessageEditor = ({
-  name,
   onBlur,
   onChange,
-  value: _formikHtml,
   groupId,
   externalValue,
-  onBlurSaveSlateValue,
-  onHtmlSerialized,
   toolbarEnd,
   belowEditor,
-  onAddImagesCustomHandle,
 }: Props) => {
   const { t } = useTranslation(['messages/default']);
 
-  const editor = usePlateEditor<Value, MessageEditorPlugin>({
-    plugins: [...MESSAGE_EDITOR_PLUGINS],
-    value: MESSAGE_EDITOR_EMPTY_VALUE,
-    handlers: {
-      onFocus: (({ event, editor: plateEditor }) => {
-        setIsFocused(true);
-
-        // Keyboard focus (Tab): place caret at end of content.
-        if ((event.nativeEvent as UIEvent).detail === 0) {
-          requestAnimationFrame(() => {
-            const end = plateEditor.api.end([]);
-            if (end) plateEditor.tf.select(end);
-          });
-        }
-      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
-      onBlur: (({ event, editor: plateEditor }) => {
-        setIsFocused(false);
-        onBlur(name)(event as any);
-
-        onBlurSaveSlateValue?.(plateEditor.children);
-        void serializeToFormikHtml();
-      }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+  const onChangeWithImages = useCallback(
+    ({
+      value,
+      editor,
+    }: {
+      value: Value;
+      editor: TPlateEditor<Value, MessageEditorPlugin>;
+    }) => {
+      const imgType = editor.getType(KEYS.img);
+      const imagesToUpload = collectMessageImages(value, imgType);
+      onChange({
+        value,
+        imagesToUpload,
+      });
     },
-  });
+    [onChange],
+  );
+
+  const editor = usePlateEditor<Value, MessageEditorPlugin>(
+    {
+      plugins: [...MESSAGE_EDITOR_PLUGINS],
+      value: externalValue || MESSAGE_EDITOR_EMPTY_VALUE,
+      handlers: {
+        onChange: onChangeWithImages,
+        onFocus: (({ event, editor: plateEditor }) => {
+          setIsFocused(true);
+
+          // Keyboard focus (Tab): place caret at end of content.
+          if ((event.nativeEvent as UIEvent).detail === 0) {
+            requestAnimationFrame(() => {
+              const end = plateEditor.api.end([]);
+              if (end) plateEditor.tf.select(end);
+            });
+          }
+        }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+        onBlur: (({ editor: plateEditor }) => {
+          setIsFocused(false);
+          onChangeWithImages({ value: plateEditor.children, editor: plateEditor });
+          onBlur?.(plateEditor.children);
+        }) as DOMHandler<MessageEditorPlugin, React.FocusEvent>,
+      },
+    },
+    [externalValue],
+  );
 
   const [isFocused, setIsFocused] = useState(false);
-  const pendingSerialize = useRef<number | null>(null);
-
-  const serializeToFormikHtml = useCallback(async () => {
-    const html = await serializeHtml(createSlateEditor({
-      plugins: EMAIL_RENDER_PLUGINS,
-      value: editor.children,
-    }), {
-      stripClassNames: true,
-      stripDataAttributes: true,
-      editorComponent: EmailEditorStatic,
-    });
-    onHtmlSerialized?.(html);
-    onChange(name)(html);
-  }, [editor, name, onChange, onHtmlSerialized]);
-
-  const scheduleSerialize = useCallback(() => {
-    if (pendingSerialize.current) window.clearTimeout(pendingSerialize.current);
-    pendingSerialize.current = window.setTimeout(() => {
-      void serializeToFormikHtml();
-    }, 150);
-  }, [serializeToFormikHtml]);
-
-  // Apply reused message content once; must not depend on Formik HTML (it updates on every edit).
-  React.useEffect(() => {
-    if (!externalValue) return;
-    editor.tf.setValue(externalValue);
-  }, [editor, externalValue]);
-
-  React.useEffect(() => {
-    if (externalValue) return;
-    if (isEmptyEmailHtml(_formikHtml)) {
-      editor.tf.setValue(MESSAGE_EDITOR_EMPTY_VALUE);
-    }
-  }, [editor, externalValue, _formikHtml]);
-
-  const onPlateChange = useCallback(() => {
-    scheduleSerialize();
-  }, [scheduleSerialize]);
 
   return (
     <Box
@@ -139,24 +109,23 @@ export const PlateMessageEditor = ({
           },
         }),
         isFocused &&
-        (() => ({
-          boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
-          '&:hover': {
-            borderColor: theme.palette.primary.main,
-          },
-        })),
-        ...plateStyles
+          (() => ({
+            boxShadow: `0 0 0 1px ${theme.palette.primary.main}`,
+            '&:hover': {
+              borderColor: theme.palette.primary.main,
+            },
+          })),
+        ...plateStyles,
       ]}
       mt={2}
       mb={1}
     >
-      <Plate editor={editor}
-        onChange={onPlateChange}
-      >
+      <Plate editor={editor}>
         <TextEditorToolbar
           editor={editor}
-          onAddImagesCustomHandle={onAddImagesCustomHandle}
-          groupId={groupId} toolbarEnd={toolbarEnd} />
+          groupId={groupId}
+          toolbarEnd={toolbarEnd}
+        />
 
         {belowEditor}
 
@@ -176,4 +145,3 @@ export const PlateMessageEditor = ({
     </Box>
   );
 };
-

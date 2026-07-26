@@ -36,7 +36,7 @@ export const plateStyles = [
     },
     {
         '.slate-img img': {
-            width: '100%',
+            width: 'auto',
             maxWidth: MESSAGE_IMAGE_MAX_WIDTH,
             height: 'auto',
             maxHeight: MESSAGE_IMAGE_MAX_HEIGHT,

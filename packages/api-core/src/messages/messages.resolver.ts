@@ -113,8 +113,13 @@ export class MessagesResolver {
   async attachments(@Parent() parent: Message) {
     if (!parent.attachments) return [];
     return parent.attachments.map((a) => {
-      if (typeof a === 'string') return { fileName: a };
-      return a;
+      if (typeof a === 'string') return { fileName: a, content: '' };
+      if ('cid' in a) return a;
+      return {
+        ...a,
+        fileName: (a as { fileName?: string }).fileName || '',
+        content: (a as { content?: string }).content || '',
+      };
     });
   }
 
@@ -165,11 +170,21 @@ export class MessagesResolver {
       attachments,
     );
 
-    const messageAttachments = attachments.map((a) => {
+    const messageAttachments = (attachments ?? []).map((a) => {
       if (a.cid) {
-        return { cid: a.cid, content: a.content };
+        return {
+          cid: a.cid,
+          content: a.content,
+          contentType: a.contentType,
+          filename: a.filename,
+        };
       }
-      return a.filename;
+      return {
+        fileName: a.filename,
+        content: a.content,
+        contentType: a.contentType,
+        encoding: a.encoding,
+      };
     });
 
     return this.messagesService.create({

@@ -8,12 +8,28 @@ export class EmbeddedImageAttachment {
 
   @Field()
   content: string;
+
+  @Field({ nullable: true })
+  contentType?: string;
+
+  @Field({ nullable: true })
+  filename?: string;
 }
 
 @ObjectType()
 export class OtherAttachment {
   @Field()
   fileName: string;
+
+  /** Empty string when the file bytes were not stored (legacy messages). */
+  @Field()
+  content: string;
+
+  @Field({ nullable: true })
+  contentType?: string;
+
+  @Field({ nullable: true })
+  encoding?: string;
 }
 
 export const AttachmentUnion = createUnionType({

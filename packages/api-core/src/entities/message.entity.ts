@@ -62,7 +62,21 @@ export class MessageEntity {
   @Column('mediumtext', { name: 'attachments', nullable: true })
   raw_attachments: string | null;
 
-  get attachments(): ({ cid: string; content: string } | string)[] | null {
+  get attachments(): (
+    | {
+        cid: string;
+        content: string;
+        contentType?: string;
+        filename?: string;
+      }
+    | {
+        fileName: string;
+        content?: string;
+        contentType?: string;
+        encoding?: string;
+      }
+    | string
+  )[] | null {
     if (this.raw_attachments === null || this.raw_attachments.trim() === '')
       return null;
 
@@ -73,7 +87,23 @@ export class MessageEntity {
     }
   }
 
-  set attachments(value: ({ cid: string; content: string } | string)[] | null) {
+  set attachments(
+    value: (
+      | {
+          cid: string;
+          content: string;
+          contentType?: string;
+          filename?: string;
+        }
+      | {
+          fileName: string;
+          content?: string;
+          contentType?: string;
+          encoding?: string;
+        }
+      | string
+    )[] | null,
+  ) {
     if (!value) {
       this.raw_attachments = null;
     } else {
