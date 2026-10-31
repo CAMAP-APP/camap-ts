@@ -64,6 +64,7 @@ const MessagesForm = ({
     'vendors',
     'membership',
     'noMembership',
+    'noMembershipWithActivityInMembershipYear',
     'hasOrders',
     'hasNoOrders',
     'waitingList',
