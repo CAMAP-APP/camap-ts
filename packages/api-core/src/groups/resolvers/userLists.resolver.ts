@@ -14,6 +14,7 @@ import { GroupEntity } from '../entities/group.entity';
 import { GroupsLoader } from '../loaders/groups.loader';
 import { GroupsService } from '../services/groups.service';
 import { MembershipsService } from '../services/memberships.service';
+import { MemberYearListsService } from '../services/member-year-lists.service';
 import { UserGroupsService } from '../services/user-groups.service';
 import { WaitingListsService } from '../services/waitingLists.service';
 import { UserList } from '../types/user-list.type';
@@ -33,6 +34,7 @@ export class UserListsResolver {
     private readonly multiDistribsService: MultiDistribsService,
     private readonly distributionsService: DistributionsService,
     private readonly vendorsService: VendorService,
+    private readonly memberYearListsService: MemberYearListsService,
   ) {}
 
   @Query(() => [UserList])
@@ -52,6 +54,8 @@ export class UserListsResolver {
     if (group.hasMembership)
       numberOfUsersWithMembership =
         await this.membershipsService.getUsersWithMembership(group, true);
+    const numberOfMembersToRenewInYear =
+      await this.memberYearListsService.getUsersToRenew(group, true);
     const activeCatalogs =
       await this.catalogsService.getActiveCatalogsFromActiveVendorsInGroup(groupId);
     const numberOfNewUsers = await this.userGroupsService.getNumberOfNewUsers(
@@ -108,6 +112,11 @@ export class UserListsResolver {
           break;
         case 'hasOrders':
           userLists.push({ type: l.type, count: numberOfUsersWithContracts });
+          break;
+        case 'noMembershipWithActivityInMembershipYear':
+          if (group.hasMembership) {
+            userLists.push({ type: l.type, count: numberOfMembersToRenewInYear });
+          }
           break;
         case 'noMembership':
           if (group.hasMembership) {
@@ -271,6 +280,9 @@ export class UserListsResolver {
 
       case 'hasOrders':
         return this.usersService.getUsersWithOrdersInActiveCatalogs(groupId);
+
+      case 'noMembershipWithActivityInMembershipYear':
+        return this.memberYearListsService.getUsersToRenew(group);
 
       case 'noMembership':
         return group.hasMembership

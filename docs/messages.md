@@ -33,3 +33,23 @@ Le front et le back de la gestion des membres sont codés en TS ( à part les fi
 
 -   Le backend est géré par le module `groups.module.ts`
 -   Le frontend est géré par le composant React `Members.module.tsx`
+
+### Adhésions à renouveler avec activité sur l'année
+
+La liste « Membres avec adhésions à renouveler et activité sur l'année » sélectionne
+les membres du groupe sans adhésion pour la période courante et ayant soit une
+commande de quantité strictement positive pour une distribution de cette période,
+soit une souscription couvrant une partie de la période. Les catalogues terminés et
+les producteurs désactivés ne sont pas exclus de l'historique.
+
+La période court entre deux dates annuelles de renouvellement des adhésions ; sans
+date configurée, il s'agit de l'année civile. Le début est inclus et le renouvellement
+suivant est exclu, selon l'heure de Paris. La date de distribution compte, quelle que
+soit la date de saisie de la commande. Les deux utilisateurs d'un panier partagé sont
+retenus s'ils appartiennent encore au groupe. Le statut de producteur ne suffit pas
+à constituer une activité comme consommateur.
+
+La liste est disponible dans Membres et dans la messagerie uniquement lorsque la
+gestion des adhésions est activée. Le compteur et les destinataires utilisent le
+même filtre (`MemberYearListsService`). La liste existante des adhésions à renouveler
+conserve son fonctionnement.

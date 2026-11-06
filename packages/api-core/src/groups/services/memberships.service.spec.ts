@@ -91,6 +91,21 @@ describe('MembershipsService', () => {
     expect(service.getMembershipYear(group, new Date(2015, 8, 1))).toBe(2015);
   });
 
+  it.each<[string | null, string, number]>([
+    ['2000-09-01', '2026-08-31T21:59:59Z', 2025],
+    ['2000-09-01', '2026-08-31T22:00:00Z', 2026],
+    ['2000-01-01', '2026-12-31T22:59:59Z', 2026],
+    ['2000-01-01', '2026-12-31T23:00:00Z', 2027],
+    [null, '2026-12-31T23:00:00Z', 2027],
+    ['2024-02-29', '2025-03-01T00:00:00Z', 2025],
+  ])(
+    'uses the Paris membership year for renewal %s at %s',
+    (membershipRenewalDate, now, expectedYear) => {
+      const group = { membershipRenewalDate } as GroupEntity;
+      expect(service.getMembershipYear(group, new Date(now))).toBe(expectedYear);
+    },
+  );
+
   describe('deleteMembership', () => {
     it('when membership exists', async () => {
       const membership = new MembershipEntity();

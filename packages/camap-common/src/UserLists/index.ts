@@ -5,6 +5,7 @@ export type UserListsType =
   | 'hasNoOrders'
   | 'hasOrders'
   | 'noMembership'
+  | 'noMembershipWithActivityInMembershipYear'
   | 'membership'
   | 'contractSubscribers'
   | 'newUsers'
@@ -29,6 +30,10 @@ export class UserLists {
   static readonly WITH_ORDERS = new UserLists('hasOrders');
 
   static readonly MEMBERSHIP_TO_BE_RENEWED = new UserLists('noMembership');
+
+  static readonly MEMBERSHIP_TO_BE_RENEWED_WITH_ACTIVITY_IN_YEAR = new UserLists(
+    'noMembershipWithActivityInMembershipYear',
+  );
 
   static readonly VALID_MEMBERSHIP = new UserLists('membership');
 
@@ -65,6 +70,7 @@ export class UserLists {
       UserLists.WITH_ORDERS,
       UserLists.NEW_USERS,
       UserLists.MEMBERSHIP_TO_BE_RENEWED,
+      UserLists.MEMBERSHIP_TO_BE_RENEWED_WITH_ACTIVITY_IN_YEAR,
       UserLists.VALID_MEMBERSHIP,
       UserLists.WAITING_LIST,
       UserLists.CONTRACT_SUBSCRIBERS,
@@ -90,6 +96,8 @@ export class UserLists {
         return UserLists.WITH_ORDERS;
       case 'noMembership':
         return UserLists.MEMBERSHIP_TO_BE_RENEWED;
+      case 'noMembershipWithActivityInMembershipYear':
+        return UserLists.MEMBERSHIP_TO_BE_RENEWED_WITH_ACTIVITY_IN_YEAR;
       case 'membership':
         return UserLists.VALID_MEMBERSHIP;
       case 'waitingList':
