@@ -25,33 +25,49 @@ export class MemberYearListsService {
     if (!group.hasMembership) return count ? 0 : [];
 
     const period = getMembershipPeriod(group);
-    const query = this.userGroupsRepo
-      .createQueryBuilder('ug')
-      .where('ug.groupId = :groupId', { groupId: group.id })
-      .setParameters(period);
-
-    // Distribution dates, rather than order creation dates, define the year.
-    const orders = query
-      .subQuery()
-      .select('1')
-      .from(UserOrderEntity, 'o')
+    const parameters = { ...period, groupId: group.id };
+    // Collect activity once, rather than scan the history for each group member.
+    // Distribution dates define order activity within the membership year.
+    const ordersQuery = this.userGroupsRepo.manager
+      .createQueryBuilder(UserOrderEntity, 'o')
+      .select('o.userId', 'userId')
+      .addSelect('o.userId2', 'userId2')
+      .distinct(true)
       .innerJoin('o.distribution', 'd')
       .innerJoin('d.catalog', 'c')
       .where('c.groupId = :groupId')
-      .andWhere('(o.userId = ug.userId OR o.userId2 = ug.userId)')
       .andWhere('o.quantity > 0')
       .andWhere('d.raw_date >= :from AND d.raw_date < :to')
-      .getQuery();
-
-    const subscriptions = query
-      .subQuery()
-      .select('1')
-      .from(CsaSubscriptionEntity, 's')
+      .setParameters(parameters);
+    const subscriptionsQuery = this.userGroupsRepo.manager
+      .createQueryBuilder(CsaSubscriptionEntity, 's')
+      .select('s.userId', 'userId')
+      .addSelect('s.userId2', 'userId2')
+      .distinct(true)
       .innerJoin('s.catalog', 'catalog')
       .where('catalog.groupId = :groupId')
-      .andWhere('(s.userId = ug.userId OR s.userId2 = ug.userId)')
       .andWhere('s.startDate < :to AND s.endDate > :from')
-      .getQuery();
+      .setParameters(parameters);
+    const [orders, subscriptions] = await Promise.all([
+      ordersQuery.getRawMany<Pick<UserOrderEntity, 'userId' | 'userId2'>>(),
+      subscriptionsQuery.getRawMany<
+        Pick<CsaSubscriptionEntity, 'userId' | 'userId2'>
+      >(),
+    ]);
+    const activeUserIds = new Set<number>();
+    for (const { userId, userId2 } of [...orders, ...subscriptions]) {
+      activeUserIds.add(userId);
+      if (userId2 !== null) activeUserIds.add(userId2);
+    }
+    if (!activeUserIds.size) return count ? 0 : [];
+
+    const query = this.userGroupsRepo
+      .createQueryBuilder('ug')
+      .where('ug.groupId = :groupId')
+      .andWhere('ug.userId IN (:...activeUserIds)', {
+        activeUserIds: [...activeUserIds],
+      })
+      .setParameters(parameters);
     const memberships = query
       .subQuery()
       .select('1')
@@ -59,9 +75,7 @@ export class MemberYearListsService {
       .where('m.groupId = :groupId AND m.userId = ug.userId AND m.year = :year')
       .getQuery();
 
-    query
-      .andWhere(`(EXISTS ${orders} OR EXISTS ${subscriptions})`)
-      .andWhere(`NOT EXISTS ${memberships}`);
+    query.andWhere(`NOT EXISTS ${memberships}`);
 
     if (count) return query.getCount();
 
