@@ -41,6 +41,9 @@ describe('Member lists for the membership year (e2e)', () => {
     await connection.getRepository(GroupEntity).save(group);
     const period = getMembershipPeriod(group);
     year = period.year;
+    // test:e2e forces TZ=UTC. Appending Z preserves the Paris wall-clock values
+    // when the fixture generators write these Dates to MySQL datetime columns.
+    // With another process timezone, the driver would shift those fixture dates.
     from = new Date(period.from.replace(' ', 'T') + 'Z');
     to = new Date(period.to.replace(' ', 'T') + 'Z');
   });
