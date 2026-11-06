@@ -16,17 +16,19 @@ export class MemberYearListsService {
     private readonly userGroupsRepo: Repository<UserGroupEntity>,
   ) {}
 
-  async getUsersToRenew(group: GroupEntity): Promise<UserEntity[]> {
-    if (!group.hasMembership) return [];
+  async getUsersToRenew(group: GroupEntity, count?: false): Promise<UserEntity[]>;
+  async getUsersToRenew(group: GroupEntity, count: true): Promise<number>;
+  async getUsersToRenew(
+    group: GroupEntity,
+    count = false,
+  ): Promise<UserEntity[] | number> {
+    if (!group.hasMembership) return count ? 0 : [];
 
     const period = getMembershipPeriod(group);
     const query = this.userGroupsRepo
       .createQueryBuilder('ug')
-      .innerJoinAndSelect('ug.user', 'user')
       .where('ug.groupId = :groupId', { groupId: group.id })
-      .setParameters(period)
-      .orderBy('user.lastName', 'ASC')
-      .addOrderBy('user.firstName', 'ASC');
+      .setParameters(period);
 
     // Distribution dates, rather than order creation dates, define the year.
     const orders = query
@@ -61,6 +63,14 @@ export class MemberYearListsService {
       .andWhere(`(EXISTS ${orders} OR EXISTS ${subscriptions})`)
       .andWhere(`NOT EXISTS ${memberships}`);
 
-    return (await query.getMany()).map((ug) => ug.user);
+    if (count) return query.getCount();
+
+    return (
+      await query
+        .innerJoinAndSelect('ug.user', 'user')
+        .orderBy('user.lastName', 'ASC')
+        .addOrderBy('user.firstName', 'ASC')
+        .getMany()
+    ).map((ug) => ug.user);
   }
 }

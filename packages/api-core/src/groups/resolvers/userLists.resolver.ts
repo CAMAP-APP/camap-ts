@@ -54,6 +54,8 @@ export class UserListsResolver {
     if (group.hasMembership)
       numberOfUsersWithMembership =
         await this.membershipsService.getUsersWithMembership(group, true);
+    const numberOfMembersToRenewInYear =
+      await this.memberYearListsService.getUsersToRenew(group, true);
     const activeCatalogs =
       await this.catalogsService.getActiveCatalogsFromActiveVendorsInGroup(groupId);
     const numberOfNewUsers = await this.userGroupsService.getNumberOfNewUsers(
@@ -97,8 +99,6 @@ export class UserListsResolver {
 
     const userListOfLists = UserLists.getLists();
     const userLists: UserList[] = [];
-    const membersToRenewInYear =
-      await this.memberYearListsService.getUsersToRenew(group);
     userListOfLists.forEach((l) => {
       switch (l.type) {
         case 'all':
@@ -115,7 +115,7 @@ export class UserListsResolver {
           break;
         case 'noMembershipWithActivityInMembershipYear':
           if (group.hasMembership) {
-            userLists.push({ type: l.type, count: membersToRenewInYear.length });
+            userLists.push({ type: l.type, count: numberOfMembersToRenewInYear });
           }
           break;
         case 'noMembership':

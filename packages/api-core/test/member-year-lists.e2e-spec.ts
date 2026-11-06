@@ -147,6 +147,7 @@ describe('Member lists for the membership year (e2e)', () => {
     );
     const type = 'noMembershipWithActivityInMembershipYear';
     const users = await resolver.getUserListInGroupByListType(type, group.id, null);
+    expect(await service.getUsersToRenew(group, true)).toBe(users.length);
     expect(lists.find((list) => list.type === type)?.count).toBe(users.length);
   });
 
@@ -155,6 +156,7 @@ describe('Member lists for the membership year (e2e)', () => {
     await connection.getRepository(GroupEntity).save(group);
     await order(await member(), from);
     expect(await ids()).toEqual([]);
+    expect(await service.getUsersToRenew(group, true)).toBe(0);
     const lists = await resolver.getUserLists(
       group.id,
       new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
