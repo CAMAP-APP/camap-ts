@@ -6,6 +6,7 @@ import { MembershipEntity } from '../src/groups/entities/membership.entity';
 import { getMembershipPeriod } from '../src/groups/membership-period';
 import { UserListsResolver } from '../src/groups/resolvers/userLists.resolver';
 import { MemberYearListsService } from '../src/groups/services/member-year-lists.service';
+import { BasketStatus } from '../src/shop/entities/basket.entity';
 import { UserOrderEntity } from '../src/shop/entities/user-order.entity';
 import { UserEntity } from '../src/users/models/user.entity';
 import { closeTestApp, initTestApp, TestContextHelper } from './utils';
@@ -58,23 +59,102 @@ describe('Member lists for the membership year (e2e)', () => {
   ) => {
     const catalog = await generators.genCatalog({
       groupIdOrdEntity: orderGroup,
-      startDate: from,
-      endDate: to,
+      startDate: new Date(from.getTime() - 86400000),
+      endDate: new Date(to.getTime() + 86400000),
+    });
+    const multiDistrib = await generators.genMultiDistrib({
+      groupIdOrEntity: orderGroup,
+      placeIdOrEntity: orderGroup.placeId,
     });
     const distribution = await generators.genDistribution({
       catalogIdOrEntity: catalog,
+      multiDistribIdOrEntity: multiDistrib,
+      placeIdOrEntity: orderGroup.placeId,
       date,
     });
-    return generators.genUserOrder({
+    const product = await generators.genProduct({ catalogIdOrEntity: catalog });
+    const basket = await generators.genBasket({
+      status: BasketStatus.CONFIRMED,
+      multiDistribIdOrEntity: multiDistrib,
+      userIdOrEntity: user,
+    });
+    // No subscription: these fixtures exercise activity from orders alone.
+    return connection.getRepository(UserOrderEntity).save({
       quantity,
       productPrice: 5,
-      userIdOrEntity: user,
-      distributionIdOrEntity: distribution,
+      feesRate: 0,
+      paid: false,
+      flags: 0,
+      date: new Date(from.getTime() - 86400000),
+      userId: user.id,
+      productId: product.id,
+      distributionId: distribution.id,
+      basketId: basket.id,
+      subscriptionId: null,
     });
   };
 
   const ids = async () =>
     (await service.getUsersToRenew(group)).map((user) => user.id);
+
+  it.each<[string, 'from' | 'to', number, number, boolean]>([
+    ['just before the period', 'from', -1000, 1, false],
+    ['at the first instant of the period', 'from', 0, 1, true],
+    ['just before the end of the period', 'to', -1000, 1, true],
+    ['at the excluded end of the period', 'to', 0, 1, false],
+    ['with zero quantity', 'from', 86400000, 0, false],
+    ['with negative quantity', 'from', 86400000, -1, false],
+  ])('handles an order %s', async (_name, boundary, offset, quantity, included) => {
+    const buyer = await member();
+    const date = new Date((boundary === 'from' ? from : to).getTime() + offset);
+    await order(buyer, date, quantity);
+    expect(await ids()).toEqual(included ? [buyer.id] : []);
+    expect(await service.getUsersToRenew(group, true)).toBe(included ? 1 : 0);
+  });
+
+  it('includes both members of a shared order once, within this group only', async () => {
+    const buyer = await member();
+    const partner = await member();
+    const foreignBuyer = await member();
+    const outsider = await generators.genUser({});
+    const shared = await order(buyer, from);
+    await connection.getRepository(UserOrderEntity).update(shared.id, {
+      userId2: partner.id,
+    });
+    const repeated = await order(buyer, from);
+    await connection.getRepository(UserOrderEntity).update(repeated.id, {
+      userId2: outsider.id,
+    });
+    await order(foreignBuyer, from, 1, await generators.genGroup({}));
+
+    expect((await ids()).sort()).toEqual([buyer.id, partner.id].sort());
+    expect(await service.getUsersToRenew(group, true)).toBe(2);
+  });
+
+  it('includes a subscription even when the member has no orders', async () => {
+    const subscriber = await member();
+    const catalog = await generators.genCatalog({ groupIdOrdEntity: group });
+    await generators.genCsaSubscription({
+      userIdOrEntity: subscriber,
+      catalogIdOrEntity: catalog,
+      startDate: from,
+      endDate: to,
+    });
+
+    expect(
+      await connection
+        .getRepository(UserOrderEntity)
+        .count({ userId: subscriber.id }),
+    ).toBe(0);
+    expect(await ids()).toEqual([subscriber.id]);
+    expect(await service.getUsersToRenew(group, true)).toBe(1);
+  });
+
+  it('returns an empty list and zero count when nobody has activity', async () => {
+    await member();
+    expect(await ids()).toEqual([]);
+    expect(await service.getUsersToRenew(group, true)).toBe(0);
+  });
 
   it('renews only consumers without membership for this group and year', async () => {
     const buyer = await member();
