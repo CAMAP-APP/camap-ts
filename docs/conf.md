@@ -2,7 +2,7 @@
 
 ## Haxe
 
-La configuration de l'application se fait dans le fichier `config.xml` à la racine.
+La configuration de l'application se fait dans le fichier `config.xml` à la racine (modèle : `config.xml.dist`).
 
 `lang` : Langue par défaut ( format à 2 lettres : `fr`)
 
@@ -10,9 +10,11 @@ La configuration de l'application se fait dans le fichier `config.xml` à la rac
 
 `langnames` : Libellé des langues de l'app Langues.
 
-`name` : Nom de l'application.
+`host` : nom de domaine de l'application camap-hx.
 
-`webmaster_email` : Email de l'administrateur de l'app. Utilisé par le cron qui envoie chaque nuit la liste des erreurs Haxe enregistrées dans la table `Error`
+`name` : Nom de l'application (optionnel, absent de `config.xml.dist`).
+
+`webmaster_email` : Email de l'administrateur de l'app (optionnel, absent de `config.xml.dist`). Utilisé par le cron qui envoie chaque nuit la liste des erreurs Haxe enregistrées dans la table `Error`
 
 `database` : chaine de configuration de l'accès à la base MySQL sous la forme `mysql://$user:$password@$host/$databaseName`
 
@@ -62,7 +64,7 @@ DB_PASSWORD = pass
 DB_DATABASE = db-camap
 DB_PORT = 3306
 DB_SYNCHRONIZE = false
-DB_ENTITIES = ./dist/\*_/_.entity.js
+DB_ENTITIES = ./dist/**/*.entity.js
 DB_LOGGING = false
 ```
 
@@ -81,7 +83,11 @@ SMTP_AUTH_PASS=
 
 `API_HOSTNAME` et `API_PORT` : paramétrage du host et du port sur lequel l'app node va se lancer
 
-`CAMAP_HOST` : URL de camap-haxe
+`CAMAP_HOST` : URL publique de camap-haxe (utilisée pour générer les URLs à destination du navigateur)
+
+`CAMAP_LOCAL_HOST` : URL de camap-haxe accessible depuis le container camap-ts (ex. `http://camap-neko`), utilisée notamment pour déclencher les crons Haxe (cf `HX_TRIGGER_CRONS`)
+
+`CAMAP_BRIDGE_API` : URL de camap-ts pour le bridge (ex. `http://camap-nest:3010`), équivalent de `camap_bridge_api` côté Haxe
 
 URLs de camap-ts :
 
@@ -89,6 +95,8 @@ URLs de camap-ts :
 FRONT_URL=http://localhost:3010
 FRONT_GRAPHQL_URL=http://localhost:3010/graphql
 ```
+
+Note : les variables destinées au navigateur (`CAMAP_HOST`, `CAMAP_BRIDGE_API`, `FRONT_URL`, `FRONT_GRAPHQL_URL`, `MAPBOX_KEY`) ne sont plus figées au build du front. Elles sont lues au démarrage du container camap-hx (fichier `/srv/camapts.env`) et injectées dans `window.__APP_CONFIG__` via le fichier `www/env.js` généré par `camap-hx/entrypoint.sh`.
 
 `HX_TRIGGER_CRONS` : mettre `true` pour que camap-ts déclenche les crons de camap-haxe ( pratique dans des environnements containerisés où la programmation d'une crontab n'est pas simple )
 

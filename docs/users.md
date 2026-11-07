@@ -44,7 +44,7 @@ L'authentification est très liée aux possibilités données par les frameworks
 
 Plus concrètement, [le login se fait via camap-ts](https://github.com/CAMAP-APP/camap-ts/blob/master/packages/api-core/src/auth/auth.service.ts), qui "hacke" camap-hx pour loguer l'utilisateur sur camap-hx.
 
-**Pour camap-hx** : un cookie `sid` ( Session Id ) est posé et correspond à une session stockée dans la table `Session`. Si la session à une ID dans le champs `user` , l'utilisateur correspondant est connecté.
+**Pour camap-hx** : un cookie `sid` ( Session Id, nom par défaut du framework Sugoï ) est posé et correspond à une session stockée dans la table `Session`. Si la session à une ID dans le champs `user` , l'utilisateur correspondant est connecté.
 
 L'utilisateur courant est récupéré via `app.user` dans tous les controllers, ou `App.current.user` ailleurs.
 

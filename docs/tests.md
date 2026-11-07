@@ -6,6 +6,8 @@ Il y a eu des tests en Haxe mais qui sont tombés en désuétude.
 
 ## Commandes
 
+Les commandes se lancent depuis `packages/api-core` (le `package.json` racine ne définit pas de script `test`). `packages/front-core` dispose aussi de ses propres tests Jest (`npm run test`, `npm run test:watch`).
+
 `npm run test ['<filtre>']` : exécute les test unitaires.
 
 `npm run test:e2e ['<filtre>']` : exécute les test end to end.

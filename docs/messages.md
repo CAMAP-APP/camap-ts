@@ -25,7 +25,7 @@ Le front et le back de la messagerie sont codés en TS.
 -   Le backend est géré par le module `messages.module.ts`
 -   Le frontend est géré par le composant React `Messages.module.tsx`
 
-L'éditeur de texte wysiwyg est fait avec [Slate JS](https://www.slatejs.org/)
+L'éditeur de texte wysiwyg est fait avec [Plate](https://platejs.org/) (`platejs` / `@platejs/*`), construit sur [Slate JS](https://www.slatejs.org/). Le code de l'éditeur est dans `packages/front-core/src/modules/messages/editor/`.
 
 ### Gestion des membres
 
