@@ -42,6 +42,6 @@ Si ces champs sont définis, lorsque le catalogue participe à une distribution 
 
 Il est possible de définir une **plage d'absences** autorisée afin de permettre aux adhérents de pouvoir être absent lors de certaines distributions.
 
-Le nombre maximum d'absences est stocké dans `Catalog.absentDistribsMaxNb` , et la plage de temps pendant laquelle ces absences sont possibles est définie par `Catalog.absencesStartDate` et `Catalog.absencesStartDate`.
+Le nombre maximum d'absences est stocké dans `Catalog.absentDistribsMaxNb` , et la plage de temps pendant laquelle ces absences sont possibles est définie par `Catalog.absencesStartDate` et `Catalog.absencesEndDate`.
 
 C'est le `AbsencesService` (haxe) qui gère les absences. Quand un adhérent prend une souscription, ses dates d'absences sont dans `Subscription.absentDistribIds` ( ids de Distribution sérialisées )

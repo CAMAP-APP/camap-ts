@@ -51,7 +51,7 @@ export default async (generators: DatasetGenerators, app: INestApplication) => {
 
 On peut utiliser la commande `npm run dataset <isletName> [options]`, depuis la racine de `camap-ts`, pour générer un îlot dans la bdd défini par le `.env`.
 
-**/ ! \\ Cette commande doit être exécuté dans le container nest.** En dev utiliser : `docker-compose exec nest npm run dataset <isletName> -- [options]`
+**/ ! \\ Cette commande doit être exécutée dans le pod camap-api.** En dev (Minikube) utiliser : `kubectl exec -it -n camap deploy/camap-api -- npm run dataset <isletName> -- [options]`
 
 **Paramètre**
 
@@ -66,7 +66,7 @@ On peut utiliser la commande `npm run dataset <isletName> [options]`, depuis la 
 
 On peut utiliser la commande `npm run dataset-server`, depuis la racine de `camap-ts`, pour lancer le serveur d'îlot.
 
-**/ ! \\ Cette commande doit être exécuté dans le container nest.** En dev utiliser : `docker-compose exec nest npm run dataset-server`
+**/ ! \\ Cette commande doit être exécutée dans le pod camap-api.** En dev (Minikube) utiliser : `kubectl exec -it -n camap deploy/camap-api -- npm run dataset-server`
 
 Le serveur écoute sur le port `6007`.
 

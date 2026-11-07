@@ -18,7 +18,7 @@ Les **inscriptions d'un User à un rôle pour une distribution donnée** sont st
 
 La calendrier des permanences permet aux adhérents de s'inscrire en tant que bénévole lors d'une des prochaines distributions.
 
-Il est codé avec un front en TS (_React JS_) nommé `volunteersCalendar`. Le backend est en haxe (_API REST_, controller dans `controller/api/Distribution`)
+Il est codé avec un front en TS (_React JS_) nommé `volunteersCalendar`. Le backend est en haxe (_API REST_, controller dans `controller/api/Distributions.hx`)
 
 ### Emails liées aux permanences
 

@@ -24,5 +24,5 @@ La relation `Membership.operationId` fait le lien avec les operations de paiemen
 
 Le front et le back sont codés en TS :
 
--   le backend est géré par `membership.resolver.ts` et `membership.service.ts` dans le module "groups"
+-   le backend est géré par `memberships.resolver.ts` et `memberships.service.ts` dans le module "groups"
 -   Le frontend est géré par le composant React `MembershipDialog.module.tsx`

@@ -35,8 +35,10 @@ Actuellement quasiement toutes les entités (tables) de la BDD sont écrites à 
 
 Lorsqu'on porte une fonctionnalité de Haxe vers TS, il devient possible de supprimer l'entité en Haxe.
 
-Typeorm, permet la rédaction de [migrations](https://orkhan.gitbook.io/typeorm/docs/migrations) ce qui simplifie grandement la gestion de différentes instances.
-Chaque mise à jour du schéma de BDD de CAMAP devrait s'accompagner d'une migration.
+Typeorm permet la rédaction de [migrations](https://orkhan.gitbook.io/typeorm/docs/migrations) ce qui simplifie grandement la gestion de différentes instances.
+C'est désormais la pratique en place (cf `packages/api-core/src/migrations/` et [la doc des migrations](./schema.md)) : chaque mise à jour du schéma de BDD de CAMAP doit s'accompagner d'une migration.
+
+TypeORM est encore en version 0.2.x : une montée de version (0.3+) est à prévoir, elle implique des changements d'API (DataSource, CLI des migrations...).
 
 ## Encodage UTF8 vs ISO
 
@@ -48,9 +50,9 @@ Malheureusement, il n'est pas possible de passer à un _characterset_ et une _co
 
 ## Dépendances JS et autres
 
-Le monde Javascript / Node Js / Typescript évolue très vite, ce qui nécéssite de mettre à jour les dépendances régulièrement, au moins sur les briques principales ( _Nest JS, TypeORM, React, Appolo ...etc_) sinon l'application risque de devenir obsolète et difficile à maintenir.
+Le monde Javascript / Node Js / Typescript évolue très vite, ce qui nécéssite de mettre à jour les dépendances régulièrement, au moins sur les briques principales ( _Nest JS, TypeORM, React, Apollo ...etc_) sinon l'application risque de devenir obsolète et difficile à maintenir.
 
-Côté BDD, la version 5.7 de MySQL commence à être ancienne, une évolution vers des versions plus récentes serait bénéfique. ( Si les vieux drivers MySQL de Neko continuent de fonctionner )
+Côté BDD, CAMAP fonctionne désormais sur MySQL 8 (image `mysql:8.0` dans minikube-camap). Le driver MySQL de Neko impose toutefois l'authentification `mysql_native_password` (cf `default-authentication-plugin` dans la config `my.cnf` du chart minikube-camap, et [troubleshooting](./troubleshooting.md)), dépréciée dans MySQL 8 et supprimée dans les versions suivantes : c'est un frein à toute montée de version.
 
 # Autre chantiers possibles
 

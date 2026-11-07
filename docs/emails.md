@@ -9,7 +9,7 @@ CAMAP envoie beaucoup d'emails : notifications, confirmation de création de sou
 CAMAP gère une pile d'email à envoyer via un service SMTP.
 Pour envoyer un email il suffit donc d'écrire dans cette pile pour stocker le mail à envoyer. Ensuite un cron se charge de l'envoyer régulièrement et de vider la pile.
 
-Cette pile est stockée dans la table `BufferedJsonEmail`.
+Cette pile est stockée dans la table `BufferedJsonMail`.
 
 ## Code
 
@@ -73,7 +73,7 @@ const mail = await this.mailsService.createBufferedJsonMail(
 
 Le cron qui envoie réellement les emails via SMTP est dans `MailsService.sendEmailsFromBuffer()`
 
-## Developement
+## Développement
 
 En développement local le service mailpit tourne depuis docker et capture tout le traffic mail,
 les emails envoyés sont visibles depuis l'interface mailpit sur http://localhost:8025
