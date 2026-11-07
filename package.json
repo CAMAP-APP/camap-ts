@@ -17,8 +17,6 @@
     "dev:api": "cd ./packages/api-core && npm run dev",
     "dev:common": "cd ./packages/camap-common && npm run dev",
     "dev:story": "cd packages/front-core && npm run storybook",
-    "dev:restart:neko": "docker-compose restart neko-camap",
-    "dev:restart:nest": "docker-compose restart nest-camap",
     "dev:typeorm:schema:log": "npm run --prefix packages/api-core typeorm schema:log",
     "dev:typeorm:migration:show": "npm run --prefix packages/api-core typeorm migration:show",
     "dev:typeorm:migration:run": "npm run --prefix packages/api-core typeorm migration:run",
