@@ -221,22 +221,22 @@ export class UsersService {
   }
 
   private async getUsersIdFromUserOrders(
-    userOrders: UserOrderEntity[],
+    userOrders: Pick<UserOrderEntity, 'userId' | 'userId2'>[],
     groupId: number,
     signal?: AbortSignal,
   ): Promise<number[]> {
     throwIfAborted(signal);
     const members = await this.userGroupsService.findAllUsersOfGroupId(groupId);
     throwIfAborted(signal);
+    const memberIds = new Set(members.map((member) => member.id));
     const usersIds: Set<number> = new Set([]);
 
     userOrders.forEach((order) => {
       // Filter out non-members
-      const isUser1Member = members.findIndex((m) => m.id === order.userId) !== -1;
-      const isUser2Member = members.findIndex((m) => m.id === order.userId2) !== -1;
-
-      if (isUser1Member) usersIds.add(order.userId);
-      if (isUser2Member) usersIds.add(order.userId2);
+      if (memberIds.has(order.userId)) usersIds.add(order.userId);
+      if (order.userId2 !== null && memberIds.has(order.userId2)) {
+        usersIds.add(order.userId2);
+      }
     });
 
     return [...usersIds];
@@ -255,7 +255,7 @@ export class UsersService {
     throwIfAborted(signal);
     const productsId = products.map((p) => p.id);
     const usersOrders = productsId.length
-      ? await this.ordersService.findUserOrdersByProductIds(productsId)
+      ? await this.ordersService.findDistinctUserIdsByProductIds(productsId)
       : [];
 
     return this.getUsersIdFromUserOrders(usersOrders, groupId, signal);

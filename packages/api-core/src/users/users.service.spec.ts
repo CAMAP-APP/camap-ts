@@ -55,7 +55,7 @@ describe('UsersService', () => {
   };
 
   const mockOrdersService = {
-    findUserOrdersByProductIds: jest.fn(),
+    findDistinctUserIdsByProductIds: jest.fn(),
     attributeBasketsToDeletedUser: jest.fn(),
     findPartialUserOrdersByUserId: jest.fn(),
     findPartialUserOrdersByUserId2: jest.fn(),
@@ -145,20 +145,20 @@ describe('UsersService', () => {
 
   it('stops an order count before reading orders when cancelled during the product query', async () => {
     const controller = new AbortController();
-    mockOrdersService.findUserOrdersByProductIds.mockClear();
+    mockOrdersService.findDistinctUserIdsByProductIds.mockClear();
     mockProductsService.getFromActiveCatalogsInGroup.mockImplementationOnce(async () => {
       controller.abort();
       return [{ id: 1 }];
     });
     await expect(service.getUsersWithOrdersInActiveCatalogs(42, true, [], controller.signal)).rejects.toThrow('cancelled');
-    expect(mockOrdersService.findUserOrdersByProductIds).not.toHaveBeenCalled();
+    expect(mockOrdersService.findDistinctUserIdsByProductIds).not.toHaveBeenCalled();
   });
 
   it('stops before reading members when cancelled during the order query', async () => {
     const controller = new AbortController();
     mockUserGroupsService.findAllUsersOfGroupId.mockClear();
     mockProductsService.getFromActiveCatalogsInGroup.mockResolvedValueOnce([{ id: 1 }]);
-    mockOrdersService.findUserOrdersByProductIds.mockImplementationOnce(async () => {
+    mockOrdersService.findDistinctUserIdsByProductIds.mockImplementationOnce(async () => {
       controller.abort();
       return [];
     });
