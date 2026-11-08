@@ -25,8 +25,8 @@ const Members = ({ groupId, token, basePath }: MembersProps) => {
 
   /** */
   return (
-    <MembersContextProvider groupId={groupId} token={token}>
-      <BrowserRouter {...reactRouterDefaultProps} basename={basePath}>
+    <BrowserRouter {...reactRouterDefaultProps} basename={basePath}>
+      <MembersContextProvider groupId={groupId} token={token}>
         <Routes>
           <Route path="/import" element={<ImportMembers />} />
           <Route path="/insert" element={<ImportOneMember />} />
@@ -54,15 +54,16 @@ const Members = ({ groupId, token, basePath }: MembersProps) => {
                           </Box>
                         </Paper>
                       </Grid>
-                      <Grid item display={{ "xs": "none", "xl": "block" }}>
+                      <Grid item display={{ xs: 'none', xl: 'block' }}>
                         <Paper>
                           <Box py={2}>
-                            <Typography sx={{mx: 2}} variant="h6">{t('lists')}</Typography> 
-                            <MemberLists variant='block' />
+                            <Typography sx={{ mx: 2 }} variant="h6">
+                              {t('lists')}
+                            </Typography>
+                            <MemberLists variant="block" />
                           </Box>
                         </Paper>
                       </Grid>
-
                     </Grid>
                   </Grid>
                 </Grid>
@@ -70,8 +71,8 @@ const Members = ({ groupId, token, basePath }: MembersProps) => {
             }
           />
         </Routes>
-      </BrowserRouter>
-    </MembersContextProvider>
+      </MembersContextProvider>
+    </BrowserRouter>
   );
 };
 

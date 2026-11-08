@@ -13,10 +13,21 @@ export const initMembers = gql`
       membershipFee
       hasMembership
     }
-    getUserLists(groupId: $groupId) {
+    getUserLists(groupId: $groupId, withCounts: false) {
       type
       count
       data
+    }
+  }
+`;
+
+export const getUserListCount = gql`
+  query GetUserListCount($groupId: Int!, $listType: String!) {
+    getUserListCount(groupId: $groupId, listType: $listType) {
+      type
+      count
+      data
+      durationMs
     }
   }
 `;
