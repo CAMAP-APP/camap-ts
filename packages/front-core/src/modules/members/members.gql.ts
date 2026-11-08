@@ -27,6 +27,7 @@ export const getUserListCount = gql`
       type
       count
       data
+      durationMs
     }
   }
 `;

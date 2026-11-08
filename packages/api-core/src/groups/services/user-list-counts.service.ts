@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { UserLists, UserListsType } from 'camap-common';
+import { performance } from 'perf_hooks';
 import { throwIfAborted } from '../../common/throw-if-aborted';
 import { DistributionsService } from '../../shop/services/distributions.service';
 import { UsersService } from '../../users/users.service';
@@ -138,9 +139,10 @@ export class UserListCountsService {
       if (!this.getLists(group).some((list) => list.type === type)) {
         throw new BadRequestException('Unsupported user list');
       }
+      const start = performance.now();
       const count = await calculate(type);
       checkCancelled();
-      return { type, count };
+      return { type, count, durationMs: performance.now() - start };
     };
   }
 }

@@ -17,6 +17,7 @@ describe('progressive list count lifecycle', () => {
   let host: HTMLDivElement;
   let root: Root;
   let client: ApolloClient<object>;
+  let table: jest.SpyInstance;
   let pending: {
     signal: AbortSignal;
     groupId: number;
@@ -26,8 +27,9 @@ describe('progressive list count lifecycle', () => {
   const result = (
     type: string,
     count: number,
+    durationMs = 1,
   ): ApolloQueryResult<GetUserListCountQuery> => ({
-    data: { getUserListCount: { type, count } },
+    data: { getUserListCount: { type, count, durationMs } },
     loading: false,
     networkStatus: 7,
   });
@@ -62,6 +64,8 @@ describe('progressive list count lifecycle', () => {
   };
 
   beforeEach(() => {
+    window.history.replaceState(null, '', '/member');
+    table = jest.spyOn(console, 'table').mockImplementation(() => {});
     host = document.createElement('div');
     document.body.append(host);
     root = createRoot(host);
@@ -84,6 +88,8 @@ describe('progressive list count lifecycle', () => {
   afterEach(async () => {
     await act(async () => root.unmount());
     host.remove();
+    table.mockRestore();
+    window.history.replaceState(null, '', '/member');
   });
 
   it('shows names before counts and stops when unmounted', async () => {
@@ -123,5 +129,34 @@ describe('progressive list count lifecycle', () => {
     );
     expect(pending).toHaveLength(2);
     expect(pending[1].signal.aborted).toBe(false);
+  });
+
+  it('prints server durations only after all counts finish when profiling is enabled', async () => {
+    window.history.replaceState(null, '', '/member?profileUserLists=1');
+    await render();
+    await act(async () => pending[0].resolve(result('all', 12, 2)));
+    expect(table).not.toHaveBeenCalled();
+    await act(async () => pending[1].resolve(result('membership', 9, 5)));
+    expect(table).toHaveBeenCalledTimes(1);
+    expect(table).toHaveBeenCalledWith([
+      { type: 'all', durationMs: 2 },
+      { type: 'membership', durationMs: 5 },
+    ]);
+  });
+
+  it('does not print durations without opting in', async () => {
+    await render();
+    await act(async () => pending[0].resolve(result('all', 12)));
+    await act(async () => pending[1].resolve(result('membership', 9)));
+    expect(table).not.toHaveBeenCalled();
+  });
+
+  it('does not print an incomplete table after leaving the page', async () => {
+    window.history.replaceState(null, '', '/member?profileUserLists=1');
+    await render();
+    await act(async () => pending[0].resolve(result('all', 12)));
+    await act(async () => root.render(null));
+    await act(async () => pending[1].resolve(result('membership', 9)));
+    expect(table).not.toHaveBeenCalled();
   });
 });

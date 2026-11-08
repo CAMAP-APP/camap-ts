@@ -116,6 +116,11 @@ describe('UserListCountsService', () => {
         vendors: 1,
       },
     );
+    expect(
+      lists.every(
+        (list) => Number.isFinite(list.durationMs) && list.durationMs >= 0,
+      ),
+    ).toBe(true);
     expect(userGroups.getNumberOfMembers).toHaveBeenCalledTimes(1);
     expect(memberships.getUsersWithMembership).toHaveBeenCalledTimes(1);
     expect(catalogs.getActiveCatalogsFromActiveVendorsInGroup).toHaveBeenCalledTimes(

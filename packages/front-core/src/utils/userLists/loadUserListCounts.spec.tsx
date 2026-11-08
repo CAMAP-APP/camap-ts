@@ -10,7 +10,7 @@ describe('progressive user list counts', () => {
   const createClient = () =>
     new ApolloClient({ cache: new InMemoryCache(), link: ApolloLink.empty() });
   const result = (type: string, count: number) => ({
-    data: { getUserListCount: { type, count } },
+    data: { getUserListCount: { type, count, durationMs: 12 } },
     loading: false,
     networkStatus: 7,
   });

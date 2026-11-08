@@ -476,6 +476,9 @@ type MembershipFormData {
 type UserList {
   type: String!
   count: Float
+
+  """Server computation time in milliseconds, excluding HTTP transport."""
+  durationMs: Float
   data: String
 }
 

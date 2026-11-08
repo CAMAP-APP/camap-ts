@@ -1149,6 +1149,8 @@ export type UserList = {
   __typename?: 'UserList';
   count?: Maybe<Scalars['Float']>;
   data?: Maybe<Scalars['String']>;
+  /** Server computation time in milliseconds, excluding HTTP transport. */
+  durationMs?: Maybe<Scalars['Float']>;
   type: Scalars['String'];
 };
 
@@ -1510,7 +1512,7 @@ export type GetUserListCountQueryVariables = Exact<{
 }>;
 
 
-export type GetUserListCountQuery = { __typename?: 'Query', getUserListCount: { __typename?: 'UserList', type: string, count?: number | null, data?: string | null } };
+export type GetUserListCountQuery = { __typename?: 'Query', getUserListCount: { __typename?: 'UserList', type: string, count?: number | null, data?: string | null, durationMs?: number | null } };
 
 export type GetMembersOfGroupByListTypeQueryVariables = Exact<{
   listType: Scalars['String'];
@@ -3342,6 +3344,7 @@ export const GetUserListCountDocument = gql`
     type
     count
     data
+    durationMs
   }
 }
     `;

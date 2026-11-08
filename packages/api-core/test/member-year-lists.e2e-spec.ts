@@ -273,7 +273,7 @@ describe('Member lists for the membership year (e2e)', () => {
   });
 
   it.each(['Membership', 'Messages', 'GroupAdmin'])(
-    'returns a count for a %s manager',
+    'returns a measured count for a %s manager',
     async (right) => {
       const user = await generators.genUser({ rights: [] });
       await generators.genUserGroup({
@@ -283,11 +283,11 @@ describe('Member lists for the membership year (e2e)', () => {
       });
       await order(user, from);
       const { data } = await helper.createApolloClient(user).query<{
-        getUserListCount: { type: string; count: number };
+        getUserListCount: { type: string; count: number; durationMs: number };
       }>({
         query: `query($groupId: Int!) {
         getUserListCount(groupId: $groupId, listType: "noMembershipWithActivityInMembershipYear") {
-          type count
+          type count durationMs
         }
       }`,
         variables: { groupId: group.id },
@@ -296,6 +296,7 @@ describe('Member lists for the membership year (e2e)', () => {
         'noMembershipWithActivityInMembershipYear',
       );
       expect(data?.getUserListCount.count).toBe((await ids()).length);
+      expect(data?.getUserListCount.durationMs).toBeGreaterThanOrEqual(0);
     },
   );
 

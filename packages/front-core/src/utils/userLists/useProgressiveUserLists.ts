@@ -27,6 +27,8 @@ export function useProgressiveUserLists(
     const onPageShow = (event: PageTransitionEvent) => {
       if (event.persisted) setVisit((previous) => previous + 1);
     };
+    const timings: { type: string; durationMs: number | null | undefined }[] =
+      [];
     window.addEventListener('pagehide', cancel);
     window.addEventListener('pageshow', onPageShow);
     void loadUserListCounts(
@@ -39,6 +41,7 @@ export function useProgressiveUserLists(
           ...previous,
           counts: { ...previous.counts, [list.type]: list },
         }));
+        timings.push({ type: list.type, durationMs: list.durationMs });
       },
       (cause) =>
         setProgress((previous) => ({
@@ -51,7 +54,14 @@ export function useProgressiveUserLists(
                     cause instanceof Error ? cause : new Error(String(cause)),
                 }),
         })),
-    );
+    ).then(() => {
+      if (
+        !controller.signal.aborted &&
+        new URLSearchParams(window.location.search).has('profileUserLists')
+      ) {
+        console.table(timings);
+      }
+    });
     return () => {
       cancel();
       window.removeEventListener('pagehide', cancel);
