@@ -29,6 +29,7 @@ import {
 } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
 import { DB_DATE_FORMAT } from '../common/constants';
+import { throwIfAborted } from '../common/throw-if-aborted';
 import { setFlag, unsetFlag } from '../common/haxeCompat';
 import { checkDeleted, convertAllEmptyStringsToNull } from '../common/utils';
 import { CsaSubscriptionsService } from '../groups/services/csa-subscriptions.service';
@@ -222,8 +223,11 @@ export class UsersService {
   private async getUsersIdFromUserOrders(
     userOrders: UserOrderEntity[],
     groupId: number,
+    signal?: AbortSignal,
   ): Promise<number[]> {
+    throwIfAborted(signal);
     const members = await this.userGroupsService.findAllUsersOfGroupId(groupId);
+    throwIfAborted(signal);
     const usersIds: Set<number> = new Set([]);
 
     userOrders.forEach((order) => {
@@ -241,17 +245,20 @@ export class UsersService {
   private async getUsersIdWithOrdersInActiveCatalogs(
     groupId: number,
     activeCatalogs?: CatalogEntity[],
+    signal?: AbortSignal,
   ): Promise<number[]> {
+    throwIfAborted(signal);
     const products = await this.productsService.getFromActiveCatalogsInGroup(
       groupId,
       activeCatalogs,
     );
+    throwIfAborted(signal);
     const productsId = products.map((p) => p.id);
     const usersOrders = productsId.length
       ? await this.ordersService.findUserOrdersByProductIds(productsId)
       : [];
 
-    return this.getUsersIdFromUserOrders(usersOrders, groupId);
+    return this.getUsersIdFromUserOrders(usersOrders, groupId, signal);
   }
 
   async getUsersWithOrdersInActiveCatalogs(groupId: number): Promise<UserEntity[]>;
@@ -259,14 +266,20 @@ export class UsersService {
   async getUsersWithOrdersInActiveCatalogs(
     groupId: number,
     getCount: boolean,
+    activeCatalogs?: CatalogEntity[],
+    signal?: AbortSignal,
   ): Promise<number>;
 
   async getUsersWithOrdersInActiveCatalogs(
     groupId: number,
     getCount?: boolean,
+    activeCatalogs?: CatalogEntity[],
+    signal?: AbortSignal,
   ): Promise<UserEntity[] | number> {
     const usersIdWithOrders = await this.getUsersIdWithOrdersInActiveCatalogs(
       groupId,
+      activeCatalogs,
+      signal,
     );
 
     if (getCount) return usersIdWithOrders.length;
@@ -277,11 +290,15 @@ export class UsersService {
   async getUsersWithoutOrdersInActiveCatalogs(
     groupId: number,
     activeCatalogs?: CatalogEntity[],
+    signal?: AbortSignal,
   ): Promise<UserEntity[]> {
     const usersIdWithOrders = await this.getUsersIdWithOrdersInActiveCatalogs(
       groupId,
       activeCatalogs,
+      signal,
     );
+
+    throwIfAborted(signal);
 
     return this.userGroupsService.findAllUsersOfGroupId(groupId, usersIdWithOrders);
   }
@@ -295,19 +312,23 @@ export class UsersService {
     distributionsId: number[],
     groupId: number,
     getCount: boolean,
+    signal?: AbortSignal,
   ): Promise<number>;
 
   async getUsersWithCommandInDistribution(
     distributionsId: number[],
     groupId: number,
     getCount?: boolean,
+    signal?: AbortSignal,
   ): Promise<UserEntity[] | number> {
+    throwIfAborted(signal);
     const userOrders = await this.ordersService.findUserOrdersByDistributionIds(
       distributionsId,
     );
     const usersIdWithCommandInDistribution = await this.getUsersIdFromUserOrders(
       userOrders,
       groupId,
+      signal,
     );
 
     if (getCount) return usersIdWithCommandInDistribution.length;
