@@ -4,6 +4,7 @@ import { endOfDay, startOfDay } from 'date-fns';
 import { utcToZonedTime } from 'date-fns-tz';
 import { Between, In, MoreThanOrEqual, Repository } from 'typeorm';
 import { TZ_PARIS } from '../../common/constants';
+import { throwIfAborted } from '../../common/throw-if-aborted';
 import { CacheService } from '../../tools/cache.service';
 import { CatalogType } from '../../vendors/catalog.interface';
 import { CatalogsService } from '../../vendors/services/catalogs.service';
@@ -93,11 +94,17 @@ export class DistributionsService {
     });
   }
 
-  async getNextDistributionsId(groupId: number): Promise<number[]> {
+  async getNextDistributionsId(
+    groupId: number,
+    signal?: AbortSignal,
+  ): Promise<number[]> {
+    throwIfAborted(signal);
     const now = new Date();
 
     const multiDistributions =
       await this.multiDistribsService.finder.byGroupAndAfterDate(groupId, now);
+
+    throwIfAborted(signal);
 
     if (!multiDistributions.length) return [];
 

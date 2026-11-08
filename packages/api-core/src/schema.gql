@@ -569,7 +569,8 @@ type Query {
   getUserMemberships(groupId: Int!, userId: Int!, ignoreIfNotAllowed: Boolean! = false): [Membership!]!
   getMembershipFormData(groupId: Int!, userId: Int!): MembershipFormData!
   getWaitingListsOfGroup(groupId: Int!): [WaitingList!]!
-  getUserLists(groupId: Int!): [UserList!]!
+  getUserLists(groupId: Int!, withCounts: Boolean! = true): [UserList!]!
+  getUserListCount(groupId: Int!, listType: String!): UserList!
   getContractsUserLists(groupId: Int!): [UserList!]!
   getDistributionsUserLists(groupId: Int!): [UserList!]!
   getUserListInGroupByListType(listType: String!, groupId: Int!, data: String): [User!]!
