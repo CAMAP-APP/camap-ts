@@ -11,6 +11,7 @@ import {
   Repository,
 } from 'typeorm';
 import { Transactional } from 'typeorm-transactional-cls-hooked';
+import { throwIfAborted } from '../../common/throw-if-aborted';
 import { OrdersService } from '../../payments/services/orders.service';
 import { UserEntity } from '../../users/models/user.entity';
 import { UsersService } from '../../users/users.service';
@@ -78,6 +79,15 @@ export class UserGroupsService {
 
   async findByIds(ids: number[]) {
     return this.usersService.findByIds(ids);
+  }
+
+  /** Member ids only: cheaper than loading every member entity. */
+  async findAllUserIdsOfGroupId(groupId: number): Promise<number[]> {
+    const userGroups = await this.userGroupsRepo.find({
+      select: ['userId'],
+      where: { groupId },
+    });
+    return userGroups.map((ug) => ug.userId);
   }
 
   find(options: FindManyOptions<UserGroupEntity>) {
@@ -174,8 +184,10 @@ export class UserGroupsService {
     return this.userGroupsRepo.count({ groupId });
   }
 
-  async getNumberOfNewUsers(groupId: number) {
+  async getNumberOfNewUsers(groupId: number, signal?: AbortSignal) {
+    throwIfAborted(signal);
     const userGroups = await this.userGroupsRepo.find({ groupId });
+    throwIfAborted(signal);
     const userIds = userGroups.map((ug) => ug.userId);
     const r = await this.usersService.count({
       where: {
@@ -201,12 +213,18 @@ export class UserGroupsService {
 
   async findAllAdminsOfGroup(group: GroupEntity): Promise<UserEntity[]>;
 
-  async findAllAdminsOfGroup(group: GroupEntity, getCount: boolean): Promise<number>;
+  async findAllAdminsOfGroup(
+    group: GroupEntity,
+    getCount: boolean,
+    signal?: AbortSignal,
+  ): Promise<number>;
 
   async findAllAdminsOfGroup(
     group: GroupEntity,
     getCount?: boolean,
+    signal?: AbortSignal,
   ): Promise<UserEntity[] | number> {
+    throwIfAborted(signal);
     const admins: UserEntity[] = [];
     const adminIds: Set<number> = new Set([]);
 
@@ -222,13 +240,13 @@ export class UserGroupsService {
       });
     }
 
-    admins.push(
-      ...(await Promise.all(
-        [...adminIds].map((id) => this.usersService.findOne(id)),
-      )),
-    );
+    // The count only needs the ids: do not load the users.
+    if (getCount) return adminIds.size;
 
-    return getCount ? adminIds.size : admins;
+    throwIfAborted(signal);
+    admins.push(...(await this.usersService.findByIds([...adminIds])));
+
+    return admins;
   }
 
   async findUsersWithGroupAdminRightInGroup(

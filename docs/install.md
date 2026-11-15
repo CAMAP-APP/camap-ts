@@ -8,12 +8,14 @@ nous détaillerons ici les étapes permettant d'obtenir :
 Limites :
 - La possibilité de déboguer le projet est très limitée avec haxe sur neko en mod apache,
   breakpoints et inspection en pas par pas ne sera pas possible.
-- La possibilité de déboguer le projet typescript est possible mais nécessite des étapes d'installations supplémentaires qui ne seront pas détaillées ici. En effet, la présente documentation s'appuira sur docker-compose pour faire tourner l'ensemble de l'environnement. Avoir un environnement avec debogage nécessiterait de faire tourner le projet camap-ts sur la machine locale, et de configurer en local également un reverse proxy.
+- La possibilité de déboguer le projet typescript est possible mais nécessite des étapes d'installations supplémentaires qui ne seront pas détaillées ici. En effet, la présente documentation s'appuie sur Minikube (Kubernetes local) pour faire tourner l'ensemble de l'environnement. Avoir un environnement avec débogage nécessiterait de faire tourner le projet camap-ts sur la machine locale, et de configurer en local également un reverse proxy.
 
-L'installation consistera a
-1. installer l'environnement projet de base (via [**camap-docker**](https://github.com/CAMAP-APP/camap-docker)),
-2. installer les outils et dépendances nécessaire pour le développement.
-3. personnaliser le docker-file pour utiliser les fichiers sources locaux de la machine hote dans les conteneurs docker,
+L'installation consistera à
+1. installer l'environnement projet de base sous Minikube (via [**minikube-camap**](https://github.com/CAMAP-APP/minikube-camap)),
+2. installer les outils et dépendances nécessaires pour le développement (IDE, Haxe, Node),
+3. builder localement les images camap-ts / camap-hx et les charger dans Minikube pour tester ses modifications.
+
+> ⚠️ L'ancien environnement [camap-docker](https://github.com/CAMAP-APP/camap-docker) (docker-compose) n'est plus maintenu et n'est probablement plus fonctionnel.
 
 En cas d'erreur, un troubleshooting est à disposition [ici](./troubleshooting.md)
 
@@ -33,9 +35,8 @@ Pour développer une évolution dans l'application CAMAP, il est nécessaire de 
 - exécution: via le mod apache2 "neko" et le `camap-hx/www/.htaccess` qui pointe vers `camap-hx/www/index.n`
 - documentation spécifique: [camap-hx/README.md](../../camap-hx/README.md), [camap-ts/docs/i18n.md](./i18n.md), [camap-ts/docs/templates.md](./templates.md)
 - développement: 
-  - installer l'environnement vscode + docker-compose de développement.
-  - Les modifications des templates (.mtt) sont prises en compte au rechargement de la page.
-  - Les modifications haxe nécessitent une recompilation (build backend/build.hxml depuis vscode)
+  - installer l'environnement vscode (auto-complétion, compilation locale pour vérifier le code).
+  - Pour tester dans l'environnement Minikube, rebuilder l'image camap-hx et la recharger (voir [Tester ses modifications](#tester-ses-modifications-dans-minikube)).
 
 #### backend (cron):
 - voir [crons.md](crons.md)
@@ -87,8 +88,8 @@ Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un pack
 
 - role: Serveur d'API NestJS, fournit un service d'API complémentaire à camap-hx/backend.
 - sources: camap-ts/packages/api-core/src, camap-common
-- compilation: camap-ts> `npm run build:front`
-- output: camap-ts/packages/front-core/dist/*
+- compilation: camap-ts> `npm run build:api` (compile aussi les templates de mails)
+- output: camap-ts/packages/api-core/dist/*
 - exécution:
   - camap-ts> `npm start`
   - cron: voir [crons.md](crons.md)
@@ -97,7 +98,7 @@ Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un pack
 
 - role: Compiler les templates de mails pour l'envoi de mails de la partie typescript de l'app.
 - sources: camap-ts/packages/api-core/mails
-- compilation: camap-ts> `npm run build:mail`
+- compilation: camap-ts/packages/api-core> `npm run build:mail` (inclus dans `npm run build:api`)
 - output: camap-ts/packages/api-core/mails/dist
 - exécution: via le service nest [emails.md](emails.md)
 
@@ -111,7 +112,7 @@ Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un pack
 - compilation: camap-ts> `npm run build:front`
 	- Astuce : il est possible d'utiliser `npm run watch` dans `packages/front-core` pour recompiler automatiquement les fichiers front modifiés. 
 		- Vous pouvez compléter avec le module filewatcher de firefox pour recharger automatiquement la page à la modification d'un fichier dans `/neostatic/` - NdR: Il est probablement possible de mettre en place un serveur de dév ou du hot reload. Cf les 3 solutions possibles de webpack ici : https://webpack.js.org/guides/development/#choosing-a-development-tool. 
-		- Attention : A des fin d'optimisation en dév, le fichier de config webpack en dev ne génère pas le fichier palette.ts (cf `webpack.dev.config.js`). Décommenter l.74 pour le faire revenir 
+		- Attention : le fichier `src/palette.ts` est copié depuis `src/theme/$THEME_ID/palette.ts` par la config webpack de production (`webpack.config.js`, plugin `FileManagerPlugin`), mais pas par `webpack.dev.config.js`.
 
 - utilisation: 
   - Le template haxe [base.mtt](..%2F..%2Fcamap-hx%2Flang%2Fmaster%2Ftpl%2Fbase.mtt) importe les scripts via [BridgeService.hx](..%2F..%2Fcamap-hx%2Fsrc%2Fservice%2FBridgeService.hx)
@@ -119,11 +120,43 @@ Camap-ts rassemble un ensemble de sous projet. Le projet parent contient un pack
 
 ## Installer l'environnement projet
 
-Tout d'abord, suivez les étapes d'installation de [**camap-docker**](https://github.com/CAMAP-APP/camap-docker).
+L'environnement local est décrit dans le dépôt template [**minikube-camap**](https://github.com/CAMAP-APP/minikube-camap) (Minikube + Argo CD + charts Helm camap et mailpit). Suivre son README, qui fait foi. En résumé :
 
-Utiliser dans un premier temps le docker-compose.yml de base.
+1. Créer sa propre copie du dépôt (**Use this template** sur GitHub) et remplacer l'URL du dépôt dans `root-app.yaml`, `apps/camap.yaml` et `apps/mailpit.yaml`.
+2. Installer Docker Desktop, kubectl et Minikube, puis :
+   ```powershell
+   minikube start --driver=docker
+   minikube addons enable ingress
+   minikube addons enable metrics-server
+   ```
+3. Installer Argo CD dans le namespace `argocd` et y déclarer son dépôt. Si la copie du dépôt est **privée**, Argo CD demande un login GitHub et un token (fine-grained token limité au dépôt, permission *Contents : Read-only*).
+4. Créer les namespaces `camap` et `mailpit`, ainsi que les secrets `camap-mysql` et `camap-runtime` dans `camap` (voir le README pour les clés attendues).
+5. Ajouter dans le fichier hosts : `127.0.0.1   camap.local api.camap.local mailpit.local`
+6. Déployer l'App of Apps : `kubectl apply -f root-app.yaml -n argocd`
+7. Lancer `minikube tunnel` (terminal à laisser ouvert, les droits administrateur ne sont pas nécessaires), puis ouvrir [http://camap.local/install](http://camap.local/install) : le formulaire (nom du groupe, prénom, nom) crée le compte admin (`admin@camap.tld` / `admin`) et un groupe de démonstration avec un contrat et deux produits d'exemple.
 
-Une fois les étapes terminées, assurez vous de jouer une première fois la commande `docker compose up -d --build` et de vérifier que l'environnement fonctionne en mode production.
+> ⚠️ **Contexte kubectl** : `minikube start` bascule le contexte kubectl courant sur `minikube`, et les commandes du README s'appliquent au contexte courant. Si vous travaillez aussi sur d'autres clusters (production, préproduction…), vérifiez-le avec `kubectl config current-context` avant de lancer des commandes, ou ajoutez `--context minikube`. Exemples de cette documentation : remplacer `kubectl ...` par `kubectl --context minikube ...`.
+
+Les emails envoyés sont visibles dans Mailpit : [http://mailpit.local](http://mailpit.local)
+
+Ressources déployées dans le namespace `camap` :
+
+| Ressource | Rôle |
+|---|---|
+| `camap-api` (deployment) | camap-ts (image `ghcr.io/camap-app/camap-ts`), port 3010, `api.camap.local` |
+| `camap-web` (deployment) | camap-hx (image `ghcr.io/camap-app/camap-hx`), Apache + Neko, `camap.local`. Proxifie `/neostatic`, `/graphql` et `/locales` vers `camap-api` |
+| `camap-mysql` (statefulset) | MySQL 8.0 |
+
+La configuration (`camapts.env`, `config.xml`) est générée au démarrage des pods par un `initContainer` à partir des templates `deployments/camap/files/*.tpl`, des valeurs de `deployments/camap/values.yaml` (`camapConfig`) et des secrets.
+
+Côté `camap-web`, `camapts.env` sert aussi à générer `/env.js` (`window.__APP_CONFIG__`) lu par le front : `CAMAP_HOST` (`camapConfig.camapHost`) et `CAMAP_BRIDGE_API` (`camapConfig.camapBridgeApi`) doivent être des URLs **accessibles depuis le navigateur**. Pour vérifier : ouvrir [http://camap.local/env.js](http://camap.local/env.js).
+
+### Vérifier l'installation
+
+- [http://camap.local](http://camap.local) : connexion avec `admin@camap.tld` / `admin`
+- [http://camap.local/env.js](http://camap.local/env.js) : contient `CAMAP_HOST`, `CAMAP_BRIDGE_API`, `FRONT_GRAPHQL_URL`
+- Envoyer un message depuis l'onglet Messagerie : il doit apparaître dans [Mailpit](http://mailpit.local) en moins d'une minute (le cron d'envoi tourne toutes les minutes)
+- `kubectl logs -n camap deploy/camap-web | grep cron/minute` : camap-ts déclenche le cron Haxe toutes les minutes (`HX_TRIGGER_CRONS=true`)
 
 ## Installer les outils et dépendances
 
@@ -155,45 +188,62 @@ Une fois les étapes terminées, assurez vous de jouer une première fois la com
 		- "Haxe: Restart Language Server" pour vérifier que votre installation a bien détecté l'environnement haxe.
 		- "Build"
 
-## Utiliser le docker-compose.dev.yml pour le dev
+## Tester ses modifications dans Minikube
 
-Cela permettra, grâce aux volumes, de lancer les conteneurs docker avec les fichiers compilés locaux de la machine hote.
+Il n'y a pas de montage des sources locales dans les pods : pour tester une modification, on builde l'image localement et on la charge dans Minikube.
 
-exécuter ```docker-compose up -d```
+### 1. Builder l'image
 
-Vous pouvez-maintenant lancer l'initialisation en visitant l'adresse [https://camap.localdomain/install]
+Depuis le répertoire du projet concerné, avec son propre Dockerfile :
 
-### Developpemetn sous Apple Silicon ou arm
-l'image camap-hx nécessite d'etre lancée en mode emulation amd64 pour fonctionner sur une machine de dev en arm (puces apple M ou arm pour windows/linux)
-ajouter a `docker-compose.yml`
+```powershell
+# camap-ts
+docker build -t camap-ts:local -f camap-ts.Dockerfile .
+
+# camap-hx
+docker build -t camap-hx:local -f camap-hx.Dockerfile .
+```
+
+### 2. Charger l'image dans Minikube
+
+```powershell
+minikube image load camap-ts:local
+minikube image load camap-hx:local
+```
+
+### 3. Pointer le chart vers l'image locale
+
+Dans `deployments/camap/values.yaml` de sa copie de minikube-camap :
+
 ```yaml
-neko-loc-camap:
-  platform: "linux/amd64"
-  ...
+image:
+  api:
+    repository: camap-ts
+    tag: "local"
+    pullPolicy: Never   # indispensable, sinon Kubernetes tente de puller depuis ghcr.io
+  web:
+    repository: camap-hx
+    tag: "local"
+    pullPolicy: Never
 ```
 
-### Troubleshooting 1ere installation
-Une fois `docker compose up -d` lancé naviguez vers [https://camap.localdomain]
-Si vous rencontrez une page 403, il y a eu un probleme a l'installation
-Il se peut que lix ai échoué silencieusement à installer les dépendences du projet haXe
+Puis forcer un sync dans Argo CD, ou redémarrer le déploiement :
 
-#### Reinstaller le backend haXe manuellement
-Il va falloir relancer les étapes de build de l'image camap-hx
-Connectez-vous à l'instance Docker en mode interactif
-```sh
-docker exec -it neko-loc-camap sh
+```powershell
+kubectl rollout restart deployment camap-api -n camap
+kubectl rollout restart deployment camap-web -n camap
 ```
 
-executer
-```sh
-cd /srv/backend
-lix download
-haxe build.hxml -D i18n_generation
-cd /srv/lang/fr/tpl/
-neko ../../../backend/temploc2.n -macros macros.mtt -output ../tmp/ *.mtt */*.mtt */*/*.mtt
-cd /srv/frontend
-lix download
-haxe build.hxml
+> Après un rebuild avec le même tag `local`, refaire `minikube image load` puis `kubectl rollout restart`.
+
+### Commandes utiles
+
+```powershell
+kubectl get pods -n camap                                  # état des pods
+kubectl logs -n camap deploy/camap-api -f                  # logs camap-ts
+kubectl logs -n camap deploy/camap-web -f                  # logs camap-hx (Apache/Neko)
+kubectl exec -it -n camap deploy/camap-api -- /bin/bash    # shell dans le pod camap-ts (répertoire /srv)
+kubectl exec -it -n camap deploy/camap-web -- /bin/bash    # shell dans le pod camap-hx (répertoire /srv)
 ```
 
-Le site devrais être servi, mais a potentiellement d'autres erreurs, pour celà se référer à la doc [./troubleshooting.md]
+En cas d'erreur, se référer au [troubleshooting](./troubleshooting.md).

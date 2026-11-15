@@ -5,6 +5,7 @@
   "hasNoOrders": "Membres sans commande",
   "hasOrders": "Membres avec commande",
   "noMembership": "Membres avec adhésions à renouveler",
+  "noMembershipWithActivityInMembershipYear": "Membres avec adhésions à renouveler et activité sur l'année",
   "membership": "Membres avec adhésions à jour",
   "contractSubscribers": "{{name}} du {{startDate}} au {{endDate}}",
   "newUsers": "Ne s'est jamais connecté",

@@ -64,6 +64,7 @@ const MessagesForm = ({
     'vendors',
     'membership',
     'noMembership',
+    'noMembershipWithActivityInMembershipYear',
     'hasOrders',
     'hasNoOrders',
     'waitingList',
@@ -217,9 +218,19 @@ const MessagesForm = ({
   );
 };
 
+// Counts are loaded progressively: compare them too, not only the number of lists.
+const haveSameUserLists = (previous: UserList[], next: UserList[]): boolean =>
+  previous.length === next.length &&
+  previous.every(
+    (list, i) =>
+      list.type === next[i].type &&
+      list.data === next[i].data &&
+      list.count === next[i].count,
+  );
+
 const arePropsEqual = (prevProps: Props, nextProps: Props) => {
   return (
-    prevProps.defaultUserLists.length === nextProps.defaultUserLists.length &&
+    haveSameUserLists(prevProps.defaultUserLists, nextProps.defaultUserLists) &&
     prevProps.isSuccessful === nextProps.isSuccessful &&
     prevProps.formResetKey === nextProps.formResetKey
   );

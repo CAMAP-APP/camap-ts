@@ -10,11 +10,12 @@ Ensuite au fil du développement, on va générer des migrations. On peut géné
 
 ## Se connecter au container nest
 
-En local avec docker :
-`docker-compose run nest /bin/bash`
+En local avec Minikube (cf [installation](./install.md)) :
+`kubectl exec -it -n camap deploy/camap-api -- /bin/bash`
 
-Sur scalingo :
-`scalingo -a api-prod run /bin/bash`
+Depuis la racine de `camap-ts`, des raccourcis existent : `npm run dev:typeorm:schema:log`, `dev:typeorm:migration:show`, `dev:typeorm:migration:run`, `dev:typeorm:migration:revert` et `dev:typeorm:migration:generate -- NomDeMaMigration`.
+
+⚠️ L'image Docker camap-ts démarre directement `node packages/api-core/dist/main.js` : les migrations **ne sont pas jouées automatiquement** au démarrage. Il faut les lancer à la main dans le pod après un déploiement qui en contient (le script `npm run start:prod` de api-core, qui enchaîne `migration:run` et le lancement de l'app, n'est pas utilisé par l'image).
 
 ## Créer une migration
 

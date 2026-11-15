@@ -52,3 +52,11 @@ Les droits sont cumulables. Si quelqu'un veut pouvoir tout faire dans un groupe,
 ]
 
 ```
+
+## Compteurs des listes de membres
+
+La page `/member` demande les noms avec `getUserLists(groupId, withCounts: false)`, puis charge les compteurs un par un avec `getUserListCount(groupId, listType)`. Chaque nombre apparaît dès sa réception, sans recharger la page. Les listes restent utilisables pendant les calculs. Les vues mobile et ordinateur partagent le même chargement.
+
+Le départ de la page (y compris vers l'import de membres), le changement de groupe ou une actualisation des membres annulent le chargement précédent. Le navigateur interrompt la requête en cours et le serveur vérifie l'annulation entre les étapes de calcul. Une requête SQL déjà envoyée à MySQL termine son exécution ; les suivantes ne sont plus lancées. Le retour arrière après restauration d'une page par le navigateur relance les compteurs.
+
+Un échec de compteur conserve le nom de la liste et permet le calcul des compteurs suivants. Les clients existants peuvent continuer à appeler `getUserLists(groupId)` pour recevoir tous les nombres en une seule réponse. Dans cette réponse, les dépendances partagées sont calculées une seule fois.

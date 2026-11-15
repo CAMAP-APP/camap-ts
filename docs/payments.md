@@ -42,7 +42,7 @@ Le champs `data` permet de stocker des informations additionnelles en JSON en fo
 
 ## Code
 
-L'entité `Operation` est représentée par [Operation.hx](https://github.com/CAMAP-APP/camap-hx/blob/master/src/db/Operation.hx) en Haxe et par [group.entity.ts](https://github.com/CAMAP-APP/camap-ts/blob/master/packages/api-core/src/payments/entities/operation.entity.ts) en TS.
+L'entité `Operation` est représentée par [Operation.hx](https://github.com/CAMAP-APP/camap-hx/blob/master/src/db/Operation.hx) en Haxe et par [operation.entity.ts](https://github.com/CAMAP-APP/camap-ts/blob/master/packages/api-core/src/payments/entities/operation.entity.ts) en TS.
 
 Les fonctions de base de paiement sont gérées dans `PaymentService`, mais on en trouve aussi dans `SubscriptionService` qui gère les souscriptions aux contrats.
 

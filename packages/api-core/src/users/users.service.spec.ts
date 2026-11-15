@@ -55,6 +55,8 @@ describe('UsersService', () => {
   };
 
   const mockOrdersService = {
+    findDistinctUserIdsByProductIds: jest.fn(),
+    findDistinctUserIdsByDistributionIds: jest.fn(),
     attributeBasketsToDeletedUser: jest.fn(),
     findPartialUserOrdersByUserId: jest.fn(),
     findPartialUserOrdersByUserId2: jest.fn(),
@@ -76,7 +78,11 @@ describe('UsersService', () => {
 
   const mockUserGroupsService = {
     find: jest.fn(),
+    findAllUsersOfGroupId: jest.fn(),
+    findAllUserIdsOfGroupId: jest.fn(),
   };
+
+  const mockProductsService = { getFromActiveCatalogsInGroup: jest.fn() };
 
   const mockCsaSubscriptionService = {
     findByUserId: jest.fn(),
@@ -118,7 +124,7 @@ describe('UsersService', () => {
         { provide: getRepositoryToken(UserEntity), useValue: mockRepository },
         { provide: getRepositoryToken(SessionEntity), useClass: Repository },
         { provide: GroupsService, useValue: mockGroupService },
-        { provide: ProductsService, useValue: mockService },
+        { provide: ProductsService, useValue: mockProductsService },
         { provide: CryptoService, useValue: mockService },
         { provide: MailsService, useValue: mockMailService },
         { provide: CatalogsService, useValue: mockCatalogService },
@@ -139,6 +145,29 @@ describe('UsersService', () => {
     expect(service).toBeDefined();
   });
 
+  it('stops an order count before reading orders when cancelled during the product query', async () => {
+    const controller = new AbortController();
+    mockOrdersService.findDistinctUserIdsByProductIds.mockClear();
+    mockProductsService.getFromActiveCatalogsInGroup.mockImplementationOnce(async () => {
+      controller.abort();
+      return [{ id: 1 }];
+    });
+    await expect(service.getUsersWithOrdersInActiveCatalogs(42, true, [], controller.signal)).rejects.toThrow('cancelled');
+    expect(mockOrdersService.findDistinctUserIdsByProductIds).not.toHaveBeenCalled();
+  });
+
+  it('stops before reading members when cancelled during the order query', async () => {
+    const controller = new AbortController();
+    mockUserGroupsService.findAllUserIdsOfGroupId.mockClear();
+    mockProductsService.getFromActiveCatalogsInGroup.mockResolvedValueOnce([{ id: 1 }]);
+    mockOrdersService.findDistinctUserIdsByProductIds.mockImplementationOnce(async () => {
+      controller.abort();
+      return [];
+    });
+    await expect(service.getUsersWithoutOrdersInActiveCatalogs(42, [], controller.signal)).rejects.toThrow('cancelled');
+    expect(mockUserGroupsService.findAllUserIdsOfGroupId).not.toHaveBeenCalled();
+  });
+
   describe('delete', () => {
     let user: UserEntity;
     beforeEach(() => {
@@ -146,6 +175,10 @@ describe('UsersService', () => {
       user.id = 1;
 
       jest.spyOn(service, 'findOneByEmail').mockResolvedValue(DELETED_USER);
+      // No recent orders and no group membership: deletion is allowed
+      mockOrdersService.findPartialUserOrdersByUserId.mockResolvedValue([]);
+      mockOrdersService.findPartialUserOrdersByUserId2.mockResolvedValue([]);
+      mockUserGroupsService.find.mockResolvedValue([]);
     });
 
     it('When deleting a user that is a contact of a catalog, should update catalog to the DeletedUser', async () => {

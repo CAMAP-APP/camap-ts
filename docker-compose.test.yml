@@ -1,0 +1,63 @@
+# Environnement de tests camap-ts (unitaires + e2e) — voir docs/tests.md
+#
+#   docker compose -f docker-compose.test.yml run --rm tests
+#   docker compose -f docker-compose.test.yml down
+#
+# Les sources sont copiées dans le conteneur : le dépôt n'est jamais modifié
+# et aucun node_modules de l'hôte (Windows/macOS) n'est utilisé.
+name: camap-ts-test
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test
+    # Mêmes réglages que mysql/my.cnf, passés en ligne de commande car MySQL
+    # ignore un fichier de configuration monté « world-writable » (cas sous Windows).
+    # STRICT_TRANS_TABLES est volontairement absent (le dataset generator en dépend).
+    command:
+      - --sql-mode=ONLY_FULL_GROUP_BY,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysql", "-h127.0.0.1", "-uroot", "-proot", "-e", "SELECT 1"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  tests:
+    image: node:20.19.5-slim
+    # Partage le réseau de MySQL : .env.test (DB_HOST=localhost) fonctionne tel quel
+    network_mode: service:mysql
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      TZ: UTC
+    working_dir: /srv
+    volumes:
+      - .:/src:ro
+      - node_modules_root:/srv/node_modules
+      - node_modules_api:/srv/packages/api-core/node_modules
+      - node_modules_front:/srv/packages/front-core/node_modules
+      - node_modules_common:/srv/packages/camap-common/node_modules
+    command:
+      - bash
+      - -euc
+      - |
+        tar -C /src --exclude=node_modules --exclude=.git --exclude=dist -cf - . | tar -xf -
+        npm install --no-audit --no-fund
+        npm run build:common
+        npm test --prefix packages/api-core
+        npm run test:e2e --prefix packages/api-core
+        # Les specs de composants (src/components) sont obsolètes : seules src/utils sont lancées
+        npm test --prefix packages/front-core -- src/utils
+
+volumes:
+  node_modules_root:
+  node_modules_api:
+  node_modules_front:
+  node_modules_common:

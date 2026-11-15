@@ -71,6 +71,9 @@ describe('AuthService', () => {
     config = {};
 
     jest.clearAllMocks();
+    // clearAllMocks keeps queued `mockResolvedValueOnce` values: a value left
+    // unused by a test (e.g. when brute force is disabled) would leak into the next one.
+    mockCacheService.get.mockReset();
 
     const module = await Test.createTestingModule({
       providers: [

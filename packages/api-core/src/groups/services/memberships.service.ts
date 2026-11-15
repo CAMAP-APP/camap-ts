@@ -16,6 +16,7 @@ import { UserEntity } from '../../users/models/user.entity';
 import { GroupEntity } from '../entities/group.entity';
 import { MembershipEntity } from '../entities/membership.entity';
 import { UserGroupEntity } from '../entities/user-group.entity';
+import { getMembershipPeriod } from '../membership-period';
 import { GroupsService } from './groups.service';
 import { UserGroupsService } from './user-groups.service';
 
@@ -224,32 +225,9 @@ export class MembershipsService {
     return `${String(year)}-${String(year + 1)}`;
   }
 
-  /**
-   * Donne l'année de cotisation à partir d'une date
-   *
-   * Si la date de renouvellement est en janvier ou février, on note la cotisation avec l'année en cours,
-   * sinon c'est "à cheval" donc on note la cotis avec l'année la plus ancienne (ex:2014 pour une cotis 2014-2015)
-   */
+  /** Start year of the membership period, using the shared Paris renewal rules. */
   public getMembershipYear(group: GroupEntity, ofYear?: Date): number {
-    const currentDate = ofYear || new Date();
-    const year = currentDate.getFullYear();
-    const membershipRenewalDateString = group.membershipRenewalDate;
-    let membershipRenewalDate: Date;
-    if (!membershipRenewalDateString) membershipRenewalDate = new Date();
-    else membershipRenewalDate = new Date(membershipRenewalDateString);
-    const renewalDate = new Date(
-      year,
-      membershipRenewalDate.getMonth(),
-      membershipRenewalDate.getDate(),
-      0,
-      0,
-      0,
-    );
-
-    if (currentDate.getTime() < renewalDate.getTime()) {
-      return year - 1;
-    }
-    return year;
+    return getMembershipPeriod(group, ofYear).year;
   }
 
   findUserIdsWithMembership(

@@ -32,6 +32,8 @@ import { WaitingListsResolver } from './resolvers/waitingLists.resolver';
 import { CsaSubscriptionsService } from './services/csa-subscriptions.service';
 import { GroupsService } from './services/groups.service';
 import { MembershipsService } from './services/memberships.service';
+import { MemberYearListsService } from './services/member-year-lists.service';
+import { UserListCountsService } from './services/user-list-counts.service';
 import { UserGroupsService } from './services/user-groups.service';
 import { VolunteersService } from './services/volunteers.service';
 import { WaitingListsService } from './services/waitingLists.service';
@@ -67,6 +69,8 @@ import { CatalogEntity } from 'src/vendors/entities/catalog.entity';
     CatalogsService,
     UserGroupsService,
     MembershipsService,
+    MemberYearListsService,
+    UserListCountsService,
     WaitingListsService,
     CsaSubscriptionsService,
     GroupsResolver,
