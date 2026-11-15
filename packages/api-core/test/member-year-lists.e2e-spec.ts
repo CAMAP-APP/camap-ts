@@ -1,4 +1,6 @@
 import { Connection } from 'typeorm';
+import { request, Server } from 'http';
+import { AddressInfo } from 'net';
 import { DatasetGenerators } from '../src/dev/dataset-generator';
 import { CsaSubscriptionEntity } from '../src/groups/entities/csa-subscription.entity';
 import { GroupEntity } from '../src/groups/entities/group.entity';
@@ -6,9 +8,13 @@ import { MembershipEntity } from '../src/groups/entities/membership.entity';
 import { getMembershipPeriod } from '../src/groups/membership-period';
 import { UserListsResolver } from '../src/groups/resolvers/userLists.resolver';
 import { MemberYearListsService } from '../src/groups/services/member-year-lists.service';
+import { UserListCountsService } from '../src/groups/services/user-list-counts.service';
 import { BasketStatus } from '../src/shop/entities/basket.entity';
 import { UserOrderEntity } from '../src/shop/entities/user-order.entity';
 import { UserEntity } from '../src/users/models/user.entity';
+import { UsersService } from '../src/users/users.service';
+import { CatalogsService } from '../src/vendors/services/catalogs.service';
+import { CatalogEntity } from '../src/vendors/entities/catalog.entity';
 import { closeTestApp, initTestApp, TestContextHelper } from './utils';
 import DataLoader = require('dataloader');
 
@@ -247,5 +253,151 @@ describe('Member lists for the membership year (e2e)', () => {
     expect(
       lists.some((list) => list.type === 'noMembershipWithActivityInMembershipYear'),
     ).toBe(false);
+  });
+
+  it('returns list names without invoking the counter', async () => {
+    const counts = helper.app.get(UserListCountsService);
+    const spy = jest.spyOn(counts, 'createCounter');
+    try {
+      const lists = await resolver.getUserLists(
+        group.id,
+        new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
+        false,
+      );
+      expect(lists).toHaveLength(14);
+      expect(lists.every((list) => list.count === undefined)).toBe(true);
+      expect(spy).not.toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it.each(['Membership', 'Messages', 'GroupAdmin'])(
+    'returns a count for a %s manager',
+    async (right) => {
+      const user = await generators.genUser({ rights: [] });
+      await generators.genUserGroup({
+        userIdOrEntity: user,
+        groupIdOrEntity: group,
+        rights: [{ right }],
+      });
+      await order(user, from);
+      const { data } = await helper.createApolloClient(user).query<{
+        getUserListCount: { type: string; count: number };
+      }>({
+        query: `query($groupId: Int!) {
+        getUserListCount(groupId: $groupId, listType: "noMembershipWithActivityInMembershipYear") {
+          type count
+        }
+      }`,
+        variables: { groupId: group.id },
+      });
+      expect(data?.getUserListCount.type).toBe(
+        'noMembershipWithActivityInMembershipYear',
+      );
+      expect(data?.getUserListCount.count).toBe((await ids()).length);
+    },
+  );
+
+  it('denies counts to a member without management rights', async () => {
+    const user = await member();
+    const { data } = await helper.createApolloClient(user).query({
+      query: `query($groupId: Int!) { getUserListCount(groupId: $groupId, listType: "all") { count } }`,
+      variables: { groupId: group.id },
+    });
+    expect(data).toBeUndefined();
+  });
+
+  it('does not run the final renewal query after cancellation', async () => {
+    await order(await member(), from);
+    const controller = new AbortController();
+    const spy = jest
+      .spyOn(connection.logger, 'logQuery')
+      .mockImplementation(() => controller.abort());
+    try {
+      await expect(
+        service.getUsersToRenew(group, true, controller.signal),
+      ).rejects.toThrow('cancelled');
+      // Only the two activity queries can start; the membership count must not.
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
+  it('cancels the next counting step when the HTTP client disconnects', async () => {
+    const deferred = <T>() => {
+      let resolve!: (value: T) => void;
+      const promise = new Promise<T>((done) => {
+        resolve = done;
+      });
+      return { promise, resolve };
+    };
+    const started = deferred<void>();
+    const cancelled = deferred<void>();
+    const finished = deferred<void>();
+    const catalogsResult = deferred<CatalogEntity[]>();
+    const catalogs = helper.app.get(CatalogsService);
+    const users = helper.app.get(UsersService);
+    const counts = helper.app.get(UserListCountsService);
+    const originalCounter = counts.createCounter.bind(counts);
+    const counterSpy = jest
+      .spyOn(counts, 'createCounter')
+      .mockImplementation((g, signal) => {
+        signal?.addEventListener('abort', () => cancelled.resolve());
+        const counter = originalCounter(g, signal);
+        return async (type) => {
+          try {
+            return await counter(type);
+          } finally {
+            finished.resolve();
+          }
+        };
+      });
+    const catalogsSpy = jest
+      .spyOn(catalogs, 'getActiveCatalogsFromActiveVendorsInGroup')
+      .mockImplementationOnce(() => {
+        started.resolve();
+        return catalogsResult.promise;
+      });
+    const usersSpy = jest.spyOn(users, 'getUsersWithoutOrdersInActiveCatalogs');
+    const manager = await generators.genUser({ rights: [] });
+    await generators.genUserGroup({
+      userIdOrEntity: manager,
+      groupIdOrEntity: group,
+      rights: [{ right: 'Membership' }],
+    });
+    await helper.app.listen(0, '127.0.0.1');
+    const { port } = (helper.app.getHttpServer() as Server).address() as AddressInfo;
+    const client = request({
+      host: '127.0.0.1',
+      port,
+      path: '/graphql',
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Cookie: `Authentication=${helper.signUser(manager)};Refresh=blabla`,
+      },
+    });
+    client.on('error', () => {});
+    try {
+      client.end(
+        JSON.stringify({
+          query: `{ getUserListCount(groupId: ${group.id}, listType: "hasNoOrders") { count } }`,
+        }),
+      );
+      await started.promise;
+      client.destroy();
+      await cancelled.promise;
+      catalogsResult.resolve([]);
+      await finished.promise;
+      expect(usersSpy).not.toHaveBeenCalled();
+    } finally {
+      client.destroy();
+      catalogsResult.resolve([]);
+      counterSpy.mockRestore();
+      catalogsSpy.mockRestore();
+      usersSpy.mockRestore();
+    }
   });
 });

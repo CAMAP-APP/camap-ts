@@ -10,66 +10,51 @@ import {
 } from '@mui/material';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { useInitMembersQuery } from '../../../gql';
 import { formatUserList } from '../../../utils/fomat';
 import { MembersContext } from '../MembersContext';
 
-const MemberLists = ({
-  variant
-}: {
-  variant: "block" | "dropdown"
-}) => {
+const MemberLists = ({ variant }: { variant: 'block' | 'dropdown' }) => {
   const { t } = useTranslation(['members/lists', 'members/default']);
-  const { groupId, toggleRefetch, selectedUserList, onSelectList } =
-    React.useContext(MembersContext);
-  const { data, loading, error, refetch } = useInitMembersQuery({
-    variables: { groupId },
-  });
+  const {
+    userLists: otherLists,
+    userListsLoading: loading,
+    userListsError: error,
+    selectedUserList,
+    onSelectList,
+  } = React.useContext(MembersContext);
 
-  const otherLists = data?.getUserLists;
+  if (error && !otherLists) return <ApolloErrorAlert error={error} />;
 
-  React.useEffect(() => {
-    if (toggleRefetch === undefined) return;
-    if (refetch) refetch();
-  }, [toggleRefetch, refetch]);
-
-  React.useEffect(() => {
-    if (!data || data.getUserLists === undefined) return;
-    if (toggleRefetch !== undefined) {
-      const refreshedUserList = data.getUserLists.find(
-        (ul) => ul.type === selectedUserList.type,
-      );
-      if (refreshedUserList) onSelectList(refreshedUserList);
-    } else if(selectedUserList === undefined) {
-      // First render
-      const allUserList = data.getUserLists.find((ul) => ul.type === 'all');
-      if (allUserList) onSelectList(allUserList);
-    }
-  }, [data, onSelectList, selectedUserList, toggleRefetch]);
-
-  if (error) return <ApolloErrorAlert error={error} />;
-
-  if(variant === "dropdown") {
-    const selectedI = otherLists?.indexOf(selectedUserList) ?? 0
-    if(!otherLists || otherLists.length === 0) return;
-    return <Select
-      sx={{
-        height: 48,
-      }}
-      value={Math.max(selectedI, 0)}
-      onChange={(e) => otherLists && onSelectList(otherLists[parseInt(''+e.target.value)])}
-    >{otherLists?.map((ul, i) => (
-      <MenuItem
-        key={`${ul.type}${ul.data}`}
-        value={i}
+  if (variant === 'dropdown') {
+    const selectedI =
+      otherLists?.findIndex(
+        (list) =>
+          list.type === selectedUserList.type &&
+          list.data === selectedUserList.data,
+      ) ?? 0;
+    if (!otherLists || otherLists.length === 0) return null;
+    return (
+      <Select
+        sx={{
+          height: 48,
+        }}
+        value={Math.max(selectedI, 0)}
+        onChange={(e) =>
+          otherLists && onSelectList(otherLists[parseInt('' + e.target.value)])
+        }
       >
-        {formatUserList(ul, t)}
-      </MenuItem>
-    ))}</Select>
+        {otherLists?.map((ul, i) => (
+          <MenuItem key={`${ul.type}${ul.data}`} value={i}>
+            {formatUserList(ul, t)}
+          </MenuItem>
+        ))}
+      </Select>
+    );
   }
 
   return (
     <Box>
+      {error && <ApolloErrorAlert error={error} />}
       <Box
         maxHeight="770px"
         display="flex"
@@ -94,9 +79,7 @@ const MemberLists = ({
                   }
                   onClick={() => onSelectList(ul)}
                 >
-                  <ListItemText
-                    primary={formatUserList(ul, t)}
-                  />
+                  <ListItemText primary={formatUserList(ul, t)} />
                 </ListItemButton>
               ))}
             </List>

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { throwIfAborted } from '../../common/throw-if-aborted';
 import { UserOrderEntity } from '../../shop/entities/user-order.entity';
 import { UserEntity } from '../../users/models/user.entity';
 import { CsaSubscriptionEntity } from '../entities/csa-subscription.entity';
@@ -17,11 +18,17 @@ export class MemberYearListsService {
   ) {}
 
   async getUsersToRenew(group: GroupEntity, count?: false): Promise<UserEntity[]>;
-  async getUsersToRenew(group: GroupEntity, count: true): Promise<number>;
+  async getUsersToRenew(
+    group: GroupEntity,
+    count: true,
+    signal?: AbortSignal,
+  ): Promise<number>;
   async getUsersToRenew(
     group: GroupEntity,
     count = false,
+    signal?: AbortSignal,
   ): Promise<UserEntity[] | number> {
+    throwIfAborted(signal);
     if (!group.hasMembership) return count ? 0 : [];
 
     const period = getMembershipPeriod(group);
@@ -54,6 +61,9 @@ export class MemberYearListsService {
         Pick<CsaSubscriptionEntity, 'userId' | 'userId2'>
       >(),
     ]);
+    // A disconnected client must not start the final membership query.
+    // Queries already running in MySQL are allowed to finish.
+    throwIfAborted(signal);
     const activeUserIds = new Set<number>();
     for (const { userId, userId2 } of [...orders, ...subscriptions]) {
       activeUserIds.add(userId);

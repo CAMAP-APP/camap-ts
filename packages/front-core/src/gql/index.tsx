@@ -15,6 +15,7 @@ export type Scalars = {
   Boolean: boolean;
   Int: number;
   Float: number;
+  /** A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format. */
   DateTime: any;
 };
 
@@ -734,6 +735,7 @@ export type Query = {
   getMessagesForGroup: Array<Message>;
   getOrderableCatalogsFromMultiDistrib: Array<Catalog>;
   getUserFromControlKey: User;
+  getUserListCount: UserList;
   getUserListInGroupByListType: Array<User>;
   getUserLists: Array<UserList>;
   getUserMemberships: Array<Membership>;
@@ -873,6 +875,12 @@ export type QueryGetUserFromControlKeyArgs = {
 };
 
 
+export type QueryGetUserListCountArgs = {
+  groupId: Scalars['Int'];
+  listType: Scalars['String'];
+};
+
+
 export type QueryGetUserListInGroupByListTypeArgs = {
   data?: InputMaybe<Scalars['String']>;
   groupId: Scalars['Int'];
@@ -882,6 +890,7 @@ export type QueryGetUserListInGroupByListTypeArgs = {
 
 export type QueryGetUserListsArgs = {
   groupId: Scalars['Int'];
+  withCounts?: Scalars['Boolean'];
 };
 
 
@@ -1494,6 +1503,14 @@ export type InitMembersQueryVariables = Exact<{
 
 
 export type InitMembersQuery = { __typename?: 'Query', me: { __typename?: 'User', id: number, email: string, firstName: string, lastName: string, address1?: string | null, address2?: string | null, zipCode?: string | null, city?: string | null, nationality?: string | null, countryOfResidence?: string | null, birthDate?: any | null, email2?: string | null, firstName2?: string | null, lastName2?: string | null, phone?: string | null, phone2?: string | null }, groupPreviewMembers: { __typename?: 'GroupPreviewMembers', membershipFee?: number | null, hasMembership: boolean }, getUserLists: Array<{ __typename?: 'UserList', type: string, count?: number | null, data?: string | null }> };
+
+export type GetUserListCountQueryVariables = Exact<{
+  groupId: Scalars['Int'];
+  listType: Scalars['String'];
+}>;
+
+
+export type GetUserListCountQuery = { __typename?: 'Query', getUserListCount: { __typename?: 'UserList', type: string, count?: number | null, data?: string | null } };
 
 export type GetMembersOfGroupByListTypeQueryVariables = Exact<{
   listType: Scalars['String'];
@@ -3284,7 +3301,7 @@ export const InitMembersDocument = gql`
     membershipFee
     hasMembership
   }
-  getUserLists(groupId: $groupId) {
+  getUserLists(groupId: $groupId, withCounts: false) {
     type
     count
     data
@@ -3319,6 +3336,44 @@ export function useInitMembersLazyQuery(baseOptions?: ApolloReactHooks.LazyQuery
 export type InitMembersQueryHookResult = ReturnType<typeof useInitMembersQuery>;
 export type InitMembersLazyQueryHookResult = ReturnType<typeof useInitMembersLazyQuery>;
 export type InitMembersQueryResult = Apollo.QueryResult<InitMembersQuery, InitMembersQueryVariables>;
+export const GetUserListCountDocument = gql`
+    query GetUserListCount($groupId: Int!, $listType: String!) {
+  getUserListCount(groupId: $groupId, listType: $listType) {
+    type
+    count
+    data
+  }
+}
+    `;
+
+/**
+ * __useGetUserListCountQuery__
+ *
+ * To run a query within a React component, call `useGetUserListCountQuery` and pass it any options that fit your needs.
+ * When your component renders, `useGetUserListCountQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useGetUserListCountQuery({
+ *   variables: {
+ *      groupId: // value for 'groupId'
+ *      listType: // value for 'listType'
+ *   },
+ * });
+ */
+export function useGetUserListCountQuery(baseOptions: ApolloReactHooks.QueryHookOptions<GetUserListCountQuery, GetUserListCountQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return ApolloReactHooks.useQuery<GetUserListCountQuery, GetUserListCountQueryVariables>(GetUserListCountDocument, options);
+      }
+export function useGetUserListCountLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<GetUserListCountQuery, GetUserListCountQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return ApolloReactHooks.useLazyQuery<GetUserListCountQuery, GetUserListCountQueryVariables>(GetUserListCountDocument, options);
+        }
+export type GetUserListCountQueryHookResult = ReturnType<typeof useGetUserListCountQuery>;
+export type GetUserListCountLazyQueryHookResult = ReturnType<typeof useGetUserListCountLazyQuery>;
+export type GetUserListCountQueryResult = Apollo.QueryResult<GetUserListCountQuery, GetUserListCountQueryVariables>;
 export const GetMembersOfGroupByListTypeDocument = gql`
     query getMembersOfGroupByListType($listType: String!, $groupId: Int!, $data: String) {
   getUserListInGroupByListType(

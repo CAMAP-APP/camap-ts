@@ -1,5 +1,8 @@
 import React from 'react';
-import { User, UserList } from '../../gql';
+import { ApolloError } from '@apollo/client';
+import { useLocation } from 'react-router-dom';
+import { User, UserList, useInitMembersQuery } from '../../gql';
+import { useProgressiveUserLists } from '../../utils/userLists/useProgressiveUserLists';
 
 interface MembersContextProviderProps {
   groupId: number;
@@ -18,6 +21,9 @@ interface MembersContextProps extends MembersContextProviderProps {
   resetAlerts: () => void;
   selectedUserList: UserList;
   onSelectList: (userList: UserList) => void;
+  userLists?: UserList[];
+  userListsLoading: boolean;
+  userListsError?: ApolloError;
 }
 
 const DEFAULT_USER_LIST: UserList = {
@@ -37,6 +43,7 @@ export const MembersContext = React.createContext<MembersContextProps>({
   resetAlerts: () => {},
   selectedUserList: DEFAULT_USER_LIST,
   onSelectList: () => {},
+  userListsLoading: true,
 });
 
 const MembersContextProvider = ({
@@ -47,7 +54,25 @@ const MembersContextProvider = ({
   const [errors, setErrors] = React.useState<string[]>([]);
   const [success, setSuccess] = React.useState<string | undefined>();
   const [toggleRefetch, setToggleRefetch] = React.useState<boolean>();
-  const [selectedUserList, setSelectedUserList] = React.useState<UserList>(DEFAULT_USER_LIST);
+  const [selection, setSelectedUserList] =
+    React.useState<UserList>(DEFAULT_USER_LIST);
+  const { pathname } = useLocation();
+  const enabled = pathname === '/';
+  const { data, loading, error } = useInitMembersQuery({
+    variables: { groupId },
+    skip: !enabled,
+  });
+  const { lists: userLists, error: countsError } = useProgressiveUserLists(
+    groupId,
+    enabled ? data?.getUserLists : undefined,
+    toggleRefetch,
+  );
+  const selectedUserList =
+    userLists?.find(
+      (list) => list.type === selection.type && list.data === selection.data,
+    ) ??
+    userLists?.[0] ??
+    selection;
 
   const onSelectList = (userList: UserList) => setSelectedUserList(userList);
 
@@ -71,6 +96,9 @@ const MembersContextProvider = ({
         resetAlerts,
         selectedUserList,
         onSelectList,
+        userLists,
+        userListsLoading: loading,
+        userListsError: error || countsError,
       }}
     >
       {children}

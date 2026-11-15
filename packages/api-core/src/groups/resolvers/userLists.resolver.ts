@@ -1,9 +1,12 @@
-import { NotFoundException, UseGuards } from '@nestjs/common';
-import { Args, Int, Query, Resolver } from '@nestjs/graphql';
+import { ForbiddenException, NotFoundException, UseGuards } from '@nestjs/common';
+import { Args, Context, Int, Query, Resolver } from '@nestjs/graphql';
 import { UserLists, UserListsType } from 'camap-common';
 import { add } from 'date-fns';
 import { Loader } from '../../common/decorators/dataloder.decorator';
 import { GqlAuthGuard } from '../../common/guards/gql-auth.guard';
+import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { UserEntity } from '../../users/models/user.entity';
+import { Response } from 'express';
 import { DistributionEntity } from '../../shop/entities/distribution.entity';
 import { DistributionsService } from '../../shop/services/distributions.service';
 import { MultiDistribsService } from '../../shop/services/multi-distribs.service';
@@ -18,6 +21,7 @@ import { MemberYearListsService } from '../services/member-year-lists.service';
 import { UserGroupsService } from '../services/user-groups.service';
 import { WaitingListsService } from '../services/waitingLists.service';
 import { UserList } from '../types/user-list.type';
+import { UserListCountsService } from '../services/user-list-counts.service';
 import DataLoader = require('dataloader');
 import { VendorService } from 'src/vendors/services/vendor.service';
 
@@ -35,151 +39,56 @@ export class UserListsResolver {
     private readonly distributionsService: DistributionsService,
     private readonly vendorsService: VendorService,
     private readonly memberYearListsService: MemberYearListsService,
+    private readonly userListCountsService: UserListCountsService,
   ) {}
 
   @Query(() => [UserList])
   async getUserLists(
     @Args({ name: 'groupId', type: () => Int }) groupId: number,
     @Loader(GroupsLoader) groupLoader: DataLoader<number, GroupEntity>,
+    @Args({ name: 'withCounts', type: () => Boolean, defaultValue: true })
+    withCounts = true,
   ): Promise<UserList[]> {
     const group = await groupLoader.load(groupId);
     if (!group) throw new NotFoundException();
 
-    const numberOfMembers = await this.userGroupsService.getNumberOfMembers(groupId);
-    const numberOfAdmins = await this.userGroupsService.findAllAdminsOfGroup(
-      group,
-      true,
-    );
-    let numberOfUsersWithMembership: number;
-    if (group.hasMembership)
-      numberOfUsersWithMembership =
-        await this.membershipsService.getUsersWithMembership(group, true);
-    const numberOfMembersToRenewInYear =
-      await this.memberYearListsService.getUsersToRenew(group, true);
-    const activeCatalogs =
-      await this.catalogsService.getActiveCatalogsFromActiveVendorsInGroup(groupId);
-    const numberOfNewUsers = await this.userGroupsService.getNumberOfNewUsers(
-      groupId,
-    );
-    const usersWithNoContracts =
-      await this.usersService.getUsersWithoutOrdersInActiveCatalogs(
-        groupId,
-        activeCatalogs,
-      );
-    const numberOfUsersWithContracts =
-      await this.usersService.getUsersWithOrdersInActiveCatalogs(groupId, true);
-    const numberOfWaitingList =
-      await this.waitingListsService.getNumberOfWaitingUsersInGroup(groupId);
-    const nextDistributionsId =
-      await this.distributionsService.getNextDistributionsId(groupId);
-    const numberOfUsersWithCommandInNextDistribution =
-      await this.usersService.getUsersWithCommandInDistribution(
-        nextDistributionsId,
-        groupId,
-        true,
-      );
-    let numberOfActiveSubscriptions: number;
-    const activeSubscriptions = await this.catalogsService.getActiveSubscriptions(
-      groupId,
-      activeCatalogs,
-    );
-    const activeSubscriptionsUserIds = activeSubscriptions.reduce((acc, s) => {
-      acc.add(s.userId);
-      if (s.userId2) acc.add(s.userId2);
-      return acc;
-    }, new Set<number>());
-    numberOfActiveSubscriptions = activeSubscriptionsUserIds.size;
+    const lists = this.userListCountsService.getLists(group);
+    if (!withCounts) return lists;
 
-    const numVendors = new Set(
-      (await this.vendorsService.findByIds(
-        activeCatalogs.map(c => c.vendorId)
-      )).map(v => v.userId)
-        .filter(Boolean)
-    ).size;
+    const count = this.userListCountsService.createCounter(group);
+    const result: UserList[] = [];
+    for (const list of lists) result.push(await count(list.type));
+    return result;
+  }
 
-    const userListOfLists = UserLists.getLists();
-    const userLists: UserList[] = [];
-    userListOfLists.forEach((l) => {
-      switch (l.type) {
-        case 'all':
-          userLists.push({ type: l.type, count: numberOfMembers });
-          break;
-        case 'admins':
-          userLists.push({ type: l.type, count: numberOfAdmins });
-          break;
-        case 'hasNoOrders':
-          userLists.push({ type: l.type, count: usersWithNoContracts.length });
-          break;
-        case 'hasOrders':
-          userLists.push({ type: l.type, count: numberOfUsersWithContracts });
-          break;
-        case 'noMembershipWithActivityInMembershipYear':
-          if (group.hasMembership) {
-            userLists.push({ type: l.type, count: numberOfMembersToRenewInYear });
-          }
-          break;
-        case 'noMembership':
-          if (group.hasMembership) {
-            userLists.push({
-              type: l.type,
-              count: Math.max(0, numberOfMembers - numberOfUsersWithMembership),
-            });
-          }
-          break;
-        case 'membership':
-          if (group.hasMembership) {
-            userLists.push({ type: l.type, count: numberOfUsersWithMembership });
-          }
-          break;
-        case 'newUsers':
-          userLists.push({ type: l.type, count: numberOfNewUsers });
-          break;
-        case 'waitingList':
-          userLists.push({ type: l.type, count: numberOfWaitingList });
-          break;
-        case 'withCommandInNextDistribution': {
-          userLists.push({
-            type: l.type,
-            count: numberOfUsersWithCommandInNextDistribution,
-          });
-          break;
-        }
-        case 'noCommandInNextDistribution': {
-          userLists.push({
-            type: l.type,
-            count: Math.max(
-              0,
-              numberOfMembers - numberOfUsersWithCommandInNextDistribution,
-            ),
-          });
-          break;
-        }
-        case 'withRunningContract': {
-          userLists.push({ type: l.type, count: numberOfActiveSubscriptions });
-          break;
-        }
-        case 'catalogsContacts': {
-          userLists.push({
-            type: l.type,
-            count: new Set(
-              activeCatalogs.map((c) => c.userId).filter((id) => id !== null),
-            ).size,
-          });
-          break;
-        }
-        case 'vendors': {
-          userLists.push({
-            type: l.type,
-            count: numVendors,
-          });
-          break;
-        }
-        default:
-          break;
-      }
-    });
-
-    return userLists;
+  @Query(() => UserList)
+  async getUserListCount(
+    @Args({ name: 'groupId', type: () => Int }) groupId: number,
+    @Args({ name: 'listType', type: () => String }) listType: UserListsType,
+    @CurrentUser() user: UserEntity,
+    @Context('res') response: Response,
+  ): Promise<UserList> {
+    const controller = new AbortController();
+    const onClose = () => {
+      if (!response.writableEnded) controller.abort();
+    };
+    response.on('close', onClose);
+    if (response.destroyed) controller.abort();
+    try {
+      const canManage =
+        (await this.userGroupsService.isGroupAdmin(user, groupId)) ||
+        (await this.userGroupsService.canManageMembers(user, groupId)) ||
+        (await this.userGroupsService.canManageMessages(user, groupId));
+      if (!canManage) throw new ForbiddenException();
+      const group = await this.groupsService.findOne(groupId);
+      if (!group) throw new NotFoundException();
+      return await this.userListCountsService.createCounter(
+        group,
+        controller.signal,
+      )(listType);
+    } finally {
+      response.removeListener('close', onClose);
+    }
   }
 
   @Query(() => [UserList])
@@ -366,9 +275,11 @@ export class UserListsResolver {
             groupId,
           );
         const activeCatalogsVendors = await this.vendorsService.findByIds(
-          activeCatalogs.map((c) => c.vendorId)
+          activeCatalogs.map((c) => c.vendorId),
         );
-        const users = this.usersService.findByIds(activeCatalogsVendors.map(v => v.userId).filter(Boolean));
+        const users = this.usersService.findByIds(
+          activeCatalogsVendors.map((v) => v.userId).filter(Boolean),
+        );
         return users;
       }
 
