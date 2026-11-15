@@ -33,6 +33,21 @@ export class OrdersService {
       .getRawMany<Pick<UserOrderEntity, 'userId' | 'userId2'>>();
   }
 
+  async findDistinctUserIdsByDistributionIds(
+    distributionIds: number[],
+  ): Promise<Pick<UserOrderEntity, 'userId' | 'userId2'>[]> {
+    if (!distributionIds.length) return [];
+
+    // Member lists only need participants, not one entity per order.
+    return this.ordersRepo
+      .createQueryBuilder('o')
+      .select('o.userId', 'userId')
+      .addSelect('o.userId2', 'userId2')
+      .distinct(true)
+      .where('o.distributionId IN (:...distributionIds)', { distributionIds })
+      .getRawMany<Pick<UserOrderEntity, 'userId' | 'userId2'>>();
+  }
+
   findUserOrdersByDistributionIds(distributionIds: number[]) {
     return this.ordersRepo.find({ distributionId: In(distributionIds) });
   }

@@ -81,6 +81,15 @@ export class UserGroupsService {
     return this.usersService.findByIds(ids);
   }
 
+  /** Member ids only: cheaper than loading every member entity. */
+  async findAllUserIdsOfGroupId(groupId: number): Promise<number[]> {
+    const userGroups = await this.userGroupsRepo.find({
+      select: ['userId'],
+      where: { groupId },
+    });
+    return userGroups.map((ug) => ug.userId);
+  }
+
   find(options: FindManyOptions<UserGroupEntity>) {
     return this.userGroupsRepo.find(options);
   }
@@ -231,14 +240,13 @@ export class UserGroupsService {
       });
     }
 
-    throwIfAborted(signal);
-    admins.push(
-      ...(await Promise.all(
-        [...adminIds].map((id) => this.usersService.findOne(id)),
-      )),
-    );
+    // The count only needs the ids: do not load the users.
+    if (getCount) return adminIds.size;
 
-    return getCount ? adminIds.size : admins;
+    throwIfAborted(signal);
+    admins.push(...(await this.usersService.findByIds([...adminIds])));
+
+    return admins;
   }
 
   async findUsersWithGroupAdminRightInGroup(

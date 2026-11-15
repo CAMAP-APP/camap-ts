@@ -60,6 +60,16 @@ describe('Member lists for the membership year (e2e)', () => {
     return user;
   };
 
+  const manager = async () => {
+    const user = await generators.genUser({});
+    await generators.genUserGroup({
+      userIdOrEntity: user,
+      groupIdOrEntity: group,
+      rights: [{ right: 'Membership' }],
+    });
+    return user;
+  };
+
   const order = async (
     user: UserEntity,
     date: Date,
@@ -233,6 +243,7 @@ describe('Member lists for the membership year (e2e)', () => {
     const lists = await resolver.getUserLists(
       group.id,
       new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
+      await manager(),
     );
     const type = 'noMembershipWithActivityInMembershipYear';
     const users = await resolver.getUserListInGroupByListType(type, group.id, null);
@@ -249,6 +260,7 @@ describe('Member lists for the membership year (e2e)', () => {
     const lists = await resolver.getUserLists(
       group.id,
       new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
+      await manager(),
     );
     expect(
       lists.some((list) => list.type === 'noMembershipWithActivityInMembershipYear'),
@@ -262,6 +274,7 @@ describe('Member lists for the membership year (e2e)', () => {
       const lists = await resolver.getUserLists(
         group.id,
         new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
+        await manager(),
         false,
       );
       expect(lists).toHaveLength(14);
@@ -303,6 +316,19 @@ describe('Member lists for the membership year (e2e)', () => {
     const user = await member();
     const { data } = await helper.createApolloClient(user).query({
       query: `query($groupId: Int!) { getUserListCount(groupId: $groupId, listType: "all") { count } }`,
+      variables: { groupId: group.id },
+    });
+    expect(data).toBeUndefined();
+  });
+
+  it.each([
+    `query($groupId: Int!) { getUserLists(groupId: $groupId, withCounts: false) { type } }`,
+    `query($groupId: Int!) { getContractsUserLists(groupId: $groupId) { type } }`,
+    `query($groupId: Int!) { getDistributionsUserLists(groupId: $groupId) { type } }`,
+  ])('denies list queries to a member without management rights: %s', async (query) => {
+    const user = await member();
+    const { data } = await helper.createApolloClient(user).query({
+      query,
       variables: { groupId: group.id },
     });
     expect(data).toBeUndefined();
@@ -360,7 +386,7 @@ describe('Member lists for the membership year (e2e)', () => {
         started.resolve();
         return catalogsResult.promise;
       });
-    const usersSpy = jest.spyOn(users, 'getUsersWithoutOrdersInActiveCatalogs');
+    const usersSpy = jest.spyOn(users, 'getUsersWithOrdersInActiveCatalogs');
     const manager = await generators.genUser({ rights: [] });
     await generators.genUserGroup({
       userIdOrEntity: manager,

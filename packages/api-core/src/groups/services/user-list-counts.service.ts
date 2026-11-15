@@ -60,6 +60,14 @@ export class UserListCountsService {
     const catalogs = once(() =>
       this.catalogs.getActiveCatalogsFromActiveVendorsInGroup(group.id),
     );
+    const withOrders = once(async () =>
+      this.users.getUsersWithOrdersInActiveCatalogs(
+        group.id,
+        true,
+        await catalogs(),
+        signal,
+      ),
+    );
     const nextDistributions = once(() =>
       this.distributions.getNextDistributionsId(group.id, signal),
     );
@@ -79,20 +87,10 @@ export class UserListCountsService {
         case 'admins':
           return this.userGroups.findAllAdminsOfGroup(group, true, signal);
         case 'hasNoOrders':
-          return (
-            await this.users.getUsersWithoutOrdersInActiveCatalogs(
-              group.id,
-              await catalogs(),
-              signal,
-            )
-          ).length;
+          // Participants are already restricted to members: no need to load the others.
+          return Math.max(0, (await members()) - (await withOrders()));
         case 'hasOrders':
-          return this.users.getUsersWithOrdersInActiveCatalogs(
-            group.id,
-            true,
-            await catalogs(),
-            signal,
-          );
+          return withOrders();
         case 'noMembershipWithActivityInMembershipYear':
           return this.memberYearLists.getUsersToRenew(group, true, signal);
         case 'noMembership':

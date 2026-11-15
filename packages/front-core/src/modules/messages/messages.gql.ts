@@ -12,7 +12,7 @@ export const initMessagingService = gql`
       id
       name
     }
-    getUserLists(groupId: $groupId) {
+    getUserLists(groupId: $groupId, withCounts: false) {
       type
       count
       data

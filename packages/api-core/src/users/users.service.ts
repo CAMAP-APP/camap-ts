@@ -226,9 +226,10 @@ export class UsersService {
     signal?: AbortSignal,
   ): Promise<number[]> {
     throwIfAborted(signal);
-    const members = await this.userGroupsService.findAllUsersOfGroupId(groupId);
+    const memberIds = new Set(
+      await this.userGroupsService.findAllUserIdsOfGroupId(groupId),
+    );
     throwIfAborted(signal);
-    const memberIds = new Set(members.map((member) => member.id));
     const usersIds: Set<number> = new Set([]);
 
     userOrders.forEach((order) => {
@@ -322,7 +323,7 @@ export class UsersService {
     signal?: AbortSignal,
   ): Promise<UserEntity[] | number> {
     throwIfAborted(signal);
-    const userOrders = await this.ordersService.findUserOrdersByDistributionIds(
+    const userOrders = await this.ordersService.findDistinctUserIdsByDistributionIds(
       distributionsId,
     );
     const usersIdWithCommandInDistribution = await this.getUsersIdFromUserOrders(
