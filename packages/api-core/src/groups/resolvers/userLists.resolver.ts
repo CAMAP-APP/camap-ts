@@ -42,13 +42,27 @@ export class UserListsResolver {
     private readonly userListCountsService: UserListCountsService,
   ) {}
 
+  /** Member lists are only for people managing the group, its members or its messages. */
+  private async assertCanManageUserLists(
+    user: UserEntity,
+    groupId: number,
+  ): Promise<void> {
+    const canManage =
+      (await this.userGroupsService.isGroupAdmin(user, groupId)) ||
+      (await this.userGroupsService.canManageMembers(user, groupId)) ||
+      (await this.userGroupsService.canManageMessages(user, groupId));
+    if (!canManage) throw new ForbiddenException();
+  }
+
   @Query(() => [UserList])
   async getUserLists(
     @Args({ name: 'groupId', type: () => Int }) groupId: number,
     @Loader(GroupsLoader) groupLoader: DataLoader<number, GroupEntity>,
+    @CurrentUser() user: UserEntity,
     @Args({ name: 'withCounts', type: () => Boolean, defaultValue: true })
     withCounts = true,
   ): Promise<UserList[]> {
+    await this.assertCanManageUserLists(user, groupId);
     const group = await groupLoader.load(groupId);
     if (!group) throw new NotFoundException();
 
@@ -75,11 +89,7 @@ export class UserListsResolver {
     response.on('close', onClose);
     if (response.destroyed) controller.abort();
     try {
-      const canManage =
-        (await this.userGroupsService.isGroupAdmin(user, groupId)) ||
-        (await this.userGroupsService.canManageMembers(user, groupId)) ||
-        (await this.userGroupsService.canManageMessages(user, groupId));
-      if (!canManage) throw new ForbiddenException();
+      await this.assertCanManageUserLists(user, groupId);
       const group = await this.groupsService.findOne(groupId);
       if (!group) throw new NotFoundException();
       return await this.userListCountsService.createCounter(
@@ -94,7 +104,9 @@ export class UserListsResolver {
   @Query(() => [UserList])
   async getContractsUserLists(
     @Args({ name: 'groupId', type: () => Int }) groupId: number,
+    @CurrentUser() user: UserEntity,
   ): Promise<UserList[]> {
+    await this.assertCanManageUserLists(user, groupId);
     const userListOfLists = UserLists.getLists();
     if (userListOfLists.find((ml) => ml.type === 'contractSubscribers') === null)
       return [];
@@ -121,7 +133,9 @@ export class UserListsResolver {
   @Query(() => [UserList])
   async getDistributionsUserLists(
     @Args({ name: 'groupId', type: () => Int }) groupId: number,
+    @CurrentUser() user: UserEntity,
   ): Promise<UserList[]> {
+    await this.assertCanManageUserLists(user, groupId);
     const userListOfLists = UserLists.getLists();
     const group = await this.groupsService.findOne(groupId);
     if (!group) throw new NotFoundException();
