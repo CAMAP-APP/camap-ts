@@ -173,6 +173,10 @@ describe('UsersService', () => {
       user.id = 1;
 
       jest.spyOn(service, 'findOneByEmail').mockResolvedValue(DELETED_USER);
+      // No recent orders and no group membership: deletion is allowed
+      mockOrdersService.findPartialUserOrdersByUserId.mockResolvedValue([]);
+      mockOrdersService.findPartialUserOrdersByUserId2.mockResolvedValue([]);
+      mockUserGroupsService.find.mockResolvedValue([]);
     });
 
     it('When deleting a user that is a contact of a catalog, should update catalog to the DeletedUser', async () => {

@@ -91,6 +91,10 @@ export const initTestApp = async (resetDb = true): Promise<TestContextHelper> =>
 
   app.use(cookieParser());
 
+  // Create the schema from the entities (the test database may be empty).
+  // resetDb=true drops every table first so each suite starts from a clean database.
+  await app.get<Connection>(Connection).synchronize(resetDb);
+
   const jwtService = moduleFixture.get<JwtService>(JwtService);
 
   const signUser = (user: UserEntity) => {

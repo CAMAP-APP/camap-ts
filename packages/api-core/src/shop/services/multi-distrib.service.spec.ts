@@ -5,6 +5,7 @@ import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
 import { VolunteersService } from '../../groups/services/volunteers.service';
 import { MailsService } from '../../mails/mails.service';
+import { OrdersService } from '../../payments/services/orders.service';
 import { PaymentsService } from '../../payments/services/payments.service';
 import { VendorService } from '../../vendors/services/vendor.service';
 import { BasketEntity, BasketStatus } from '../entities/basket.entity';
@@ -81,6 +82,7 @@ describe('MultiDistribsService', () => {
         { provide: VolunteersService, useValue: {} },
         { provide: GroupsService, useValue: mockGroupsService },
         { provide: PaymentsService, useValue: mockPaymentsService },
+        { provide: OrdersService, useValue: {} },
       ],
     }).compile();
 
