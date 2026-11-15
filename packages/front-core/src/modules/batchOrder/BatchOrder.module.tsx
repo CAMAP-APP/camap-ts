@@ -43,7 +43,7 @@ const BatchOrder = ({
    */
   const [getGroupMembers, { data: groupMembers, error: memberError }] =
     useGetMembersOfGroupByListTypeLazyQuery({
-      variables: { listType: 'all', groupId },
+      variables: { listType: 'all', groupId, data: String(catalogId) },
     });
 
   const [

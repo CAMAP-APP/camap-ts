@@ -240,13 +240,19 @@ describe('Member lists for the membership year (e2e)', () => {
 
   it('uses the same results for list counters and recipients', async () => {
     await order(await member(), from);
+    const listManager = await manager();
     const lists = await resolver.getUserLists(
       group.id,
       new DataLoader<number, GroupEntity>(async (keys) => keys.map(() => group)),
-      await manager(),
+      listManager,
     );
     const type = 'noMembershipWithActivityInMembershipYear';
-    const users = await resolver.getUserListInGroupByListType(type, group.id, null);
+    const users = await resolver.getUserListInGroupByListType(
+      type,
+      group.id,
+      null,
+      listManager,
+    );
     expect(await service.getUsersToRenew(group, true)).toBe(users.length);
     expect(lists.find((list) => list.type === type)?.count).toBe(users.length);
   });
