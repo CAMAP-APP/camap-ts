@@ -13,6 +13,7 @@ import { MultiDistribsService } from '../../shop/services/multi-distribs.service
 import { User } from '../../users/types/user.type';
 import { UsersService } from '../../users/users.service';
 import { CatalogsService } from '../../vendors/services/catalogs.service';
+import { CatalogEntity } from '../../vendors/entities/catalog.entity';
 import { GroupEntity } from '../entities/group.entity';
 import { GroupsLoader } from '../loaders/groups.loader';
 import { GroupsService } from '../services/groups.service';
@@ -24,6 +25,13 @@ import { UserList } from '../types/user-list.type';
 import { UserListCountsService } from '../services/user-list-counts.service';
 import DataLoader = require('dataloader');
 import { VendorService } from 'src/vendors/services/vendor.service';
+
+/** Positive integer id from a list `data` argument, or null. */
+const parseId = (data: string | null): number | null => {
+  if (!data || !/^\d+$/.test(data.trim())) return null;
+  const id = Number(data.trim());
+  return id > 0 ? id : null;
+};
 
 @UseGuards(GqlAuthGuard)
 @Resolver(() => UserList)
@@ -52,6 +60,52 @@ export class UserListsResolver {
       (await this.userGroupsService.canManageMembers(user, groupId)) ||
       (await this.userGroupsService.canManageMessages(user, groupId));
     if (!canManage) throw new ForbiddenException();
+  }
+
+  /**
+   * Group managers can read every list. The whole member list is also open to
+   * people managing the catalog given in `data` (used by the batch order screen).
+   */
+  private async assertCanReadUserList(
+    user: UserEntity,
+    groupId: number,
+    listType: UserListsType,
+    data: string | null,
+  ): Promise<void> {
+    if (listType === 'all' && (await this.canManageCatalogOfGroup(user, data, groupId)))
+      return;
+    await this.assertCanManageUserLists(user, groupId);
+  }
+
+  private async canManageCatalogOfGroup(
+    user: UserEntity,
+    data: string | null,
+    groupId: number,
+  ): Promise<boolean> {
+    const catalogId = parseId(data);
+    if (!catalogId) return false;
+    const catalog = await this.catalogsService.findOneById(catalogId);
+    if (!catalog || catalog.groupId !== groupId) return false;
+    return this.userGroupsService.canManageCatalog(user, catalog);
+  }
+
+  private async findCatalogOfGroup(
+    catalogId: number,
+    groupId: number,
+  ): Promise<CatalogEntity> {
+    const catalog = await this.catalogsService.findOneById(catalogId);
+    if (!catalog || catalog.groupId !== groupId) throw new NotFoundException();
+    return catalog;
+  }
+
+  private async assertDistributionInGroup(
+    distributionId: number,
+    groupId: number,
+  ): Promise<void> {
+    const distribution =
+      await this.distributionsService.findOneDistribution(distributionId);
+    if (!distribution) throw new NotFoundException();
+    await this.findCatalogOfGroup(distribution.catalogId, groupId);
   }
 
   @Query(() => [UserList])
@@ -186,8 +240,10 @@ export class UserListsResolver {
   async getUserListInGroupByListType(
     @Args({ name: 'listType', type: () => String }) listType: UserListsType,
     @Args({ name: 'groupId', type: () => Int }) groupId: number,
-    @Args({ name: 'data', nullable: true }) data: string,
+    @Args({ name: 'data', type: () => String, nullable: true }) data: string | null,
+    @CurrentUser() user: UserEntity,
   ) {
+    await this.assertCanReadUserList(user, groupId, listType, data);
     const group = await this.groupsService.findOne(groupId);
     if (!group) throw new NotFoundException();
 
@@ -218,8 +274,9 @@ export class UserListsResolver {
           : [];
 
       case 'contractSubscribers': {
-        const catalogId = parseInt(data, 10);
+        const catalogId = parseId(data);
         if (!catalogId) break;
+        await this.findCatalogOfGroup(catalogId, groupId);
         return this.userGroupsService.getUsersInCatalog(groupId, catalogId);
       }
 
@@ -270,8 +327,9 @@ export class UserListsResolver {
       }
 
       case 'withProductToGetOnDistribution': {
-        const distributionId = parseInt(data, 10);
+        const distributionId = parseId(data);
         if (!distributionId) break;
+        await this.assertDistributionInGroup(distributionId, groupId);
         return this.userGroupsService.getUsersInDistribution(distributionId);
       }
 
