@@ -2,6 +2,8 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { roundPrice } from 'camap-common';
 import { Repository } from 'typeorm';
+import { CsaSubscriptionEntity } from '../../groups/entities/csa-subscription.entity';
+import { CsaSubscriptionsService } from '../../groups/services/csa-subscriptions.service';
 import { GroupsService } from '../../groups/services/groups.service';
 import { UserGroupsService } from '../../groups/services/user-groups.service';
 import { OperationEntity } from '../entities/operation.entity';
@@ -28,6 +30,8 @@ describe('PaymentsService', () => {
         { provide: getRepositoryToken(OperationEntity), useClass: Repository },
         { provide: GroupsService, useValue: {} },
         { provide: UserGroupsService, useValue: mockUserGroupService },
+        { provide: CsaSubscriptionsService, useValue: {} },
+        { provide: getRepositoryToken(CsaSubscriptionEntity), useClass: Repository },
       ],
     }).compile();
 

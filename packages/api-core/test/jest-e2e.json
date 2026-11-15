@@ -1,10 +1,15 @@
 {
-  "moduleFileExtensions": ["js", "json", "ts"],
+  "moduleFileExtensions": ["js", "json", "ts", "node"],
   "rootDir": ".",
-  "testEnvironment": "node",
+  "testEnvironment": "<rootDir>/jest-node-environment.js",
   "testRegex": ".e2e-spec.ts$",
   "transform": {
     "^.+\\.(t)s$": "ts-jest"
+  },
+  "modulePaths": ["<rootDir>/.."],
+  "moduleNameMapper": {
+    "^axios$": "<rootDir>/../node_modules/axios/dist/node/axios.cjs",
+    "^@img/(sharp-[^/]+)/sharp\\.node$": "<rootDir>/../node_modules/@img/$1/lib/$1.node"
   },
   "testTimeout": 18000,
   "globals": {

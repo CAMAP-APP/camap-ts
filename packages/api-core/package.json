@@ -28,6 +28,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "pretest:e2e": "npm run build:mail",
     "test:e2e": "TZ=UTC jest --config ./test/jest-e2e.json -i --verbose --forceExit",
     "watch:e2e": "jest --watch --config ./test/jest-e2e.json -i",
     "tsc": "tsc --noEmit -p tsconfig.check.json",
