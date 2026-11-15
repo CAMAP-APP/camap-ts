@@ -14,6 +14,7 @@ import {
   useInitMessagingServiceQuery,
 } from '../../../gql';
 import { encodeFileToBase64String } from '../../../utils/encoding';
+import { useProgressiveUserLists } from '../../../utils/userLists/useProgressiveUserLists';
 import MessagesForm from '../components/MessagesForm';
 import {
   MessagesFormikBag,
@@ -78,7 +79,12 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
   const me = requestData && requestData.me;
   const error = requestError || contextError;
 
-  const defaultUserLists = requestData ? requestData.getUserLists : [];
+  // List names are shown at once; counts arrive one by one.
+  const { lists: userLists, error: userListsError } = useProgressiveUserLists(
+    groupId,
+    requestData?.getUserLists,
+  );
+  const defaultUserLists = userLists ?? [];
 
   useEffect(() => {
     const recipients = requestData?.getEmailRecipientsByUserIds ?? [];
@@ -279,6 +285,8 @@ const MessagingService = ({ onMessageSent }: MessagingServiceProps) => {
 
   return (
     <Box>
+      {/* A failed count keeps the form usable: lists are shown without it. */}
+      {userListsError && <ApolloErrorAlert error={userListsError} />}
       {me && (
         <MessagesForm
           user={me}
