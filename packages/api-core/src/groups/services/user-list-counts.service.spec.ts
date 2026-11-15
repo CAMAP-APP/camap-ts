@@ -165,6 +165,6 @@ describe('UserListCountsService', () => {
     await expect(
       service.createCounter(group, controller.signal)('hasNoOrders'),
     ).rejects.toThrow('cancelled');
-    expect(users.getUsersWithoutOrdersInActiveCatalogs).not.toHaveBeenCalled();
+    expect(users.getUsersWithOrdersInActiveCatalogs).not.toHaveBeenCalled();
   });
 });
