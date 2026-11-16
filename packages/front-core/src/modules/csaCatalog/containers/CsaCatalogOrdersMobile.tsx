@@ -63,6 +63,8 @@ const CsaCatalogOrdersMobile = ({
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+  const [toggleDefaultOrderSuccess, setToggleDefaultOrderSuccess] = React.useState(false);
+  const [defaultOrderLoading, setDefaultOrderLoading] = React.useState(false);
 
   const distributions = useMemo(() => {
     if (mode === 'initialOrders') {
@@ -219,15 +221,30 @@ const CsaCatalogOrdersMobile = ({
     });
   }, [defaultOrder, setDefaultOrder]);
 
-  const updateDefaultOrders = async () => {
-    if (!subscription) return;
-    await updateSubscriptionDefaultOrder(
+  const updateDefaultOrders = async (): Promise<boolean> => {
+    if (!subscription) return false;
+    return updateSubscriptionDefaultOrder(
       Object.keys(defaultOrder).map((productId) => ({
         productId: parseInt(productId, 10),
         quantity: defaultOrder[parseInt(productId, 10)],
       })),
       `${subscription.id}`,
     );
+  };
+
+  const onSaveDefaultOrderClick = async () => {
+    setDefaultOrderLoading(true);
+    const success = await updateDefaultOrders();
+    setDefaultOrderLoading(false);
+    if (success) {
+      setToggleDefaultOrderSuccess(true);
+      setTimeout(() => {
+        setToggleDefaultOrderSuccess(false);
+      }, 2000);
+    }
+    if (isConstOrDefaults) {
+      void onNext();
+    }
   };
 
   const onSaveClick = async () => {
@@ -290,13 +307,10 @@ const CsaCatalogOrdersMobile = ({
       <span>{/* prevents disable state to inhibit tooltip */}
         <SuccessButton
           variant="contained"
+          loading={defaultOrderLoading}
+          toggleSuccess={toggleDefaultOrderSuccess}
           disabled={isConstOrders ? defaultOrderTotal === 0 : (catalog?.distribMinOrdersTotal ?? 0) > defaultOrderTotal}
-          onClick={async () => {
-            await updateDefaultOrders();
-            if (isConstOrDefaults) {
-              void onNext();
-            }
-          }}
+          onClick={onSaveDefaultOrderClick}
         >
           {isConstOrDefaults ? tCommon('save') : t('setAsDefaultOrderBtn')}
         </SuccessButton>
