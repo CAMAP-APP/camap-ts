@@ -11,11 +11,10 @@ import ProductModal, {
   ProductInfos,
 } from '../../../components/utils/Product/ProductModal';
 import SuccessButton from '../../../components/utils/SuccessButton';
-import { CatalogType } from '../../../gql';
 import { useCamapTranslation } from '../../../utils/hooks/use-camap-translation';
 import { useUnsavedChangesPrompt } from '../../../utils/hooks/use-unsaved-changes-prompt';
 import { CsaCatalogContext } from '../CsaCatalog.context';
-import { restCsaCatalogTypeToType, RestDistributionState } from '../interfaces';
+import { RestDistributionState } from '../interfaces';
 import { useRestUpdateSubscriptionDefaultOrderPost } from '../requests';
 import { CsaCatalogOrdersMobileHeader } from '../components/CsaCatalogOrdersMobileHeader';
 import CsaCatalogOrdersMobileProduct from '../components/CsaCatalogOrdersMobileProduct';
@@ -63,7 +62,6 @@ const CsaCatalogOrdersMobile = ({
   const isConstOrDefaults = (mode === 'defaultOrder') || isConstOrders;
 
   const [toggleSuccess, setToggleSuccess] = React.useState(false);
-  const [toggleSetDefaultOrderSuccess, setToggleSetDefaultOrderSuccess] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
   const distributions = useMemo(() => {
@@ -249,31 +247,6 @@ const CsaCatalogOrdersMobile = ({
     void onNext();
   }, [distribution.id, cancelOrder, onNext]);
 
-  const setCurrentDistributionAsDefaultOrder = useCallback(() => {
-    if (!catalog) return;
-    (async () => {
-      const defaultOrderProducts = catalog.products.map(p => {
-        return {
-          productId: p.id,
-          quantity: orders[distribution.id][p.id] ?? 0
-        }
-      });
-      setDefaultOrder(Object.fromEntries(defaultOrderProducts.map(p => [p.productId, p.quantity])));
-
-      if (subscription) {
-        setToggleSetDefaultOrderSuccess(true);
-        const rqStart = Date.now();
-        await updateSubscriptionDefaultOrder(
-          defaultOrderProducts,
-          `${subscription.id}`,
-        )
-        setTimeout(() => {
-          setToggleSetDefaultOrderSuccess(false);
-        }, 2000 - (Date.now() - rqStart));
-      }
-    })();
-  }, [subscription, catalog, orders, distribution.id, updateSubscriptionDefaultOrder, setDefaultOrder])
-
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
 
   const onProductModalClose = () => {
@@ -316,20 +289,6 @@ const CsaCatalogOrdersMobile = ({
       >
         {t('cancelOrder')}
       </Button>)
-    }
-    if (restCsaCatalogTypeToType(catalog?.type ?? 0) === CatalogType.TYPE_VARORDER) {
-      buttons.push(
-        <Tooltip key="set-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
-            <SuccessButton
-              variant="contained"
-              color="primary"
-              toggleSuccess={toggleSetDefaultOrderSuccess}
-              disabled={(catalog?.distribMinOrdersTotal ?? 0) > total}
-              onClick={setCurrentDistributionAsDefaultOrder}
-            >
-              {t('setAsDefaultOrderBtn')}
-            </SuccessButton>
-        </Tooltip>);
     }
     if (distribution.state === RestDistributionState.Open) {
       buttons.push(<SuccessButton
