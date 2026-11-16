@@ -242,10 +242,20 @@ const CsaCatalogOrdersMobile = ({
     setLoading(false);
   };
 
+  // Saving must wait for the next render: onNext reads updatedOrders from its closure,
+  // which would still hold the quantities from before cancelOrder.
+  const [cancelSaveRequested, setCancelSaveRequested] = React.useState(false);
+
   const onCancelOrder = useCallback(() => {
     cancelOrder(distribution.id);
-    void onNext();
-  }, [distribution.id, cancelOrder, onNext]);
+    setCancelSaveRequested(true);
+  }, [distribution.id, cancelOrder]);
+
+  useEffect(() => {
+    if (!cancelSaveRequested) return;
+    setCancelSaveRequested(false);
+    void onSaveClick();
+  }, [cancelSaveRequested, onSaveClick]);
 
   const [modalProduct, setModalProduct] = React.useState<ProductInfos>();
 
@@ -284,7 +294,7 @@ const CsaCatalogOrdersMobile = ({
       buttons.push(<Button
         key="cancel-order"
         variant="outlined"
-        disabled={(catalog?.distribMinOrdersTotal ?? 0) > 0}
+        disabled={loading || (catalog?.distribMinOrdersTotal ?? 0) > 0}
         onClick={onCancelOrder}
       >
         {t('cancelOrder')}
