@@ -271,8 +271,21 @@ const CsaCatalogOrdersMobile = ({
     ? t('constOrder')
     : defaultOrdersMode ? t('defaultOrder') : (adminMode ? t('changeOrders') : t('changeMyOrders'));
 
+  const switchModeButton = mode !== 'defaultOrder' && (
+    <Button
+      key="switch-mode"
+      variant="outlined"
+      onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
+    >
+      {defaultOrdersMode
+        ? (adminMode ? t('changeOrders') : t('changeMyOrders'))
+        : t('defaultOrderBtn')}
+    </Button>
+  );
+
   const buttons = [];
   if (defaultOrdersMode) {
+    if (switchModeButton) buttons.push(switchModeButton);
     buttons.push(<Tooltip key="update-default-order" title={t('setAsDefaultOrder', { distrib: remainingDistributions })}>
       <span>{/* prevents disable state to inhibit tooltip */}
         <SuccessButton
@@ -289,7 +302,9 @@ const CsaCatalogOrdersMobile = ({
         </SuccessButton>
       </span>
     </Tooltip>)
-  } else if (distribution.state !== RestDistributionState.Absent) {
+  } else if (distribution.state === RestDistributionState.Absent) {
+    if (switchModeButton) buttons.push(switchModeButton);
+  } else {
     if (mode !== 'initialOrders' && distribution.state === RestDistributionState.Open && hasProductOrder(distribution.id)) {
       buttons.push(<Button
         key="cancel-order"
@@ -300,6 +315,7 @@ const CsaCatalogOrdersMobile = ({
         {t('cancelOrder')}
       </Button>)
     }
+    if (switchModeButton) buttons.push(switchModeButton);
     if (distribution.state === RestDistributionState.Open) {
       buttons.push(<SuccessButton
         key="save-order"
@@ -310,7 +326,7 @@ const CsaCatalogOrdersMobile = ({
         disabled={(!hasChanges && mode !== 'initialOrders') || (catalog?.distribMinOrdersTotal ?? 0) > total || minSubscriptionOrder > contractTotal}
         onClick={onSaveClick}
       >
-        {tCommon('save')}
+        {adminMode ? t('saveOrdersBtn') : t('saveMyOrdersBtn')}
       </SuccessButton>
       );
     }
@@ -346,23 +362,7 @@ const CsaCatalogOrdersMobile = ({
     <MobileContainer
       title={title}
       icon={isConstOrders ? CamapIconId.constOrders : CamapIconId.varOrders}
-      actions={<>
-        {mode !== 'defaultOrder' && (
-          <Button
-            color="lightgrey"
-            variant="contained"
-            value="default-order"
-            onClick={() => setDefaultOrdersMode(!defaultOrdersMode)}
-            sx={{
-              maxWidth: {'xs': '170px', 'sm': 'unset'},
-              fontSize: {'xs': '0.875rem', 'sm': '1rem'},
-              padding: {'xs': '4px 8px', 'sm': '10px 20px'},
-            }}  
-          >
-            {defaultOrdersMode ? t('changeOrders') : t('defaultOrderBtn')}
-          </Button>
-        )}
-      </>}>
+      actions={null}>
       <CsaCatalogOrdersMobileHeader
         mode={mode}
         distribution={distribution}
