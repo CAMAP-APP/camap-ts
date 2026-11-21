@@ -11,7 +11,6 @@ import CsaCatalogSubscription from './containers/CsaCatalogSubscription';
 import MediumActionIcon from './containers/MediumActionIcon';
 import {
   useRestSubscriptionPost,
-  useRestUpdateSubscriptionDefaultOrderPost,
   useRestUpdateSubscriptionOrdersPost,
 } from './requests';
 import CircularProgressBox from '@components/utils/CircularProgressBox';
@@ -58,17 +57,12 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
     updateSubscriptionOrders,
     { data: updatedSubscriptionData, error: updatedSubscriptionError },
   ] = useRestUpdateSubscriptionOrdersPost();
-  const [
-    updateSubscriptionDefaultOrder,
-    { data: updatedDefaultOrderData, error: updateDefaultOrderError },
-  ] = useRestUpdateSubscriptionDefaultOrderPost();
 
   React.useEffect(() => {
     if (
       !postSubscriptionError &&
       !updatedSubscriptionError &&
-      !contextError &&
-      !updateDefaultOrderError
+      !contextError
     )
       return;
 
@@ -76,17 +70,12 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   }, [
     updatedSubscriptionError,
     postSubscriptionError,
-    updateDefaultOrderError,
     contextError,
   ]);
 
   React.useEffect(() => {
     setSubscription(updatedSubscriptionData);
   }, [updatedSubscriptionData, setSubscription]);
-
-  React.useEffect(() => {
-    setSubscription(updatedDefaultOrderData);
-  }, [updatedDefaultOrderData, setSubscription]);
 
   const gotoAbsences = async () => {
     console.log(catalog?.absentDistribsMaxNb);
@@ -141,44 +130,35 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
 
   const onOrderNext = async () => {
     if (step !== 'review' || !subscription || !catalog) return false;
-    let success = false;
-    if (isConstOrders) {
-      success = await updateSubscriptionDefaultOrder(
-        Object.keys(defaultOrder).map((productId) => ({
-          productId: parseInt(productId, 10),
-          quantity: defaultOrder[parseInt(productId, 10)],
-        })),
-        `${subscription.id}`,
-      );
-    } else {
-      if (Object.keys(updatedOrders).length === 0) {
-        return true;
-      }
-
-      success = await updateSubscriptionOrders(
-        {
-          distributions: distributions
-            .filter((d) => {
-              // in admin mode, this variable is set after the admin has set / unset absences
-              // but we still want to update orders, so we ignore this
-              if (absenceDistributionsIds && !adminMode) {
-                return !absenceDistributionsIds.includes(d.id);
-              }
-              // return only updated orders on all distributions
-              return !!updatedOrders[d.id];
-            })
-            .map((d) => ({
-              // transform in expected API format
-              id: d.id,
-              orders: Object.keys(updatedOrders[d.id]).map((p) => ({
-                productId: parseInt(p, 10),
-                qty: updatedOrders[d.id][parseInt(p, 10)],
-              })),
-            })),
-        },
-        `${subscription.id}`,
-      );
+    // const orders: the recurring order is saved by CsaCatalogOrdersMobile itself
+    if (isConstOrders) return true;
+    if (Object.keys(updatedOrders).length === 0) {
+      return true;
     }
+
+    const success = await updateSubscriptionOrders(
+      {
+        distributions: distributions
+          .filter((d) => {
+            // in admin mode, this variable is set after the admin has set / unset absences
+            // but we still want to update orders, so we ignore this
+            if (absenceDistributionsIds && !adminMode) {
+              return !absenceDistributionsIds.includes(d.id);
+            }
+            // return only updated orders on all distributions
+            return !!updatedOrders[d.id];
+          })
+          .map((d) => ({
+            // transform in expected API format
+            id: d.id,
+            orders: Object.keys(updatedOrders[d.id]).map((p) => ({
+              productId: parseInt(p, 10),
+              qty: updatedOrders[d.id][parseInt(p, 10)],
+            })),
+          })),
+      },
+      `${subscription.id}`,
+    );
 
     return success;
   };
@@ -186,8 +166,7 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
   const error =
     updatedSubscriptionError ||
     postSubscriptionError ||
-    contextError ||
-    updateDefaultOrderError;
+    contextError;
 
   if (!catalog) return <CircularProgressBox />;
 
@@ -243,6 +222,9 @@ const CsaCatalogRouter = ({ userId }: CsaCatalogRouterProps) => {
         {/* This is the end of the flow once subscribed */}
         {step === 'review' && !isConstOrders && (
           <CsaCatalogOrdersMobile onNext={onOrderNext} />
+        )}
+        {step === 'review' && isConstOrders && !!subscription?.canMemberEditConstOrders && (
+          <CsaCatalogOrdersMobile onNext={onOrderNext} mode="defaultOrder" />
         )}
         {step === 'review' && !!subscription && !adminMode && (
           <Box mt={3}>
