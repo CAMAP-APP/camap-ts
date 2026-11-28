@@ -136,6 +136,7 @@ export type RestCsaSubscription = {
   balance: number;
   defaultOrder: RestCsaDefaultOrder[];
   minSubscriptionOrder: number;
+  canMemberEditConstOrders: boolean;
 };
 
 export type RestCsaSubscriptionAbsences = RestCsaCatalogAbsences & {
